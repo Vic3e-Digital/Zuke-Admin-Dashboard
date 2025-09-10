@@ -1,0 +1,99 @@
+<div class="ai-employees-container">
+    <div class="page-header">
+        <h1 class="page-title">AI Employees</h1>
+        <p class="page-subtitle">Manage your AI workforce and their specialized roles</p>
+    </div>
+
+    <div class="ai-employees-grid">
+        <!-- Neo Card -->
+        <div class="ai-employee-card sim-card" onclick="manageEmployee('neo')">
+            <div>
+                <h3 class="employee-name">Neo</h3>
+                <p class="employee-description">PR and Social Media Specialist</p>
+            </div>
+            <div class="employee-footer">
+                <button class="employee-action" onclick="event.stopPropagation(); manageEmployee('neo')">
+                    <div class="action-triangle"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dineo Card -->
+        <div class="ai-employee-card sim-card" onclick="manageEmployee('dineo')">
+            <div>
+                <h3 class="employee-name">Dineo</h3>
+                <p class="employee-description">Marketing and Sales Expert</p>
+            </div>
+            <div class="employee-footer">
+                <button class="employee-action" onclick="event.stopPropagation(); manageEmployee('dineo')">
+                    <div class="action-triangle"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Jinja Card -->
+        <div class="ai-employee-card sim-card" onclick="manageEmployee('jinja')">
+            <div>
+                <h3 class="employee-name">Jinja</h3>
+                <p class="employee-description">Administrative Virtual Assistant</p>
+            </div>
+            <div class="employee-footer">
+                <button class="employee-action" onclick="event.stopPropagation(); manageEmployee('jinja')">
+                    <div class="action-triangle"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Thane Card -->
+        <div class="ai-employee-card sim-card" onclick="manageEmployee('thane')">
+            <div>
+                <h3 class="employee-name">Thane</h3>
+                <p class="employee-description">Customer Service and Feedback Assistant</p>
+            </div>
+            <div class="employee-footer">
+                <button class="employee-action" onclick="event.stopPropagation(); manageEmployee('thane')">
+                    <div class="action-triangle"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Add more AI employees as needed -->
+        <div class="ai-employee-card sim-card" onclick="manageEmployee('alex')">
+            <div>
+                <h3 class="employee-name">Alex</h3>
+                <p class="employee-description">Data Analysis and Reporting Specialist</p>
+            </div>
+            <div class="employee-footer">
+                <button class="employee-action" onclick="event.stopPropagation(); manageEmployee('alex')">
+                    <div class="action-triangle"></div>
+                </button>
+            </div>
+        </div>
+
+        <div class="ai-employee-card sim-card" onclick="manageEmployee('zara')">
+            <div>
+                <h3 class="employee-name">Zara</h3>
+                <p class="employee-description">Content Creation and Strategy</p>
+            </div>
+            <div class="employee-footer">
+                <button class="employee-action" onclick="event.stopPropagation(); manageEmployee('zara')">
+                    <div class="action-triangle"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function manageEmployee(employeeName) {
+        alert(`Managing ${employeeName.charAt(0).toUpperCase() + employeeName.slice(1)}...`);
+        // Here you can add logic to open a modal, navigate to a management page, etc.
+        console.log(`Opening management panel for ${employeeName}`);
+    }
+
+    function addNewEmployee() {
+        alert('Add New Employee functionality coming soon!');
+        // Here you can add logic to open an "Add Employee" form/modal
+        console.log('Opening add new employee form');
+    }
+</script>
