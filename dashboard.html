@@ -110,11 +110,203 @@
 
         <!-- Main Content Area -->
         <main class="main-content" id="mainContent">
-            <!-- Replaced static content with dynamic page loader -->
+            <!-- Dynamic content will be loaded here -->
             <div id="pageContent">
                 <!-- Dynamic content will be loaded here -->
             </div>
         </main>
+    </div>
+
+    <!-- Added modals for add product and add product images -->
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Product</h2>
+                <span class="close" onclick="closeModal('addProductModal')">&times;</span>
+            </div>
+            <form id="addProductForm" class="modal-form">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" name="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productPrice">Price ($)</label>
+                        <input type="number" id="productPrice" name="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Category</label>
+                        <select id="productCategory" name="productCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="clothing">Clothing</option>
+                            <option value="home">Home & Garden</option>
+                            <option value="sports">Sports & Outdoors</option>
+                            <option value="books">Books</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productStock">Stock Quantity</label>
+                        <input type="number" id="productStock" name="productStock" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productSku">SKU</label>
+                        <input type="text" id="productSku" name="productSku" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addProductModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Product Images Modal -->
+    <div id="addProductImagesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Product Images</h2>
+                <span class="close" onclick="closeModal('addProductImagesModal')">&times;</span>
+            </div>
+            <form id="addProductImagesForm" class="modal-form">
+                <div class="form-group">
+                    <label for="imageProduct">Select Product</label>
+                    <select id="imageProduct" name="imageProduct" required>
+                        <option value="">Choose a product...</option>
+                        <!-- Products will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="image-upload-section">
+                    <div class="upload-methods">
+                        <div class="upload-method active" data-method="file">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7,10 12,15 17,10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Upload Files
+                        </div>
+                        <div class="upload-method" data-method="url">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                            </svg>
+                            Add URL
+                        </div>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div id="fileUploadSection" class="upload-section">
+                        <div class="file-drop-zone" id="fileDropZone">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                            <p>Drag and drop images here or <span class="browse-link">browse files</span></p>
+                            <input type="file" id="imageFiles" multiple accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- URL Upload Section -->
+                    <div id="urlUploadSection" class="upload-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="imageUrl">Image URL</label>
+                            <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg">
+                            <button type="button" class="btn-secondary" onclick="addImageUrl()">Add Image</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Preview Section -->
+                <div id="imagePreviewSection" class="image-preview-section" style="display: none;">
+                    <h4>Selected Images</h4>
+                    <div id="imagePreviewGrid" class="image-preview-grid">
+                        <!-- Image previews will be added here -->
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addProductImagesModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Upload Images</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Business Modal -->
+    <div id="addBusinessModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Business</h2>
+                <span class="close" onclick="closeModal('addBusinessModal')">&times;</span>
+            </div>
+            <form id="addBusinessForm" class="modal-form">
+                <div class="form-group">
+                    <label for="businessName">Business Name</label>
+                    <input type="text" id="businessName" name="businessName" required>
+                </div>
+                <div class="form-group">
+                    <label for="businessDescription">Description</label>
+                    <textarea id="businessDescription" name="businessDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="businessIndustry">Industry</label>
+                        <select id="businessIndustry" name="businessIndustry" required>
+                            <option value="">Select Industry</option>
+                            <option value="technology">Technology</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="finance">Finance</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="education">Education</option>
+                            <option value="hospitality">Hospitality</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="businessSize">Company Size</label>
+                        <select id="businessSize" name="businessSize" required>
+                            <option value="">Select Size</option>
+                            <option value="startup">Startup (1-10)</option>
+                            <option value="small">Small (11-50)</option>
+                            <option value="medium">Medium (51-200)</option>
+                            <option value="large">Large (201-1000)</option>
+                            <option value="enterprise">Enterprise (1000+)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="businessEmail">Contact Email</label>
+                        <input type="email" id="businessEmail" name="businessEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="businessPhone">Phone Number</label>
+                        <input type="tel" id="businessPhone" name="businessPhone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="businessWebsite">Website</label>
+                    <input type="url" id="businessWebsite" name="businessWebsite" placeholder="https://example.com">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addBusinessModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Business</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="auth.js"></script>
