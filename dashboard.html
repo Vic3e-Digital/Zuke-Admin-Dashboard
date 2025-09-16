@@ -13,7 +13,6 @@
     <div class="dashboard-container">
         <!-- Header -->
         <header class="header">
-            <!-- Replaced SVG hamburger with Zuke-style 3 span hamburger -->
             <button class="hamburger-menu" id="hamburgerMenu">
                 <span></span>
                 <span></span>
@@ -21,88 +20,94 @@
             </button>
             <h1 class="dashboard-title">Business Directory</h1>
             <div class="header-right">
-                <!-- Updated welcome message to show admin -->
                 <span class="user-welcome" id="userWelcome">Welcome @admin</span>
                 <button class="tokens-button" id="tokensButton">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v5"/>
-                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-9"/>
-                        <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/>
+                    <!-- Modern wallet icon -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 21V5C16 3.89543 15.1046 3 14 3H10C8.89543 3 8 3.89543 8 5V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="18" cy="14" r="1" fill="currentColor"/>
                     </svg>
                     Balance: <span id="tokenBalance">ZR 99</span>
                 </button>
                 <button class="logout-button" id="logoutButton">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16,17 21,12 16,7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    <!-- Modern logout icon -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     Logout
                 </button>
             </div>
         </header>
 
-        <!-- Restructured sidebar with Zuke-style navigation and user profile -->
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-content">
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="dashboard.html" class="nav-link active" data-page="dashboard">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 21h18"/>
-                                <path d="M5 21V7l8-4v18"/>
-                                <path d="M19 21V11l-6-4"/>
+                            <!-- Modern dashboard grid icon -->
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span class="nav-text">Businesses</span>
+                            <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
-                    <!-- Added new menu items: Marketplace, Creative, Chat AIAgent -->
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-page="marketplace">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
-                                <path d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4"/>
-                                <path d="M3 7l9-4 9 4"/>
-                            </svg>
-                            <span class="nav-text">Marketplace</span>
+                            <!-- Modern shopping bag icon -->
+                            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 3.5C8.75736 3.5 7.75 4.50736 7.75 5.75V6.5H4.75C3.50736 6.5 2.5 7.50736 2.5 8.75V17.75C2.5 18.9926 3.50736 20 4.75 20H19.2502C20.4928 20 21.5002 18.9926 21.5002 17.75V8.75C21.5002 7.50736 20.4928 6.5 19.2502 6.5H16.25V5.75C16.25 4.50736 15.2426 3.5 14 3.5H10ZM14.75 6.5H9.25V5.75C9.25 5.33579 9.58579 5 10 5H14C14.4142 5 14.75 5.33579 14.75 5.75V6.5Z" fill="#323544"/>
+                                </svg>                                
+                            <span class="nav-text">Develop Your Business</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-page="creative">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <span class="nav-text">Creative</span>
+                            <!-- Modern palette icon for creative -->
+                            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path opacity="0.4" d="M6.10719 3.19153C6.3143 2.83281 6.77299 2.70991 7.13171 2.91701L9.02418 4.00964C9.04614 4.02231 9.06721 4.03593 9.08738 4.05041L17.908 9.14299L17.4622 9.83006C17.4413 9.86213 17.4216 9.89488 17.4029 9.92825C17.0131 10.6251 16.4494 11.7715 16.2768 12.9805C16.1883 13.5998 16.1864 14.3412 16.4527 15.0798C16.5539 15.3607 16.6889 15.6265 16.8571 15.8729L14.4399 20.0596C13.8186 21.1358 12.4425 21.5045 11.3664 20.8832L3.62577 16.4141C3.08706 16.1031 2.72509 15.6015 2.57677 15.0454C2.42889 14.491 2.49212 13.8776 2.80221 13.3406L7.64811 4.94721L6.38171 4.21605C6.02299 4.00894 5.90008 3.55025 6.10719 3.19153ZM8.94529 5.70043L4.25771 13.8196L17.0661 10.389L8.94529 5.70043Z" fill="#323544"/>
+                                <path d="M17.4405 14.8621C17.6504 15.3638 18.018 15.7956 18.562 16.1097C19.8124 16.8316 21.4113 16.4032 22.1333 15.1527C22.486 14.5418 22.5706 13.9153 22.4481 13.3189C22.3297 12.743 22.0283 12.2407 21.6842 11.8248C21.0031 11.0017 20.0275 10.3667 19.3833 9.9948L18.775 9.64355L18.3009 10.3742C18.2919 10.3879 18.2835 10.402 18.2755 10.4163C17.9023 11.0834 17.4126 12.0992 17.2665 13.1216C17.1926 13.6392 17.1999 14.204 17.3932 14.7405C17.408 14.7815 17.4237 14.822 17.4405 14.8621Z" fill="#323544"/>
+                                </svg>
+                                
+                            <span class="nav-text">Creative and Brand Appeal</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="ai-employees.html" class="nav-link" data-page="ai-employees">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>
-                            </svg>
-                            <span class="nav-text">AI Employees</span>
+                            <!-- Modern AI/robot icon -->
+                            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.5565 10.6338C21.0009 9.27575 20.8528 7.76958 20.1367 6.53501C19.0503 4.63378 16.8528 3.67081 14.7046 4.11526C13.7663 3.05353 12.3836 2.46094 10.9515 2.46094C8.75399 2.46094 6.82807 3.86835 6.13671 5.94242C4.7293 6.23872 3.51943 7.10291 2.80338 8.36217C1.71696 10.2634 1.96387 12.6338 3.42066 14.2634C2.97622 15.6461 3.14906 17.1276 3.8651 18.3622C4.95152 20.2634 7.14906 21.2511 9.2972 20.7819C10.2602 21.8437 11.6182 22.4609 13.0503 22.4609C15.2478 22.4609 17.1737 21.0535 17.8651 18.9795C19.2725 18.6832 20.4824 17.819 21.1984 16.5597C22.2849 14.6585 22.0379 12.2634 20.5565 10.6338ZM13.0503 21.1523C12.1614 21.1523 11.3219 20.856 10.6552 20.2881C10.6799 20.2634 10.754 20.2387 10.7787 20.214L14.754 17.9177C14.9515 17.7943 15.075 17.5967 15.075 17.3498V11.7449L16.754 12.7079C16.7787 12.7079 16.7787 12.7325 16.7787 12.7572V17.3992C16.8034 19.4733 15.1244 21.1523 13.0503 21.1523ZM5.00091 17.7202C4.55646 16.9548 4.40831 16.0659 4.55646 15.2017C4.58115 15.2264 4.63054 15.2511 4.67992 15.2758L8.65523 17.572C8.85276 17.6955 9.09967 17.6955 9.2972 17.572L14.1614 14.7572V16.7079C14.1614 16.7325 14.1614 16.7572 14.1367 16.7572L10.112 19.0782C8.33424 20.1153 6.03794 19.498 5.00091 17.7202ZM3.96387 9.02884C4.40831 8.26341 5.09967 7.69551 5.91449 7.37452V12.1153C5.91449 12.3375 6.03794 12.5597 6.23548 12.6832L11.0997 15.498L9.42066 16.4609C9.39597 16.4609 9.37128 16.4856 9.37128 16.4609L5.34659 14.1399C3.51943 13.1029 2.92683 10.8066 3.96387 9.02884ZM17.791 12.2387L12.9268 9.4239L14.6058 8.46094C14.6305 8.46094 14.6552 8.43625 14.6552 8.46094L18.6799 10.7819C20.4824 11.819 21.075 14.1153 20.0379 15.893C19.5935 16.6585 18.9021 17.2264 18.0873 17.5227V12.8066C18.112 12.5844 17.9886 12.3622 17.791 12.2387ZM19.4454 9.7202C19.4207 9.69551 19.3713 9.67081 19.3219 9.64612L15.3466 7.34983C15.1491 7.22637 14.9021 7.22637 14.7046 7.34983L9.84041 10.1646V8.21402C9.84041 8.18933 9.84041 8.16464 9.86511 8.16464L13.8898 5.84365C15.6923 4.80662 17.9639 5.4239 19.0009 7.22637C19.4454 7.96711 19.5935 8.856 19.4454 9.7202ZM8.92683 13.177L7.24782 12.214C7.22313 12.214 7.22313 12.1893 7.22313 12.1646V7.52267C7.22313 5.44859 8.90214 3.76958 10.9762 3.76958C11.8651 3.76958 12.7046 4.06588 13.3713 4.63378C13.3466 4.65847 13.2972 4.68316 13.2478 4.70785L9.27251 7.00415C9.07498 7.1276 8.95152 7.32514 8.95152 7.57205V13.177H8.92683ZM9.84041 11.2017L12.0133 9.94242L14.1861 11.2017V13.6955L12.0133 14.9548L9.84041 13.6955V11.2017Z" fill="#323544"/>
+                                </svg>                                
+                            <span class="nav-text">AI Assistants</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-page="chat-aigent">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                                <path d="M8 9h8"/>
-                                <path d="M8 13h6"/>
-                            </svg>
+                            <!-- Modern chat bubble icon -->
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18.7968 3.43187C20.4752 2.95708 22.0418 4.52303 21.5674 6.2014L21.5127 6.36937L18.9648 13.3684L18.9345 13.4387C18.7692 13.7809 18.3687 13.9492 18.0039 13.8166C17.6147 13.6749 17.4139 13.2439 17.5556 12.8547L20.1035 5.85667L20.1347 5.74437C20.2404 5.22541 19.7728 4.75771 19.2539 4.86351L19.1416 4.89573L12.1435 7.44358C11.7544 7.58526 11.3234 7.38442 11.1816 6.99534C11.0399 6.60617 11.2407 6.17519 11.6299 6.03343L18.6289 3.48558L18.7968 3.43187Z" fill="#323544"/>
+                                <path opacity="0.4" d="M17.5539 12.8604C17.4161 13.2481 17.6167 13.6754 18.0041 13.8164C18.3689 13.9489 18.7694 13.7806 18.9347 13.4385L18.965 13.3682L16.4171 20.3662C15.7327 22.2455 13.1512 22.3453 12.2921 20.6074L12.214 20.4336L10.1447 15.2705C10.078 15.1042 9.95417 14.9682 9.79703 14.8857L9.7277 14.8535L4.56461 12.7842C2.64791 12.0161 2.69169 9.28743 4.63199 8.58105L11.63 6.0332C11.241 6.17495 11.0402 6.60599 11.1818 6.99512C11.3148 7.36001 11.7018 7.5593 12.0705 7.46582L12.1437 7.44336L5.14469 9.99121C4.49838 10.2268 4.48379 11.1354 5.12223 11.3916L10.2863 13.4609L10.4943 13.5566C10.9661 13.8042 11.3372 14.2137 11.5373 14.7129L13.6066 19.876L13.6623 19.9883C13.9742 20.5099 14.7871 20.4593 15.008 19.8535L17.5539 12.8604Z" fill="#323544"/>
+                                </svg>                                
                             <span class="nav-text">Chat AIgent</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- Added user profile section at bottom like Zuke -->
+            <!-- User profile section -->
             <div class="user-profile">
-                <div class="user-avatar">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
+                <div class="user-avatar" id="userAvatar">
+                    <!-- Modern user avatar icon -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 20.662V19C7 17.3431 8.34315 16 10 16H14C15.6569 16 17 17.3431 17 19V20.662" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
             </div>
@@ -110,14 +115,25 @@
 
         <!-- Main Content Area -->
         <main class="main-content" id="mainContent">
-            <!-- Dynamic content will be loaded here -->
             <div id="pageContent">
                 <!-- Dynamic content will be loaded here -->
             </div>
         </main>
     </div>
 
-    <!-- Added modals for add product and add product images -->
+    <!-- AI Employee Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">AI Employee</h2>
+                <span class="close" onclick="closeEmployeeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <iframe id="employeeIframe" src="" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Product Modal -->
     <div id="addProductModal" class="modal">
         <div class="modal-content">
@@ -189,17 +205,19 @@
                 <div class="image-upload-section">
                     <div class="upload-methods">
                         <div class="upload-method active" data-method="file">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7,10 12,15 17,10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            <!-- Modern cloud upload icon -->
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7 16L12 11L17 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 11V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M20.39 18.39A5 5 0 0 0 18 9H16.74C16.3692 7.01276 15.3024 5.2267 13.7398 3.97452C12.1771 2.72234 10.2229 2.08547 8.24 2.177C6.25708 2.26854 4.37846 3.08213 2.95474 4.46924C1.53102 5.85636 0.658 7.72726 0.5 9.72C-0.897282 10.0794 -1.48066 12.0662 -0.518387 13.5176C0.443888 14.9689 2.35011 15.2495 3.65 14.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             Upload Files
                         </div>
                         <div class="upload-method" data-method="url">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                            <!-- Modern link icon -->
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.7071 7.29289C17.6834 9.26923 17.6834 12.4908 15.7071 14.4671L13.4142 16.76C11.4379 18.7363 8.21633 18.7363 6.23999 16.76C4.26366 14.7837 4.26366 11.5621 6.23999 9.58576L7.65685 8.16891" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.29289 16.7071C6.31656 14.7308 6.31656 11.5092 8.29289 9.53289L10.5858 7.24C12.5621 5.26366 15.7837 5.26366 17.76 7.24C19.7363 9.21633 19.7363 12.4379 17.76 14.4142L16.3431 15.8311" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             Add URL
                         </div>
@@ -208,10 +226,12 @@
                     <!-- File Upload Section -->
                     <div id="fileUploadSection" class="upload-section">
                         <div class="file-drop-zone" id="fileDropZone">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="8.5" cy="8.5" r="1.5"/>
-                                <polyline points="21,15 16,10 5,21"/>
+                            <!-- Modern image gallery icon -->
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3 16L8 11C8.928 10.107 10.072 10.107 11 11L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 14L15 13C15.63 12.37 16.37 12.37 17 13L21 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
                             </svg>
                             <p>Drag and drop images here or <span class="browse-link">browse files</span></p>
                             <input type="file" id="imageFiles" multiple accept="image/*" style="display: none;">
@@ -309,8 +329,6 @@
         </div>
     </div>
 
-    <!-- <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <script src="dashboard.js"></script> -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script src="dashboard.js"></script>
 </body>

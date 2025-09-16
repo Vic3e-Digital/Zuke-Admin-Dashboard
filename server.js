@@ -127,6 +127,7 @@ app.post("/api/auth/logout", (req, res) => {
 
 // Serve static assets from the /public folder
 app.use(express.static(join(__dirname, "public")));
+app.use(express.static(join(__dirname, "/pages")));
 
 // Endpoint to serve the configuration file
 app.get("/auth_config.json", (req, res) => {

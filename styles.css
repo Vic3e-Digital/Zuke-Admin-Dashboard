@@ -30,7 +30,7 @@
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f3f5f9;
   color: #2d2d2d;
   line-height: 1.5;
@@ -1526,4 +1526,148 @@ body {
   font-weight: 700;
   color: #ff7b00;
   font-size: 0.875rem;
+}
+
+/* AI Employee Cards - SIM Card Style */
+.ai-employees-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* AI Employee SIM Card - Simple version */
+.ai-employee-sim-card {
+  background: white;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid #e0e0e0;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+  /* SIM card shape with sharp cut */
+  clip-path: polygon(
+    0 0,
+    calc(100% - 45px) 0,
+    100% 45px,
+    100% 100%,
+    0 100%
+  );
+  
+  /* Shadow */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Hover state */
+.ai-employee-sim-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border-color: #ff7b00;
+}
+
+/* AI Employee Header */
+.ai-employee-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+/* AI Employee Avatar */
+.ai-employee-avatar {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ff7b00, #ff9500);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* AI Employee Info */
+.ai-employee-info {
+  flex: 1;
+}
+
+.ai-employee-name {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0 0 0.5rem 0;
+}
+
+.ai-employee-role {
+  color: #666;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+/* AI Employee Footer */
+.ai-employee-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto;
+}
+
+/* AI Action Button */
+.ai-action-button {
+  background: none;
+  border: none;
+  color: #ff7b00;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.ai-action-button:hover {
+  transform: translateX(4px);
+}
+
+/* Modal Styles */
+.modal-large {
+  width: 90%;
+  max-width: 1200px;
+  height: 85vh;
+  margin: 7.5vh auto;
+}
+
+.modal-large .modal-body {
+  padding: 0;
+  height: calc(100% - 60px);
+  overflow: hidden;
+}
+
+/* Content styles */
+.content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0 0 0.5rem 0;
+}
+
+.content > p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0 0 2rem 0;
+}
+
+.user-avatar img.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* makes it circular */
+  object-fit: cover;
 }

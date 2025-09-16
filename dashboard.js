@@ -148,6 +148,10 @@ async function init() {
 
     // Update welcome message with actual user info
     userWelcome.textContent = `Welcome ${user.name || user.email || 'User'}`;
+      // Profile picture
+    if (user.picture && userAvatar) {
+      userAvatar.innerHTML = `<img src="${user.picture}" alt="Profile" class="profile-img">`;
+    }
 
     setupPageNavigation()
     loadPage("dashboard")
@@ -219,7 +223,7 @@ async function init() {
     return `
       <div class="businesses-page">
         <div class="page-header">
-          <h1 class="page-title">Business Directory</h1>
+          <h1 class="page-title">Dashboard</h1>
           <!-- Added hamburger menu for businesses section -->
           <div class="hamburger-dropdown">
             <button class="hamburger-btn" onclick="toggleBusinessDropdown()">
