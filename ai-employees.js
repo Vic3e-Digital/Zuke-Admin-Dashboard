@@ -2,10 +2,34 @@
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async function() {
-    // Check authentication
-    const authResult = await checkAuth();
-    if (!authResult.success) {
-        window.location.href = "/";
+    // Auth0 SPA SDK authentication check
+    let auth0Client = null;
+    const fetchAuthConfig = () => fetch("/auth_config.json");
+    const configureClient = async () => {
+        const response = await fetchAuthConfig();
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+            domain: config.domain,
+            clientId: config.clientId
+        });
+    };
+
+    await configureClient();
+
+    // Handle Auth0 redirect callback if present
+    const query = window.location.search;
+    if (query.includes("code=") && query.includes("state=")) {
+        await auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/ai-employees.html");
+    }
+
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    if (!isAuthenticated) {
+        await auth0Client.loginWithRedirect({
+            authorizationParams: {
+                redirect_uri: window.location.origin + "/ai-employees.html"
+            }
+        });
         return;
     }
 
@@ -13,23 +37,22 @@ document.addEventListener("DOMContentLoaded", async function() {
     // For now, it's a placeholder page
 });
 
-// Logout function (re-used from auth.js, but good to have here for clarity)
+
+// Auth0 SPA SDK logout function
 async function logout() {
-    try {
-        const response = await fetch("/api/auth/logout", {
-            method: "POST",
-            credentials: "include"
+    // Ensure auth0Client is initialized
+    if (!window.auth0Client) {
+        const fetchAuthConfig = () => fetch("/auth_config.json");
+        const response = await fetchAuthConfig();
+        const config = await response.json();
+        window.auth0Client = await auth0.createAuth0Client({
+            domain: config.domain,
+            clientId: config.clientId
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            window.location.href = "/";
-        } else {
-            alert("Logout failed");
-        }
-    } catch (error) {
-        console.error("Logout error:", error);
-        alert("Logout failed");
     }
+    window.auth0Client.logout({
+        logoutParams: {
+            returnTo: window.location.origin
+        }
+    });
 }

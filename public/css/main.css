@@ -1,0 +1,25 @@
+#btn-logout:not(:disabled) {
+  background-color: #dc3545;
+  color: white;
+  cursor: pointer;
+}
+
+#btn-logout:not(:disabled):hover {
+  background-color: #c82333;
+}
+
+#btn-login:not(:disabled) {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+#btn-login:not(:disabled):hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+}

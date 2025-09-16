@@ -1,0 +1,49 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Coverage reports
+coverage/
+
+# Misc
+*.swp
+*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Optional: Ignore public generated files (if any)
+public/js/*.js.map
+public/css/*.css.map
+
+# Optional: Ignore database files
+*.sqlite
+*.db
+
+# Optional: Ignore backup files
+*.bak
+*.tmp
+
+auth_config.json

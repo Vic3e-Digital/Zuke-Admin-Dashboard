@@ -1,9 +1,30 @@
 // Dashboard functionality
+
+// Auth0 client
+let auth0Client = null;
+
+const fetchAuthConfig = () => fetch("/auth_config.json");
+
+const configureAuth0Client = async () => {
+  try {
+    const response = await fetchAuthConfig();
+    const config = await response.json();
+
+    auth0Client = await auth0.createAuth0Client({
+      domain: config.domain,
+      clientId: config.clientId,
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Error configuring Auth0 client:", error);
+    return false;
+  }
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
-  // Check authentication
-  const authManager = window.authManager // Declare the authManager variable
-  const isAuthenticated = await authManager.requireAuth()
-  if (!isAuthenticated) return
 
   const hamburgerMenu = document.getElementById("hamburgerMenu")
   const sidebar = document.getElementById("sidebar")
@@ -87,17 +108,57 @@ document.addEventListener("DOMContentLoaded", async () => {
   const searchTimeout = null
 
   // Initialize
-  init()
+  // init()
 
-  async function init() {
-    userWelcome.textContent = "Welcome @admin"
+  // async function init() {
+  //   userWelcome.textContent = "Welcome @admin"
+
+  //   setupPageNavigation()
+  //   loadPage("dashboard")
+
+  //   // Setup event listeners
+  //   setupEventListeners()
+  // }
+
+  // Initialize
+init()
+
+async function init() {
+  // Configure Auth0 first
+  const configured = await configureAuth0Client();
+  if (!configured) {
+    console.error("Failed to configure Auth0");
+    window.location.href = '/';
+    return;
+  }
+
+  // Check authentication
+  try {
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    
+    if (!isAuthenticated) {
+      console.log("User not authenticated, redirecting to login...");
+      window.location.href = '/';
+      return;
+    }
+
+    // Get user info
+    const user = await auth0Client.getUser();
+    console.log("User logged in:", user);
+
+    // Update welcome message with actual user info
+    userWelcome.textContent = `Welcome ${user.name || user.email || 'User'}`;
 
     setupPageNavigation()
     loadPage("dashboard")
 
     // Setup event listeners
     setupEventListeners()
+  } catch (error) {
+    console.error("Auth check error:", error);
+    window.location.href = '/';
   }
+}
 
   function setupPageNavigation() {
     navLinks.forEach((link) => {
@@ -1078,9 +1139,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
 
     // Logout
-    logoutButton.addEventListener("click", () => {
-      authManager.logout()
-    })
+    // logoutButton.addEventListener("click", () => {
+    //   authManager.logout()
+    // })
+    // Logout
+    // logoutButton.addEventListener("click", () => {
+    //   auth0Client.logout({
+    //     logoutParams: {
+    //       returnTo: window.location.origin
+    //     }
+    //   });
+    // });
+
+      // Logout
+// logoutButton.addEventListener("click", () => {
+//   authManager.logout()
+      // })
+      // Logout
+      logoutButton.addEventListener("click", () => {
+        if (auth0Client) {
+          console.log("Logging out...");
+          sessionStorage.removeItem('hasRedirected');
+          auth0Client.logout({
+            logoutParams: {
+              returnTo: window.location.origin
+            }
+          });
+        }
+      });
 
     // Tokens button (placeholder functionality)
     tokensButton.addEventListener("click", () => {
@@ -1119,7 +1205,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function initializeCreativePage() {
     // Simple button functionality - no complex modal needed
   }
-
+ 
   window.navigateToSection = (section) => {
     console.log("[v0] Navigating to section:", section)
     loadPage(section)

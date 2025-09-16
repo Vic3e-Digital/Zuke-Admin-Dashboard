@@ -3,6 +3,7 @@ const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const path = require("path")
 require("dotenv").config()
+const { join } = require("path");
 
 const { getDatabase } = require("./lib/mongodb")
 const { createSession, verifySession, deleteSession, requireAuth } = require("./lib/auth")
@@ -72,6 +73,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 })
 
+
 app.get("/api/auth/verify", (req, res) => {
   console.log("[v0] VERIFY ROUTE HIT!")
   try {
@@ -120,6 +122,24 @@ app.post("/api/auth/logout", (req, res) => {
     })
   }
 })
+
+//Auth0 routes
+
+// Serve static assets from the /public folder
+app.use(express.static(join(__dirname, "public")));
+
+// Endpoint to serve the configuration file
+app.get("/auth_config.json", (req, res) => {
+  res.sendFile(join(__dirname, "auth_config.json"));
+});
+
+// Serve the index page for all other requests
+app.get("/", (_, res) => {
+  res.sendFile(join(__dirname, "index.html"));
+});
+
+// Listen on port 3000
+app.listen(3000, () => console.log("Application running on port 3000"));
 
 // Business routes
 app.get("/api/businesses", requireAuth, async (req, res) => {
@@ -383,9 +403,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"))
 })
 
-app.get("/dashboard.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "dashboard.html"))
-})
+
+// app.get("/dashboard.html", (req, res) => {
+//   res.sendFile(path.join(__dirname, "dashboard.html"));
+// });
 
 // Error handling middleware
 app.use((err, req, res, next) => {

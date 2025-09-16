@@ -379,40 +379,6 @@ body {
   margin-top: 2rem;
 }
 
-.business-card {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px 120px 60px 20px; /* simcard shape */
-  padding: 2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  position: relative;
-  overflow: hidden;
-}
-
-.business-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ff7b00, #ff9500);
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-.business-card:hover::before {
-  transform: scaleX(1);
-}
-
-.business-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  border-color: #ff7b00;
-}
-
 .business-card-header {
   display: flex;
   align-items: flex-start;
@@ -422,6 +388,56 @@ body {
 
 .business-logo {
   flex-shrink: 0;
+}
+
+/* Business Cards - Precise SIM Card with Border */
+.business-card {
+  background: #2d2d2d;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 0; /* Sharp edges */
+  
+  /* Create the shape with clip-path */
+  clip-path: polygon(
+    0 0,
+    calc(100% - 45px) 0,
+    100% 45px,
+    100% 100%,
+    0 100%
+  );
+  
+  /* Add shadow that follows the shape */
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+/* Add a border using a pseudo-element */
+.business-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fdfdfd;
+  border: 1px solid #e0e0e0;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 45px) 0,
+    100% 45px,
+    100% 100%,
+    0 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Hover state */
+.business-card:hover {
+  transform: translateY(-4px);
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.12));
+}
+
+.business-card:hover::after {
+  border-color: #ff7b00;
 }
 
 .logo-placeholder {
@@ -1445,4 +1461,69 @@ body {
 
 .action-button.primary:hover {
   background: #e67a00;
+}
+/* Orange-themed logout button to match your design */
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 2px solid #ff7b00;
+  border-radius: 10px;
+  color: #ff7b00;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.logout-button:hover {
+  background: #ff7b00;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 123, 0, 0.3);
+}
+
+.logout-button:hover svg {
+  stroke: white;
+}
+
+.logout-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 123, 0, 0.2);
+}
+
+/* Minimalist Balance Display */
+.tokens-button {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.875rem;
+  background: #f8f9fa;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  color: #666;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tokens-button:hover {
+  background: #fff4ed;
+  color: #ff7b00;
+}
+
+.tokens-button svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+#tokenBalance {
+  font-weight: 700;
+  color: #ff7b00;
+  font-size: 0.875rem;
 }
