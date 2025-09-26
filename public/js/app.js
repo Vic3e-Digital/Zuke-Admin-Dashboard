@@ -93,7 +93,7 @@ const updateUI = async () => {
       sessionStorage.setItem('hasRedirected', 'true');
       setTimeout(() => {
         window.location.href = '/dashboard.html';
-      }, 1000); // Changed to 1 second
+      }, 1000); // add small delay after login for debugging
     }
   } catch (error) {
     console.error("Error updating UI:", error);

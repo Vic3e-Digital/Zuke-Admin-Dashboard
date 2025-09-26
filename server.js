@@ -6,7 +6,7 @@ const path = require("path");
 require("dotenv").config();
 const { join } = require("path");
 
-const { getDatabase } = require("./lib/mongodb"); // Your MongoDB helper
+const { getDatabase } = require("./lib/mongodb");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,105 +37,24 @@ app.use("/api", (req, res, next) => {
 // -------------------------
 // Business Routes
 // -------------------------
-app.get("/api/businesses", async (req, res) => {
-  try {
-    const { query } = req.query;
-    const db = await getDatabase();
-    const collection = db.collection("businesses");
 
-    let filter = {};
-    if (query) {
-      filter = {
-        $or: [
-          { name: { $regex: query, $options: "i" } },
-          { industry: { $regex: query, $options: "i" } },
-          { location: { $regex: query, $options: "i" } },
-          { email: { $regex: query, $options: "i" } },
-        ],
-      };
-    }
+// Use the businesses router for ALL /api/businesses routes
+// This MUST come before any other /api/businesses routes
+app.use('/api/businesses', require('./api/businesses'));
 
-    const businesses = await collection.find(filter).toArray();
+// Remove the getBusinessesByEmail function - it's not used
 
-    res.json({
-      success: true,
-      data: businesses,
-    });
-  } catch (error) {
-    console.error("Error fetching businesses:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch businesses",
-    });
-  }
+// Move these routes to different paths or into the businesses router
+// Option 1: Rename them
+app.post("/api/businesses-create", async (req, res) => {
+  // ... your existing POST logic
 });
 
-app.post("/api/businesses", async (req, res) => {
-  try {
-    const { name, industry, location, email, phone, website, description } = req.body;
-
-    if (!name || !industry || !location || !email) {
-      return res.status(400).json({
-        success: false,
-        error: "Name, industry, location, and email are required",
-      });
-    }
-
-    const db = await getDatabase();
-    const collection = db.collection("businesses");
-
-    const business = {
-      name,
-      industry,
-      location,
-      email,
-      phone: phone || "",
-      website: website || "",
-      description: description || "",
-      status: "Active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const result = await collection.insertOne(business);
-
-    res.json({
-      success: true,
-      data: { ...business, _id: result.insertedId },
-    });
-  } catch (error) {
-    console.error("Error creating business:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to create business",
-    });
-  }
+app.get("/api/businesses-stats", async (req, res) => {
+  // ... your existing stats logic
 });
 
-app.get("/api/businesses/stats", async (req, res) => {
-  try {
-    const db = await getDatabase();
-    const collection = db.collection("businesses");
-
-    const [total, active, pending, inactive] = await Promise.all([
-      collection.countDocuments(),
-      collection.countDocuments({ status: "Active" }),
-      collection.countDocuments({ status: "Pending" }),
-      collection.countDocuments({ status: "Inactive" }),
-    ]);
-
-    res.json({
-      success: true,
-      data: { total, active, pending, inactive },
-    });
-  } catch (error) {
-    console.error("Error fetching business stats:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch statistics",
-    });
-  }
-});
+// OR Option 2: Remove them if they're handled in api/businesses.js
 
 // -------------------------
 // Product Routes
@@ -185,7 +104,7 @@ app.post("/api/products", async (req, res) => {
     const db = await getDatabase();
     const collection = db.collection("products");
 
-    const adminEmail = "dev@example.com"; // dummy admin
+    const adminEmail = "dev@example.com";
     const productData = {
       product_name,
       product_description,
@@ -210,7 +129,6 @@ app.post("/api/products", async (req, res) => {
       admin_profile: productData.admin_profile,
     };
 
-    // Optional webhook
     if (webhookUrl) {
       try {
         const fetch = require("node-fetch");

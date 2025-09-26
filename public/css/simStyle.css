@@ -1,0 +1,213 @@
+/* public/css/simStyle.css */
+
+/* SIM Card Container with cut corner */
+.sim-card {
+    position: relative;
+    width: 300px;
+    height: fit-content;
+    background: linear-gradient(135deg, #fff 0%, #fff 100%);
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    
+    /* Create the cut corner shape */
+    clip-path: polygon(
+      0 0,                    /* top-left */
+      calc(100% - 35px) 0,    /* top-right before cut */
+      100% 35px,              /* right side of cut */
+      100% 100%,              /* bottom-right */
+      0 100%                  /* bottom-left */
+    );
+  }
+  
+  .sim-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Icon in top left */
+  .sim-icon {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 40px;
+    height: 40px;
+    /* background: #f0f0f0; */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+  }
+  
+  /* Icon styles - you can replace with actual icons */
+  .sim-icon svg {
+    width: 48;
+    height: 48px;
+    fill: #fff;
+  }
+  
+  /* Content area */
+  .sim-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  
+  
+  /* Grid layout for multiple SIM cards */
+  .sim-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 1200px;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+  }
+  
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: -10px;
+    cursor: pointer;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sim-card {
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+    
+    .sim-cards-grid {
+      grid-template-columns: 1fr;
+      padding: 10px;
+    }
+  }
+  /* Update the sim-body to use better alignment */
+.sim-body {
+    display: flex;
+    flex-direction: column; /* Change from row to column */
+    align-items: flex-start; /* Align items to the left */
+    gap: 15px;
+    padding-top: 20px;
+}
+  
+  .sim-info {
+    flex: 1;
+    padding-top: 50px; /* Space for icon */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .sim-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1d1d1d;
+    margin: 0;
+  }
+  
+  .sim-description {
+    font-size: 14px;
+    color: #9a9a9a;
+    line-height: 1.4;
+    margin: 0;
+  }
+  
+  /* Orange action button with play icon */
+  .sim-action-btn {
+    width: 40px;
+    height: 40px;
+    background: #ff6b35;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+    flex-shrink: 0;
+    padding: 0;
+    
+  }
+  
+  .sim-action-btn:hover {
+    background: #ff7b00;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  }
+  
+  .sim-action-btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* Remove the old arrow pseudo-element */
+  .sim-action-btn::after {
+    display: none;
+  }
+  
+  /* Style for the SVG play icon */
+  .sim-action-btn svg {
+    width: 18px;
+    height: 18px;
+    margin-left: 2px; /* Slight offset to center the play icon visually */
+  }
+  
+  .sim-action-btn svg path {
+    fill: white;
+    transition: fill 0.3s ease;
+  }
+  
+  /* Optional: Alternative layout where button is inline with description */
+  .sim-body.inline-button {
+    align-items: flex-start;
+  }
+  
+  .sim-body.inline-button .sim-description-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .sim-body.inline-button .sim-action-btn {
+    align-self: center;
+  }
