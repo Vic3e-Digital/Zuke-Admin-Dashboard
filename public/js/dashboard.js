@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       case "marketplace":
         // Marketplace functionality
         break;
-      case "test":
+      case "business":
         if (!window.__testLoaded) {
           try {
             const mod = await import("../pages/business.js");
