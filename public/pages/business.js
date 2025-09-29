@@ -104,13 +104,19 @@ export async function initTestPage() {
                                'No description available';
     const businessAddress = currentBusiness?.store_info?.address || '';
     const businessCategories = currentBusiness?.store_info?.category?.join(', ') || '';
+    // const businessCase = currentBusiness?.initial_business_case?.more_details_needed;
+    const businessCase = currentBusiness?.initial_business_case?.more_details_needed;
+    const businessCaseString = Array.isArray(businessCase) ? businessCase.join('\n') : businessCase || '';
+    const mongoID = currentBusiness?._id;
     
     // Log for debugging
     console.log('Business loaded:', {
       name: businessName,
       description: businessDescription,
       address: businessAddress,
-      categories: businessCategories
+      categories: businessCategories,
+      bcase: businessCaseString,
+      mongo_ID: mongoID
     });
     
     // Setup buttons with dynamic URLs using actual business data
@@ -118,7 +124,7 @@ export async function initTestPage() {
       {
         btn: document.getElementById("openModalBtn"),
         title: "Business Case Assistant",
-        url: `https://aigents.southafricanorth.azurecontainer.io/form/4a4b49d8-45a5-4710-9b84-52587ce88cb6?Business%20Name=${encodeURIComponent(businessName)}&Business%20Description=${encodeURIComponent(businessDescription)}&Email=${encodeURIComponent(userEmail)}&Address=${encodeURIComponent(businessAddress)}&Categories=${encodeURIComponent(businessCategories)}`
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/4a4b49d8-45a5-4710-9b84-52587ce88cb6?Business%20Name=${encodeURIComponent(businessName)}&Business%20Description=${encodeURIComponent(businessDescription)}&Email=${encodeURIComponent(userEmail)}&Address=${encodeURIComponent(businessAddress)}&Categories=${encodeURIComponent(businessCategories)}&Questions%20to%20Answer=${encodeURIComponent(businessCase)}&ID=${encodeURIComponent(mongoID)}`
       },
       {
         btn: document.getElementById("openModalBtn2"),

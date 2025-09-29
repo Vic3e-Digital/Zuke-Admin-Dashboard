@@ -1,0 +1,216 @@
+<!-- pages/image-upload.html -->
+<link rel="stylesheet" href="css/simStyle.css">
+
+<div class="page-container">
+  <div class="page-header">
+    <h1 class="page-title">Image Upload Tool</h1>
+    <p class="page-subtitle">Upload images with instructions</p>
+  </div>
+
+  <div class="sim-cards-grid">
+    <!-- Image Upload Card -->
+    <div class="sim-card" id="imageUploadCard">
+      <div class="sim-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="#323544" stroke-width="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5" fill="#323544"/>
+          <path d="M21 15L16 10L5 21" stroke="#323544" stroke-width="2" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="sim-content">
+        <div class="sim-body">
+          <div class="sim-info">
+            <h3 class="sim-name">Upload Images</h3>
+            <p class="sim-description">Upload multiple images with instructions</p>
+          </div>
+          <button class="sim-action-btn" id="openUploadModalBtn" aria-label="Open Upload Modal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div id="uploadModal" class="modal">
+    <div class="modal-content upload-modal-content">
+      <span class="close">&times;</span>
+      <h2>Upload Images</h2>
+      
+      <!-- Drag and Drop Zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+        <div class="upload-zone-content">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5">
+            <path d="M7 10L12 5L17 10M12 5V15"/>
+            <path d="M20 15V19C20 19.5304 19.7893 20.0391 19.4142 20.4142C19.0391 20.7893 18.5304 21 18 21H6C5.46957 21 4.96086 20.7893 4.58579 20.4142C4.21071 20.0391 4 19.5304 4 19V15"/>
+          </svg>
+          <p>Drag and drop images here or click to browse</p>
+          <p class="file-info">Maximum file size: 10MB</p>
+        </div>
+      </div>
+
+      <!-- Image Preview Area -->
+      <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+        <h3>Selected Images</h3>
+        <div class="image-preview-grid" id="imagePreviewGrid">
+          <!-- Previews will be added here -->
+        </div>
+      </div>
+
+      <!-- Instructions Text Area -->
+      <div class="instructions-container">
+        <label for="instructions">Instructions:</label>
+        <textarea id="instructions" rows="4" placeholder="Enter your instructions here..."></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="clearUploads()">Clear All</button>
+        <button class="btn-primary" id="submitBtn" onclick="submitImages()" disabled>Submit</button>
+      </div>
+
+      <!-- Progress Indicator -->
+      <div class="upload-progress" id="uploadProgress" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text" id="progressText">Uploading...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add CSS -->
+<style>
+.upload-modal-content {
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.upload-zone {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 20px 0;
+}
+
+.upload-zone.drag-over {
+  border-color: #ff6b35;
+  background-color: #fff5f2;
+}
+
+.upload-zone-content p {
+  margin: 10px 0;
+  color: #666;
+}
+
+.file-info {
+  font-size: 12px;
+  color: #999;
+}
+
+.image-preview-container {
+  margin: 20px 0;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.image-preview-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.image-preview-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.image-preview-item .remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.image-preview-item .remove-btn:hover {
+  background: #ff4444;
+  color: white;
+}
+
+.instructions-container {
+  margin: 20px 0;
+}
+
+.instructions-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.instructions-container textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.upload-progress {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #ff6b35;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+</style>

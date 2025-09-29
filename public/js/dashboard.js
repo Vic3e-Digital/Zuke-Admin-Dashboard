@@ -228,9 +228,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "creative":
           content = await loadCreativePage();
           break;
-        case "social-media":
-          content = await loadSocialMediaPage();
-          break;
+        // case "social-media":
+        //   content = await loadSocialMediaPage();
+        //   break;
         case "test":
           content = await loadMarketingPage();
           break;
@@ -378,12 +378,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return loadCreativePage.cache;
   }
 
-  async function loadSocialMediaPage() {
-    if (!loadSocialMediaPage.cache) {
-      loadSocialMediaPage.cache = await fetch('pages/social-media.html').then(r => r.text());
-    }
-    return loadSocialMediaPage.cache;
-  }
+  // async function loadSocialMediaPage() {
+  //   if (!loadSocialMediaPage.cache) {
+  //     loadSocialMediaPage.cache = await fetch('pages/social-media.html').then(r => r.text());
+  //   }
+  //   return loadSocialMediaPage.cache;
+  // }
 
   async function loadMarketingPage() {
     if (!loadMarketingPage.cache) {
@@ -433,19 +433,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           import("../pages/creative.js").then(mod => mod.initCreativePage());
         }
         break;
-      case "social-media":
-        if (!window.__socialMediaLoaded) {
-          try {
-            const mod = await import("../pages/social-media.js");
-            mod.initSocialMediaPage();
-            window.__socialMediaLoaded = true;
-          } catch (error) {
-            console.error("Error loading social media page:", error);
-          }
-        } else {
-          import("../pages/social-media.js").then(mod => mod.initSocialMediaPage());
-        }
-        break;
+      // case "social-media":
+      //   if (!window.__socialMediaLoaded) {
+      //     try {
+      //       const mod = await import("../pages/social-media.js");
+      //       mod.initSocialMediaPage();
+      //       window.__socialMediaLoaded = true;
+      //     } catch (error) {
+      //       console.error("Error loading social media page:", error);
+      //     }
+      //   } else {
+      //     import("../pages/social-media.js").then(mod => mod.initSocialMediaPage());
+      //   }
+      //   break;
       case "test":
         if (!window.__marketingLoaded) {
           try {
