@@ -8,6 +8,8 @@ function truncateText(text, maxLength) {
 
 // Auth0 client
 let auth0Client = null;
+// Make currentPage globally accessible
+let currentPage = "dashboard";
 
 const fetchAuthConfig = () => fetch("/auth_config.json");
 
@@ -30,6 +32,43 @@ const configureAuth0Client = async () => {
   }
 };
 
+// Function to fetch businesses from MongoDB
+async function fetchBusinessesByEmail() {
+  try {
+    // Check cache first
+    const cachedBusinesses = window.dataManager.getBusinesses();
+    if (cachedBusinesses) {
+      console.log('Using cached businesses data');
+      return cachedBusinesses;
+    }
+
+    console.log('Fetching fresh businesses data from server');
+    const user = await auth0Client.getUser();
+    
+    if (!user || !user.email) {
+      console.error('No user email found');
+      return [];
+    }
+
+    const response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const businesses = data.businesses || [];
+    
+    // Cache the data
+    window.dataManager.setBusinesses(businesses);
+    
+    return businesses;
+  } catch (error) {
+    console.error('Error fetching businesses:', error);
+    return [];
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const hamburgerMenu = document.getElementById("hamburgerMenu");
   const sidebar = document.getElementById("sidebar");
@@ -39,10 +78,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userWelcome = document.getElementById("userWelcome");
   const pageContent = document.getElementById("pageContent");
   const userAvatar = document.getElementById("userAvatar");
+  const settingsButton = document.getElementById("settingsButton");
 
   // Page navigation functionality
   const navLinks = document.querySelectorAll(".nav-link");
-  let currentPage = "dashboard";
 
   // Initialize
   init();
@@ -79,13 +118,77 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       setupPageNavigation();
+      await initializeGlobalBusinessSelector();
       loadPage("dashboard");
       setupEventListeners();
+
     } catch (error) {
       console.error("Auth check error:", error);
       window.location.href = '/';
     }
   }
+
+  // Initialize global business selector
+  async function initializeGlobalBusinessSelector() {
+    const businesses = await fetchBusinessesByEmail();
+    const selectorContainer = document.getElementById('businessSelectorContainer');
+    const selector = document.getElementById('globalBusinessSelector');
+    
+    if (!businesses || businesses.length === 0) {
+      return;
+    }
+    
+    if (businesses.length === 1) {
+      // Single business - show as badge
+      selectorContainer.innerHTML = `
+        <div class="single-business-badge">
+          <div class="business-icon">${businesses[0].store_info?.name?.charAt(0) || 'B'}</div>
+          <span class="business-name">${businesses[0].store_info?.name || 'Business'}</span>
+        </div>
+      `;
+      selectorContainer.style.display = 'flex';
+      
+      // Set as selected
+      window.dataManager.setSelectedBusiness(businesses[0]);
+    } else {
+      // Multiple businesses - show selector
+      selectorContainer.style.display = 'flex';
+      
+      // Get current selection or use first
+      const currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+      
+      // Populate options
+      selector.innerHTML = businesses.map(b => `
+        <option value="${b._id}" ${currentBusiness?._id === b._id ? 'selected' : ''}>
+          ${b.store_info?.name || 'Unnamed Business'}
+        </option>
+      `).join('');
+      
+      // Handle selection changes
+      selector.onchange = async function(e) {
+        const selectedId = e.target.value;
+        const selectedBusiness = businesses.find(b => b._id === selectedId);
+        
+        if (selectedBusiness) {
+          // Update global selection
+          window.dataManager.setSelectedBusiness(selectedBusiness);
+          
+          // Reload current page with new business context
+          if (currentPage) {
+            await loadPage(currentPage);
+          }
+          
+          console.log('Global business changed to:', selectedBusiness.store_info?.name);
+        }
+      };
+    }
+  }
+
+  // Register for business changes on page loads
+  window.dataManager.onBusinessChange((business) => {
+    console.log('Business changed globally:', business?.store_info?.name);
+    // You can add any global UI updates here
+  });
 
   function setupPageNavigation() {
     navLinks.forEach((link) => {
@@ -125,6 +228,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "creative":
           content = await loadCreativePage();
           break;
+        case "social-media":
+          content = await loadSocialMediaPage();
+          break;
+        case "test":
+          content = await loadMarketingPage();
+          break;
+        case "settings":
+          content = await loadSettingsPage();
+          break;
         default:
           content = '<div style="padding: 30px;"><h1>Page not found</h1></div>';
       }
@@ -139,31 +251,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Function to fetch businesses from MongoDB
-  async function fetchBusinessesByEmail() {
-    try {
-      const user = await auth0Client.getUser();
-      
-      if (!user || !user.email) {
-        console.error('No user email found');
-        return [];
-      }
-
-      const response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.businesses || [];
-    } catch (error) {
-      console.error('Error fetching businesses:', error);
-      return [];
-    }
-  }
-
-  
   async function loadBusinessesPage() {
     // Show loading state first
     pageContent.innerHTML = `
@@ -195,6 +282,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             Add Business
           </button>
         </div>
+
+        <!-- Status overview -->
+        <div class="business-overview" style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+          <h3>Business Overview</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 20px;">
+            <div style="text-align: center;">
+              <div style="font-size: 2rem; font-weight: bold; color: #ff6b35;">${businesses.length}</div>
+              <div style="color: #666; font-size: 14px;">Total Businesses</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 2rem; font-weight: bold; color: #2ecc71;">${businesses.filter(b => b.processing_status?.status === 'active').length}</div>
+              <div style="color: #666; font-size: 14px;">Active</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 2rem; font-weight: bold; color: #f39c12;">${businesses.filter(b => b.processing_status?.status === 'processing').length}</div>
+              <div style="color: #666; font-size: 14px;">Processing</div>
+            </div>
+          </div>
+        </div>
   
         ${businesses.length > 0 ? `
           <div class="sim-cards-grid">
@@ -217,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     <button class="sim-action-btn" onclick="viewBusinessDetails('${business._id}')" aria-label="View ${business.store_info?.name} details">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                                                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
                       </svg>
                     </button>
                   </div>
@@ -226,24 +332,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             `).join('')}
           </div>
   
-          <!-- Status overview -->
-          <div class="business-overview" style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-            <h3>Business Overview</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 20px;">
-              <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #ff6b35;">${businesses.length}</div>
-                <div style="color: #666; font-size: 14px;">Total Businesses</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #2ecc71;">${businesses.filter(b => b.processing_status?.status === 'active').length}</div>
-                <div style="color: #666; font-size: 14px;">Active</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #f39c12;">${businesses.filter(b => b.processing_status?.status === 'processing').length}</div>
-                <div style="color: #666; font-size: 14px;">Processing</div>
-              </div>
-            </div>
-          </div>
         ` : `
           <div class="empty-state" style="text-align: center; padding: 60px 20px;">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1">
@@ -253,7 +341,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </svg>
             <h2 style="margin: 20px 0 10px 0; color: #2c3e50;">No businesses yet</h2>
             <p style="color: #7f8c8d; margin-bottom: 20px;">Start by adding your first business to manage it here.</p>
-            <button class="btn-primary" onclick="window.open('https://zuke.co.za/join/, '_blank')">
+            <button class="btn-primary" onclick="window.open('https://zuke.co.za/join/', '_blank')">
               Add Your First Business
             </button>
           </div>
@@ -272,6 +360,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
+  async function loadMarketplacePage() {
+    return '<div style="padding: 30px;"><h1>Marketplace</h1><p>Coming soon...</p></div>';
+  }
+
   async function loadTestPage() {
     if (!loadTestPage.cache) {
       loadTestPage.cache = await fetch('pages/business.html').then(r => r.text());
@@ -284,6 +376,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       loadCreativePage.cache = await fetch('pages/creative.html').then(r => r.text());
     }
     return loadCreativePage.cache;
+  }
+
+  async function loadSocialMediaPage() {
+    if (!loadSocialMediaPage.cache) {
+      loadSocialMediaPage.cache = await fetch('pages/social-media.html').then(r => r.text());
+    }
+    return loadSocialMediaPage.cache;
+  }
+
+  async function loadMarketingPage() {
+    if (!loadMarketingPage.cache) {
+      loadMarketingPage.cache = await fetch('pages/marketing.html').then(r => r.text());
+    }
+    return loadMarketingPage.cache;
+  }
+
+  async function loadSettingsPage() {
+    if (!loadSettingsPage.cache) {
+      loadSettingsPage.cache = await fetch('pages/settings.html').then(r => r.text());
+    }
+    return loadSettingsPage.cache;
   }
 
   async function initializePageFunctionality(page) {
@@ -307,127 +420,61 @@ document.addEventListener("DOMContentLoaded", async () => {
           import("../pages/business.js").then(mod => mod.initTestPage());
         }
         break;
-        case "creative":
-          if (!window.__testLoaded) {
-            try {
-              const mod = await import("../pages/creative.js");
-              mod.initCreativePage();
-              window.__testLoaded = true;
-            } catch (error) {
-              console.error("Error loading test page:", error);
-            }
-          } else {
-            import("../pages/creative.js").then(mod => mod.initCreativePage());
+      case "creative":
+        if (!window.__creativeLoaded) {
+          try {
+            const mod = await import("../pages/creative.js");
+            mod.initCreativePage();
+            window.__creativeLoaded = true;
+          } catch (error) {
+            console.error("Error loading creative page:", error);
           }
-          break;
+        } else {
+          import("../pages/creative.js").then(mod => mod.initCreativePage());
+        }
+        break;
+      case "social-media":
+        if (!window.__socialMediaLoaded) {
+          try {
+            const mod = await import("../pages/social-media.js");
+            mod.initSocialMediaPage();
+            window.__socialMediaLoaded = true;
+          } catch (error) {
+            console.error("Error loading social media page:", error);
+          }
+        } else {
+          import("../pages/social-media.js").then(mod => mod.initSocialMediaPage());
+        }
+        break;
+      case "test":
+        if (!window.__marketingLoaded) {
+          try {
+            const mod = await import("../pages/marketing.js");
+            mod.initMarketingPage();
+            window.__marketingLoaded = true;
+          } catch (error) {
+            console.error("Error loading marketing page:", error);
+          }
+        } else {
+          import("../pages/marketing.js").then(mod => mod.initMarketingPage());
+        }
+        break;
+      case "settings":
+        if (!window.__settingsLoaded) {
+          try {
+            const mod = await import("../pages/settings.js");
+            mod.initSettingsPage();
+            window.__settingsLoaded = true;
+          } catch (error) {
+            console.error("Error loading settings page:", error);
+          }
+        } else {
+          import("../pages/settings.js").then(mod => mod.initSettingsPage());
+        }
+        break;
     }
   }
 
-  // View business details
-  // window.viewBusinessDetails = async function(businessId) {
-  //   const businesses = await fetchBusinessesByEmail();
-  //   const business = businesses.find(b => b._id === businessId);
-  //   if (!business) return;
-
-  //   const detailsHTML = `
-  //     <div class="business-details-page">
-  //       <div class="page-header">
-  //         <button class="btn-back" onclick="loadPage('dashboard')">
-  //           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-  //             <polyline points="15,18 9,12 15,6"/>
-  //           </svg>
-  //           Back to Businesses
-  //         </button>
-  //         <h1 class="page-title">${business.store_info?.name || 'Business Details'}</h1>
-  //       </div>
-
-  //       <div class="details-content">
-  //         ${business.media_files?.store_banner ? `
-  //           <div class="banner-container">
-  //                           <img src="${business.media_files.store_banner}" alt="Store banner" class="store-banner">
-  //           </div>
-  //         ` : ''}
-
-  //         <div class="details-grid">
-  //           <div class="detail-card">
-  //             <h3>Business Information</h3>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Store Name:</span>
-  //               <span class="detail-value">${business.store_info?.name || 'N/A'}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Categories:</span>
-  //               <span class="detail-value">${business.store_info?.category?.join(', ') || 'N/A'}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Address:</span>
-  //               <span class="detail-value">${business.store_info?.address || 'N/A'}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Description:</span>
-  //               <span class="detail-value">${business.store_info?.description || 'N/A'}</span>
-  //             </div>
-  //           </div>
-
-  //           <div class="detail-card">
-  //             <h3>Contact Information</h3>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Owner:</span>
-  //               <span class="detail-value">${business.personal_info?.first_name} ${business.personal_info?.last_name}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Email:</span>
-  //               <span class="detail-value">${business.personal_info?.email || 'N/A'}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Phone:</span>
-  //               <span class="detail-value">${business.personal_info?.phone || 'N/A'}</span>
-  //             </div>
-  //           </div>
-
-  //           <div class="detail-card">
-  //             <h3>Social Media</h3>
-  //             ${business.social_media ? `
-  //               ${Object.entries(business.social_media).map(([platform, handle]) => `
-  //                 <div class="detail-row">
-  //                   <span class="detail-label">${platform.charAt(0).toUpperCase() + platform.slice(1)}:</span>
-  //                   <span class="detail-value">${handle}</span>
-  //                 </div>
-  //               `).join('')}
-  //             ` : '<p class="no-data">No social media linked</p>'}
-  //           </div>
-
-  //           <div class="detail-card">
-  //             <h3>Platform Status</h3>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Status:</span>
-  //               <span class="status-badge ${business.processing_status?.status}">${business.processing_status?.status || 'N/A'}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Plan:</span>
-  //               <span class="detail-value">${business.processing_status?.plan || 'Free'}</span>
-  //             </div>
-  //             <div class="detail-row">
-  //               <span class="detail-label">Created:</span>
-  //               <span class="detail-value">${new Date(business.processing_status?.created_at).toLocaleDateString() || 'N/A'}</span>
-  //             </div>
-  //           </div>
-  //         </div>
-
-  //         <div class="business-actions">
-  //           <button class="btn-primary" onclick="window.open('https://your-edit-business-url.com?id=${businessId}', '_blank')">
-  //             Edit Business
-  //           </button>
-  //           <button class="btn-secondary" onclick="window.open('${business.store_info?.slug ? `https://your-domain.com/${business.store_info.slug}` : '#'}', '_blank')">
-  //             View Public Page
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   `;
-
-  //   pageContent.innerHTML = detailsHTML;
-  // };
   window.viewBusinessDetails = async function(businessId) {
     const businesses = await fetchBusinessesByEmail();
     const business = businesses.find(b => b._id === businessId);
@@ -448,7 +495,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ` : ''}
           <div>
             <h2 style="margin: 0 0 10px 0;">${business.store_info?.name || 'Business Details'}</h2>
-            <p style="color: #666; margin: 0;">${business.store_info?.description || 'No description available'}</p>
+            <p style="color: #666; margin: 0;">${business.initial_business_case?.what_you_do || 'No description available'}</p>
           </div>
         </div>
   
@@ -509,7 +556,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       closeBusinessModal();
     }
   };
-  
 
   function setupEventListeners() {
     hamburgerMenu.addEventListener("click", () => {
@@ -523,6 +569,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     });
+
+    // Settings button click handler
+    if (settingsButton) {
+      settingsButton.addEventListener("click", () => {
+        loadPage('settings');
+        
+        // Update active nav item
+        navLinks.forEach((l) => l.classList.remove("active"));
+        const settingsNavItem = document.querySelector('[data-page="settings"]');
+        if (settingsNavItem) {
+          settingsNavItem.classList.add("active");
+        }
+      });
+    }
 
     // Logout
     logoutButton.addEventListener("click", () => {
@@ -565,31 +625,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Make loadPage available globally for navigation
   window.loadPage = loadPage;
 });
-
-// Add these console logs to your dashboard.js
-async function fetchBusinessesByEmail() {
-  try {
-    const user = await auth0Client.getUser();
-    console.log('Fetching businesses for email:', user.email); // Check user email
-    
-    if (!user || !user.email) {
-      console.error('No user email found');
-      return [];
-    }
-
-    const response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
-    console.log('API Response status:', response.status); // Check response status
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log('Businesses fetched:', data); // See the actual data
-    console.log('Number of businesses:', data.businesses?.length || 0);
-    return data.businesses || [];
-  } catch (error) {
-    console.error('Error fetching businesses:', error);
-    return [];
-  }
-}

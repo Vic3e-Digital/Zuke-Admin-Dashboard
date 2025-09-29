@@ -43,7 +43,7 @@ Example `auth_config.json`:
 {
   "domain": "YOUR_AUTH0_DOMAIN",
   "clientId": "YOUR_AUTH0_CLIENT_ID",
-  "audience": "YOUR_AUTH0_API_AUDIENCE"
+  // "audience": "YOUR_AUTH0_API_AUDIENCE"
 }
 ```
 

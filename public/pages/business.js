@@ -1,13 +1,12 @@
-// pages/test.js
+// pages/business.js
 let auth0Client = null;
+let currentBusiness = null;
 
 async function getAuth0Client() {
-  // Check if already exists in window
   if (window.auth0Client) {
     return window.auth0Client;
   }
 
-  // Otherwise configure it
   try {
     const response = await fetch("/auth_config.json");
     const config = await response.json();
@@ -19,7 +18,6 @@ async function getAuth0Client() {
       useRefreshTokens: true
     });
     
-    // Store it globally
     window.auth0Client = auth0Client;
     return auth0Client;
   } catch (error) {
@@ -28,8 +26,33 @@ async function getAuth0Client() {
   }
 }
 
+// Function to get business data from global selection
+async function getBusinessData() {
+  // Wait for dataManager to be available
+  if (!window.dataManager) {
+    console.error('DataManager not initialized');
+    return null;
+  }
+
+  // Get from global selection
+  const selectedBusiness = window.dataManager.getSelectedBusinessOrFirst();
+  
+  if (selectedBusiness) {
+    return selectedBusiness;
+  }
+  
+  // If no business is selected and no cached data, we shouldn't fetch here
+  // The dashboard should have already loaded the businesses
+  console.warn('No business selected in global context');
+  return null;
+}
+
 export async function initTestPage() {
-  // Get or create Auth0 client
+  // Wait a bit for dataManager to initialize
+  if (!window.dataManager) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
   const auth0Client = await getAuth0Client();
   
   if (!auth0Client) {
@@ -37,14 +60,12 @@ export async function initTestPage() {
     return;
   }
 
-  // Get modal elements
   const modal = document.getElementById("myModal");
   const modalTitle = document.getElementById("modalTitle");
   const iframe = document.getElementById("modalIframe");
   const closeBtn = document.getElementsByClassName("close")[0];
 
   try {
-    // Check authentication
     const isAuthenticated = await auth0Client.isAuthenticated();
     
     if (!isAuthenticated) {
@@ -53,29 +74,61 @@ export async function initTestPage() {
       return;
     }
 
-    // Get user info
     const user = await auth0Client.getUser();
     const userEmail = user.email || user.name || 'unknown';
-    const userName = user.name;
-    console.log("User email:", userEmail);
-    console.log("User name:", userName);
+    const userName = user.name || 'User';
+    
+    // Get business data
+    currentBusiness = await getBusinessData();
+    
+    if (!currentBusiness) {
+      console.warn('No business data available');
+      // Show a message to the user
+      const pageContainer = document.querySelector('.page-container');
+      if (pageContainer) {
+        pageContainer.innerHTML = `
+          <div class="empty-state" style="text-align: center; padding: 60px 20px;">
+            <h2>No Business Selected</h2>
+            <p>Please select a business from the header dropdown to continue.</p>
+            <button class="btn-primary" onclick="window.loadPage('dashboard')">Go to Dashboard</button>
+          </div>
+        `;
+      }
+      return;
+    }
 
-    // Setup buttons with dynamic URLs
+    // Extract business information with fallbacks
+    const businessName = currentBusiness?.store_info?.name || 'Your Business';
+    const businessDescription = currentBusiness?.marketplace_info?.marketplace_description || 
+                               currentBusiness?.marketplace_platform_banner?.description || 
+                               'No description available';
+    const businessAddress = currentBusiness?.store_info?.address || '';
+    const businessCategories = currentBusiness?.store_info?.category?.join(', ') || '';
+    
+    // Log for debugging
+    console.log('Business loaded:', {
+      name: businessName,
+      description: businessDescription,
+      address: businessAddress,
+      categories: businessCategories
+    });
+    
+    // Setup buttons with dynamic URLs using actual business data
     const buttons = [
       {
         btn: document.getElementById("openModalBtn"),
-        title: "Neo - Find Customers",
-        url: `https://aigents.southafricanorth.azurecontainer.io/form/fbfabdbb-a36e-4761-93b2-a55e4bfe62a9?Email=${encodeURIComponent(userEmail)}&Business%20Descripion=${encodeURIComponent(userName)}`
+        title: "Business Case Assistant",
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/4a4b49d8-45a5-4710-9b84-52587ce88cb6?Business%20Name=${encodeURIComponent(businessName)}&Business%20Description=${encodeURIComponent(businessDescription)}&Email=${encodeURIComponent(userEmail)}&Address=${encodeURIComponent(businessAddress)}&Categories=${encodeURIComponent(businessCategories)}`
       },
       {
         btn: document.getElementById("openModalBtn2"),
-        title: "Dineo - Sales Analytics",
-        url: `#`
+        title: "Sales Analytics",
+        url: `https://aigents.southafricanorth.azurecontainer.io/sales-analytics?Business=${encodeURIComponent(businessName)}&Email=${encodeURIComponent(userEmail)}`
       },
       {
         btn: document.getElementById("openModalBtn3"),
-        title: "Alex - Business Intelligence",
-        url: `#`
+        title: "Business Intelligence",
+        url: `https://aigents.southafricanorth.azurecontainer.io/business-intelligence?Business=${encodeURIComponent(businessName)}&Email=${encodeURIComponent(userEmail)}`
       }
     ];
 
@@ -91,6 +144,9 @@ export async function initTestPage() {
         }
       }
     });
+
+    // Update page content with business info if needed
+    updatePageWithBusinessInfo(currentBusiness);
 
     // Close handlers
     if (closeBtn) {
@@ -111,5 +167,31 @@ export async function initTestPage() {
 
   } catch (error) {
     console.error("Error in initTestPage:", error);
+  }
+}
+
+// Function to update page content with business information
+function updatePageWithBusinessInfo(business) {
+  if (!business) return;
+
+  // Update any elements on the page that should show business info
+  const businessNameElements = document.querySelectorAll('.business-name-display');
+  businessNameElements.forEach(el => {
+    el.textContent = business.store_info?.name || 'Business';
+  });
+
+  // You can add more dynamic content updates here
+}
+
+// Export function to set selected business
+export function setSelectedBusiness(businessId) {
+  const businesses = window.dataManager.getBusinesses();
+  if (businesses) {
+    const selected = businesses.find(b => b._id === businessId);
+    if (selected) {
+      window.dataManager.setSelectedBusiness(selected);
+      currentBusiness = selected;
+      updatePageWithBusinessInfo(selected);
+    }
   }
 }

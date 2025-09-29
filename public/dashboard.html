@@ -20,7 +20,15 @@
                 <span></span>
             </button>
             <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" alt="Zuke Logo" style="height:48px;">
-            <h1 class="dashboard-title">Go Big.</h1>
+            <h1 class="dashboard-title">Dashboard</h1>
+
+            <!-- Add Business Selector Here -->
+            <div class="business-selector-container" id="businessSelectorContainer" style="display: none;">
+                <label>Active Business:</label>
+                <select class="header-business-selector" id="globalBusinessSelector">
+                    <!-- Options will be populated dynamically -->
+                </select>
+                </div>
             
             <div class="header-right">
                 <span class="user-welcome" id="userWelcome">Welcome @admin</span>
@@ -31,7 +39,7 @@
                         <path d="M16 21V5C16 3.89543 15.1046 3 14 3H10C8.89543 3 8 3.89543 8 5V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <circle cx="18" cy="14" r="1" fill="currentColor"/>
                     </svg>
-                    CREDIT: <span id="tokenBalance">ZAR 99</span>
+                    BAL: <span id="tokenBalance">ZAR 99</span>
                 </button>
                 <button class="logout-button" id="logoutButton">
                     <!-- Modern logout icon -->
@@ -123,6 +131,26 @@
                           
                         </a>
                       </li>
+                      <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="social-media">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 2H15C13.6739 2 12.4021 2.52678 11.4645 3.46447C10.5268 4.40215 10 5.67392 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73478 14.1054 6.48043 14.2929 6.29289C14.4804 6.10536 14.7348 6 15 6H18V2Z" stroke="#323544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="6" cy="18" r="3" stroke="#323544" stroke-width="2" opacity="0.4"/>
+                            <circle cx="18" cy="6" r="3" stroke="#323544" stroke-width="2" opacity="0.4"/>
+                          </svg>
+                          <span class="nav-text">Social Media</span>
+                        </a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="settings">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="3" stroke="#323544" stroke-width="2"/>
+                            <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="#323544" stroke-width="2" stroke-linecap="round"/>
+                          </svg>
+                          <span class="nav-text">Settings</span>
+                        </a>
+                      </li>
                     <!-- <li class="nav-item">
                         <a href="#" class="nav-link" data-page="creative">
                             <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -165,6 +193,12 @@
                         <path d="M7 20.662V19C7 17.3431 8.34315 16 10 16H14C15.6569 16 17 17.3431 17 19V20.662" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
+                <button class="settings-icon-btn" id="settingsButton" title="Settings" data-page="settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                      <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
             </div>
         </nav>
 
@@ -177,10 +211,11 @@
     </div>
 
 
-
+    <!-- Fix the script order -->
+    <script src="js/dataManager.js"></script>
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <!-- <script src="js/dashboard.js"></script> -->
     <script src="js/dashboard.js" type="module"></script>
+
 
     <!-- <script src="pages/test.js"> type="module"</script> -->
 </body>
