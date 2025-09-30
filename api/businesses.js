@@ -3,7 +3,17 @@ const router = express.Router();
 const { connectToDatabase } = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
-
+// Helper function to check if user is admin
+const isAdmin = (user) => {
+  // Check multiple possible locations for roles in Auth0 user object
+  const roles = user?.['https://zukex.com/roles'] || 
+                user?.roles || 
+                user?.app_metadata?.roles || 
+                user?.user_metadata?.roles || 
+                [];
+  
+  return roles.includes('admin') || roles.includes('Admin');
+};
 
 router.get('/debug', async (req, res) => {
   try {
@@ -44,16 +54,27 @@ router.get('/debug', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// Main route - get businesses by email
+
+// Main route - get businesses by email with admin check
 router.get('/', async (req, res) => {
   console.log('=== Business API Called ===');
   console.log('Query params:', req.query);
   
   try {
-    const { email } = req.query;
+    const { email, user } = req.query;
     
     if (!email) {
       return res.status(400).json({ error: 'Email parameter is required' });
+    }
+
+    // Parse user object if it's a string
+    let userData = null;
+    if (user) {
+      try {
+        userData = typeof user === 'string' ? JSON.parse(user) : user;
+      } catch (e) {
+        console.error('Failed to parse user data:', e);
+      }
     }
 
     const { db } = await connectToDatabase();
@@ -62,22 +83,30 @@ router.get('/', async (req, res) => {
     console.log('Searching in database:', db.databaseName);
     console.log('Collection: store_submissions');
     console.log('Looking for email:', email);
+    console.log('User data:', userData);
     
-    // Try multiple possible email locations based on your document structure
-    const businesses = await collection.find({ 
-      $or: [
-        { 'personal_info.email': email },
-        { 'marketplace_platform_user_info.user_email': email },
-        { 'personal_info.email': { $regex: new RegExp(`^${email}$`, 'i') } },
-        { 'marketplace_platform_user_info.user_email': { $regex: new RegExp(`^${email}$`, 'i') } }
-      ]
-    }).toArray();
+    // Check if user is admin
+    const userIsAdmin = userData ? isAdmin(userData) : false;
+    console.log('Is Admin:', userIsAdmin);
     
-    console.log(`Found ${businesses.length} businesses for email: ${email}`);
+    let businesses = [];
+    
+    if (userIsAdmin) {
+      // Admin: return ALL businesses
+      console.log('Admin detected - fetching all businesses');
+      businesses = await collection.find({}).toArray();
+    } else {
+      // Non-admin: return empty array (no businesses)
+      console.log('Non-admin user - returning no businesses');
+      businesses = [];
+    }
+    
+    console.log(`Returning ${businesses.length} businesses`);
     
     res.json({ 
       success: true,
       count: businesses.length,
+      isAdmin: userIsAdmin,
       businesses: businesses
     });
     
@@ -120,7 +149,6 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-
 router.post('/add-test', async (req, res) => {
   try {
     const { connectToDatabase } = require('../lib/mongodb');
@@ -131,7 +159,7 @@ router.post('/add-test', async (req, res) => {
       personal_info: {
         first_name: "Test",
         last_name: "User",
-        email: "opeolu.victory@gmail.com",
+        email: "owamjames1@gmail.com",
         phone: "+27123456789",
         address: "123 Test Street"
       },
