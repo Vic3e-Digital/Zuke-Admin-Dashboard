@@ -44,15 +44,65 @@ router.get('/debug', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// // Main route - get businesses by email
+// router.get('/', async (req, res) => {
+//   console.log('=== Business API Called ===');
+//   console.log('Query params:', req.query);
+  
+//   try {
+//     const { email } = req.query;
+    
+//     if (!email) {
+//       return res.status(400).json({ error: 'Email parameter is required' });
+//     }
+
+//     const { db } = await connectToDatabase();
+//     const collection = db.collection('store_submissions');
+    
+//     console.log('Searching in database:', db.databaseName);
+//     console.log('Collection: store_submissions');
+//     console.log('Looking for email:', email);
+    
+//     // Try multiple possible email locations based on your document structure
+//     const businesses = await collection.find({ 
+//       $or: [
+//         { 'personal_info.email': email },
+//         { 'marketplace_platform_user_info.user_email': email },
+//         { 'personal_info.email': { $regex: new RegExp(`^${email}$`, 'i') } },
+//         { 'marketplace_platform_user_info.user_email': { $regex: new RegExp(`^${email}$`, 'i') } }
+//       ]
+//     }).toArray();
+    
+//     console.log(`Found ${businesses.length} businesses for email: ${email}`);
+    
+//     res.json({ 
+//       success: true,
+//       count: businesses.length,
+//       businesses: businesses
+//     });
+    
+//   } catch (error) {
+//     console.error('Error in businesses API:', error);
+//     res.status(500).json({ 
+//       error: 'Failed to fetch businesses',
+//       message: error.message 
+//     });
+//   }
+// });
+
 // Main route - get businesses by email
 router.get('/', async (req, res) => {
   console.log('=== Business API Called ===');
   console.log('Query params:', req.query);
   
   try {
-    const { email } = req.query;
+    const { email, admin, isAdmin } = req.query;
     
-    if (!email) {
+    // Check if this is an admin request
+    const isAdminRequest = admin === 'true' || isAdmin === 'true';
+    
+    // If not admin, email is required
+    if (!isAdminRequest && !email) {
       return res.status(400).json({ error: 'Email parameter is required' });
     }
 
@@ -61,24 +111,33 @@ router.get('/', async (req, res) => {
     
     console.log('Searching in database:', db.databaseName);
     console.log('Collection: store_submissions');
-    console.log('Looking for email:', email);
     
-    // Try multiple possible email locations based on your document structure
-    const businesses = await collection.find({ 
-      $or: [
-        { 'personal_info.email': email },
-        { 'marketplace_platform_user_info.user_email': email },
-        { 'personal_info.email': { $regex: new RegExp(`^${email}$`, 'i') } },
-        { 'marketplace_platform_user_info.user_email': { $regex: new RegExp(`^${email}$`, 'i') } }
-      ]
-    }).toArray();
+    let businesses;
     
-    console.log(`Found ${businesses.length} businesses for email: ${email}`);
+    if (isAdminRequest) {
+      // Admin: fetch ALL businesses
+      console.log('Admin request - fetching all businesses');
+      businesses = await collection.find({}).toArray();
+    } else {
+      // Regular user: fetch by email
+      console.log('Looking for email:', email);
+      businesses = await collection.find({ 
+        $or: [
+          { 'personal_info.email': email },
+          { 'marketplace_platform_user_info.user_email': email },
+          { 'personal_info.email': { $regex: new RegExp(`^${email}$`, 'i') } },
+          { 'marketplace_platform_user_info.user_email': { $regex: new RegExp(`^${email}$`, 'i') } }
+        ]
+      }).toArray();
+    }
+    
+    console.log(`Found ${businesses.length} businesses${isAdminRequest ? ' (admin view)' : ` for email: ${email}`}`);
     
     res.json({ 
       success: true,
       count: businesses.length,
-      businesses: businesses
+      businesses: businesses,
+      isAdminView: isAdminRequest
     });
     
   } catch (error) {

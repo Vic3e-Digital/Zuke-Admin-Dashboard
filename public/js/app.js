@@ -64,14 +64,35 @@ const updateUI = async () => {
       }
 
       try {
-        const token = await auth0Client.getTokenSilently();
         const user = await auth0Client.getUser();
+        
+        // Check if user changed
+        const lastUserSub = sessionStorage.getItem('lastUserSub');
+        const currentUserSub = user.sub;
+        
+        if (lastUserSub && lastUserSub !== currentUserSub) {
+          console.log('Different user detected, clearing flags');
+          sessionStorage.removeItem('hasRedirected');
+          
+          // Also clear the business cache
+          if (window.dataManager) {
+            window.dataManager.clearBusinesses();
+          }
+          localStorage.removeItem('lastUserId');
+        }
+        
+        sessionStorage.setItem('lastUserSub', currentUserSub);
 
         const tokenElement = document.getElementById("ipt-access-token");
         const profileElement = document.getElementById("ipt-user-profile");
         
-        if (tokenElement) tokenElement.innerHTML = token;
-        if (profileElement) profileElement.textContent = JSON.stringify(user, null, 2);
+        if (tokenElement) {
+          const token = await auth0Client.getTokenSilently();
+          tokenElement.innerHTML = token;
+        }
+        if (profileElement) {
+          profileElement.textContent = JSON.stringify(user, null, 2);
+        }
       } catch (tokenError) {
         console.error("Error getting token/user:", tokenError);
       }
@@ -81,6 +102,9 @@ const updateUI = async () => {
       if (gatedContent) {
         gatedContent.classList.add("hidden");
       }
+      // Clear user tracking when not authenticated
+      sessionStorage.removeItem('lastUserSub');
+      sessionStorage.removeItem('hasRedirected');
     }
     
     // Only auto-redirect if we're on the index page and NOT coming from a callback
@@ -93,7 +117,7 @@ const updateUI = async () => {
       sessionStorage.setItem('hasRedirected', 'true');
       setTimeout(() => {
         window.location.href = '/dashboard.html';
-      }, 1000); // add small delay after login for debugging
+      }, 100); // Reduced delay
     }
   } catch (error) {
     console.error("Error updating UI:", error);
@@ -103,6 +127,10 @@ const updateUI = async () => {
 const login = async () => {
   try {
     console.log("Starting login...");
+    // Clear any existing flags before login
+    sessionStorage.removeItem('hasRedirected');
+    sessionStorage.removeItem('lastUserSub');
+    
     await auth0Client.loginWithRedirect({
       authorizationParams: {
         redirect_uri: window.location.origin
@@ -116,8 +144,10 @@ const login = async () => {
 const logout = () => {
   try {
     console.log("Starting logout...");
-    // Clear the redirect flag on logout
-    sessionStorage.removeItem('hasRedirected');
+    // Clear all session data on logout
+    sessionStorage.clear();
+    localStorage.removeItem('lastUserId');
+    
     auth0Client.logout({
       logoutParams: {
         returnTo: window.location.origin
@@ -150,7 +180,7 @@ window.onload = async () => {
       // Clear the query parameters
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Clear the redirect flag after callback
+      // Clear the redirect flag after callback to ensure redirect happens
       sessionStorage.removeItem('hasRedirected');
       
     } catch (error) {
