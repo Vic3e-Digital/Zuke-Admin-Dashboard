@@ -1,14 +1,144 @@
-# Variables
-APP_NAME=zuke-admin-dashboard-$RANDOM
-RG_NAME=zuke-admin-rg
-LOCATION=eastus
-NODE_RUNTIME="NODE:18-lts"   # Node 18 LTS is a safe default
+# deploy_setup.ps1
+# One-time setup: Azure resources + GitHub Actions CI/CD for Azure App Service
 
-# Create resource group
-az group create --name $RG_NAME --location $LOCATION
+# ========= CONFIGURE THESE =========
+$Subscription       = "c2c1686f-1854-463c-bd82-c0eadf102f8a"
+$ResourceGroup      = "zuke-dashboard-rg"
+$Location           = "southafricawest"
+$AppName            = "zuke-admin-dashboard-$([int](Get-Random))"   # must be globally unique
+$MongoDbUri         = "MONGODB_URI=mongodb+srv://zu-cluster:Qk4krLMcNeFIZZFh@zuke-cluster-00.a11c1i.mongodb.net/"
 
-# Create Linux App Service plan (B1 = small paid tier, use F1 for free trial if available)
-az appservice plan create --name ${APP_NAME}-plan --resource-group $RG_NAME --sku B1 --is-linux
+# GitHub repo info (optional: enables auto-setup with gh CLI)
+$GitHubOwner        = "ZukeX"
+$GitHubRepo         = "Zuke-Admin-Dashboard"
+$GitHubBranch       = "main"
+$LocalRepoPath      = "/Users/vo/Documents/3e Clients/zuke/zuke-dev/zuke-admin-dashboard/Zuke-Admin-Dashboard"  # path to the repo on disk
+# ===================================
 
-# Create the web app
-az webapp create --name $APP_NAME --resource-group $RG_NAME --plan ${APP_NAME}-plan --runtime "$NODE_RUNTIME"
+Write-Host "Setting Azure context..."
+Import-Module Az -ErrorAction Stop
+Set-AzContext -Subscription $Subscription
+
+$PlanName = "$AppName-plan"
+
+# Create Resource Group
+if (-not (Get-AzResourceGroup -Name $ResourceGroup -ErrorAction SilentlyContinue)) {
+  Write-Host "Creating resource group $ResourceGroup..."
+  New-AzResourceGroup -Name $ResourceGroup -Location $Location | Out-Null
+} else {
+  Write-Host "Resource group $ResourceGroup already exists."
+}
+
+# Create App Service Plan (Linux)
+if (-not (Get-AzAppServicePlan -Name $PlanName -ResourceGroupName $ResourceGroup -ErrorAction SilentlyContinue)) {
+  Write-Host "Creating Linux App Service plan $PlanName..."
+  New-AzAppServicePlan -Name $PlanName -ResourceGroupName $ResourceGroup -Location $Location -Tier "B1" -NumberofWorkers 1 -Linux | Out-Null
+} else {
+  Write-Host "App Service plan $PlanName already exists."
+}
+
+# Create Web App (Linux)
+if (-not (Get-AzWebApp -Name $AppName -ResourceGroupName $ResourceGroup -ErrorAction SilentlyContinue)) {
+  Write-Host "Creating Web App $AppName..."
+  New-AzWebApp -Name $AppName -ResourceGroupName $ResourceGroup -Location $Location -AppServicePlan $PlanName | Out-Null
+} else {
+  Write-Host "Web App $AppName already exists."
+}
+
+# Pin Node runtime
+Write-Host "Setting runtime to Node 18 LTS..."
+Set-AzWebApp -Name $AppName -ResourceGroupName $ResourceGroup -LinuxFxVersion "NODE|18-lts" | Out-Null
+
+# App settings
+Write-Host "Configuring app settings..."
+$settings = @(
+  @{ Name = "MONGODB_URI"; Value = $MongoDbUri },
+  @{ Name = "NODE_ENV";    Value = "production" }
+)
+Set-AzWebApp -Name $AppName -ResourceGroupName $ResourceGroup -AppSettings $settings | Out-Null
+
+# Export publish profile (for GitHub Actions deploy)
+$ProfilePath = Join-Path $PWD "publishProfile-$AppName.xml"
+Write-Host "Exporting publish profile to $ProfilePath..."
+Get-AzWebAppPublishingProfile -ResourceGroupName $ResourceGroup -Name $AppName -OutputFile $ProfilePath | Out-Null
+
+# Try setting the GitHub secret with gh (optional)
+$GhOk = $false
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+  try {
+    Write-Host "Setting GitHub secret AZURE_WEBAPP_PUBLISH_PROFILE in $GitHubOwner/$GitHubRepo..."
+    gh secret set AZURE_WEBAPP_PUBLISH_PROFILE --repo "$GitHubOwner/$GitHubRepo" < $ProfilePath
+    $GhOk = $true
+  } catch {
+    Write-Warning "Failed to set GitHub secret with gh: $($_.Exception.Message)"
+  }
+} else {
+  Write-Warning "GitHub CLI (gh) not found. Skipping secret setup."
+}
+
+# Create GitHub Actions workflow file in repo
+if (Test-Path $LocalRepoPath) {
+  $WorkflowDir = Join-Path $LocalRepoPath ".github/workflows"
+  if (-not (Test-Path $WorkflowDir)) { New-Item -ItemType Directory -Path $WorkflowDir -Force | Out-Null }
+  $WorkflowPath = Join-Path $WorkflowDir "deploy.yml"
+
+  $Workflow = @"
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ $GitHubBranch ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create deployment package
+        run: zip -r app.zip . -x "node_modules/*" ".git/*" ".DS_Store"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: $AppName
+          publish-profile: \${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: app.zip
+"@
+
+  $Workflow | Set-Content -Path $WorkflowPath -NoNewline
+  Write-Host "Workflow written to $WorkflowPath"
+
+  # Commit and push if repo is clean and git exists
+  if (Get-Command git -ErrorAction SilentlyContinue) {
+    Push-Location $LocalRepoPath
+    try {
+      git add .github/workflows/deploy.yml
+      git commit -m "chore(ci): add Azure App Service deploy workflow" 2>$null
+      git push origin $GitHubBranch
+      Write-Host "Workflow committed and pushed to $GitHubBranch."
+    } catch {
+      Write-Warning "Could not commit/push workflow (repo state or permissions). Commit manually if needed."
+    } finally {
+      Pop-Location
+    }
+  } else {
+    Write-Warning "git not found. Add/commit/push the workflow manually."
+  }
+} else {
+  Write-Warning "Local repo path not found: $LocalRepoPath. Create the workflow in your repo manually."
+}
+
+Write-Host ""
+Write-Host "Done. App URL: https://$AppName.azurewebsites.net"
+Write-Host "If gh step failed, set the secret manually with the contents of: $ProfilePath"
+Write-Host "Azure Portal → Your Web App → Deployment Center to monitor deployments."

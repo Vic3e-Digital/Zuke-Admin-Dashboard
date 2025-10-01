@@ -414,6 +414,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     `;
     
+    // Get the current user
+    const user = await auth0Client.getUser();
+    const userEmail = user?.email || '';
+    const userFirstName = user?.family_name || '';
+    const userLastName = user?.given_name || '';
+   
+    
     // Fetch real businesses from MongoDB
     const businesses = await fetchBusinessesByEmail();
     
@@ -423,7 +430,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="businesses-page">
         <div class="page-header">
           <h1 class="page-title">My Businesses</h1>
-          <button class="btn-primary" onclick="window.open('https://zuke.co.za/join/', '_blank')">
+          <button class="btn-primary" onclick="window.open('https://aigents.southafricanorth.azurecontainer.io/form/mkp-onboarding?Email=${encodeURIComponent(userEmail)}&First%20Name=${encodeURIComponent(userFirstName)}&Last%20Name=${encodeURIComponent(userLastName)}', '_blank')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -431,7 +438,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             Add Business
           </button>
         </div>
-
+  
         <!-- Status overview -->
         <div class="business-overview" style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
           <h3>Business Overview</h3>
@@ -472,7 +479,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     <button class="sim-action-btn" onclick="viewBusinessDetails('${business._id}')" aria-label="View ${business.store_info?.name} details">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                        <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
                       </svg>
                     </button>
                   </div>
@@ -490,7 +497,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             </svg>
             <h2 style="margin: 20px 0 10px 0; color: #2c3e50;">No businesses yet</h2>
             <p style="color: #7f8c8d; margin-bottom: 20px;">Start by adding your first business to manage it here.</p>
-            <button class="btn-primary" onclick="window.open('https://zuke.co.za/join/', '_blank')">
+            <button class="btn-primary" onclick="window.open('https://aigents.southafricanorth.azurecontainer.io/form/mkp-onboarding?Email=${encodeURIComponent(userEmail)}&First%Name=${encodeURIComponent(userFirstName)}&Last%Name=${encodeURIComponent(userLastName)}', '_blank')">
               Add Your First Business
             </button>
           </div>
