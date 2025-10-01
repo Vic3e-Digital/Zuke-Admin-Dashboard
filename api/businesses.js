@@ -180,54 +180,54 @@ router.get('/stats', async (req, res) => {
 });
 
 
-router.post('/add-test', async (req, res) => {
-  try {
-    const { connectToDatabase } = require('../lib/mongodb');
-    const { db } = await connectToDatabase();
-    const collection = db.collection('store_submissions');
+// router.post('/add-test', async (req, res) => {
+//   try {
+//     const { connectToDatabase } = require('../lib/mongodb');
+//     const { db } = await connectToDatabase();
+//     const collection = db.collection('store_submissions');
     
-    const testDoc = {
-      personal_info: {
-        first_name: "Test",
-        last_name: "User",
-        email: "opeolu.victory@gmail.com",
-        phone: "+27123456789",
-        address: "123 Test Street"
-      },
-      store_info: {
-        name: "Test Store",
-        slug: "test-store",
-        category: ["Electronics", "Gadgets"],
-        description: "This is a test store",
-        address: "456 Store Street"
-      },
-      media_files: {
-        store_logo: "https://via.placeholder.com/150",
-        store_banner: "https://via.placeholder.com/600x200"
-      },
-      social_media: {
-        instagram: "@teststore",
-        twitter: "@teststore"
-      },
-      processing_status: {
-        status: "active",
-        plan: "Premium",
-        created_at: new Date()
-      }
-    };
+//     const testDoc = {
+//       personal_info: {
+//         first_name: "Test",
+//         last_name: "User",
+//         email: "opeolu.victory@gmail.com",
+//         phone: "+27123456789",
+//         address: "123 Test Street"
+//       },
+//       store_info: {
+//         name: "Test Store",
+//         slug: "test-store",
+//         category: ["Electronics", "Gadgets"],
+//         description: "This is a test store",
+//         address: "456 Store Street"
+//       },
+//       media_files: {
+//         store_logo: "https://via.placeholder.com/150",
+//         store_banner: "https://via.placeholder.com/600x200"
+//       },
+//       social_media: {
+//         instagram: "@teststore",
+//         twitter: "@teststore"
+//       },
+//       processing_status: {
+//         status: "active",
+//         plan: "Premium",
+//         created_at: new Date()
+//       }
+//     };
     
-    const result = await collection.insertOne(testDoc);
+//     const result = await collection.insertOne(testDoc);
     
-    res.json({
-      success: true,
-      message: "Test document added",
-      insertedId: result.insertedId,
-      document: testDoc
-    });
-  } catch (error) {
-    console.error('Error adding test doc:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+//     res.json({
+//       success: true,
+//       message: "Test document added",
+//       insertedId: result.insertedId,
+//       document: testDoc
+//     });
+//   } catch (error) {
+//     console.error('Error adding test doc:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 module.exports = router;

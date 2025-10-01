@@ -1,0 +1,14 @@
+# Variables
+APP_NAME=zuke-admin-dashboard-$RANDOM
+RG_NAME=zuke-admin-rg
+LOCATION=eastus
+NODE_RUNTIME="NODE:18-lts"   # Node 18 LTS is a safe default
+
+# Create resource group
+az group create --name $RG_NAME --location $LOCATION
+
+# Create Linux App Service plan (B1 = small paid tier, use F1 for free trial if available)
+az appservice plan create --name ${APP_NAME}-plan --resource-group $RG_NAME --sku B1 --is-linux
+
+# Create the web app
+az webapp create --name $APP_NAME --resource-group $RG_NAME --plan ${APP_NAME}-plan --runtime "$NODE_RUNTIME"
