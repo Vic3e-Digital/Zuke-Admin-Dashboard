@@ -33,67 +33,6 @@ const configureAuth0Client = async () => {
 };
 
 // Function to fetch businesses from MongoDB
-// async function fetchBusinessesByEmail() {
-//   try {
-//     // Check cache first
-//     const cachedBusinesses = window.dataManager.getBusinesses();
-//     if (cachedBusinesses) {
-//       console.log('Using cached businesses data');
-//       return cachedBusinesses;
-//     }
-
-//     console.log('Fetching fresh businesses data from server');
-//     const user = await auth0Client.getUser();
-    
-//     if (!user || !user.email) {
-//       console.error('No user email found');
-//       return [];
-//     }
-
-//     // Check if admin
-//     const userRoles = user['https://zuke.co.za/roles'] || [];
-//     const isAdmin = userRoles.includes('Admin');
-
-//     let response;
-
-//     if (isAdmin) {
-//       // Admin: fetch ALL businesses
-//       console.log('Admin user detected - fetching all businesses');
-//       response = await fetch('/api/businesses/all');
-//     } else {
-      
-//       // Regular user: fetch only their businesses
-//       response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
-//       console.log('Regula user detected');
-//     }
-    
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! status: ${response.status}`);
-//     }
-    
-//     const data = await response.json();
-//     const businesses = data.businesses || [];
-
-//     // const response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
-    
-//     // if (!response.ok) {
-//     //   throw new Error(`HTTP error! status: ${response.status}`);
-//     // }
-    
-//     // const data = await response.json();
-//     // const businesses = data.businesses || [];
-    
-//     // Cache the data
-//     window.dataManager.setBusinesses(businesses);
-    
-//     return businesses;
-//   } catch (error) {
-//     console.error('Error fetching businesses:', error);
-//     return [];
-//   }
-// }
-
-// Function to fetch businesses from MongoDB
 async function fetchBusinessesByEmail() {
   try {
     // Check cache first
@@ -118,7 +57,7 @@ async function fetchBusinessesByEmail() {
     let response;
     
     if (isAdmin) {
-      // Admin: fetch ALL businesseswith admin flag
+      // Admin: fetch ALL businesses with admin flag
       console.log('Admin user detected - fetching all businesses');
       response = await fetch(`/api/businesses?isAdmin=true&email=${encodeURIComponent(user.email)}`);
     } else {
@@ -145,8 +84,6 @@ async function fetchBusinessesByEmail() {
   }
 }
 
-
-
 document.addEventListener("DOMContentLoaded", async () => {
   const hamburgerMenu = document.getElementById("hamburgerMenu");
   const sidebar = document.getElementById("sidebar");
@@ -163,60 +100,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize
   init();
-
-  // async function init() {
-  //   // Configure Auth0 first
-  //   const configured = await configureAuth0Client();
-  //   if (!configured) {
-  //     console.error("Failed to configure Auth0");
-  //     window.location.href = '/';
-  //     return;
-  //   }
-
-  //   // Check authentication
-  //   try {
-  //     const isAuthenticated = await auth0Client.isAuthenticated();
-      
-  //     if (!isAuthenticated) {
-  //       console.log("User not authenticated, redirecting to login...");
-  //       window.location.href = '/';
-  //       return;
-  //     }
-
-  //     // Get user info
-  //     const user = await auth0Client.getUser();
-  //     console.log("User logged in:", user);
-
-  //     // Check if user is admin
-  //     const userRoles = user['https://zuke.co.za/roles'] || [];
-  //     const isAdmin = userRoles.includes('Admin');
-      
-  //     // Store admin status globally
-  //     window.isUserAdmin = isAdmin;
-      
-
-  //     // Update welcome message with actual user info
-  //     userWelcome.textContent = `Welcome ${user.name || user.email || 'User'}`;
-  //     if (isAdmin) {
-  //       userWelcome.textContent += ' (Admin)';
-  //     }
-      
-  //     // Profile picture
-  //     if (user.picture && userAvatar) {
-  //       userAvatar.innerHTML = `<img src="${user.picture}" alt="Profile" class="profile-img">`;
-  //     }
-
-  //     setupPageNavigation();
-  //     await initializeGlobalBusinessSelector();
-  //     loadPage("dashboard");
-  //     setupEventListeners();
-
-  //   } catch (error) {
-  //     console.error("Auth check error:", error);
-  //     window.location.href = '/';
-  //   }
-  // }
-
 
   async function init() {
     // Configure Auth0 first
@@ -245,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const lastUserId = localStorage.getItem('lastUserId');
       if (lastUserId && lastUserId !== user.sub) {
         console.log('User changed - clearing cache');
-        window.dataManager.clearBusinesses(); // Clear the business cache
+        window.dataManager.clearBusinesses();
       }
       localStorage.setItem('lastUserId', user.sub);
       
@@ -277,6 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = '/';
     }
   }
+
   // Initialize global business selector
   async function initializeGlobalBusinessSelector() {
     const businesses = await fetchBusinessesByEmail();
@@ -336,7 +220,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Register for business changes on page loads
   window.dataManager.onBusinessChange((business) => {
     console.log('Business changed globally:', business?.store_info?.name);
-    // You can add any global UI updates here
   });
 
   function setupPageNavigation() {
@@ -377,9 +260,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "creative":
           content = await loadCreativePage();
           break;
-        // case "social-media":
-        //   content = await loadSocialMediaPage();
-        //   break;
         case "test":
           content = await loadMarketingPage();
           break;
@@ -534,13 +414,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return loadCreativePage.cache;
   }
 
-  // async function loadSocialMediaPage() {
-  //   if (!loadSocialMediaPage.cache) {
-  //     loadSocialMediaPage.cache = await fetch('pages/social-media.html').then(r => r.text());
-  //   }
-  //   return loadSocialMediaPage.cache;
-  // }
-
   async function loadMarketingPage() {
     if (!loadMarketingPage.cache) {
       loadMarketingPage.cache = await fetch('pages/marketing.html').then(r => r.text());
@@ -589,19 +462,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           import("../pages/creative.js").then(mod => mod.initCreativePage());
         }
         break;
-      // case "social-media":
-      //   if (!window.__socialMediaLoaded) {
-      //     try {
-      //       const mod = await import("../pages/social-media.js");
-      //       mod.initSocialMediaPage();
-      //       window.__socialMediaLoaded = true;
-      //     } catch (error) {
-      //       console.error("Error loading social media page:", error);
-      //     }
-      //   } else {
-      //     import("../pages/social-media.js").then(mod => mod.initSocialMediaPage());
-      //   }
-      //   break;
       case "test":
         if (!window.__marketingLoaded) {
           try {
@@ -739,19 +599,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
     }
-
-    // Logout
-    // logoutButton.addEventListener("click", () => {
-    //   if (auth0Client) {
-    //     console.log("Logging out...");
-    //     sessionStorage.removeItem('hasRedirected');
-    //     auth0Client.logout({
-    //       logoutParams: {
-    //         returnTo: window.location.origin
-    //       }
-    //     });
-    //   }
-    // });
 
     // Logout
     logoutButton.addEventListener("click", () => {

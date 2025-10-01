@@ -92,3 +92,6 @@ AUTH0_DOMAIN=your-domain
 AUTH0_CLIENT_ID=your-client-id
 AUTH0_AUDIENCE=your-audience
 ```
+# Deployed to Azure
+# Deployed to Azure
+# Deployed to Azure
