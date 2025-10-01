@@ -56,10 +56,20 @@ async function fetchBusinessesByEmail() {
     
     let response;
     
+    // if (isAdmin) {
+    //   // Admin: fetch ALL businesses with admin flag
+    //   console.log('Admin user detected - fetching all businesses');
+    //   response = await fetch(`/api/businesses?isAdmin=true&email=${encodeURIComponent(user.email)}`);
+    // } else {
+    //   // Regular user: fetch only their businesses
+    //   response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
+    // }
+
     if (isAdmin) {
       // Admin: fetch ALL businesses with admin flag
       console.log('Admin user detected - fetching all businesses');
-      response = await fetch(`/api/businesses?isAdmin=true&email=${encodeURIComponent(user.email)}`);
+      // Skip cache for admin view to avoid stale empty results
+      response = await fetch(`/api/businesses?admin=true&email=${encodeURIComponent(user.email)}`);
     } else {
       // Regular user: fetch only their businesses
       response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);

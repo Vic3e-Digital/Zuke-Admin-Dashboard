@@ -4,14 +4,25 @@ const { connectToDatabase } = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
 // Helper function to check if user is admin
+// const isAdmin = (user) => {
+// const roles = user?.['https://zuke.co.za/roles'] || 
+//              user?.roles || 
+//              user?.app_metadata?.roles || 
+//              user?.user_metadata?.roles || 
+//              [];
+// return roles.includes('admin') || roles.includes('Admin');
+// };
+
+// Helper function to check if user is admin
 const isAdmin = (user) => {
-const roles = user?.['https://zuke.co.za/roles'] || 
-             user?.roles || 
-             user?.app_metadata?.roles || 
-             user?.user_metadata?.roles || 
-             [];
-return roles.includes('admin') || roles.includes('Admin');
-};
+  const roles = user?.['https://zukex.com/roles'] || 
+               user?.['https://zuke.co.za/roles'] || 
+               user?.roles || 
+               user?.app_metadata?.roles || 
+               user?.user_metadata?.roles || 
+               [];
+  return roles.includes('admin') || roles.includes('Admin');
+  };
 
 // Debug route
 router.get('/debug', async (req, res) => {
@@ -57,7 +68,8 @@ try {
  const { email, user, admin } = req.query;
 
  // Check if admin is passed in query or from user object
- let isAdminRequest = admin === 'true';
+//  let isAdminRequest = admin === 'true';
+ let isAdminRequest = (admin === 'true') || (isAdmin === 'true');
 
  let userData = null;
  if (user) {

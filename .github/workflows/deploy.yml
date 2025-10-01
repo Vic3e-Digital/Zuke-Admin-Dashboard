@@ -14,10 +14,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm start
 
       - name: Create deployment package
         run: zip -r app.zip . -x "node_modules/*" ".git/*" ".DS_Store"
