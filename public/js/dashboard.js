@@ -50,7 +50,20 @@ async function fetchBusinessesByEmail() {
       return [];
     }
 
-    const response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
+    // Check if admin
+    const userRoles = user['https://zuke.co.za/roles'] || [];
+    const isAdmin = userRoles.includes('Admin');
+    
+    let response;
+    
+    if (isAdmin) {
+      // Admin: fetch ALL businesses with admin flag
+      console.log('Admin user detected - fetching all businesses');
+      response = await fetch(`/api/businesses?isAdmin=true&email=${encodeURIComponent(user.email)}`);
+    } else {
+      // Regular user: fetch only their businesses
+      response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
+    }
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -58,6 +71,8 @@ async function fetchBusinessesByEmail() {
     
     const data = await response.json();
     const businesses = data.businesses || [];
+    
+    console.log(`Fetched ${businesses.length} businesses${data.isAdminView ? ' (Admin - All businesses)' : ' (User - Personal businesses)'}`);
     
     // Cache the data
     window.dataManager.setBusinesses(businesses);
@@ -94,7 +109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = '/';
       return;
     }
-
+  
     // Check authentication
     try {
       const isAuthenticated = await auth0Client.isAuthenticated();
@@ -104,24 +119,42 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = '/';
         return;
       }
-
+  
       // Get user info
       const user = await auth0Client.getUser();
       console.log("User logged in:", user);
-
+      
+      // Clear cache if user changed
+      const lastUserId = localStorage.getItem('lastUserId');
+      if (lastUserId && lastUserId !== user.sub) {
+        console.log('User changed - clearing cache');
+        window.dataManager.clearBusinesses();
+      }
+      localStorage.setItem('lastUserId', user.sub);
+      
+      // Check if user is admin
+      const userRoles = user['https://zuke.co.za/roles'] || [];
+      const isAdmin = userRoles.includes('Admin');
+      
+      // Store admin status globally
+      window.isUserAdmin = isAdmin;
+      
       // Update welcome message with actual user info
       userWelcome.textContent = `Welcome ${user.name || user.email || 'User'}`;
+      if (isAdmin) {
+        userWelcome.textContent += ' (Admin)';
+      }
       
       // Profile picture
       if (user.picture && userAvatar) {
         userAvatar.innerHTML = `<img src="${user.picture}" alt="Profile" class="profile-img">`;
       }
-
+  
       setupPageNavigation();
       await initializeGlobalBusinessSelector();
       loadPage("dashboard");
       setupEventListeners();
-
+  
     } catch (error) {
       console.error("Auth check error:", error);
       window.location.href = '/';
@@ -187,7 +220,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Register for business changes on page loads
   window.dataManager.onBusinessChange((business) => {
     console.log('Business changed globally:', business?.store_info?.name);
-    // You can add any global UI updates here
   });
 
   function setupPageNavigation() {
@@ -228,9 +260,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "creative":
           content = await loadCreativePage();
           break;
-        // case "social-media":
-        //   content = await loadSocialMediaPage();
-        //   break;
         case "test":
           content = await loadMarketingPage();
           break;
@@ -323,7 +352,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     <button class="sim-action-btn" onclick="viewBusinessDetails('${business._id}')" aria-label="View ${business.store_info?.name} details">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                        <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
                       </svg>
                     </button>
                   </div>
@@ -378,13 +407,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return loadCreativePage.cache;
   }
 
-  // async function loadSocialMediaPage() {
-  //   if (!loadSocialMediaPage.cache) {
-  //     loadSocialMediaPage.cache = await fetch('pages/social-media.html').then(r => r.text());
-  //   }
-  //   return loadSocialMediaPage.cache;
-  // }
-
   async function loadMarketingPage() {
     if (!loadMarketingPage.cache) {
       loadMarketingPage.cache = await fetch('pages/marketing.html').then(r => r.text());
@@ -433,19 +455,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           import("../pages/creative.js").then(mod => mod.initCreativePage());
         }
         break;
-      // case "social-media":
-      //   if (!window.__socialMediaLoaded) {
-      //     try {
-      //       const mod = await import("../pages/social-media.js");
-      //       mod.initSocialMediaPage();
-      //       window.__socialMediaLoaded = true;
-      //     } catch (error) {
-      //       console.error("Error loading social media page:", error);
-      //     }
-      //   } else {
-      //     import("../pages/social-media.js").then(mod => mod.initSocialMediaPage());
-      //   }
-      //   break;
       case "test":
         if (!window.__marketingLoaded) {
           try {
@@ -588,7 +597,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     logoutButton.addEventListener("click", () => {
       if (auth0Client) {
         console.log("Logging out...");
-        sessionStorage.removeItem('hasRedirected');
+        // Clear all session and local storage
+        sessionStorage.clear();
+        localStorage.clear();
+        
+        // Clear business data
+        if (window.dataManager) {
+          window.dataManager.clearCache();
+        }
+        
         auth0Client.logout({
           logoutParams: {
             returnTo: window.location.origin

@@ -1,4 +1,4 @@
-// pages/settings.js
+// pages/settings.js - Coming Soon Version
 let auth0Client = null;
 let currentUser = null;
 
@@ -44,59 +44,90 @@ export async function initSettingsPage() {
     }
 
     currentUser = await auth0Client.getUser();
+    console.log('Settings page initialized (Coming Soon mode)');
     
-    // Initialize settings
-    loadUserData();
-    setupTabNavigation();
-    setupEventHandlers();
+    // Don't initialize any functionality since the page is disabled
+    // Just log that the user accessed the page
     
   } catch (error) {
     console.error("Error in initSettingsPage:", error);
   }
 }
 
+// Stub functions to prevent errors if called from onclick handlers
+window.saveProfileSettings = function() {
+  console.log('Settings page not available yet');
+};
+
+window.savePreferences = function() {
+  console.log('Settings page not available yet');
+};
+
+window.copyAccountId = function() {
+  console.log('Settings page not available yet');
+};
+
+window.toggleApiKey = function() {
+  console.log('Settings page not available yet');
+};
+
+window.copyApiKey = function() {
+  console.log('Settings page not available yet');
+};
+
+// When you're ready to activate the settings page, uncomment this section:
+/*
 function loadUserData() {
-  // Load profile data
-  if (currentUser) {
-    document.getElementById('fullName').value = currentUser.name || '';
-    document.getElementById('email').value = currentUser.email || '';
-    
-    // Load avatar
-    if (currentUser.picture) {
-      const avatar = document.getElementById('profileAvatar');
-      avatar.src = currentUser.picture;
-      avatar.style.display = 'block';
-      avatar.nextElementSibling.style.display = 'none';
-    }
+  if (!currentUser) return;
+  
+  // Safely check if elements exist before accessing them
+  const fullName = document.getElementById('fullName');
+  const email = document.getElementById('email');
+  const profileAvatar = document.getElementById('profileAvatar');
+  
+  if (fullName) fullName.value = currentUser.name || '';
+  if (email) email.value = currentUser.email || '';
+  
+  if (profileAvatar && currentUser.picture) {
+    profileAvatar.src = currentUser.picture;
+    profileAvatar.style.display = 'block';
+    const placeholder = profileAvatar.nextElementSibling;
+    if (placeholder) placeholder.style.display = 'none';
   }
 
   // Load saved preferences from localStorage
   const preferences = JSON.parse(localStorage.getItem('userPreferences') || '{}');
   
   // Apply saved settings
-  if (preferences.darkMode) {
-    document.getElementById('darkMode').checked = preferences.darkMode;
+  const darkMode = document.getElementById('darkMode');
+  if (darkMode && preferences.darkMode) {
+    darkMode.checked = preferences.darkMode;
     document.body.classList.toggle('dark-mode', preferences.darkMode);
   }
   
-  if (preferences.language) {
-    document.getElementById('language').value = preferences.language;
+  const language = document.getElementById('language');
+  if (language && preferences.language) {
+    language.value = preferences.language;
   }
   
-  if (preferences.timezone) {
-    document.getElementById('timezone').value = preferences.timezone;
+  const timezone = document.getElementById('timezone');
+  if (timezone && preferences.timezone) {
+    timezone.value = preferences.timezone;
   }
   
-  if (preferences.dateFormat) {
-    document.getElementById('dateFormat').value = preferences.dateFormat;
+  const dateFormat = document.getElementById('dateFormat');
+  if (dateFormat && preferences.dateFormat) {
+    dateFormat.value = preferences.dateFormat;
   }
   
-  if (preferences.compactView !== undefined) {
-    document.getElementById('compactView').checked = preferences.compactView;
+  const compactView = document.getElementById('compactView');
+  if (compactView && preferences.compactView !== undefined) {
+    compactView.checked = preferences.compactView;
   }
   
-  if (preferences.animations !== undefined) {
-    document.getElementById('animations').checked = preferences.animations;
+  const animations = document.getElementById('animations');
+  if (animations && preferences.animations !== undefined) {
+    animations.checked = preferences.animations;
   }
 
   // Load notification preferences
@@ -117,24 +148,24 @@ function setupTabNavigation() {
     tab.addEventListener('click', () => {
       const targetPanel = tab.getAttribute('data-tab');
       
-      // Remove active class from all tabs and panels
       tabs.forEach(t => t.classList.remove('active'));
       panels.forEach(p => p.classList.remove('active'));
       
-      // Add active class to clicked tab and corresponding panel
       tab.classList.add('active');
-      document.getElementById(`${targetPanel}-panel`).classList.add('active');
+      const panel = document.getElementById(`${targetPanel}-panel`);
+      if (panel) panel.classList.add('active');
     });
   });
 }
 
 function setupEventHandlers() {
-  // Dark mode toggle
-  document.getElementById('darkMode').addEventListener('change', (e) => {
-    document.body.classList.toggle('dark-mode', e.target.checked);
-  });
+  const darkModeToggle = document.getElementById('darkMode');
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener('change', (e) => {
+      document.body.classList.toggle('dark-mode', e.target.checked);
+    });
+  }
 
-  // Notification toggles
   const notificationToggles = document.querySelectorAll('#notifications-panel input[type="checkbox"]');
   notificationToggles.forEach(toggle => {
     toggle.addEventListener('change', () => {
@@ -143,17 +174,22 @@ function setupEventHandlers() {
   });
 }
 
-// Global functions for onclick handlers
 window.saveProfileSettings = async function() {
+  const fullName = document.getElementById('fullName');
+  const bio = document.getElementById('bio');
+  const phone = document.getElementById('phone');
+  const location = document.getElementById('location');
+  
+  if (!fullName) return;
+  
   const profileData = {
-    fullName: document.getElementById('fullName').value,
-    bio: document.getElementById('bio').value,
-    phone: document.getElementById('phone').value,
-    location: document.getElementById('location').value
+    fullName: fullName.value,
+    bio: bio?.value || '',
+    phone: phone?.value || '',
+    location: location?.value || ''
   };
 
   try {
-    // Here you would typically send this to your backend
     console.log('Saving profile:', profileData);
     showNotification('Profile updated successfully!', 'success');
   } catch (error) {
@@ -162,16 +198,21 @@ window.saveProfileSettings = async function() {
 };
 
 window.savePreferences = function() {
+  const language = document.getElementById('language');
+  const timezone = document.getElementById('timezone');
+  const dateFormat = document.getElementById('dateFormat');
+  const darkMode = document.getElementById('darkMode');
+  const compactView = document.getElementById('compactView');
+  const animations = document.getElementById('animations');
+  
   const preferences = {
-    language: document.getElementById('language').value,
-    timezone: document.getElementById('timezone').value,
-    dateFormat: document.getElementById('dateFormat').value,
-    darkMode: document.getElementById('darkMode').checked,
-    compactView: document.getElementById('compactView').checked,
-    animations: document.getElementById('animations').checked
+    language: language?.value || 'en',
+    timezone: timezone?.value || 'UTC',
+    dateFormat: dateFormat?.value || 'MM/DD/YYYY',
+    darkMode: darkMode?.checked || false,
+    compactView: compactView?.checked || false,
+    animations: animations?.checked || true
   };
-
-  // pages/settings.js (continued)
 
   localStorage.setItem('userPreferences', JSON.stringify(preferences));
   showNotification('Preferences saved successfully!', 'success');
@@ -179,43 +220,47 @@ window.savePreferences = function() {
 
 function saveNotificationPreferences() {
   const notifications = {
-    marketingEmails: document.getElementById('marketingEmails').checked,
-    businessActivity: document.getElementById('businessActivity').checked,
-    socialAlerts: document.getElementById('socialAlerts').checked,
-    weeklySummary: document.getElementById('weeklySummary').checked,
-    browserNotifications: document.getElementById('browserNotifications').checked
+    marketingEmails: document.getElementById('marketingEmails')?.checked || false,
+    businessActivity: document.getElementById('businessActivity')?.checked || false,
+    socialAlerts: document.getElementById('socialAlerts')?.checked || false,
+    weeklySummary: document.getElementById('weeklySummary')?.checked || false,
+    browserNotifications: document.getElementById('browserNotifications')?.checked || false
   };
 
   localStorage.setItem('notificationPreferences', JSON.stringify(notifications));
   
-  // If browser notifications are enabled, request permission
   if (notifications.browserNotifications && 'Notification' in window) {
     Notification.requestPermission();
   }
 }
 
 window.copyAccountId = function() {
-  const accountId = document.getElementById('accountId').textContent;
-  navigator.clipboard.writeText(accountId).then(() => {
+  const accountId = document.getElementById('accountId');
+  if (!accountId) return;
+  
+  navigator.clipboard.writeText(accountId.textContent).then(() => {
     showNotification('Account ID copied to clipboard!', 'success');
   });
 };
 
 window.toggleApiKey = function() {
   const apiKeyInput = document.getElementById('apiKey');
+  if (!apiKeyInput) return;
+  
   const isPassword = apiKeyInput.type === 'password';
   apiKeyInput.type = isPassword ? 'text' : 'password';
 };
 
 window.copyApiKey = function() {
-  const apiKey = document.getElementById('apiKey').value;
-  navigator.clipboard.writeText(apiKey).then(() => {
+  const apiKeyInput = document.getElementById('apiKey');
+  if (!apiKeyInput) return;
+  
+  navigator.clipboard.writeText(apiKeyInput.value).then(() => {
     showNotification('API Key copied to clipboard!', 'success');
   });
 };
 
 function showNotification(message, type = 'info') {
-  // Create notification element
   const notification = document.createElement('div');
   notification.className = `notification ${type}`;
   notification.innerHTML = `
@@ -225,11 +270,10 @@ function showNotification(message, type = 'info') {
     </div>
   `;
   
-  // Add to page
   document.body.appendChild(notification);
   
-  // Remove after 5 seconds
   setTimeout(() => {
     notification.remove();
   }, 5000);
 }
+*/

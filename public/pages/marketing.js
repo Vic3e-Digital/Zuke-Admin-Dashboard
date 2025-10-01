@@ -255,7 +255,7 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
   const socialMediaActions = {
     postVideo: {
       title: "Post Video - Social Media Manager",
-      url: `https://aigents.southafricanorth.azurecontainer.io/video-post?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`
+      url: `https://clippedai.vercel.app/?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`
     },
     aiAgents: {
       title: "AI Agents - Social Media Automation",
