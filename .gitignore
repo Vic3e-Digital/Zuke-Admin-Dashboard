@@ -47,3 +47,5 @@ public/css/*.css.map
 *.tmp
 
 auth_config.json
+
+deploy_setup.ps1

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<publishData>
+  <publishProfile profileName="zuke-admin-dashboard-3341 - Web Deploy" publishMethod="MSDeploy" publishUrl="zuke-admin-dashboard-3341.scm.azurewebsites.net:443" msdeploySite="zuke-admin-dashboard-3341" userName="$zuke-admin-dashboard-3341" userPWD="YbvYxsnlunDYwS28bpoCMtBFGkQHxsWjjQzu8cP7cr4a85wcvpRyGYtMGS9t" destinationAppUrl="http://zuke-admin-dashboard-3341.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+    <databases />
+  </publishProfile>
+  <publishProfile profileName="zuke-admin-dashboard-3341 - FTP" publishMethod="FTP" publishUrl="ftps://waws-prod-jnb21-019.ftp.azurewebsites.windows.net/site/wwwroot" ftpPassiveMode="True" userName="zuke-admin-dashboard-3341\$zuke-admin-dashboard-3341" userPWD="YbvYxsnlunDYwS28bpoCMtBFGkQHxsWjjQzu8cP7cr4a85wcvpRyGYtMGS9t" destinationAppUrl="http://zuke-admin-dashboard-3341.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+    <databases />
+  </publishProfile>
+  <publishProfile profileName="zuke-admin-dashboard-3341 - Zip Deploy" publishMethod="ZipDeploy" publishUrl="zuke-admin-dashboard-3341.scm.azurewebsites.net:443" userName="$zuke-admin-dashboard-3341" userPWD="YbvYxsnlunDYwS28bpoCMtBFGkQHxsWjjQzu8cP7cr4a85wcvpRyGYtMGS9t" destinationAppUrl="http://zuke-admin-dashboard-3341.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+    <databases />
+  </publishProfile>
+</publishData>
