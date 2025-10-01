@@ -46,6 +46,6 @@ public/css/*.css.map
 *.bak
 *.tmp
 
-auth_config.json
+# auth_config.json
 
 deploy_setup.ps1
