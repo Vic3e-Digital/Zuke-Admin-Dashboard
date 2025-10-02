@@ -116,8 +116,8 @@ const updateUI = async () => {
       console.log("User authenticated, redirecting to dashboard...");
       sessionStorage.setItem('hasRedirected', 'true');
       setTimeout(() => {
-        window.location.href = '/dashboard.html';
-      }, 100); // Reduced delay
+        window.location.href = '/dashboard/';
+      }, 1000); // Reduced delay
     }
   } catch (error) {
     console.error("Error updating UI:", error);

@@ -89,7 +89,7 @@
                                 <path d="M19.4167 14.1211V12.6211C19.4167 11.3785 18.4093 10.3711 17.1667 10.3711H13.2507V14.1211H19.4167Z" fill="#323544"/>
                                 </g>
                                 </svg>                                   
-                          <span class="nav-text">Business</span>
+                          <span class="nav-text">Marketplace</span>
                           
                         </a>
                       </li>
@@ -150,22 +150,52 @@
 
 
             <!-- User profile section -->
-            <div class="user-profile">
-                <div class="user-avatar" id="userAvatar">
-                    <!-- Modern user avatar icon -->
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M7 20.662V19C7 17.3431 8.34315 16 10 16H14C15.6569 16 17 17.3431 17 19V20.662" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <button class="settings-icon-btn" id="settingsButton" title="Settings" data-page="settings">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                      <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                  </button>
-            </div>
+        <!-- User profile section -->
+<div class="user-profile">
+    <div class="user-avatar" id="userAvatar">
+        <!-- Modern user avatar icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 20.662V19C7 17.3431 8.34315 16 10 16H14C15.6569 16 17 17.3431 17 19V20.662" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+    
+    <!-- Rotating switch dropdown -->
+    <div class="switch-dropdown-container">
+        <button class="switch-dropdown-btn" id="switchDropdownBtn" title="Switch Business">
+            <!-- Rotating/Round Switch SVG Icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 12C21 16.9706 16.9706 21 12 21M21 12C21 7.02944 16.9706 3 12 3M21 12H3M12 21C7.02944 21 3 16.9706 3 12M12 21C13.6569 21 15 16.9706 15 12C15 7.02944 13.6569 3 12 3M12 21C10.3431 21 9 16.9706 9 12C9 7.02944 10.3431 3 12 3M3 12C3 7.02944 7.02944 3 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+        </button>
+        
+        <!-- Dropdown Menu -->
+        <div class="switch-dropdown-menu" id="switchDropdownMenu">
+            <div class="dropdown-header">Switch Business</div>
+            <select class="switch-business-selector" id="switchBusinessSelector">
+                <!-- Options will be populated dynamically -->
+                <option value="">Select a business...</option>
+            </select>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="manageBusinessesBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Manage Businesses
+            </button>
+        </div>
+    </div>
+    
+    <button class="settings-icon-btn" id="settingsButton" title="Settings" data-page="settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
+</div>
         </nav>
 
         <!-- Main Content Area -->

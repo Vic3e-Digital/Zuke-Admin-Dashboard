@@ -56,15 +56,6 @@ async function fetchBusinessesByEmail() {
     
     let response;
     
-    // if (isAdmin) {
-    //   // Admin: fetch ALL businesses with admin flag
-    //   console.log('Admin user detected - fetching all businesses');
-    //   response = await fetch(`/api/businesses?isAdmin=true&email=${encodeURIComponent(user.email)}`);
-    // } else {
-    //   // Regular user: fetch only their businesses
-    //   response = await fetch(`/api/businesses?email=${encodeURIComponent(user.email)}`);
-    // }
-
     if (isAdmin) {
       // Admin: fetch ALL businesses with admin flag
       console.log('Admin user detected - fetching all businesses');
@@ -162,6 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       setupPageNavigation();
       await initializeGlobalBusinessSelector();
+      await initializeSwitchDropdown();
       loadPage("dashboard");
       setupEventListeners();
   
@@ -216,6 +208,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           // Update global selection
           window.dataManager.setSelectedBusiness(selectedBusiness);
           
+          // Also update switch dropdown if it exists
+          const switchSelector = document.getElementById('switchBusinessSelector');
+          if (switchSelector) {
+            switchSelector.value = selectedId;
+          }
+          
           // Reload current page with new business context
           if (currentPage) {
             await loadPage(currentPage);
@@ -224,6 +222,97 @@ document.addEventListener("DOMContentLoaded", async () => {
           console.log('Global business changed to:', selectedBusiness.store_info?.name);
         }
       };
+    }
+  }
+
+  // Initialize switch dropdown in sidebar
+  async function initializeSwitchDropdown() {
+    const businesses = await fetchBusinessesByEmail();
+    const switchBusinessSelector = document.getElementById('switchBusinessSelector');
+    const switchDropdownBtn = document.getElementById('switchDropdownBtn');
+    const switchDropdownMenu = document.getElementById('switchDropdownMenu');
+    const manageBusinessesBtn = document.getElementById('manageBusinessesBtn');
+    
+    if (!businesses || businesses.length === 0) {
+      // Hide the switch button if no businesses
+      if (switchDropdownBtn) {
+        switchDropdownBtn.style.display = 'none';
+      }
+      return;
+    }
+    
+    // Get current selection or use first
+    const currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+    
+    // Populate dropdown options
+    if (switchBusinessSelector) {
+      switchBusinessSelector.innerHTML = '<option value="">Select a business...</option>' + 
+        businesses.map(b => `
+          <option value="${b._id}" ${currentBusiness?._id === b._id ? 'selected' : ''}>
+            ${b.store_info?.name || 'Unnamed Business'}
+          </option>
+        `).join('');
+    }
+    
+    // Toggle dropdown
+    if (switchDropdownBtn) {
+      switchDropdownBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        switchDropdownMenu.classList.toggle('active');
+      });
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (switchDropdownMenu && !switchDropdownMenu.contains(e.target) && 
+          switchDropdownBtn && !switchDropdownBtn.contains(e.target)) {
+        switchDropdownMenu.classList.remove('active');
+      }
+    });
+    
+    // Handle business selection
+    if (switchBusinessSelector) {
+      switchBusinessSelector.addEventListener('change', async function() {
+        const selectedId = this.value;
+        const selectedBusiness = businesses.find(b => b._id === selectedId);
+        
+        if (selectedBusiness) {
+          // Update global selection
+          window.dataManager.setSelectedBusiness(selectedBusiness);
+          
+          // Also update header selector if it exists
+          const globalSelector = document.getElementById('globalBusinessSelector');
+          if (globalSelector) {
+            globalSelector.value = selectedId;
+          }
+          
+          // Reload current page with new business context
+          if (currentPage) {
+            await loadPage(currentPage);
+          }
+          
+          // Close dropdown
+          switchDropdownMenu.classList.remove('active');
+          
+          console.log('Switched to business:', selectedBusiness.store_info?.name);
+        }
+      });
+    }
+    
+    // Handle manage businesses button
+    if (manageBusinessesBtn) {
+      manageBusinessesBtn.addEventListener('click', function() {
+        // Navigate to business management page
+        loadPage('business');
+        switchDropdownMenu.classList.remove('active');
+        
+        // Update active nav item
+        navLinks.forEach((l) => l.classList.remove("active"));
+        const businessNavLink = document.querySelector('[data-page="business"]');
+        if (businessNavLink) {
+          businessNavLink.classList.add("active");
+        }
+      });
     }
   }
 
@@ -273,9 +362,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "test":
           content = await loadMarketingPage();
           break;
-        // case "settings":
-        //   content = await loadSettingsPage();
-        //   break;
+        case "settings":
+          content = await loadSettingsPage();
+          break;
         default:
           content = '<div style="padding: 30px;"><h1>Page not found</h1></div>';
       }
@@ -431,12 +520,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return loadMarketingPage.cache;
   }
 
-  // async function loadSettingsPage() {
-  //   if (!loadSettingsPage.cache) {
-  //     loadSettingsPage.cache = await fetch('pages/settings.html').then(r => r.text());
-  //   }
-  //   return loadSettingsPage.cache;
-  // }
+  async function loadSettingsPage() {
+    if (!loadSettingsPage.cache) {
+      loadSettingsPage.cache = await fetch('pages/settings.html').then(r => r.text());
+    }
+    return loadSettingsPage.cache;
+  }
 
   async function initializePageFunctionality(page) {
     switch (page) {
