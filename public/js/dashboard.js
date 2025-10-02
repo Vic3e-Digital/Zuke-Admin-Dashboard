@@ -273,9 +273,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "test":
           content = await loadMarketingPage();
           break;
-        case "settings":
-          content = await loadSettingsPage();
-          break;
+        // case "settings":
+        //   content = await loadSettingsPage();
+        //   break;
         default:
           content = '<div style="padding: 30px;"><h1>Page not found</h1></div>';
       }
@@ -431,12 +431,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return loadMarketingPage.cache;
   }
 
-  async function loadSettingsPage() {
-    if (!loadSettingsPage.cache) {
-      loadSettingsPage.cache = await fetch('pages/settings.html').then(r => r.text());
-    }
-    return loadSettingsPage.cache;
-  }
+  // async function loadSettingsPage() {
+  //   if (!loadSettingsPage.cache) {
+  //     loadSettingsPage.cache = await fetch('pages/settings.html').then(r => r.text());
+  //   }
+  //   return loadSettingsPage.cache;
+  // }
 
   async function initializePageFunctionality(page) {
     switch (page) {
