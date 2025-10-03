@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Directory - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="css/faviconV2.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <button class="hamburger-menu" id="hamburgerMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" alt="Zuke Logo" style="height:48px;">
+            <h1 class="dashboard-title">Dashboard</h1>
+
+            <!-- Add Business Selector Here -->
+            <div class="business-selector-container" id="businessSelectorContainer" style="display: none;">
+                <label>Active Business:</label>
+                <select class="header-business-selector" id="globalBusinessSelector">
+                    <!-- Options will be populated dynamically -->
+                </select>
+                </div>
+            
+            <div class="header-right">
+                <span class="user-welcome" id="userWelcome">Welcome @admin</span>
+                <button class="tokens-button" id="tokensButton">
+                    <!-- Modern wallet icon -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 21V5C16 3.89543 15.1046 3 14 3H10C8.89543 3 8 3.89543 8 5V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="18" cy="14" r="1" fill="currentColor"/>
+                    </svg>
+                    BAL: <span id="tokenBalance">ZAR 1199</span>
+                </button>
+                <button class="logout-button" id="logoutButton">
+                    <!-- Modern logout icon -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-page="dashboard">
+                            <!-- Modern dashboard grid icon -->
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="marketplace">
+                            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 3.5C8.75736 3.5 7.75 4.50736 7.75 5.75V6.5H4.75C3.50736 6.5 2.5 7.50736 2.5 8.75V17.75C2.5 18.9926 3.50736 20 4.75 20H19.2502C20.4928 20 21.5002 18.9926 21.5002 17.75V8.75C21.5002 7.50736 20.4928 6.5 19.2502 6.5H16.25V5.75C16.25 4.50736 15.2426 3.5 14 3.5H10ZM14.75 6.5H9.25V5.75C9.25 5.33579 9.58579 5 10 5H14C14.4142 5 14.75 5.33579 14.75 5.75V6.5Z" fill="#323544"/>
+                                </svg>                                
+                            <span class="nav-text">Develop Your Business</span>
+                        </a>
+                    </li> -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="business">
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8.66699 7.37109C8.66699 6.12845 9.67435 5.12109 10.917 5.12109H14.0837C15.3263 5.12109 16.3337 6.12845 16.3337 7.37109V8.87109H8.66699V7.37109Z" fill="#323544"/>
+                                <path d="M4.75 15.6211C3.50736 15.6211 2.5 16.6285 2.5 17.8711V19.3711C2.5 19.7853 2.83579 20.1211 3.25 20.1211H8.29132V15.6211H4.75Z" fill="#323544"/>
+                                <path d="M9.79132 20.1211H15.2083V15.6211H9.79132V20.1211Z" fill="#323544"/>
+                                <path d="M16.7083 20.1211H21.7497C22.1639 20.1211 22.4997 19.7853 22.4997 19.3711V17.8711C22.4997 16.6285 21.4923 15.6211 20.2497 15.6211H16.7083V20.1211Z" fill="#323544"/>
+                                <g opacity="0.4">
+                                <path d="M7.83398 10.3711C6.59134 10.3711 5.58398 11.3785 5.58398 12.6211V14.1211H11.7507V10.3711H7.83398Z" fill="#323544"/>
+                                <path d="M19.4167 14.1211V12.6211C19.4167 11.3785 18.4093 10.3711 17.1667 10.3711H13.2507V14.1211H19.4167Z" fill="#323544"/>
+                                </g>
+                                </svg>                                   
+                          <span class="nav-text">Marketplace</span>
+                          
+                        </a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="creative">
+                            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path opacity="0.4" d="M8.19139 3.90369C8.61612 3.33496 9.28432 3 9.99415 3H14.0063C14.7161 3 15.3843 3.33496 15.809 3.90369L16.4028 4.6988C16.5444 4.88838 16.7671 5.00003 17.0038 5.00003H19.7502C20.9929 5.00003 22.0002 6.00739 22.0002 7.25003V17.5C22.0002 18.7427 20.9929 19.75 19.7502 19.75H4.25024C3.0076 19.75 2.00024 18.7427 2.00024 17.5V7.25003C2.00024 6.00739 3.0076 5.00003 4.25024 5.00003H6.99667C7.23328 5.00003 7.45601 4.88838 7.59759 4.6988L8.19139 3.90369ZM12.0002 16.002C14.2094 16.002 16.0002 14.2111 16.0002 12.002C16.0002 9.79281 14.2094 8.00195 12.0002 8.00195C9.79111 8.00195 8.00024 9.79281 8.00024 12.002C8.00024 14.2111 9.79111 16.002 12.0002 16.002Z" fill="#323544"/>
+                                <path d="M16.0002 12.002C16.0002 14.2111 14.2094 16.002 12.0002 16.002C9.79111 16.002 8.00024 14.2111 8.00024 12.002C8.00024 9.79281 9.79111 8.00195 12.0002 8.00195C14.2094 8.00195 16.0002 9.79281 16.0002 12.002Z" fill="#323544"/>
+                                </svg>
+                                                                
+                          <span class="nav-text">Creative</span>
+                          
+                        </a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="test">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path opacity="0.4" d="M4.75 4C4.75 3.58579 4.41421 3.25 4 3.25C3.58579 3.25 3.25 3.58579 3.25 4V18.5C3.25 19.7426 4.25736 20.75 5.5 20.75H20.0005C20.4147 20.75 20.7505 20.4142 20.7505 20C20.7505 19.5858 20.4147 19.25 20.0005 19.25H5.5C5.08579 19.25 4.75 18.9142 4.75 18.5V15.7298V13.6085V4Z" fill="#323544"/>
+                                <path d="M8.6693 9.68856L4.75 13.6079V15.7292L9.19963 11.2796L12.622 14.7019C12.7626 14.8426 12.9534 14.9216 13.1523 14.9216C13.3512 14.9216 13.542 14.8426 13.6826 14.7019L16.9777 11.4069L18.2167 12.6459C18.4313 12.8605 18.7541 12.9247 19.0345 12.8084C19.3148 12.6921 19.4974 12.4183 19.4971 12.1148L19.4931 8.57992C19.4927 8.1661 19.1571 7.83084 18.7433 7.83076L15.2117 7.83008C14.9083 7.83002 14.6348 8.01273 14.5187 8.293C14.4025 8.57327 14.4667 8.89589 14.6812 9.11041L15.917 10.3462L13.1523 13.1109L9.72996 9.68856C9.58931 9.54791 9.39855 9.46889 9.19963 9.46889C9.00072 9.46889 8.80996 9.54791 8.6693 9.68856Z" fill="#323544"/>
+                                </svg>                                   
+                          <span class="nav-text">Marketing</span>
+                          
+                        </a>
+                      </li>
+
+                      <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="business">
+                            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1.56641 4.48242C1.56641 4.06821 1.90219 3.73242 2.31641 3.73242H3.49696C4.61854 3.73242 5.56885 4.55844 5.72504 5.6691L5.7862 6.10403H19.7507C21.3714 6.10403 22.4605 7.76586 21.8137 9.25196L19.1464 15.3803C18.789 16.2014 17.9788 16.7324 17.0833 16.7324L7.72179 16.7324C6.60021 16.7324 5.6499 15.9064 5.49371 14.7957L4.23965 5.87798C4.18759 5.50776 3.87082 5.23242 3.49696 5.23242H2.31641C1.90219 5.23242 1.56641 4.89664 1.56641 4.48242Z" fill="#323544"/>
+                                <g opacity="0.4">
+                                <path d="M7.7832 18.2324C6.8167 18.2324 6.0332 19.0159 6.0332 19.9824C6.0332 20.9489 6.8167 21.7324 7.7832 21.7324H7.7932C8.7597 21.7324 9.5432 20.9489 9.5432 19.9824C9.5432 19.0159 8.7597 18.2324 7.7932 18.2324H7.7832Z" fill="#323544"/>
+                                <path d="M16.3203 18.2324C15.3538 18.2324 14.5703 19.0159 14.5703 19.9824C14.5703 20.9489 15.3538 21.7324 16.3203 21.7324H16.3303C17.2968 21.7324 18.0803 20.9489 18.0803 19.9824C18.0803 19.0159 17.2968 18.2324 16.3303 18.2324H16.3203Z" fill="#323544"/>
+                                </g>
+                                </svg>
+                                                                
+                          <span class="nav-text">Sales</span>
+                          
+                        </a>
+                      </li>
+                     
+                  
+<!-- <li class="nav-item">
+  <a href="#" class="nav-link" data-page="settings">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-text">Settings Test</span>
+  </a>
+</li> -->
+                   
+<<<<<<< HEAD
+<br>
+<br>
+<br>
+<br>
+
+
+            <!-- User profile section -->
+        <!-- User profile section -->
+<div class="user-profile">
+    <div class="user-avatar" id="userAvatar">
+        <!-- Modern user avatar icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 20.662V19C7 17.3431 8.34315 16 10 16H14C15.6569 16 17 17.3431 17 19V20.662" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+    
+    <!-- Rotating switch dropdown -->
+    <div class="switch-dropdown-container">
+        <button class="switch-dropdown-btn" id="switchDropdownBtn" title="Switch Business">
+            <!-- Rotating/Round Switch SVG Icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 12C21 16.9706 16.9706 21 12 21M21 12C21 7.02944 16.9706 3 12 3M21 12H3M12 21C7.02944 21 3 16.9706 3 12M12 21C13.6569 21 15 16.9706 15 12C15 7.02944 13.6569 3 12 3M12 21C10.3431 21 9 16.9706 9 12C9 7.02944 10.3431 3 12 3M3 12C3 7.02944 7.02944 3 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+        </button>
+        
+        <!-- Dropdown Menu -->
+        <div class="switch-dropdown-menu" id="switchDropdownMenu">
+            <div class="dropdown-header">Switch Business</div>
+            <select class="switch-business-selector" id="switchBusinessSelector">
+                <!-- Options will be populated dynamically -->
+                <option value="">Select a business...</option>
+            </select>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="manageBusinessesBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Manage Businesses
+            </button>
+        </div>
+    </div>
+    
+    <button class="settings-icon-btn" id="settingsButton" title="Settings" data-page="settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
+</div>
+=======
+        <!-- User profile section -->
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar">
+                    <!-- Modern user avatar icon -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 11C13.6569 11 15 9.65685 15 8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8C9 9.65685 10.3431 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 20.662V19C7 17.3431 8.34315 16 10 16H14C15.6569 16 17 17.3431 17 19V20.662" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <button class="settings-icon-btn" id="settingsButton" title="Settings" data-page="settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                      <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+            </div>
+>>>>>>> 9c71e79d7a3314e58b366e7b7cdfc4285412c999
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="mainContent">
+            <div id="pageContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+
+    <!-- Fix the script order -->
+    <script src="js/dataManager.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="js/dashboard.js" type="module"></script>
+
+
+    <!-- <script src="pages/test.js"> type="module"</script> -->
+</body>
+</html>
