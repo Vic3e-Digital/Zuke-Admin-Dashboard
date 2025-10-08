@@ -3,15 +3,6 @@ const router = express.Router();
 const { connectToDatabase } = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
-// Helper function to check if user is admin
-// const isAdmin = (user) => {
-// const roles = user?.['https://zuke.co.za/roles'] || 
-//              user?.roles || 
-//              user?.app_metadata?.roles || 
-//              user?.user_metadata?.roles || 
-//              [];
-// return roles.includes('admin') || roles.includes('Admin');
-// };
 
 // Helper function to check if user is admin
 const isAdmin = (user) => {
