@@ -154,6 +154,171 @@ async function loadSocialMediaCards(userEmail, userName) {
   `;
 }
 
+// Function to render video upload form
+function renderVideoUploadForm(container) {
+  const WEBHOOK_URL = "https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c";
+
+  container.innerHTML = '';
+
+  
+  // Add HTML     
+  const wrapper = document.createElement('div');
+  wrapper.className = 'video-upload-wrapper';
+  wrapper.innerHTML = `
+    <div class="video-form-container">
+      <div class="video-success-message" id="videoSuccessMessage">
+        Form submitted successfully! 🎉
+      </div>
+   
+      <form id="videoContactForm">
+        <div class="video-form-group">
+          <input
+            type="text"
+            id="videoName"
+            name="name"
+            placeholder="Business Name"
+            required
+          >
+        </div>
+   
+        <div class="video-option-card selected">
+          <div class="video-option-title">Video Upload</div>
+          <div class="video-option-subtitle">MP4 files only</div>
+   
+          <label for="videoFileInput" class="video-file-label">Choose Video</label>
+          <input
+            type="file"
+            id="videoFileInput"
+            name="file"
+            class="video-file-input"
+           accept="video/mp4,video/mpeg,video/quicktime,video/x-msvideo,video/webm"
+            required
+          >
+         
+          <div class="video-file-info" id="videoFileInfo"></div>
+        </div>
+   
+        <div class="video-form-group">
+          <textarea
+            id="videoNotes"
+            name="notes"
+            placeholder="Notes (optional)"
+          ></textarea>
+        </div>
+   
+        <button type="submit" class="video-submit-btn">
+          <span>Submit</span>
+        </button>
+      </form>
+    </div>
+  `;
+  
+  container.appendChild(wrapper);
+  
+  // Add JavaScript functionality
+  const form = document.getElementById("videoContactForm");
+  const fileInput = document.getElementById("videoFileInput");
+  const fileInfo = document.getElementById("videoFileInfo");
+  const successMessage = document.getElementById("videoSuccessMessage");
+
+  
+  // File input display
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('video/')) {
+        alert("Please select a video file only.");
+        fileInput.value = "";
+        fileInfo.textContent = "";
+        return;
+      }
+      fileInfo.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+    } else {
+      fileInfo.textContent = "";
+    }
+  });
+  
+  // Form submission
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+  
+    if (!fileInput.files[0]) {
+      alert("Please select a video file to upload.");
+      return;
+    }
+  
+    try {
+      console.log("Uploading to Cloudinary...");
+      const fileUrl = await uploadToCloudinary(fileInput.files[0]);
+      console.log("Cloudinary URL:", fileUrl);
+  
+      console.log("Submitting to webhook...");
+      const formData = new FormData();
+      formData.append("name", document.getElementById("videoName").value);
+      formData.append("notes", document.getElementById("videoNotes").value);
+      formData.append("fileUrl", fileUrl);
+  
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        body: formData
+      });
+  
+      console.log("Webhook response status:", response.status);
+     
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("Webhook submission successful:", responseData);
+        showSuccess();
+      } else {
+        const errorText = await response.text();
+        console.error("Webhook error:", errorText);
+        throw new Error(`Webhook returned status ${response.status}`);
+      }
+  
+    } catch (err) {
+      console.error("Error:", err);
+      alert("There was an error processing your submission. Please try again.");
+    }
+  });
+  
+  // Helper functions
+  async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "unsigned_preset");
+  
+    const response = await fetch("https://api.cloudinary.com/v1_1/dl0u8tzae/upload", {
+      method: "POST",
+      body: formData
+    });
+  
+    const data = await response.json();
+  
+    if (data.secure_url) {
+      return data.secure_url;
+    } else {
+      throw new Error("Cloudinary upload failed");
+    }
+  }
+  
+  function formatFileSize(bytes) {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+  
+  function showSuccess() {
+    successMessage.style.display = "block";
+    setTimeout(() => {
+      successMessage.style.display = "none";
+      form.reset();
+      fileInfo.textContent = "";
+    }, 3000);
+  }
+}
+
 export async function initMarketingPage() {
   const auth0Client = await getAuth0Client();
   
@@ -186,15 +351,12 @@ export async function initMarketingPage() {
       socialMediaBtn.onclick = async function(e) {
         e.stopPropagation();
         
-        // Hide main content, show social media sub-content
         document.getElementById("marketingMainContent").style.display = "none";
         document.getElementById("socialMediaSubContent").style.display = "block";
         
-        // Load social media cards
         const socialMediaCardsDiv = document.getElementById("socialMediaCards");
         socialMediaCardsDiv.innerHTML = await loadSocialMediaCards(userEmail, userName);
         
-        // Setup social media button handlers
         setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe);
       }
     }
@@ -205,6 +367,7 @@ export async function initMarketingPage() {
       emailMarketingBtn.onclick = function(e) {
         e.stopPropagation();
         modalTitle.textContent = "Email Marketing";
+        iframe.style.display = "block";
         iframe.src = `https://aigents.southafricanorth.azurecontainer.io/email-marketing?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
         modal.style.display = "block";
         document.body.style.overflow = 'hidden';
@@ -217,6 +380,7 @@ export async function initMarketingPage() {
       analyticsBtn.onclick = function(e) {
         e.stopPropagation();
         modalTitle.textContent = "Marketing Analytics";
+        iframe.style.display = "block";
         iframe.src = `https://aigents.southafricanorth.azurecontainer.io/marketing-analytics?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
         modal.style.display = "block";
         document.body.style.overflow = 'hidden';
@@ -234,6 +398,9 @@ export async function initMarketingPage() {
       closeBtn.onclick = function() {
         modal.style.display = "none";
         iframe.src = "";
+        iframe.style.display = "block";
+        const contentDiv = document.getElementById('modalContentDiv');
+        if (contentDiv) contentDiv.remove();
         document.body.style.overflow = 'auto';
       }
     }
@@ -242,6 +409,9 @@ export async function initMarketingPage() {
       if (event.target == modal) {
         modal.style.display = "none";
         iframe.src = "";
+        iframe.style.display = "block";
+        const contentDiv = document.getElementById('modalContentDiv');
+        if (contentDiv) contentDiv.remove();
         document.body.style.overflow = 'auto';
       }
     });
@@ -255,7 +425,7 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
   const socialMediaActions = {
     postVideo: {
       title: "Post Video - Social Media Manager",
-      url: `https://clippedai.vercel.app/?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`
+      renderContent: true
     },
     aiAgents: {
       title: "AI Agents - Social Media Automation",
@@ -285,7 +455,29 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
       
       if (config) {
         modalTitle.textContent = config.title;
-        iframe.src = config.url;
+        
+        if (config.renderContent) {
+          // Hide iframe, show custom content
+          iframe.style.display = 'none';
+          let contentDiv = document.getElementById('modalContentDiv');
+          if (!contentDiv) {
+            contentDiv = document.createElement('div');
+            contentDiv.id = 'modalContentDiv';
+            contentDiv.style.cssText = 'width: 100%; height: 500px; overflow: auto;';
+            iframe.parentNode.insertBefore(contentDiv, iframe);
+          }
+          contentDiv.style.display = 'block';
+          
+          // Render video upload form
+          renderVideoUploadForm(contentDiv);
+        } else {
+          // Use iframe for external URLs
+          iframe.style.display = 'block';
+          const contentDiv = document.getElementById('modalContentDiv');
+          if (contentDiv) contentDiv.style.display = 'none';
+          iframe.src = config.url;
+        }
+        
         modal.style.display = "block";
         document.body.style.overflow = 'hidden';
       }
