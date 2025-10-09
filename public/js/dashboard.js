@@ -1311,7 +1311,7 @@ function showPlanRequiredModal() {
   
     // Extract the specific links, with fallbacks
     const manageMarketplaceProfileLink = business.marketplace_business?.user_info?.user_link || 'https://marketplace.zuke.co.za/my-account/';
-    const viewMarketplacePageLink = business.marketplace_business?.marketplace_info?.platform_link || '#'; // Fallback to '#' if link not found
+    const viewMarketplacePageLink = business.marketplace_business?.marketplace_info?.store_link || '#'; // Fallback to '#' if link not found
   
     modalContent.innerHTML = `
       <div class="business-detail-view">
