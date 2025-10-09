@@ -142,7 +142,7 @@ try {
    personal_info: {
      first_name: "Test",
      last_name: "User",
-     email: "owamjames1@gmail.com",
+     email: "opeolu.victory@gmail.com",
      phone: "+27123456789",
      address: "123 Test Street"
    },
