@@ -1,0 +1,316 @@
+<link rel="stylesheet" href="css/simStyle.css">
+<style>
+  .pricing-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .pricing-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .pricing-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #2c3e50;
+  }
+
+  .pricing-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+  }
+
+  .billing-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+  }
+
+  .billing-toggle span {
+    font-weight: 500;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: #ff6b35;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+  }
+
+  .toggle-switch.yearly::after {
+    transform: translateX(30px);
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+  }
+
+  .pricing-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  .pricing-card.featured {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  .pricing-card.featured:hover {
+    transform: scale(1.08) translateY(-5px);
+  }
+
+  .plan-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2ecc71;
+    color: white;
+    padding: 5px 20px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .plan-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .plan-description {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin-bottom: 20px;
+  }
+
+  .plan-price {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 20px 0;
+  }
+
+  .plan-price small {
+    font-size: 1rem;
+    opacity: 0.7;
+  }
+
+  .plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 30px 0;
+    flex-grow: 1;
+  }
+
+  .plan-features li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pricing-card.featured .plan-features li {
+    border-bottom-color: rgba(255,255,255,0.2);
+  }
+
+  .feature-check {
+    color: #2ecc71;
+    font-weight: bold;
+  }
+
+  .pricing-card.featured .feature-check {
+    color: white;
+  }
+
+  .plan-cta {
+    padding: 15px 30px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #ff6b35;
+    color: white;
+    margin-top: auto;
+  }
+
+  .plan-cta:hover {
+    background: #ff5722;
+    transform: scale(1.05);
+  }
+
+  .pricing-card.featured .plan-cta {
+    background: white;
+    color: #ff6b35;
+  }
+
+  .pricing-card.featured .plan-cta:hover {
+    background: #f8f9fa;
+  }
+
+  .current-plan-badge {
+    background: #3498db;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+
+  .wallet-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .wallet-info h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+  }
+
+  .wallet-balance {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff6b35;
+  }
+</style>
+
+<div class="pricing-container">
+  <div class="pricing-header">
+    <h1>Choose Your Plan</h1>
+    <p>All plans include access to the Zuke ecosystem: marketplace, creative tools, and business development support.</p>
+  </div>
+
+  <!-- Current Wallet Balance -->
+  <div class="wallet-info" id="walletInfo" style="display: none;">
+    <h3>Your Current Balance</h3>
+    <div class="wallet-balance" id="currentBalance">R0.00</div>
+  </div>
+
+  <!-- Billing Toggle -->
+  <div class="billing-toggle">
+    <span>Monthly</span>
+    <div class="toggle-switch" id="billingToggle"></div>
+    <span>Yearly <small style="color: #2ecc71;">(Save 17%)</small></span>
+  </div>
+
+  <!-- Pricing Cards -->
+  <div class="pricing-grid">
+    <!-- Ignite Plan -->
+    <div class="pricing-card" data-plan="ignite">
+      <div class="plan-name">Ignite</div>
+      <div class="plan-description">Ideal for Starters</div>
+      <div class="plan-price">
+        <span class="monthly-price">R99</span>
+        <span class="yearly-price" style="display: none;">R990</span>
+        <small>/month</small>
+      </div>
+      <ul class="plan-features">
+        <li><span class="feature-check">✓</span> Marketplace Access</li>
+        <li><span class="feature-check">✓</span> Business Development</li>
+        <li><span class="feature-check">✓</span> Limited Creative Tools</li>
+        <li><span class="feature-check">✗</span> Marketing Tools</li>
+        <li><span class="feature-check">✗</span> Analytics</li>
+      </ul>
+      <button class="plan-cta" onclick="selectPlan('ignite', 99, 990)">Get Started</button>
+    </div>
+
+    <!-- Spark Plan -->
+    <div class="pricing-card" data-plan="spark">
+      <div class="plan-name">Spark</div>
+      <div class="plan-description">Ideal for Hustlers building momentum</div>
+      <div class="plan-price">
+        <span class="monthly-price">R599</span>
+        <span class="yearly-price" style="display: none;">R5990</span>
+        <small>/month</small>
+      </div>
+      <ul class="plan-features">
+        <li><span class="feature-check">✓</span> Everything in Ignite</li>
+        <li><span class="feature-check">✓</span> Full Creative Suite</li>
+        <li><span class="feature-check">✓</span> Limited Marketing</li>
+        <li><span class="feature-check">✗</span> Analytics</li>
+        <li><span class="feature-check">✗</span> AI Employees</li>
+      </ul>
+      <button class="plan-cta" onclick="selectPlan('spark', 599, 5990)">Get Started</button>
+    </div>
+
+    <!-- Growth Plan (Featured) -->
+    <div class="pricing-card featured" data-plan="growth">
+      <div class="plan-badge">MOST POPULAR</div>
+      <div class="plan-name">Growth</div>
+      <div class="plan-description">Ideal for Brands ready to grow</div>
+      <div class="plan-price">
+        <span class="monthly-price">R6999</span>
+        <span class="yearly-price" style="display: none;">R69990</span>
+        <small>/month</small>
+      </div>
+      <ul class="plan-features">
+        <li><span class="feature-check">✓</span> Everything in Spark</li>
+        <li><span class="feature-check">✓</span> Full Marketing Suite</li>
+        <li><span class="feature-check">✓</span> Advanced Analytics</li>
+        <li><span class="feature-check">✓</span> Limited AI Employees</li>
+        <li><span class="feature-check">✓</span> Priority Support</li>
+      </ul>
+      <button class="plan-cta" onclick="selectPlan('growth', 6999, 69990)">Get Started</button>
+    </div>
+
+    <!-- Blaze Plan -->
+    <div class="pricing-card" data-plan="blaze">
+      <div class="plan-name">Blaze</div>
+      <div class="plan-description">Ideal for Enterprises</div>
+      <div class="plan-price">
+        <span class="monthly-price">R39999</span>
+        <span class="yearly-price" style="display: none;">R399990</span>
+        <small>/month</small>
+      </div>
+      <ul class="plan-features">
+        <li><span class="feature-check">✓</span> Everything in Growth</li>
+        <li><span class="feature-check">✓</span> Unlimited AI Employees</li>
+        <li><span class="feature-check">✓</span> Custom Integrations</li>
+        <li><span class="feature-check">✓</span> Dedicated Account Manager</li>
+        <li><span class="feature-check">✓</span> White Label Options</li>
+      </ul>
+      <button class="plan-cta" onclick="selectPlan('blaze', 39999, 399990)">Get Started</button>
+    </div>
+  </div>
+</div>
