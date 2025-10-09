@@ -72,76 +72,76 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-app.post("/api/products", async (req, res) => {
-  try {
-    const { product_name, product_description, price_range, product_image, webhookUrl } = req.body;
+// app.post("/api/products", async (req, res) => {
+//   try {
+//     const { product_name, product_description, price_range, product_image, webhookUrl } = req.body;
 
-    if (!product_name || !product_description) {
-      return res.status(400).json({ success: false, error: "Product name and description are required" });
-    }
+//     if (!product_name || !product_description) {
+//       return res.status(400).json({ success: false, error: "Product name and description are required" });
+//     }
 
-    const db = await getDatabase();
-    const collection = db.collection("products");
+//     const db = await getDatabase();
+//     const collection = db.collection("products");
 
-    const adminEmail = "dev@example.com";
-    const productData = {
-      product_name,
-      product_description,
-      product_image: product_image || `https://cdn.example.com/products/${Date.now()}.jpg`,
-      price_range: price_range || "",
-      admin_profile: { name: "TechStore Electronics", email: adminEmail },
-      created_at: new Date().toISOString(),
-      status: "Active",
-    };
+//     const adminEmail = "dev@example.com";
+//     const productData = {
+//       product_name,
+//       product_description,
+//       product_image: product_image || `https://cdn.example.com/products/${Date.now()}.jpg`,
+//       price_range: price_range || "",
+//       admin_profile: { name: "TechStore Electronics", email: adminEmail },
+//       created_at: new Date().toISOString(),
+//       status: "Active",
+//     };
 
-    const result = await collection.insertOne(productData);
+//     const result = await collection.insertOne(productData);
 
-    const responseData = {
-      mongo_id: result.insertedId.toString(),
-      product_name: productData.product_name,
-      product_description: productData.product_description,
-      product_image: productData.product_image,
-      price_range: productData.price_range,
-      admin_profile: productData.admin_profile,
-    };
+//     const responseData = {
+//       mongo_id: result.insertedId.toString(),
+//       product_name: productData.product_name,
+//       product_description: productData.product_description,
+//       product_image: productData.product_image,
+//       price_range: productData.price_range,
+//       admin_profile: productData.admin_profile,
+//     };
 
-    if (webhookUrl) {
-      try {
-        const fetch = require("node-fetch");
-        await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(responseData),
-        });
-      } catch (err) {
-        console.error("Webhook error:", err);
-      }
-    }
+//     if (webhookUrl) {
+//       try {
+//         const fetch = require("node-fetch");
+//         await fetch(webhookUrl, {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify(responseData),
+//         });
+//       } catch (err) {
+//         console.error("Webhook error:", err);
+//       }
+//     }
 
-    res.json({ success: true, data: responseData });
-  } catch (error) {
-    console.error("Error creating product:", error);
-    res.status(500).json({ success: false, error: "Failed to create product" });
-  }
-});
+//     res.json({ success: true, data: responseData });
+//   } catch (error) {
+//     console.error("Error creating product:", error);
+//     res.status(500).json({ success: false, error: "Failed to create product" });
+//   }
+// });
 
-app.get("/api/products/stats", async (req, res) => {
-  try {
-    const db = await getDatabase();
-    const collection = db.collection("products");
+// app.get("/api/products/stats", async (req, res) => {
+//   try {
+//     const db = await getDatabase();
+//     const collection = db.collection("products");
 
-    const [total, active, inactive] = await Promise.all([
-      collection.countDocuments(),
-      collection.countDocuments({ status: "Active" }),
-      collection.countDocuments({ status: "Inactive" }),
-    ]);
+//     const [total, active, inactive] = await Promise.all([
+//       collection.countDocuments(),
+//       collection.countDocuments({ status: "Active" }),
+//       collection.countDocuments({ status: "Inactive" }),
+//     ]);
 
-    res.json({ success: true, data: { total, active, inactive } });
-  } catch (error) {
-    console.error("Error fetching product stats:", error);
-    res.status(500).json({ success: false, error: "Failed to fetch product statistics" });
-  }
-});
+//     res.json({ success: true, data: { total, active, inactive } });
+//   } catch (error) {
+//     console.error("Error fetching product stats:", error);
+//     res.status(500).json({ success: false, error: "Failed to fetch product statistics" });
+//   }
+// });
 // -------------------------
 // Serve Static Files
 // -------------------------
@@ -178,6 +178,9 @@ app.get("/login", (req, res) => {
   res.redirect("/");
 });
 
+const walletRoutes = require('./api/wallet');
+app.use('/api/wallet', walletRoutes);
+
 // Simple dashboard route - no trailing slash complications
 app.get("/dashboard/", (req, res) => {
   try {
@@ -186,6 +189,13 @@ app.get("/dashboard/", (req, res) => {
     console.error("Error serving dashboard.html:", error);
     res.status(500).send("Error loading dashboard");
   }
+});
+
+// Add this route to serve the Paystack public key
+app.get("/api/paystack-key", (req, res) => {
+  res.json({ 
+    key: process.env.PAYSTACK_TEST_KEY || process.env.PAYSTACK_PUBLIC_KEY 
+  });
 });
 
 // Static middleware
