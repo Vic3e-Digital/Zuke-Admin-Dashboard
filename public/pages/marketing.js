@@ -471,8 +471,9 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
           }
           contentDiv.style.display = 'block';
           
-          // Render video upload form
-          renderVideoUploadForm(contentDiv);
+          
+          // Render video upload form - PASS userEmail and userName
+          renderVideoUploadForm(contentDiv, userEmail, userName);
         } else {
           // Use iframe for external URLs
           iframe.style.display = 'block';
