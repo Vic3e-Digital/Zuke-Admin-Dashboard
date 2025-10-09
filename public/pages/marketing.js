@@ -43,9 +43,10 @@ async function loadSocialMediaCards(userEmail, userName) {
               <h3 class="sim-name">Post Video</h3>
               <p class="sim-description">Create and share engaging video content across all your social media platforms.</p>
             </div>
-            <button class="sim-action-btn" data-action="postVideo" aria-label="Post Video">
+             <button class="sim-action-btn" id="openSocialMediaBtn" aria-label="Open Social Media Management">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
               </svg>
             </button>
           </div>
@@ -67,9 +68,10 @@ async function loadSocialMediaCards(userEmail, userName) {
               <h3 class="sim-name">AI Agents</h3>
               <p class="sim-description">Deploy AI-powered agents to automate your social media engagement and responses.</p>
             </div>
-            <button class="sim-action-btn" data-action="aiAgents" aria-label="Open AI Agents">
+             <button class="sim-action-btn" id="openSocialMediaBtn" aria-label="Open Social Media Management">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
               </svg>
             </button>
           </div>
@@ -91,9 +93,10 @@ async function loadSocialMediaCards(userEmail, userName) {
               <h3 class="sim-name">Post Image</h3>
               <p class="sim-description">Share stunning images and graphics to boost your social media presence.</p>
             </div>
-            <button class="sim-action-btn" data-action="postImage" aria-label="Post Image">
+           <button class="sim-action-btn" id="openSocialMediaBtn" aria-label="Open Social Media Management">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
               </svg>
             </button>
           </div>
@@ -117,9 +120,10 @@ async function loadSocialMediaCards(userEmail, userName) {
               <h3 class="sim-name">Text + AI Image</h3>
               <p class="sim-description">Combine compelling text with AI-generated images for unique social media posts.</p>
             </div>
-            <button class="sim-action-btn" data-action="textAIImage" aria-label="Text + AI Image">
+           <button class="sim-action-btn" id="openSocialMediaBtn" aria-label="Open Social Media Management">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
               </svg>
             </button>
           </div>
@@ -142,9 +146,10 @@ async function loadSocialMediaCards(userEmail, userName) {
               <h3 class="sim-name">Create Article</h3>
               <p class="sim-description">Write and publish long-form content articles for LinkedIn and blog platforms.</p>
             </div>
-            <button class="sim-action-btn" data-action="createArticle" aria-label="Create Article">
+            <button class="sim-action-btn" id="openSocialMediaBtn" aria-label="Open Social Media Management">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
               </svg>
             </button>
           </div>
@@ -221,7 +226,7 @@ function renderVideoUploadForm(container) {
   const fileInfo = document.getElementById("videoFileInfo");
   const successMessage = document.getElementById("videoSuccessMessage");
 
-  
+
   // File input display
   fileInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
