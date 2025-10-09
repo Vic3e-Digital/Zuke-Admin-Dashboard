@@ -1450,7 +1450,7 @@ body {
 }
 
 /* Minimalist Balance Display */
-.tokens-button {
+/* .tokens-button {
   display: flex;
   align-items: center;
   gap: 0.375rem;
@@ -1480,8 +1480,126 @@ body {
   font-weight: 700;
   color: #ff7b00;
   font-size: 0.875rem;
+} */
+/* Wallet container styles */
+.wallet-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.tokens-button {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.tokens-button:hover {
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  transform: translateY(-1px);
+}
+
+#walletBalance {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.topup-icon-btn {
+  background: #2ecc71;
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+
+.topup-icon-btn:hover {
+  background: #27ae60;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.5);
+}
+
+.topup-icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* Loading state for wallet */
+.wallet-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.wallet-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .wallet-container {
+    gap: 6px;
+  }
+  
+  .tokens-button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .topup-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .topup-icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.current-plan-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+  z-index: 1;
+}
+
+.current-plan-badge div:first-child {
+  font-size: 13px;
+  font-weight: bold;
+}
 
 /* Modal Styles */
 .modal-large {
