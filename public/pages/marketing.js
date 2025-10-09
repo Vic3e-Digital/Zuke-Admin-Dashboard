@@ -158,7 +158,9 @@ async function loadSocialMediaCards(userEmail, userName) {
 function renderVideoUploadForm(container) {
   // const WEBHOOK_URL = "https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c";
   // const WEBHOOK_URL = ⁠"https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}"
-  const WEBHOOK_URL = `https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?${new URLSearchParams({ Email: userEmail, Name: userName }).toString()}`;
+  // const WEBHOOK_URL = `https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?${new URLSearchParams({ Email: userEmail, Name: userName }).toString()}`;
+  const WEBHOOK_URL = `https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
+  
   container.innerHTML = '';
 
   
