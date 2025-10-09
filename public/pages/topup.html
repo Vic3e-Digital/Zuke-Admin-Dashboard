@@ -1,0 +1,340 @@
+<link rel="stylesheet" href="css/simStyle.css">
+<style>
+  .topup-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .topup-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .topup-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #2c3e50;
+  }
+
+  .topup-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+  }
+
+  .current-balance-card {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 50px;
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  }
+
+  .current-balance-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    opacity: 0.9;
+  }
+
+  .current-balance-card .balance {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+
+  .current-balance-card .expires {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .credit-bundles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+  }
+
+  .credit-card {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+
+  .credit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  }
+
+  .credit-card.featured {
+    border: 3px solid #ffd700;
+    position: relative;
+  }
+
+  .credit-card.featured::before {
+    content: 'BEST VALUE';
+    position: absolute;
+    top: 15px;
+    right: -35px;
+    background: #ffd700;
+    color: #2c3e50;
+    padding: 5px 40px;
+    transform: rotate(45deg);
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .credit-card-header {
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  }
+
+  .credit-card-header.small {
+    background: #95a5a6;
+  }
+
+  .credit-card-header.medium {
+    background: #2c3e50;
+  }
+
+  .credit-card-header.large {
+    background: #27ae60;
+  }
+
+  .credit-card-header.custom {
+    background: #3498db;
+  }
+
+  .credit-card-body {
+    padding: 40px 30px;
+    text-align: center;
+  }
+
+  .credit-amount {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 20px 0;
+  }
+
+  .credit-label {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+  }
+
+  .credit-price {
+    font-size: 1.5rem;
+    color: #ff6b35;
+    font-weight: bold;
+    margin: 20px 0;
+  }
+
+  .custom-input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.5rem;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-weight: bold;
+  }
+
+  .custom-input:focus {
+    outline: none;
+    border-color: #ff6b35;
+  }
+
+  .buy-button {
+    width: 100%;
+    padding: 15px 30px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .buy-button:hover {
+    background: #1a252f;
+    transform: scale(1.02);
+  }
+
+  .buy-button.featured {
+    background: #ffd700;
+    color: #2c3e50;
+  }
+
+  .buy-button.featured:hover {
+    background: #ffed4e;
+  }
+
+  .buy-button:disabled {
+    background: #ddd;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .rates-section {
+    background: #f8f9fa;
+    padding: 40px;
+    border-radius: 16px;
+    margin-top: 50px;
+  }
+
+  .rates-section h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+  }
+
+  .rate-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .rate-info h3 {
+    color: #ff6b35;
+    margin-bottom: 15px;
+  }
+
+  .rate-info ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .rate-info ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .rate-info ul li:last-child {
+    border-bottom: none;
+  }
+</style>
+
+<div class="topup-container">
+  <div class="topup-header">
+    <h1>Buy Credits</h1>
+    <p>Select the credit bundle that you would like to purchase</p>
+  </div>
+
+  <!-- Current Balance -->
+  <div class="current-balance-card">
+    <h3>Your Current Balance</h3>
+    <div class="balance" id="topupCurrentBalance">R0.00</div>
+    <div class="expires">Credits expire after 6 months • R1 = 1 Credit</div>
+  </div>
+
+  <!-- Credit Bundles -->
+  <div class="credit-bundles">
+    <!-- Small Bundle -->
+    <div class="credit-card" data-bundle="small">
+      <div class="credit-card-header small">SMALL</div>
+      <div class="credit-card-body">
+        <div class="credit-amount">99</div>
+        <div class="credit-label">CREDITS</div>
+        <div class="credit-price">R99</div>
+        <button class="buy-button" onclick="buyCredits('small', 99, 9900)">BUY NOW</button>
+      </div>
+    </div>
+
+    <!-- Medium Bundle (Featured) -->
+    <div class="credit-card featured" data-bundle="medium">
+      <div class="credit-card-header medium">MEDIUM</div>
+      <div class="credit-card-body">
+        <div class="credit-amount">599</div>
+        <div class="credit-label">CREDITS</div>
+        <div class="credit-price">R599</div>
+        <button class="buy-button featured" onclick="buyCredits('medium', 599, 59900)">BUY NOW</button>
+      </div>
+    </div>
+
+    <!-- Large Bundle -->
+    <div class="credit-card" data-bundle="large">
+      <div class="credit-card-header large">LARGE</div>
+      <div class="credit-card-body">
+        <div class="credit-amount">1999</div>
+        <div class="credit-label">CREDITS</div>
+        <div class="credit-price">R1,999</div>
+        <button class="buy-button" onclick="buyCredits('large', 1999, 199900)">BUY NOW</button>
+      </div>
+    </div>
+
+    <!-- Custom Amount -->
+    <div class="credit-card" data-bundle="custom">
+      <div class="credit-card-header custom">CUSTOM</div>
+      <div class="credit-card-body">
+        <input 
+          type="number" 
+          class="custom-input" 
+          id="customAmount" 
+          placeholder="0" 
+          min="100"
+          oninput="updateCustomAmount(this.value)"
+        >
+        <div class="credit-label">CREDITS</div>
+        <div class="credit-price" id="customPrice">R0.00</div>
+        <button class="buy-button" id="customBuyButton" onclick="buyCustomCredits()" disabled>BUY NOW</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rates Section -->
+  <div class="rates-section">
+    <h2>Usage Rates (Coming Soon)</h2>
+    
+    <div class="rate-info">
+      <h3>🎨 Creative Services</h3>
+      <ul>
+        <li><span>AI Content Generation</span> <strong>5 credits</strong></li>
+        <li><span>Image Creation</span> <strong>10 credits</strong></li>
+        <li><span>Video Production</span> <strong>50 credits</strong></li>
+        <li><span>Logo Design</span> <strong>20 credits</strong></li>
+      </ul>
+    </div>
+
+    <div class="rate-info">
+      <h3>📢 Marketing Services</h3>
+      <ul>
+        <li><span>Social Media Post</span> <strong>5 credits</strong></li>
+        <li><span>Email Campaign</span> <strong>15 credits</strong></li>
+        <li><span>Ad Copy Generation</span> <strong>10 credits</strong></li>
+        <li><span>Campaign Analysis</span> <strong>25 credits</strong></li>
+      </ul>
+    </div>
+
+    <div class="rate-info">
+      <h3>🤖 AI Employees</h3>
+      <ul>
+        <li><span>Customer Service Bot (per day)</span> <strong>100 credits</strong></li>
+        <li><span>Sales Assistant (per day)</span> <strong>150 credits</strong></li>
+        <li><span>Content Writer (per task)</span> <strong>50 credits</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 8px;">
+    <p style="margin: 0; color: #856404;">
+      💡 <strong>Note:</strong> You need an active subscription plan to use credits. 
+      <a href="#" onclick="loadPage('pricing'); return false;" style="color: #ff6b35; text-decoration: underline;">View Plans</a>
+    </p>
+  </div>
+</div>
