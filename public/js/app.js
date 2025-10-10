@@ -114,10 +114,25 @@ const updateUI = async () => {
     
     if (isAuthenticated && isIndexPage && !isCallback && !hasRedirected) {
       console.log("User authenticated, redirecting to dashboard...");
-      sessionStorage.setItem('hasRedirected', 'true');
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1000); // Reduced delay
+      
+      try {
+        const user = await auth0Client.getUser();
+        const userEmail = encodeURIComponent(user?.email || '');
+        const userName = encodeURIComponent(user?.name || `${user?.given_name || ''} ${user?.family_name || ''}`.trim());
+        const userFirstName = encodeURIComponent(user?.given_name || '');
+        const userLastName = encodeURIComponent(user?.family_name || '');
+        
+        sessionStorage.setItem('hasRedirected', 'true');
+        setTimeout(() => {
+          window.location.href = `/dashboard?email=${userEmail}&name=${userName}&firstName=${userFirstName}&lastName=${userLastName}`;
+        }, 1000);
+      } catch (error) {
+        console.error("Error preparing redirect:", error);
+        sessionStorage.setItem('hasRedirected', 'true');
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+      }
     }
   } catch (error) {
     console.error("Error updating UI:", error);
