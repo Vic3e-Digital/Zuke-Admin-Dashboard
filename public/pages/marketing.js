@@ -160,9 +160,12 @@ async function loadSocialMediaCards(userEmail, userName) {
 }
 
 // Function to render video upload form
-function renderVideoUploadForm(container) {
-  const WEBHOOK_URL = "https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c";
-
+function renderVideoUploadForm(container, userEmail, userName) {
+  // const WEBHOOK_URL = "https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c";
+  // const WEBHOOK_URL = ⁠"https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}"
+  // const WEBHOOK_URL = `https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?${new URLSearchParams({ Email: userEmail, Name: userName }).toString()}`;
+  const WEBHOOK_URL = `https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
+  
   container.innerHTML = '';
 
   
@@ -450,7 +453,7 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
     }
   };
 
-  // Add click handlers to all social media buttons
+  // / Add click handlers to all social media buttons
   const socialMediaButtons = document.querySelectorAll('#socialMediaCards .sim-action-btn');
   socialMediaButtons.forEach(btn => {
     btn.onclick = function(e) {
@@ -473,8 +476,8 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
           }
           contentDiv.style.display = 'block';
           
-          // Render video upload form
-          renderVideoUploadForm(contentDiv);
+          // Render video upload form - PASS userEmail and userName
+          renderVideoUploadForm(contentDiv, userEmail, userName);
         } else {
           // Use iframe for external URLs
           iframe.style.display = 'block';
