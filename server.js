@@ -36,14 +36,17 @@ app.use("/api", (req, res, next) => {
 // -------------------------
 app.use('/api/businesses', require('./api/businesses'));
 
-// Example additional routes
-app.post("/api/businesses-create", async (req, res) => {
-  // Your existing POST logic
-});
+app.use('/api/business-settings', require('./api/business-settings'));
 
-app.get("/api/businesses-stats", async (req, res) => {
-  // Your existing stats logic
-});
+
+// // Example additional routes
+// app.post("/api/businesses-create", async (req, res) => {
+//   // Your existing POST logic
+// });
+
+// app.get("/api/businesses-stats", async (req, res) => {
+//   // Your existing stats logic
+// });
 
 // -------------------------
 // Product Routes
@@ -72,57 +75,7 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-// app.post("/api/products", async (req, res) => {
-//   try {
-//     const { product_name, product_description, price_range, product_image, webhookUrl } = req.body;
 
-//     if (!product_name || !product_description) {
-//       return res.status(400).json({ success: false, error: "Product name and description are required" });
-//     }
-
-//     const db = await getDatabase();
-//     const collection = db.collection("products");
-
-//     const adminEmail = "dev@example.com";
-//     const productData = {
-//       product_name,
-//       product_description,
-//       product_image: product_image || `https://cdn.example.com/products/${Date.now()}.jpg`,
-//       price_range: price_range || "",
-//       admin_profile: { name: "TechStore Electronics", email: adminEmail },
-//       created_at: new Date().toISOString(),
-//       status: "Active",
-//     };
-
-//     const result = await collection.insertOne(productData);
-
-//     const responseData = {
-//       mongo_id: result.insertedId.toString(),
-//       product_name: productData.product_name,
-//       product_description: productData.product_description,
-//       product_image: productData.product_image,
-//       price_range: productData.price_range,
-//       admin_profile: productData.admin_profile,
-//     };
-
-//     if (webhookUrl) {
-//       try {
-//         const fetch = require("node-fetch");
-//         await fetch(webhookUrl, {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify(responseData),
-//         });
-//       } catch (err) {
-//         console.error("Webhook error:", err);
-//       }
-//     }
-
-//     res.json({ success: true, data: responseData });
-//   } catch (error) {
-//     console.error("Error creating product:", error);
-//     res.status(500).json({ success: false, error: "Failed to create product" });
-//   }
 // });
 
 // app.get("/api/products/stats", async (req, res) => {
@@ -225,6 +178,121 @@ app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   console.error("Error stack:", err.stack);
   res.status(500).json({ success: false, error: "Internal server error" });
+});
+
+// server.js - Add before the 404 handler
+
+// -------------------------
+// Social Media Post Route
+// -------------------------
+app.post("/api/social-post", async (req, res) => {
+  try {
+    const { businessId, content, platforms, mediaUrl } = req.body;
+
+    console.log(`[Social Post] Request for business: ${businessId}, platforms:`, platforms);
+
+    const db = await getDatabase();
+    const business = await db.collection('store_submissions').findOne({
+      _id: new ObjectId(businessId)
+    });
+
+    if (!business) {
+      return res.status(404).json({ success: false, error: 'Business not found' });
+    }
+
+    const automationSettings = business.automation_settings;
+    
+    if (!automationSettings?.n8n_config?.enabled) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Automation not enabled for this business' 
+      });
+    }
+
+    const webhookUrl = automationSettings.n8n_config.webhook_url;
+    
+    if (!webhookUrl) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'n8n webhook URL not configured' 
+      });
+    }
+
+    // Prepare payload for n8n
+    const payload = {
+      businessId: businessId,
+      businessName: business.store_info?.name,
+      businessEmail: business.personal_info?.email,
+      content: content,
+      platforms: platforms,
+      mediaUrl: mediaUrl,
+      timestamp: new Date().toISOString(),
+      
+      // Include platform configurations
+      platformConfigs: {}
+    };
+
+    // Add platform-specific data
+    for (const platform of platforms) {
+      const platformSettings = automationSettings.social_media?.[platform];
+      
+      if (platformSettings && platformSettings.connected) {
+        payload.platformConfigs[platform] = {
+          node_id: platformSettings.n8n_node_id,
+          page_id: platformSettings.page_id,
+          account_id: platformSettings.account_id,
+          profile_id: platformSettings.profile_id,
+          status: platformSettings.status
+        };
+      }
+    }
+
+    // Call n8n webhook
+    const n8nHeaders = {
+      'Content-Type': 'application/json'
+    };
+
+    // Add API key if configured
+    if (automationSettings.n8n_config.api_key) {
+      n8nHeaders['X-API-Key'] = automationSettings.n8n_config.api_key;
+    }
+
+    const n8nResponse = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: n8nHeaders,
+      body: JSON.stringify(payload)
+    });
+
+    if (n8nResponse.ok) {
+      const n8nData = await n8nResponse.json();
+      
+      // Log the post attempt
+      await db.collection('social_posts').insertOne({
+        businessId: businessId,
+        content: content,
+        platforms: platforms,
+        mediaUrl: mediaUrl,
+        status: 'submitted',
+        n8n_response: n8nData,
+        created_at: new Date()
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Post submitted to n8n successfully',
+        data: n8nData
+      });
+    } else {
+      throw new Error(`n8n webhook failed: ${n8nResponse.statusText}`);
+    }
+
+  } catch (error) {
+    console.error('[Social Post] Error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
 });
 
 // -------------------------
