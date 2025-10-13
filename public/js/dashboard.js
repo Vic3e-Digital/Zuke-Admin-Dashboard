@@ -154,7 +154,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
   
       setupPageNavigation();
-      await initializeGlobalBusinessSelector();
       await initializeSwitchDropdown();
       loadPage("dashboard");
       setupEventListeners();
@@ -164,8 +163,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = '/';
     }
   }
-
-
 
   async function loadWalletBalance() {
     try {
@@ -243,8 +240,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-
-  
   function showSubscriptionExpiryWarning(daysRemaining, planName) {
     const alertDiv = document.createElement('div');
     alertDiv.style.cssText = `
@@ -289,218 +284,153 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 15000);
   }
   
-
-function showLowBalanceWarning(balance) {
-  const balanceInRands = balance;
-  
-  const alertDiv = document.createElement('div');
-  alertDiv.style.cssText = `
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    padding: 15px 20px;
-    background: ${balance <= 0 ? '#ff6b35' : '#f39c12'};
-    color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 10000;
-    max-width: 350px;
-    animation: slideIn 0.3s ease;
-  `;
-  
-  alertDiv.innerHTML = `
-    <div style="display: flex; align-items: start; gap: 10px;">
-      <span style="font-size: 20px;">${balance <= 10 ? '⚠️' : '💡'}</span>
-      <div style="flex: 1;">
-        <div style="font-weight: bold; margin-bottom: 5px;">${balance <= 0 ? 'No Credits!' : 'Low Balance'}</div>
-        <div style="font-size: 14px; margin-bottom: 10px;">
-          ${balance <= 0 
-            ? 'Your account has no credits. Please top up to continue using services.' 
-            : `You have R${balanceInRands} remaining. Consider topping up soon.`}
-        </div>
-        <a href="#" onclick="document.querySelector('[data-page=\\'pricing\\']').click(); return false;" 
-           style="color: white; text-decoration: underline; font-size: 13px;">
-          Top Up Now →
-        </a>
-      </div>
-      <button onclick="this.parentElement.parentElement.remove()" 
-              style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">×</button>
-    </div>
-  `;
-  
-  document.body.appendChild(alertDiv);
-  
-  // Auto-remove after 10 seconds
-  setTimeout(() => {
-    if (alertDiv.parentElement) {
-      alertDiv.remove();
-    }
-  }, 10000);
-}
-
-// Updated function to check plan from wallet
-async function checkUserHasPlan() {
-  try {
-    const user = await auth0Client.getUser();
+  function showLowBalanceWarning(balance) {
+    const balanceInRands = balance;
     
-    if (!user || !user.email) {
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 15px 20px;
+      background: ${balance <= 0 ? '#ff6b35' : '#f39c12'};
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      max-width: 350px;
+      animation: slideIn 0.3s ease;
+    `;
+    
+    alertDiv.innerHTML = `
+      <div style="display: flex; align-items: start; gap: 10px;">
+        <span style="font-size: 20px;">${balance <= 10 ? '⚠️' : '💡'}</span>
+        <div style="flex: 1;">
+          <div style="font-weight: bold; margin-bottom: 5px;">${balance <= 0 ? 'No Credits!' : 'Low Balance'}</div>
+          <div style="font-size: 14px; margin-bottom: 10px;">
+            ${balance <= 0 
+              ? 'Your account has no credits. Please top up to continue using services.' 
+              : `You have R${balanceInRands} remaining. Consider topping up soon.`}
+          </div>
+          <a href="#" onclick="document.querySelector('[data-page=\\'pricing\\']').click(); return false;" 
+             style="color: white; text-decoration: underline; font-size: 13px;">
+            Top Up Now →
+          </a>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" 
+                style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">×</button>
+      </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+      if (alertDiv.parentElement) {
+        alertDiv.remove();
+      }
+    }, 10000);
+  }
+
+  // Updated function to check plan from wallet
+  async function checkUserHasPlan() {
+    try {
+      const user = await auth0Client.getUser();
+      
+      if (!user || !user.email) {
+        return { hasPlan: false, planDetails: null };
+      }
+
+      const response = await fetch(`/api/wallet?email=${encodeURIComponent(user.email)}`);
+      const data = await response.json();
+      
+      if (data.success && data.wallet) {
+        const wallet = data.wallet;
+        const hasActivePlan = data.hasActivePlan || false;
+        
+        // Check if plan is active and not expired
+        const planIsActive = hasActivePlan && 
+                            wallet.current_plan && 
+                            wallet.current_plan !== 'free' && 
+                            wallet.subscription_status === 'active';
+        
+        return {
+          hasPlan: planIsActive,
+          planDetails: planIsActive ? {
+            plan: wallet.current_plan,
+            planDisplayName: wallet.plan_display_name || wallet.current_plan,
+            billingPeriod: wallet.billing_period,
+            monthlyPrice: wallet.plan_monthly_price,
+            totalPrice: wallet.plan_total_price,
+            subscriptionStatus: wallet.subscription_status,
+            startDate: wallet.subscription_start_date,
+            endDate: wallet.subscription_end_date,
+            daysRemaining: wallet.subscription_end_date ? 
+              Math.ceil((new Date(wallet.subscription_end_date) - new Date()) / (1000 * 60 * 60 * 24)) : 0
+          } : null
+        };
+      }
+      
+      return { hasPlan: false, planDetails: null };
+    } catch (error) {
+      console.error('Error checking user plan:', error);
       return { hasPlan: false, planDetails: null };
     }
-
-    const response = await fetch(`/api/wallet?email=${encodeURIComponent(user.email)}`);
-    const data = await response.json();
-    
-    if (data.success && data.wallet) {
-      const wallet = data.wallet;
-      const hasActivePlan = data.hasActivePlan || false;
-      
-      // Check if plan is active and not expired
-      const planIsActive = hasActivePlan && 
-                          wallet.current_plan && 
-                          wallet.current_plan !== 'free' && 
-                          wallet.subscription_status === 'active';
-      
-      return {
-        hasPlan: planIsActive,
-        planDetails: planIsActive ? {
-          plan: wallet.current_plan,
-          planDisplayName: wallet.plan_display_name || wallet.current_plan,
-          billingPeriod: wallet.billing_period,
-          monthlyPrice: wallet.plan_monthly_price,
-          totalPrice: wallet.plan_total_price,
-          subscriptionStatus: wallet.subscription_status,
-          startDate: wallet.subscription_start_date,
-          endDate: wallet.subscription_end_date,
-          daysRemaining: wallet.subscription_end_date ? 
-            Math.ceil((new Date(wallet.subscription_end_date) - new Date()) / (1000 * 60 * 60 * 24)) : 0
-        } : null
-      };
-    }
-    
-    return { hasPlan: false, planDetails: null };
-  } catch (error) {
-    console.error('Error checking user plan:', error);
-    return { hasPlan: false, planDetails: null };
   }
-}
 
-
-
-// Add this global function to handle the add business click
-window.handleAddBusiness = async function() {
-  const user = await auth0Client.getUser();
-  const planStatus = await checkUserHasPlan();
-  
-  if (!planStatus.hasPlan) {
-    // Show modal/alert that they need a plan
-    showPlanRequiredModal();
-    return;
-  }
-  
-  // User has a plan, proceed with adding business
-  const userEmail = user?.email || '';
-  const userFirstName = user?.given_name || '';
-  const userLastName = user?.family_name || '';
-  
-  window.open(
-    `https://aigents.southafricanorth.azurecontainer.io/form/mkp-onboarding?Email=${encodeURIComponent(userEmail)}&First%20Name=${encodeURIComponent(userFirstName)}&Last%20Name=${encodeURIComponent(userLastName)}`,
-    '_blank'
-  );
-};
-
-// Add function to show plan required modal
-function showPlanRequiredModal() {
-  const modalHTML = `
-    <div id="planRequiredModal" class="modal" style="display: block;">
-      <div class="modal-content" style="max-width: 500px;">
-        <span class="close" onclick="document.getElementById('planRequiredModal').remove()">&times;</span>
-        <div style="text-align: center; padding: 20px;">
-          <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-          <h2 style="margin: 0 0 15px 0; color: #2c3e50;">Plan Required</h2>
-          <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
-            You need an active subscription plan to add more businesses to your account.
-          </p>
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-            <p style="margin: 0; font-size: 14px; color: #555;">
-              💡 <strong>Tip:</strong> Our plans start from as low as R99/month for 3 months and include credits for marketplace listings, AI-powered content creation, and more!
-            </p>
-          </div>
-          <div style="display: flex; gap: 10px; justify-content: center;">
-            <button class="btn-primary" onclick="document.getElementById('planRequiredModal').remove(); document.querySelector('[data-page=\\'pricing\\']').click();">
-              View Plans
-            </button>
-            <button class="btn-secondary" onclick="document.getElementById('planRequiredModal').remove()">
-              Maybe Later
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-  // Initialize global business selector
-  async function initializeGlobalBusinessSelector() {
-    const businesses = await fetchBusinessesByEmail();
-    const selectorContainer = document.getElementById('businessSelectorContainer');
-    const selector = document.getElementById('globalBusinessSelector');
+  // Add this global function to handle the add business click
+  window.handleAddBusiness = async function() {
+    const user = await auth0Client.getUser();
+    const planStatus = await checkUserHasPlan();
     
-    if (!businesses || businesses.length === 0) {
+    if (!planStatus.hasPlan) {
+      // Show modal/alert that they need a plan
+      showPlanRequiredModal();
       return;
     }
     
-    if (businesses.length === 1) {
-      // Single business - show as badge
-      selectorContainer.innerHTML = `
-        <div class="single-business-badge">
-          <div class="business-icon">${businesses[0].store_info?.name?.charAt(0) || 'B'}</div>
-          <span class="business-name">${businesses[0].store_info?.name || 'Business'}</span>
+    // User has a plan, proceed with adding business
+    const userEmail = user?.email || '';
+    const userFirstName = user?.given_name || '';
+    const userLastName = user?.family_name || '';
+    
+    window.open(
+      `https://aigents.southafricanorth.azurecontainer.io/form/mkp-onboarding?Email=${encodeURIComponent(userEmail)}&First%20Name=${encodeURIComponent(userFirstName)}&Last%20Name=${encodeURIComponent(userLastName)}`,
+      '_blank'
+    );
+  };
+
+  // Add function to show plan required modal
+  function showPlanRequiredModal() {
+    const modalHTML = `
+      <div id="planRequiredModal" class="modal" style="display: block;">
+        <div class="modal-content" style="max-width: 500px;">
+          <span class="close" onclick="document.getElementById('planRequiredModal').remove()">&times;</span>
+          <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+            <h2 style="margin: 0 0 15px 0; color: #2c3e50;">Plan Required</h2>
+            <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
+              You need an active subscription plan to add more businesses to your account.
+            </p>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+              <p style="margin: 0; font-size: 14px; color: #555;">
+                💡 <strong>Tip:</strong> Our plans start from as low as R99/month for 3 months and include credits for marketplace listings, AI-powered content creation, and more!
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button class="btn-primary" onclick="document.getElementById('planRequiredModal').remove(); document.querySelector('[data-page=\\'pricing\\']').click();">
+                View Plans
+              </button>
+              <button class="btn-secondary" onclick="document.getElementById('planRequiredModal').remove()">
+                Maybe Later
+              </button>
+            </div>
+          </div>
         </div>
-      `;
-      selectorContainer.style.display = 'flex';
-      
-      // Set as selected
-      window.dataManager.setSelectedBusiness(businesses[0]);
-    } else {
-      // Multiple businesses - show selector
-      selectorContainer.style.display = 'flex';
-      
-      // Get current selection or use first
-      const currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
-      
-      // Populate options
-      selector.innerHTML = businesses.map(b => `
-        <option value="${b._id}" ${currentBusiness?._id === b._id ? 'selected' : ''}>
-          ${b.store_info?.name || 'Unnamed Business'}
-        </option>
-      `).join('');
-      
-      // Handle selection changes
-      selector.onchange = async function(e) {
-        const selectedId = e.target.value;
-        const selectedBusiness = businesses.find(b => b._id === selectedId);
-        
-        if (selectedBusiness) {
-          // Update global selection
-          window.dataManager.setSelectedBusiness(selectedBusiness);
-          
-          // Also update switch dropdown if it exists
-          const switchSelector = document.getElementById('switchBusinessSelector');
-          if (switchSelector) {
-            switchSelector.value = selectedId;
-          }
-          
-          // Reload current page with new business context
-          if (currentPage) {
-            await loadPage(currentPage);
-          }
-          
-          console.log('Global business changed to:', selectedBusiness.store_info?.name);
-        }
-      };
-    }
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
   }
 
   // Initialize switch dropdown in sidebar
@@ -509,7 +439,6 @@ function showPlanRequiredModal() {
     const switchBusinessSelector = document.getElementById('switchBusinessSelector');
     const switchDropdownBtn = document.getElementById('switchDropdownBtn');
     const switchDropdownMenu = document.getElementById('switchDropdownMenu');
-    const manageBusinessesBtn = document.getElementById('manageBusinessesBtn');
     
     if (!businesses || businesses.length === 0) {
       // Hide the switch button if no businesses
@@ -558,12 +487,6 @@ function showPlanRequiredModal() {
           // Update global selection
           window.dataManager.setSelectedBusiness(selectedBusiness);
           
-          // Also update header selector if it exists
-          const globalSelector = document.getElementById('globalBusinessSelector');
-          if (globalSelector) {
-            globalSelector.value = selectedId;
-          }
-          
           // Reload current page with new business context
           if (currentPage) {
             await loadPage(currentPage);
@@ -573,22 +496,6 @@ function showPlanRequiredModal() {
           switchDropdownMenu.classList.remove('active');
           
           console.log('Switched to business:', selectedBusiness.store_info?.name);
-        }
-      });
-    }
-    
-    // Handle manage businesses button
-    if (manageBusinessesBtn) {
-      manageBusinessesBtn.addEventListener('click', function() {
-        // Navigate to business management page
-        loadPage('business');
-        switchDropdownMenu.classList.remove('active');
-        
-        // Update active nav item
-        navLinks.forEach((l) => l.classList.remove("active"));
-        const businessNavLink = document.querySelector('[data-page="business"]');
-        if (businessNavLink) {
-          businessNavLink.classList.add("active");
         }
       });
     }
@@ -696,15 +603,30 @@ function showPlanRequiredModal() {
     return `
       <link rel="stylesheet" href="css/simStyle.css">
       <div class="businesses-page">
-        <div class="page-header">
+        <div class="page-header" style="display: flex; align-items: center; gap: 15px; justify-content: space-between;">
           <h1 class="page-title">My Businesses</h1>
-          <button class="btn-primary" onclick="handleAddBusiness()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add Business
-          </button>
+          
+          <!-- Business Selector and Add Business Button - Side by Side -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            ${businesses.length > 1 ? `
+              <select id="pageBusinessSelector" style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; cursor: pointer;">
+                <option value="">All Businesses</option>
+                ${businesses.map(b => `
+                  <option value="${b._id}">
+                    ${b.store_info?.name || 'Unnamed Business'}
+                  </option>
+                `).join('')}
+              </select>
+            ` : ''}
+            
+            <button class="btn-primary" onclick="handleAddBusiness()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Business
+            </button>
+          </div>
         </div>
   
         <!-- Active Plan Banner -->
@@ -869,9 +791,24 @@ function showPlanRequiredModal() {
 
   async function initializePageFunctionality(page) {
     switch (page) {
-      case "dashboard":
-        // Dashboard functionality is handled by onclick events
-        break;
+    case "dashboard":
+  // Initialize business filter dropdown
+  const pageBusinessSelector = document.getElementById('pageBusinessSelector');
+  if (pageBusinessSelector) {
+    pageBusinessSelector.addEventListener('change', function() {
+      const selectedId = this.value;
+      const simCards = document.querySelectorAll('.sim-card');
+      
+      simCards.forEach(card => {
+        if (!selectedId || card.id === `business-${selectedId}`) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  }
+  break;
       case "marketplace":
         if (!window.__marketplaceLoaded) {
           try {
