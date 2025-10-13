@@ -43,7 +43,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: var(--background);
+  background-color: #2d2d2d
 }
 
 .login-card {

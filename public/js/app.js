@@ -45,7 +45,7 @@ const updateUI = async () => {
     if (loginBtn) {
       loginBtn.disabled = isAuthenticated;
       if (!isAuthenticated) {
-        loginBtn.textContent = "Log in";
+        loginBtn.textContent = "Click here to get started";
       }
     }
     
