@@ -37,6 +37,8 @@
       <button class="settings-tab active" data-tab="social">Social Media</button>
       <button class="settings-tab" data-tab="automation">Automation</button>
       <button class="settings-tab" data-tab="preferences">Preferences</button>
+      <button class="settings-tab" data-tab="profile">Profile</button>
+
     </div>
 
     <!-- Social Media Settings -->
@@ -185,7 +187,7 @@
       <button class="btn-danger btn-sm" onclick="disconnectPlatform('linkedin')">Disconnect</button>
     </div>
   </div>
-  
+
   </div>
 
       <div class="settings-actions">
@@ -268,7 +270,98 @@
       </div>
     </div>
 
-  </div>
+        <!-- Profile Panel -->
+        <div class="settings-panel" id="profile-panel">
+            <h2>Profile Information</h2>
+            
+            <!-- Auth0 User Profile -->
+            <div class="profile-section">
+              <h3 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                User Account
+              </h3>
+              
+              <div class="profile-card">
+                <div class="profile-header">
+                  <img id="profilePicture" src="" alt="Profile" class="profile-avatar" />
+                  <div>
+                    <h4 id="profileName">Loading...</h4>
+                    <p id="profileEmail" style="color: #666; margin: 4px 0 0 0;">Loading...</p>
+                  </div>
+                </div>
+                
+                <div class="profile-details">
+                  <div class="profile-detail-row">
+                    <span class="profile-label">User ID:</span>
+                    <span class="profile-value" id="profileSub">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Email Verified:</span>
+                    <span class="profile-value" id="profileEmailVerified">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Last Updated:</span>
+                    <span class="profile-value" id="profileUpdated">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Active Business Profile -->
+            <div class="profile-section" style="margin-top: 30px;">
+              <h3 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                Active Business Profile
+              </h3>
+              
+              <div class="profile-card">
+                <div class="profile-header">
+                  <img id="businessProfileLogo" src="" alt="Business Logo" class="profile-avatar" style="display: none;" />
+                  <div style="flex: 1;">
+                    <h4 id="businessProfileName">Loading...</h4>
+                    <p id="businessProfileCategory" style="color: #666; margin: 4px 0 0 0;">Category</p>
+                  </div>
+                </div>
+                
+                <div class="profile-details">
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Business ID:</span>
+                    <span class="profile-value mono" id="businessProfileId">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Email:</span>
+                    <span class="profile-value" id="businessProfileEmail">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Phone:</span>
+                    <span class="profile-value" id="businessProfilePhone">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Address:</span>
+                    <span class="profile-value" id="businessProfileAddress">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Created:</span>
+                    <span class="profile-value" id="businessProfileCreated">—</span>
+                  </div>
+                  <div class="profile-detail-row">
+                    <span class="profile-label">Last Updated:</span>
+                    <span class="profile-value" id="businessProfileUpdated">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      
+        </div>
+      </div>
+</div>
 </div>
 
 <style>
@@ -439,6 +532,103 @@
   font-size: 13px;
   color: #666;
   font-style: italic;
+}
+
+/* Profile Tab Styles */
+.profile-section {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+}
+
+.profile-header h4 {
+  margin: 0;
+  font-size: 20px;
+  color: #2c3e50;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f8f8f8;
+}
+
+.profile-detail-row:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+  flex: 0 0 40%;
+}
+
+.profile-value {
+  color: #666;
+  font-size: 14px;
+  text-align: right;
+  word-break: break-word;
+  flex: 1;
+}
+
+.profile-value.mono {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .profile-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .profile-label {
+    flex: none;
+  }
+  
+  .profile-value {
+    text-align: left;
+  }
 }
 
 @media (max-width: 768px) {

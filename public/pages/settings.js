@@ -121,6 +121,9 @@ async function loadBusinessSettings() {
       
       // Populate preferences
       populatePreferences();
+
+      populateProfileTab(); // Add this line
+
       
       showNotification('Settings loaded', 'success');
     } else {
@@ -461,7 +464,7 @@ function populateSocialConnections() {
       }
     });
   }
-  
+
 function populateAutomationSettings() {
   const webhookUrl = document.getElementById('n8nWebhookUrl');
   const apiKey = document.getElementById('n8nApiKey');
@@ -497,6 +500,50 @@ function populatePreferences() {
     autoPost.checked = businessSettings.posting_preferences.auto_post;
   }
 }
+
+function populateProfileTab() {
+    // Populate Auth0 User Profile
+    auth0Client.getUser().then(user => {
+      if (user) {
+        document.getElementById('profilePicture').src = user.picture || '/images/default-avatar.png';
+        document.getElementById('profileName').textContent = user.name || 'N/A';
+        document.getElementById('profileEmail').textContent = user.email || 'N/A';
+        document.getElementById('profileSub').textContent = user.sub || 'N/A';
+        document.getElementById('profileEmailVerified').textContent = user.email_verified ? 'Yes' : 'No';
+        
+        if (user.updated_at) {
+          document.getElementById('profileUpdated').textContent = new Date(user.updated_at).toLocaleString();
+        }
+      }
+    }).catch(error => {
+      console.error('Error loading user profile:', error);
+    });
+  
+    // Populate Active Business Profile
+    if (currentBusiness) {
+      document.getElementById('businessProfileId').textContent = currentBusiness._id || 'N/A';
+      document.getElementById('businessProfileName').textContent = currentBusiness.store_info?.name || 'N/A';
+      document.getElementById('businessProfileEmail').textContent = currentBusiness.personal_info?.email || 'N/A';
+      document.getElementById('businessProfilePhone').textContent = currentBusiness.personal_info?.phone || 'N/A';
+      document.getElementById('businessProfileAddress').textContent = currentBusiness.store_info?.address || 'N/A';
+      document.getElementById('businessProfileCategory').textContent = currentBusiness.store_info?.category || 'N/A';
+      
+      if (currentBusiness.created_at) {
+        document.getElementById('businessProfileCreated').textContent = new Date(currentBusiness.created_at).toLocaleString();
+      }
+      
+      if (currentBusiness.updated_at) {
+        document.getElementById('businessProfileUpdated').textContent = new Date(currentBusiness.updated_at).toLocaleString();
+      }
+  
+      // Display business logo
+      const businessProfileLogo = document.getElementById('businessProfileLogo');
+      if (businessProfileLogo && currentBusiness.media_files?.store_logo) {
+        businessProfileLogo.src = currentBusiness.media_files.store_logo;
+        businessProfileLogo.style.display = 'block';
+      }
+    }
+  }
 
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.settings-tab');
