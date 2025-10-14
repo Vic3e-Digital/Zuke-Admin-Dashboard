@@ -541,6 +541,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         case "business":
           content = await loadTestPage();
           break;
+           case "afaa":  
+        content = await loadAfaaPage();
+        break;
         case "creative":
           content = await loadCreativePage();
           break;
@@ -760,6 +763,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     return loadTestPage.cache;
   }
+  async function loadAfaaPage() {
+  if (!loadAfaaPage.cache) {
+    loadAfaaPage.cache = await fetch('pages/afaa.html').then(r => r.text());
+  }
+  return loadAfaaPage.cache;
+}
 
   async function loadCreativePage() {
     if (!loadCreativePage.cache) {
@@ -822,6 +831,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           import("../pages/marketplace.js").then(mod => mod.initMarketingPage());
         }
         break;
+
       case "business":
         if (!window.__testLoaded) {
           try {
@@ -835,6 +845,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           import("../pages/business.js").then(mod => mod.initTestPage());
         }
         break;
+         case "afaa":  // ADD THIS CASE
+      if (!window.__afaaLoaded) {
+        try {
+          const mod = await import("../pages/afaa.js");
+          mod.initAfaaPage();
+          window.__afaaLoaded = true;
+        } catch (error) {
+          console.error("Error loading AFAA page:", error);
+        }
+      } else {
+        import("../pages/afaa.js").then(mod => mod.initAfaaPage());
+      }
+      break;
       case "creative":
         if (!window.__creativeLoaded) {
           try {
