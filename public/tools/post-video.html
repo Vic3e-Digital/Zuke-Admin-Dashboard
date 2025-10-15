@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Video to Socials</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    .upload-box {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+      margin-bottom: 20px;
+    }
+    .upload-box:hover { border-color: #667eea; }
+    .upload-box.dragover { border-color: #667eea; background: #f0f4ff; }
+    #videoPreview { 
+      max-width: 100%; 
+      border-radius: 8px; 
+      margin-top: 15px; 
+      display: none;
+      max-height: 400px;
+    }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .platform-btn {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 12px;
+    }
+    .platform-btn:hover:not([disabled]) { border-color: #667eea; }
+    .platform-btn.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+      font-weight: 600;
+    }
+    .platform-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .cost { 
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .publish-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+    }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .progress { 
+      display: none; 
+      margin-top: 15px;
+      text-align: center;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .file-info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="upload-box" id="uploadBox">
+      <div style="font-size: 48px;">🎥</div>
+      <h3>Click or drag video here</h3>
+      <p style="color: #999; margin-top: 10px;">MP4, MOV, AVI (max 100MB)</p>
+      <input type="file" id="fileInput" accept="video/*" style="display: none;">
+      <video id="videoPreview" controls></video>
+      <div class="file-info" id="fileInfo" style="display: none;"></div>
+    </div>
+
+    <textarea id="caption" placeholder="Write your video caption/description... (optional)"></textarea>
+
+    <h4 style="margin-bottom: 10px;">Select Platforms:</h4>
+    <div class="platforms">
+      <button class="platform-btn" data-platform="facebook" data-cost="50">
+        📘<br>Facebook<br><small>R0.50</small>
+      </button>
+      <button class="platform-btn" data-platform="instagram" data-cost="50" disabled title="Instagram video requires special format">
+        📷<br>Instagram<br><small>(Limited)</small>
+      </button>
+      <button class="platform-btn" data-platform="linkedin" data-cost="100">
+        💼<br>LinkedIn<br><small>R1.00</small>
+      </button>
+      <button class="platform-btn" data-platform="youtube" data-cost="200">
+        🎥<br>YouTube<br><small>R2.00</small>
+      </button>
+    </div>
+
+    <div class="cost" id="costDisplay">Select platforms to see cost</div>
+
+    <button class="publish-btn" id="publishBtn" disabled>Publish Video to Selected Platforms</button>
+
+    <div class="progress" id="progress">
+      <p id="progressText">Uploading video...</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p id="progressPercent" style="margin-top: 8px; font-size: 14px; color: #666;">0%</p>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email');
+    const businessId = urlParams.get('businessId');
+    const businessName = urlParams.get('businessName');
+
+    let selectedFile = null;
+    let selectedPlatforms = [];
+
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const videoPreview = document.getElementById('videoPreview');
+    const fileInfo = document.getElementById('fileInfo');
+    const publishBtn = document.getElementById('publishBtn');
+    const costDisplay = document.getElementById('costDisplay');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+
+    // Cloudinary config - ⚠️ REPLACE THESE
+    const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
+    const CLOUDINARY_CLOUD_NAME = 'vic-3e';
+
+
+    // Upload handlers
+    uploadBox.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('dragover');
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('video/')) {
+        showStatus('Please select a video file', 'error');
+        return;
+      }
+
+      const maxSize = 100 * 1024 * 1024; // 100MB
+      if (file.size > maxSize) {
+        showStatus('Video file is too large. Maximum size is 100MB.', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        videoPreview.src = e.target.result;
+        videoPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.textContent = `📁 ${file.name} (${sizeMB} MB)`;
+      fileInfo.style.display = 'block';
+
+      updatePublishButton();
+    }
+
+    // Platform selection
+    document.querySelectorAll('.platform-btn:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const platform = btn.dataset.platform;
+        if (selectedPlatforms.includes(platform)) {
+          selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+        } else {
+          selectedPlatforms.push(platform);
+        }
+        updateCost();
+        updatePublishButton();
+      });
+    });
+
+    function updateCost() {
+      let total = 0;
+      selectedPlatforms.forEach(platform => {
+        const btn = document.querySelector(`[data-platform="${platform}"]`);
+        if (btn) total += parseInt(btn.dataset.cost);
+      });
+      costDisplay.textContent = selectedPlatforms.length > 0 
+        ? `Total Cost: R${(total / 100).toFixed(2)}` 
+        : 'Select platforms to see cost';
+    }
+
+    function updatePublishButton() {
+      publishBtn.disabled = !selectedFile || selectedPlatforms.length === 0;
+    }
+
+    // Publish
+    publishBtn.addEventListener('click', async () => {
+      if (!selectedFile || selectedPlatforms.length === 0) return;
+      
+      publishBtn.disabled = true;
+      progress.style.display = 'block';
+      status.style.display = 'none';
+
+      try {
+        // Upload to Cloudinary
+        progressText.textContent = 'Uploading video to cloud storage...';
+        
+        const videoUrl = await uploadToCloudinary(selectedFile);
+
+        if (!videoUrl) {
+          throw new Error('Failed to upload video');
+        }
+
+        console.log('✅ Video uploaded:', videoUrl);
+
+        // Post to social media
+        progressText.textContent = 'Publishing to social media...';
+        progressFill.style.width = '100%';
+        progressPercent.textContent = 'Processing...';
+
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: businessId,
+            userEmail: userEmail,
+            platforms: selectedPlatforms,
+            postContent: {
+              text: document.getElementById('caption').value,
+              video: videoUrl
+            }
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showStatus(
+            `✅ Video posted to ${result.platforms.join(', ')}!\n\n` +
+            `Cost: ${result.formatted_cost}\n` +
+            `New Balance: ${result.formatted_balance}`, 
+            'success'
+          );
+          setTimeout(() => resetForm(), 5000);
+        } else if (response.status === 402) {
+          throw new Error(
+            `Insufficient funds!\n\n` +
+            `Required: ${result.formatted_required}\n` +
+            `Balance: ${result.formatted_balance}\n\n` +
+            `Please add credits or upgrade.`
+          );
+        } else {
+          throw new Error(result.error || 'Failed to publish video');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        showStatus('❌ ' + error.message, 'error');
+      } finally {
+        progress.style.display = 'none';
+        publishBtn.disabled = false;
+      }
+    });
+
+    async function uploadToCloudinary(file) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const xhr = new XMLHttpRequest();
+        
+        // Track upload progress
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressFill.style.width = percentComplete + '%';
+            progressPercent.textContent = Math.round(percentComplete) + '%';
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.style.display = 'block';
+    }
+
+    function resetForm() {
+      selectedFile = null;
+      selectedPlatforms = [];
+      videoPreview.style.display = 'none';
+      videoPreview.src = '';
+      fileInfo.style.display = 'none';
+      document.getElementById('caption').value = '';
+      document.querySelectorAll('.platform-btn').forEach(btn => btn.classList.remove('selected'));
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      updateCost();
+      updatePublishButton();
+    }
+  </script>
+</body>
+</html>
