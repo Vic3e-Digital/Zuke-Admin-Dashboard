@@ -2,7 +2,6 @@
 let auth0Client = null;
 let currentBusiness = null;
 
-// Get Auth0 client
 async function getAuth0Client() {
   if (window.auth0Client) {
     return window.auth0Client;
@@ -24,7 +23,6 @@ async function getAuth0Client() {
   }
 }
 
-// Main function - runs when page loads
 export async function initAfaaPage() {
   const auth0Client = await getAuth0Client();
   if (!auth0Client) {
@@ -32,14 +30,12 @@ export async function initAfaaPage() {
     return;
   }
 
-  // Get modal elements
   const modal = document.getElementById("afaaModal");
   const modalTitle = document.getElementById("modalTitle");
   const iframe = document.getElementById("modalIframe");
   const closeBtn = document.getElementsByClassName("close")[0];
 
   try {
-    // Check if user is logged in
     const isAuthenticated = await auth0Client.isAuthenticated();
     if (!isAuthenticated) {
       console.error("User not authenticated");
@@ -47,23 +43,18 @@ export async function initAfaaPage() {
       return;
     }
 
-    // Get user info
     const user = await auth0Client.getUser();
     const userEmail = user.email || 'unknown';
     const userName = user.name || 'User';
 
-    // Get the selected business (NEW!)
     currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
     const businessName = currentBusiness?.store_info?.name || 'No Business';
     const businessId = currentBusiness?._id || '';
-    // const businessCase = currentBusiness?.initial_business_case.stin || '';
-    // const businessCase = JSON.stringify(currentBusiness?.initial_business_case?.stin || '');
     const businessCase = JSON.stringify(currentBusiness?.initial_business_case || {});
 
-    
     console.log("AFAA page loaded for:", businessName);
 
-    // Setup your buttons
+    // Setup buttons
     const buttons = [
       {
         btn: document.getElementById("afaaTool1Btn"),
@@ -82,8 +73,13 @@ export async function initAfaaPage() {
       },
       {
         btn: document.getElementById("afaaTool4Btn"),
-        title: "Develop Proposal",
-        url: `https://your-proposal-tool.com?email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}`
+        title: "Post Video to Socials",
+        url: `/tools/post-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("afaaTool5Btn"),
+        title: "Post Image to Socials",
+        url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       }
     ];
 

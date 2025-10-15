@@ -142,7 +142,8 @@ function getDefaultSettings() {
     social_media: {
       facebook: { connected: false, status: 'disconnected' },
       instagram: { connected: false, status: 'disconnected' },
-      linkedin: { connected: false, status: 'disconnected' }
+      linkedin: { connected: false, status: 'disconnected' },
+      youtube: { connected: false, status: 'disconnected' }
     },
     n8n_config: {
       webhook_url: '',
@@ -159,7 +160,7 @@ function getDefaultSettings() {
 
 
 function populateSocialConnections() {
-    const platforms = ['facebook', 'instagram', 'linkedin'];
+    const platforms = ['facebook', 'instagram', 'linkedin', 'youtube'];
     
     platforms.forEach(platform => {
       const settings = businessSettings.social_media?.[platform];
@@ -171,9 +172,10 @@ function populateSocialConnections() {
       } else if (platform === 'instagram') {
         prefix = 'ig';
       } else if (platform === 'linkedin') {
-        prefix = 'li'; // This is correct
+        prefix = 'li';
+      } else if (platform === 'youtube') {
+        prefix = 'yt';
       }
-      
       // Get UI elements
       const statusEl = document.getElementById(`${prefix}Status`);
       const badgeEl = document.getElementById(`${prefix}Badge`);
@@ -263,7 +265,63 @@ function populateSocialConnections() {
           if (expiry && settings.expires_at) {
             expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
           }
+        
+        // Add YouTube-specific population after the linkedin block:
+      } else if (platform === 'linkedin') {
+        // ✅ UPDATED: Populate LinkedIn organization details
+        const orgName = document.getElementById('liOrgName');
+        const vanityName = document.getElementById('liVanityName');
+        const orgId = document.getElementById('liOrgId');
+        const expiry = document.getElementById('liExpiry');
+        
+        if (orgName) {
+          orgName.textContent = settings.organization_name || '—';
         }
+        if (vanityName) {
+          if (settings.organization_vanity) {
+            vanityName.textContent = `linkedin.com/company/${settings.organization_vanity}`;
+            vanityName.style.fontFamily = 'monospace';
+            vanityName.style.fontSize = '13px';
+          } else {
+            vanityName.textContent = '—';
+          }
+        }
+        if (orgId) {
+          orgId.textContent = settings.organization_id || '—';
+        }
+        if (expiry && settings.expires_at) {
+          expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
+        }
+      } else if (platform === 'youtube') {
+        // ✅ YouTube population - MOVED OUT of LinkedIn block
+        const channelName = document.getElementById('ytChannelName');
+        const channelId = document.getElementById('ytChannelId');
+        const customUrl = document.getElementById('ytCustomUrl');
+        const subscribers = document.getElementById('ytSubscribers');
+        const expiry = document.getElementById('ytExpiry');
+        
+        if (channelName) channelName.textContent = settings.channel_name || '—';
+        if (channelId) channelId.textContent = settings.channel_id || '—';
+        if (customUrl) {
+          if (settings.custom_url) {
+            customUrl.textContent = settings.custom_url;
+            customUrl.style.fontFamily = 'monospace';
+            customUrl.style.fontSize = '13px';
+          } else {
+            customUrl.textContent = '—';
+          }
+        }
+        if (subscribers) {
+          if (settings.subscriber_count !== undefined) {
+            subscribers.textContent = formatNumber(settings.subscriber_count);
+          } else {
+            subscribers.textContent = '—';
+          }
+        }
+        if (expiry && settings.expires_at) {
+          expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
+        }
+      }
       } else {
         // Platform is not connected or disconnected
         if (statusEl) statusEl.textContent = 'Not Connected';
@@ -299,6 +357,16 @@ function populateAutomationSettings() {
   if (enabled && businessSettings.n8n_config?.enabled !== undefined) {
     enabled.checked = businessSettings.n8n_config.enabled;
   }
+}
+
+// Add this helper function
+function formatNumber(num) {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
 }
 
 function populatePreferences() {
@@ -399,6 +467,12 @@ function setupConnectionButtons() {
   if (liBtn) {
     liBtn.onclick = () => connectPlatform('linkedin');
   }
+
+  // YouTube
+  const ytBtn = document.getElementById('connectYouTubeBtn');
+  if (ytBtn) {
+    ytBtn.onclick = () => connectPlatform('youtube');
+  }
 }
 
 async function connectPlatform(platform) {
@@ -468,6 +542,22 @@ window.changeInstagramAccount = async function() {
     }
   };
 
+  window.changeYouTubeChannel = async function() {
+    try {
+      // Disconnect current channel
+      await disconnectPlatform('youtube');
+      
+      // Reconnect (will show channel selector if multiple)
+      setTimeout(() => {
+        connectPlatform('youtube');
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error changing YouTube channel:', error);
+      showNotification('Failed to change channel', 'error');
+    }
+  };
+  
 window.disconnectPlatform = async function(platform) {
   if (!confirm(`Are you sure you want to disconnect ${capitalize(platform)}?`)) {
     return;
