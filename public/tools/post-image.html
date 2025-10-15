@@ -101,16 +101,16 @@
 
     <h4 style="margin-bottom: 10px;">Select Platforms:</h4>
     <div class="platforms">
-      <button class="platform-btn" data-platform="facebook" data-cost="50">
-        📘<br>Facebook<br><small>R0.50</small>
+      <button class="platform-btn" data-platform="facebook" data-cost="5">
+        📘<br>Facebook<br><small>R5.00</small>
       </button>
-      <button class="platform-btn" data-platform="instagram" data-cost="50">
-        📷<br>Instagram<br><small>R0.50</small>
+      <button class="platform-btn" data-platform="instagram" data-cost="5">
+        📷<br>Instagram<br><small>R5.00</small>
       </button>
-      <button class="platform-btn" data-platform="linkedin" data-cost="100">
-        💼<br>LinkedIn<br><small>R1.00</small>
+      <button class="platform-btn" data-platform="linkedin" data-cost="5">
+        💼<br>LinkedIn<br><small>R5.00</small>
       </button>
-      <button class="platform-btn" data-platform="youtube" data-cost="200" style="opacity: 0.3; cursor: not-allowed;" disabled>
+      <button class="platform-btn" data-platform="youtube" data-cost="5" style="opacity: 0.3; cursor: not-allowed;" disabled>
         🎥<br>YouTube<br><small>(N/A)</small>
       </button>
     </div>
@@ -128,6 +128,7 @@
     const userEmail = urlParams.get('email');
     const businessId = urlParams.get('businessId');
     const businessName = urlParams.get('businessName');
+    const businessCase = urlParams.get('businessCase');
 
     let selectedFile = null;
     let selectedPlatforms = [];
@@ -198,7 +199,7 @@
         total += parseInt(btn.dataset.cost);
       });
       costDisplay.textContent = selectedPlatforms.length > 0 
-        ? `Total Cost: R${(total / 100).toFixed(2)}` 
+        ? `Total Cost: R${(total * 1).toFixed(2)}` 
         : 'Select platforms to see cost';
     }
 

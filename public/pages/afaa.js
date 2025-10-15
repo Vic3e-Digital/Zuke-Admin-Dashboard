@@ -74,7 +74,7 @@ export async function initAfaaPage() {
       {
         btn: document.getElementById("afaaTool4Btn"),
         title: "Post Video to Socials",
-        url: `/tools/post-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+        url: `/tools/post-video.htmle?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
       },
       {
         btn: document.getElementById("afaaTool5Btn"),
