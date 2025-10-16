@@ -343,7 +343,10 @@ body {
   overflow: auto;
   position: relative;
   padding: 1.5rem;
+  /* width: 100%; */
+  /* max-width: 100%; */
   margin-left: 250px;
+  /* margin-right: 250px; */
 }
 
 /* Business Cards Grid and New Pages Styles */
@@ -375,70 +378,6 @@ body {
   color: #666;
   font-size: 1rem;
   margin: 0;
-}
-
-.business-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.business-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
-  margin-bottom: 2rem;
-}
-
-.business-logo {
-  flex-shrink: 0;
-}
-
-/* Business Cards - Precise SIM Card with Border */
-.business-card {
-  background: #2d2d2d;
-  padding: 2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  border-radius: 0;
-  
-  clip-path: polygon(
-    0 0,
-    calc(100% - 45px) 0,
-    100% 45px,
-    100% 100%,
-    0 100%
-  );
-  
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
-}
-
-.business-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #fdfdfd;
-  border: 1px solid #e0e0e0;
-  clip-path: polygon(
-    0 0,
-    calc(100% - 45px) 0,
-    100% 45px,
-    100% 100%,
-    0 100%
-  );
-  pointer-events: none;
-  z-index: -1;
-}
-
-.business-card:hover {
-  transform: translateY(-4px);
-  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.12));
-}
-
-.business-card:hover::after {
-  border-color: #ff7b00;
 }
 
 .logo-placeholder {
@@ -597,7 +536,7 @@ body {
 }
 
 .tokens-button {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
+  background: linear-gradient(135deg, #ff8b00 0%, #ff7b00 100%);
   color: white;
   border: none;
   padding: 10px 16px;
@@ -623,24 +562,24 @@ body {
 }
 
 .topup-icon-btn {
-  background: #2ecc71;
-  color: white;
+  background: #f3f5f9;
+  color: #ff8b00;
   border: none;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  /* border-radius: 50%; */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+  /* box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3); */
 }
 
 .topup-icon-btn:hover {
-  background: #27ae60;
+  /* background: #27ae60; */
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.5);
+  /* box-shadow: 0 4px 12px rgba(46, 204, 113, 0.5); */
 }
 
 .topup-icon-btn:active {
@@ -901,265 +840,565 @@ body {
   color: var(--muted-foreground);
 }
 
-/* =============================================
-   MOBILE RESPONSIVE STYLES - CRITICAL FIXES
-   ============================================= */
+/* Page Container - Full Width Utilization */
+.page-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+}
 
+.page-container .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.page-container .sim-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Ensure cards take full width on mobile */
 @media (max-width: 768px) {
-  /* Dashboard grid changes on mobile */
-  .dashboard-container {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "header"
-      "content";
-  }
-
-  /* Header adjustments */
-  .header {
-    padding: 0 10px;
-    gap: 10px;
-  }
-
-  .header-right {
-    gap: 0.5rem;
-  }
-
-  .user-welcome {
-    display: none; /* Hide welcome text on small screens */
-  }
-
-  /* Wallet buttons smaller on mobile */
-  .wallet-container {
-    gap: 6px;
-  }
-  
-  .tokens-button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-  
-  .topup-icon-btn {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .topup-icon-btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .logout-button {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .logout-button span {
-    display: none; /* Hide "Logout" text, keep icon */
-  }
-
-  /* Sidebar positioning on mobile */
-  .sidebar {
-    position: fixed !important;
-    left: -250px;
-    top: 60px;
-    width: 250px;
-    height: calc(100vh - 60px);
-    z-index: 999;
-    background: white;
-    border-right: 1px solid #e0e0e0;
-    overflow: hidden;
-    transition: left 0.3s ease;
-    pointer-events: auto;
-  }
-
-  /* When sidebar is open on mobile */
-  .sidebar.mobile-open {
-    left: 0;
-    pointer-events: auto;
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Overlay behind sidebar */
-  .sidebar.mobile-open::before {
-    content: "";
-    position: fixed;
-    top: 60px;
-    left: 250px;
-    width: calc(100vw - 250px);
-    height: calc(100vh - 60px);
-    background: rgba(0, 0, 0, 0.3);
-    z-index: -1;
-  }
-
-  /* Ensure nav links are fully clickable */
-  .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    color: #1d1d1d;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border-right: 3px solid transparent;
-    pointer-events: auto !important;
-    cursor: pointer;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .nav-link:active {
-    background-color: #f8f9fa;
-  }
-
-  .nav-link.active {
-    background-color: #fdfce3;
-    color: #ff7b00;
-    border-right-color: #ff7b00;
-  }
-
-  /* User profile stays at bottom of sidebar */
-  .user-profile {
-    position: relative;
-    padding: 16px;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: auto;
-    pointer-events: auto;
-  }
-
-  /* Main content takes full width */
-  .main-content {
-    padding: 1rem;
-    margin-left: 0;
-  }
-
-  /* Page header responsive */
-  .page-header {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  /* Business cards responsive */
-  .business-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  .page-container {
     padding: 0;
   }
 
-  /* Modal adjustments */
-  .modal-content {
-    width: 95%;
-    margin: 10% auto;
+  .page-container .sim-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem;
   }
 
-  /* Business detail adjustments */
-  .business-detail-view {
+  .page-container .page-header {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Improve modal for AFAA */
+#afaaModal .modal-content {
+  width: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
+  padding: 20px;
+}
+
+#afaaModal #modalIframe {
+  width: 100%;
+  height: 70vh;
+  border: none;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  #afaaModal .modal-content {
+    width: 98%;
     padding: 15px;
   }
-}
 
-/* Very small mobile screens */
-@media (max-width: 480px) {
-  .main-content {
-    padding: 0.75rem;
-  }
-
-  .page-title {
-    font-size: 1.25rem;
-  }
-
-  .business-card {
-    padding: 1.5rem;
-  }
-
-  .tokens-button {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .logout-button svg {
-    width: 14px;
-    height: 14px;
+  #afaaModal #modalIframe {
+    height: 60vh;
   }
 }
-
-/* Tablets and medium devices */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .dashboard-container {
-    grid-template-columns: 200px 1fr;
-  }
-
-  .sidebar {
-    width: 200px;
-  }
-
-  .main-content {
-    margin-left: 200px;
-  }
-
-  .business-cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
-/* Desktop - ensure sidebar is always visible */
-@media (min-width: 769px) {
-  .sidebar {
-    position: fixed !important;
-    left: 0 !important;
-    top: 60px !important;
-    width: 250px !important;
-    height: calc(100vh - 60px) !important;
-    z-index: 10 !important;
-  }
-
-  .sidebar.mobile-open {
-    left: 0 !important;
-  }
-
-  .sidebar.mobile-open::before {
+/* =============================================
+   SIDEBAR OVERLAY FOR MOBILE
+   ============================================= */
+   .sidebar-overlay {
     display: none;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
-
-  .user-profile {
-    position: relative !important;
-    bottom: auto !important;
-    left: auto !important;
+  
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
   }
-
-  .main-content {
-    margin-left: 250px;
+  
+  /* Prevent body scroll when sidebar is open on mobile */
+  body.sidebar-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
   }
-}
-
-/* Collapsed sidebar state on desktop */
-@media (min-width: 769px) {
-  .dashboard-container.sidebar-collapsed .sidebar {
-    width: 60px !important;
+  
+  /* =============================================
+     MOBILE RESPONSIVE - CRITICAL FIXES
+     ============================================= */
+  
+  @media (max-width: 768px) {
+    /* Dashboard grid changes on mobile */
+    .dashboard-container {
+      grid-template-columns: 1fr !important;
+      grid-template-areas:
+        "header"
+        "content" !important;
+      grid-template-rows: 60px 1fr;
+    }
+  
+    /* Header adjustments */
+    .header {
+      padding: 0 8px;
+      gap: 8px;
+      height: 60px;
+    }
+  
+    .header-right {
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+  
+    .user-welcome {
+      display: none;
+    }
+  
+    /* Logo size adjustment */
+    .header img[alt="Zuke Logo"] {
+      height: 36px !important;
+    }
+  
+    /* Wallet buttons smaller on mobile */
+    .wallet-container {
+      gap: 4px;
+    }
+    
+    .tokens-button {
+      padding: 6px 10px;
+      font-size: 11px;
+      min-width: auto;
+      white-space: nowrap;
+    }
+  
+    .tokens-button svg {
+      width: 14px;
+      height: 14px;
+    }
+    
+    #walletBalance {
+      font-size: 11px;
+    }
+    
+    .topup-icon-btn {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+    
+    .topup-icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  
+    .logout-button {
+      padding: 6px 10px;
+      gap: 4px;
+      min-width: auto;
+      font-size: 12px;
+    }
+  
+    .logout-button svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+  
+    .logout-button span {
+      display: none; /* Hide text, keep icon only */
+    }
+  
+    /* Sidebar positioning on mobile - FIXED */
+    .sidebar {
+      position: fixed !important;
+      left: -250px; /* Hidden by default */
+      top: 60px;
+      width: 250px;
+      height: calc(100vh - 60px);
+      z-index: 999;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: left 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: none;
+    }
+  
+    /* When sidebar is open on mobile */
+    .sidebar.mobile-open {
+      left: 0 !important;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+    }
+  
+    /* Ensure nav links are fully clickable and visible */
+    .nav-menu {
+      padding: 20px 0;
+    }
+  
+    .nav-link {
+      display: flex !important;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: #1d1d1d;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-right: 3px solid transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+      touch-action: manipulation;
+    }
+  
+    .nav-text {
+      display: inline-block !important;
+      opacity: 1 !important;
+      width: auto !important;
+      overflow: visible !important;
+    }
+  
+    .nav-link:active {
+      background-color: #f0f0f0;
+    }
+  
+    .nav-link.active {
+      background-color: #fdfce3;
+      color: #ff7b00;
+      border-right-color: #ff7b00;
+    }
+  
+    /* User profile at bottom */
+    .user-profile {
+      position: relative;
+      padding: 16px 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      margin-top: auto;
+    }
+  
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+  
+    .switch-dropdown-container {
+      display: flex;
+      align-items: center;
+    }
+  
+    .settings-icon-btn {
+      flex-shrink: 0;
+    }
+  
+    /* Main content takes full width */
+    .main-content {
+      margin-left: 0 !important;
+      padding: 1rem;
+      width: 100%;
+    }
+  
+    /* Page header responsive */
+    .page-header {
+      flex-direction: column;
+      gap: 15px;
+      align-items: flex-start;
+      padding-bottom: 0.75rem;
+    }
+  
+    .page-header > div[style*="flex"] {
+      flex-direction: column;
+      width: 100%;
+      gap: 10px !important;
+      align-items: stretch !important;
+    }
+  
+    .page-header select,
+    .page-header button {
+      width: 100% !important;
+    }
+  
+    .page-title {
+      font-size: 1.5rem;
+      line-height: 1.2;
+    }
+  
+    .page-subtitle {
+      font-size: 0.875rem;
+    }
+  
+    /* Business cards responsive */
+    .business-cards-grid,
+    .sim-cards-grid {
+      grid-template-columns: 1fr !important;
+      gap: 1rem;
+      padding: 0;
+      margin-top: 1rem;
+    }
+  
+    .business-card,
+    .sim-card {
+      padding: 1.25rem;
+    }
+  
+    .sim-card {
+      /* Adjust SIM card clip-path corner for mobile */
+      clip-path: polygon(
+        0 0,
+        calc(100% - 35px) 0,
+        100% 35px,
+        100% 100%,
+        0 100%
+      );
+    }
+  
+    .sim-card::after {
+      clip-path: polygon(
+        0 0,
+        calc(100% - 35px) 0,
+        100% 35px,
+        100% 100%,
+        0 100%
+      );
+    }
+  
+    .business-card-header {
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+  
+    .logo-placeholder {
+      width: 50px;
+      height: 50px;
+      font-size: 1.25rem;
+    }
+  
+    .business-name,
+    .sim-name {
+      font-size: 1.125rem;
+    }
+  
+    .business-description,
+    .sim-description {
+      font-size: 0.875rem;
+    }
+  
+    /* Modal adjustments */
+    .modal-content {
+      width: 95%;
+      margin: 5% auto;
+      max-height: 85vh;
+      padding: 20px;
+    }
+  
+    /* Business detail adjustments */
+    .business-detail-view {
+      padding: 15px;
+    }
+  
+    .business-detail-view > div[style*="grid"] {
+      grid-template-columns: 1fr !important;
+    }
+  
+    /* Business overview grid */
+    .business-overview {
+      padding: 15px;
+      margin-top: 20px !important;
+    }
+  
+    .business-overview > div[style*="grid"] {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 15px !important;
+    }
+  
+    /* Search section */
+    .search-section {
+      margin: 1.5rem 0;
+    }
+  
+    .search-input {
+      padding: 12px 12px 12px 44px;
+      font-size: 14px;
+    }
+  
+    /* Stats in business cards */
+    .business-stats {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  
+    .stat-item {
+      padding: 0.625rem;
+    }
+  
+    /* Empty state */
+    .empty-state {
+      padding: 40px 20px;
+    }
+  
+    .empty-state h2 {
+      font-size: 1.25rem;
+    }
+  
+    .empty-state p {
+      font-size: 0.875rem;
+    }
+  
+    /* Plan banners responsive */
+    div[style*="gradient(135deg, #667eea"] {
+      flex-direction: column !important;
+      gap: 15px !important;
+      padding: 15px !important;
+    }
+  
+    div[style*="gradient(135deg, #667eea"] button {
+      width: 100% !important;
+    }
+  
+    /* Improve touch targets */
+    button,
+    a,
+    .nav-link {
+      min-height: 44px; /* Apple's recommended touch target size */
+    }
+  
+    /* Prevent zoom on input focus (iOS) */
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
-
-  .dashboard-container.sidebar-collapsed .main-content {
-    margin-left: 60px;
+  
+  /* Very small mobile screens (iPhone SE, etc.) */
+  @media (max-width: 375px) {
+    .header {
+      padding: 0 6px;
+      gap: 6px;
+    }
+  
+    .header img[alt="Zuke Logo"] {
+      height: 32px !important;
+    }
+  
+    .tokens-button {
+      padding: 5px 8px;
+      font-size: 10px;
+    }
+  
+    .topup-icon-btn {
+      width: 28px;
+      height: 28px;
+    }
+  
+    .logout-button {
+      padding: 6px 8px;
+    }
+  
+    .page-title {
+      font-size: 1.25rem;
+    }
+  
+    .business-card,
+    .sim-card {
+      padding: 1rem;
+    }
+  
+    .main-content {
+      padding: 0.75rem;
+    }
+  
+    .business-overview > div[style*="grid"] {
+      grid-template-columns: 1fr !important;
+    }
   }
-
-  .dashboard-container.sidebar-collapsed .nav-menu {
-    padding: 20px 0;
+  
+  /* Tablets and medium devices */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .dashboard-container {
+      grid-template-columns: 200px 1fr;
+    }
+  
+    .sidebar {
+      width: 200px;
+    }
+  
+    .business-cards-grid,
+    .sim-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
   }
-
-  .dashboard-container.sidebar-collapsed .user-profile {
-    flex-direction: column;
-    padding: 12px;
-    gap: 8px;
+  
+  /* Desktop - ensure sidebar is always visible */
+  @media (min-width: 769px) {
+    .sidebar {
+      position: fixed !important;
+      left: 0 !important;
+      top: 60px !important;
+      width: 250px !important;
+      height: calc(100vh - 60px) !important;
+      z-index: 10 !important;
+    }
+  
+    .sidebar-overlay {
+      display: none !important;
+    }
+  
+    .main-content {
+      margin-left: 250px;
+    }
+  
+    /* Collapsed sidebar state */
+    .dashboard-container.sidebar-collapsed .sidebar {
+      width: 60px !important;
+    }
+  
+    .dashboard-container.sidebar-collapsed .main-content {
+      margin-left: 60px;
+    }
+  
+    .dashboard-container.sidebar-collapsed .nav-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+  
+    .dashboard-container.sidebar-collapsed .nav-link {
+      justify-content: center;
+      padding: 12px;
+    }
+  
+    .dashboard-container.sidebar-collapsed .user-profile {
+      flex-direction: column;
+      padding: 12px;
+      gap: 8px;
+    }
+  
+    .dashboard-container.sidebar-collapsed .switch-dropdown-container,
+    .dashboard-container.sidebar-collapsed .settings-icon-btn {
+      display: none;
+    }
   }
-
-  .dashboard-container.sidebar-collapsed .switch-dropdown-container,
-  .dashboard-container.sidebar-collapsed .settings-icon-btn {
-    display: none;
+  
+  /* Remove tap highlight on all devices */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
-}
+  
+  /* Improve button touch */
+  button {
+    touch-action: manipulation;
+  }
