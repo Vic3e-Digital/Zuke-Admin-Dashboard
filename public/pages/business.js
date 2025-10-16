@@ -53,7 +53,7 @@ export async function initTestPage() {
     await new Promise(resolve => setTimeout(resolve, 100));
   }
 
-  const auth0Client = await getAuth0Client();
+  const auth0Client = await getAuth0Client(); 
   
   if (!auth0Client) {
     console.error("Failed to get Auth0 client");

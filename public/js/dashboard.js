@@ -1066,89 +1066,138 @@ if (!isAdmin) {
     }
   };
 
-  function setupEventListeners() {
-    hamburgerMenu.addEventListener("click", () => {
-      toggleSidebar();
+  // function setupEventListeners() {
+  //   hamburgerMenu.addEventListener("click", () => {
+  //     toggleSidebar();
+  //   });
+
+function setupEventListeners() {
+  // Create overlay if it doesn't exist
+  let sidebarOverlay = document.getElementById('sidebarOverlay');
+  if (!sidebarOverlay) {
+    sidebarOverlay = document.createElement('div');
+    sidebarOverlay.id = 'sidebarOverlay';
+    sidebarOverlay.className = 'sidebar-overlay';
+    document.body.appendChild(sidebarOverlay);
+  }
+  
+  // Hamburger menu toggle
+  hamburgerMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleSidebar();
+  });
+  
+    // Close sidebar when clicking overlay
+    sidebarOverlay.addEventListener('click', () => {
+      closeMobileSidebar();
+    });
+  
+    // Close sidebar when clicking nav links on mobile
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          setTimeout(() => {
+            closeMobileSidebar();
+          }, 100); // Small delay to ensure navigation happens first
+        }
+      });
     });
 
-    document.addEventListener("click", (e) => {
+
+    // document.addEventListener("click", (e) => {
+    //   if (window.innerWidth <= 768) {
+    //     if (!sidebar.contains(e.target) && !hamburgerMenu.contains(e.target)) {
+    //       closeMobileSidebar();
+    //     }
+    //   }
+    // });
+
+   // Settings button
+  if (settingsButton) {
+    settingsButton.addEventListener("click", () => {
+      loadPage('settings');
+      navLinks.forEach((l) => l.classList.remove("active"));
+      const settingsNavItem = document.querySelector('[data-page="settings"]');
+      if (settingsNavItem) {
+        settingsNavItem.classList.add("active");
+      }
+      
       if (window.innerWidth <= 768) {
-        if (!sidebar.contains(e.target) && !hamburgerMenu.contains(e.target)) {
-          closeMobileSidebar();
-        }
+        closeMobileSidebar();
       }
     });
+  }
 
-    // Settings button click handler
-    if (settingsButton) {
-      settingsButton.addEventListener("click", () => {
-        loadPage('settings');
-        
-        // Update active nav item
-        navLinks.forEach((l) => l.classList.remove("active"));
-        const settingsNavItem = document.querySelector('[data-page="settings"]');
-        if (settingsNavItem) {
-          settingsNavItem.classList.add("active");
+    // Top-up button
+  const topupButton = document.getElementById('topupButton');
+  if (topupButton) {
+    topupButton.addEventListener('click', () => {
+      loadPage('topup');
+      navLinks.forEach((link) => link.classList.remove("active"));
+      const topupNavItem = document.querySelector('[data-page="topup"]');
+      if (topupNavItem) {
+        topupNavItem.classList.add("active");
+      }
+    });
+  }
+
+  // Logout
+  logoutButton.addEventListener("click", () => {
+    if (auth0Client) {
+      sessionStorage.clear();
+      localStorage.clear();
+      if (window.dataManager) {
+        window.dataManager.clearCache();
+      }
+      auth0Client.logout({
+        logoutParams: {
+          returnTo: window.location.origin
         }
       });
     }
+  });
 
-    // Top-up button handler
-    const topupButton = document.getElementById('topupButton');
-    if (topupButton) {
-      topupButton.addEventListener('click', () => {
-        // Navigate to topup page
-        loadPage('topup');
-        
-        // Update active nav item
-        navLinks.forEach((link) => link.classList.remove("active"));
-        const topupNavItem = document.querySelector('[data-page="topup"]');
-        if (topupNavItem) {
-          topupNavItem.classList.add("active");
-        }
-      });
-    }
-
-    // Logout
-    logoutButton.addEventListener("click", () => {
-      if (auth0Client) {
-        console.log("Logging out...");
-        // Clear all session and local storage
-        sessionStorage.clear();
-        localStorage.clear();
-        
-        // Clear business data
-        if (window.dataManager) {
-          window.dataManager.clearCache();
-        }
-        
-        auth0Client.logout({
-          logoutParams: {
-            returnTo: window.location.origin
-          }
-        });
-      }
-    });
-
-    // Handle window resize
-    window.addEventListener("resize", () => {
+  // Handle window resize
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
       if (window.innerWidth > 768) {
-        sidebar.classList.remove("mobile-open");
+        closeMobileSidebar();
       }
-    });
-  }
+    }, 250);
+  });
+}
 
-  function toggleSidebar() {
-    if (window.innerWidth <= 768) {
-      sidebar.classList.toggle("mobile-open");
+function toggleSidebar() {
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  
+  if (window.innerWidth <= 768) {
+    // Mobile behavior
+    const isOpening = !sidebar.classList.contains("mobile-open");
+    
+    sidebar.classList.toggle("mobile-open");
+    sidebarOverlay?.classList.toggle("active");
+    
+    // Prevent body scroll when sidebar is open
+    if (isOpening) {
+      document.body.classList.add('sidebar-open');
     } else {
-      dashboardContainer.classList.toggle("sidebar-collapsed");
+      document.body.classList.remove('sidebar-open');
     }
+  } else {
+    // Desktop behavior - collapse sidebar
+    dashboardContainer.classList.toggle("sidebar-collapsed");
   }
+}
 
-  function closeMobileSidebar() {
-    sidebar.classList.remove("mobile-open");
-  }
+function closeMobileSidebar() {
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  
+  sidebar.classList.remove("mobile-open");
+  sidebarOverlay?.classList.remove("active");
+  document.body.classList.remove('sidebar-open');
+}
 
   // Make loadPage available globally for navigation
   window.loadPage = loadPage;
