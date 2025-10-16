@@ -213,6 +213,7 @@ body {
   color: #1d1d1d;
 }
 
+/* FIXED SIDEBAR - No scrolling */
 .sidebar {
   grid-area: sidebar;
   background: white;
@@ -221,19 +222,43 @@ body {
   flex-direction: column;
   transition: all 0.3s ease;
   overflow: hidden;
+  height: 100vh;
+  position: fixed;
+  width: 250px;
 }
 
 .sidebar-content {
-  flex: 1;
-  padding: 20px 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
+  padding: 0;
 }
 
 .nav-menu {
   list-style: none;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 0;
+}
+
+/* Hide scrollbar but keep functionality */
+.nav-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav-menu::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.nav-menu::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
 }
 
 .nav-item {
@@ -282,6 +307,7 @@ body {
   padding: 12px;
 }
 
+/* User profile fixed at bottom */
 .user-profile {
   display: flex;
   align-items: center;
@@ -289,6 +315,8 @@ body {
   padding: 20px;
   border-top: 1px solid #e0e0e0;
   margin-top: auto;
+  flex-shrink: 0;
+  background: white;
 }
 
 .user-avatar {
@@ -315,6 +343,7 @@ body {
   overflow: auto;
   position: relative;
   padding: 1.5rem;
+  margin-left: 250px;
 }
 
 /* Business Cards Grid and New Pages Styles */
@@ -938,7 +967,7 @@ body {
     z-index: 999;
     background: white;
     border-right: 1px solid #e0e0e0;
-    overflow-y: auto;
+    overflow: hidden;
     transition: left 0.3s ease;
     pointer-events: auto;
   }
@@ -1002,6 +1031,7 @@ body {
   /* Main content takes full width */
   .main-content {
     padding: 1rem;
+    margin-left: 0;
   }
 
   /* Page header responsive */
@@ -1065,6 +1095,14 @@ body {
     grid-template-columns: 200px 1fr;
   }
 
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    margin-left: 200px;
+  }
+
   .business-cards-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
@@ -1073,16 +1111,16 @@ body {
 /* Desktop - ensure sidebar is always visible */
 @media (min-width: 769px) {
   .sidebar {
-    position: static !important;
-    left: auto !important;
-    top: auto !important;
-    width: auto !important;
-    height: auto !important;
-    z-index: auto !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 60px !important;
+    width: 250px !important;
+    height: calc(100vh - 60px) !important;
+    z-index: 10 !important;
   }
 
   .sidebar.mobile-open {
-    left: auto !important;
+    left: 0 !important;
   }
 
   .sidebar.mobile-open::before {
@@ -1093,5 +1131,35 @@ body {
     position: relative !important;
     bottom: auto !important;
     left: auto !important;
+  }
+
+  .main-content {
+    margin-left: 250px;
+  }
+}
+
+/* Collapsed sidebar state on desktop */
+@media (min-width: 769px) {
+  .dashboard-container.sidebar-collapsed .sidebar {
+    width: 60px !important;
+  }
+
+  .dashboard-container.sidebar-collapsed .main-content {
+    margin-left: 60px;
+  }
+
+  .dashboard-container.sidebar-collapsed .nav-menu {
+    padding: 20px 0;
+  }
+
+  .dashboard-container.sidebar-collapsed .user-profile {
+    flex-direction: column;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .dashboard-container.sidebar-collapsed .switch-dropdown-container,
+  .dashboard-container.sidebar-collapsed .settings-icon-btn {
+    display: none;
   }
 }
