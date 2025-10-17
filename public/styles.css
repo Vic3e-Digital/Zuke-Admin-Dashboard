@@ -34,6 +34,9 @@ body {
   background-color: #f3f5f9;
   color: #1d1d1d;
   line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 /* Login Page Styles */
@@ -142,24 +145,26 @@ body {
   margin: 0.25rem 0;
 }
 
-/* Dashboard Styles */
-.dashboard-container {
-  display: grid;
-  grid-template-areas:
-    "header header"
-    "sidebar content";
-  grid-template-columns: 250px 1fr;
-  grid-template-rows: 60px 1fr;
-  height: 100vh;
-  transition: grid-template-columns 0.3s ease;
-}
+/* =============================================
+   DASHBOARD LAYOUT - FIXED
+   ============================================= */
 
-.dashboard-container.sidebar-collapsed {
-  grid-template-columns: 60px 1fr;
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .header {
-  grid-area: header;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
   background: #f3f5f9;
   border-bottom: 1px solid #1f1f1f;
   display: flex;
@@ -213,18 +218,20 @@ body {
   color: #1d1d1d;
 }
 
-/* FIXED SIDEBAR - No scrolling */
+/* SIDEBAR - DESKTOP FIXED POSITIONING */
 .sidebar {
-  grid-area: sidebar;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 250px;
+  height: calc(100vh - 60px);
   background: white;
   border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
   overflow: hidden;
-  height: 100vh;
-  position: fixed;
-  width: 250px;
+  z-index: 50;
 }
 
 .sidebar-content {
@@ -296,17 +303,6 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.dashboard-container.sidebar-collapsed .nav-text {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
-.dashboard-container.sidebar-collapsed .nav-link {
-  justify-content: center;
-  padding: 12px;
-}
-
 /* User profile fixed at bottom */
 .user-profile {
   display: flex;
@@ -337,19 +333,52 @@ body {
   object-fit: cover;
 }
 
+/* MAIN CONTENT - DESKTOP */
 .main-content {
-  grid-area: content;
+  position: fixed;
+  top: 60px;
+  left: 250px;
+  right: 0;
+  bottom: 0;
   background: #f3f5f9;
-  overflow: auto;
-  position: relative;
-  padding: 1.5rem;
-  /* width: 100%; */
-  /* max-width: 100%; */
-  margin-left: 250px;
-  /* margin-right: 250px; */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
 }
 
-/* Business Cards Grid and New Pages Styles */
+/* COLLAPSED SIDEBAR STATE - DESKTOP */
+.dashboard-container.sidebar-collapsed .sidebar {
+  width: 60px;
+}
+
+.dashboard-container.sidebar-collapsed .main-content {
+  left: 60px;
+}
+
+.dashboard-container.sidebar-collapsed .nav-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.dashboard-container.sidebar-collapsed .nav-link {
+  justify-content: center;
+  padding: 12px;
+}
+
+.dashboard-container.sidebar-collapsed .user-profile {
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+}
+
+.dashboard-container.sidebar-collapsed .switch-dropdown-container,
+.dashboard-container.sidebar-collapsed .settings-icon-btn {
+  display: none;
+}
+
+/* Business Cards Grid and Pages Styles */
 .businesses-container {
   padding: 0;
 }
@@ -360,6 +389,7 @@ body {
   align-items: flex-start;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
+  margin-left: 4rem;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -371,7 +401,8 @@ body {
   font-size: 2rem;
   font-weight: 700;
   color: #2d2d2d;
-  margin: 0 0 0.5rem 0;
+  margin: left;
+
 }
 
 .page-subtitle {
@@ -406,6 +437,8 @@ body {
   margin: 0 0 0.75rem 0;
   line-height: 1.3;
 }
+
+
 
 .business-description {
   color: #666;
@@ -567,19 +600,15 @@ body {
   border: none;
   width: 36px;
   height: 36px;
-  /* border-radius: 50%; */
   display: flex;
   align-items: center;
   justify-content: left;
   cursor: pointer;
   transition: all 0.3s;
-  /* box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3); */
 }
 
 .topup-icon-btn:hover {
-  /* background: #27ae60; */
   transform: scale(1.1);
-  /* box-shadow: 0 4px 12px rgba(46, 204, 113, 0.5); */
 }
 
 .topup-icon-btn:active {
@@ -829,9 +858,10 @@ body {
 }
 
 .businesses-page {
-  padding: 30px 0;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 1.5rem;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
 }
 
 .empty-state {
@@ -843,8 +873,8 @@ body {
 /* Page Container - Full Width Utilization */
 .page-container {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
 }
 
@@ -865,22 +895,6 @@ body {
   width: 100%;
 }
 
-/* Ensure cards take full width on mobile */
-@media (max-width: 768px) {
-  .page-container {
-    padding: 0;
-  }
-
-  .page-container .sim-cards-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.5rem;
-  }
-
-  .page-container .page-header {
-    margin-bottom: 1.5rem;
-  }
-}
-
 /* Improve modal for AFAA */
 #afaaModal .modal-content {
   width: 95%;
@@ -896,7 +910,378 @@ body {
   border-radius: 8px;
 }
 
+/* =============================================
+   SIDEBAR OVERLAY FOR MOBILE
+   ============================================= */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 60px);
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Prevent body scroll when sidebar is open on mobile */
+body.sidebar-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* =============================================
+   MOBILE RESPONSIVE
+   ============================================= */
+
 @media (max-width: 768px) {
+  /* Header adjustments */
+  .header {
+    padding: 0 8px;
+    gap: 8px;
+    height: 60px;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
+  .user-welcome {
+    display: none;
+  }
+
+  /* Logo size adjustment */
+  .header img[alt="Zuke Logo"] {
+    height: 36px !important;
+  }
+
+  /* Wallet buttons smaller on mobile */
+  .wallet-container {
+    gap: 4px;
+  }
+  
+  .tokens-button {
+    padding: 6px 10px;
+    font-size: 11px;
+    min-width: auto;
+    white-space: nowrap;
+  }
+
+  .tokens-button svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  #walletBalance {
+    font-size: 11px;
+  }
+  
+  .topup-icon-btn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  
+  .topup-icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .logout-button {
+    padding: 6px 10px;
+    gap: 4px;
+    min-width: auto;
+    font-size: 12px;
+  }
+
+  .logout-button svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .logout-button span {
+    display: none;
+  }
+
+  /* SIDEBAR - MOBILE OVERLAY */
+  .sidebar {
+    position: fixed !important;
+    left: -250px;
+    top: 60px;
+    width: 250px;
+    height: calc(100vh - 60px);
+    z-index: 999;
+    background: white;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: left 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    left: 0 !important;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* MAIN CONTENT - MOBILE FULL WIDTH */
+  .main-content {
+    position: fixed;
+    top: 60px;
+    left: 0 !important;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0;
+  }
+
+  /* Ensure nav links are fully clickable */
+  .nav-menu {
+    padding: 20px 0;
+  }
+
+  .nav-link {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    touch-action: manipulation;
+  }
+
+  .nav-text {
+    display: inline-block !important;
+    opacity: 1 !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
+
+  .nav-link:active {
+    background-color: #f0f0f0;
+  }
+
+  /* User profile at bottom */
+  .user-profile {
+    position: relative;
+    padding: 16px 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .switch-dropdown-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .settings-icon-btn {
+    flex-shrink: 0;
+  }
+
+  .businesses-page {
+    padding: 1rem;
+  }
+
+
+  #marketingMainContent {
+  margin-left: 100px;
+  margin-top: 40px;
+  padding: 20px;
+}
+
+
+  /* Page header responsive */
+  .page-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+    padding-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .page-header > div[style*="flex"] {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+
+  .page-header select,
+  .page-header button {
+    width: 100% !important;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+  }
+
+  /* Business cards responsive */
+  .business-cards-grid,
+  .sim-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .business-card,
+  .sim-card {
+    padding: 1.25rem;
+  }
+
+  .sim-card {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 35px) 0,
+      100% 35px,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .sim-card::after {
+    clip-path: polygon(
+      0 0,
+      calc(100% - 35px) 0,
+      100% 35px,
+      100% 100%,
+      0 100%
+    );
+  }
+
+  .business-card-header {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .logo-placeholder {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+
+  .business-name,
+  .sim-name {
+    font-size: 1.125rem;
+  }
+
+  .business-description,
+  .sim-description {
+    font-size: 0.875rem;
+  }
+
+  /* Modal adjustments */
+  .modal-content {
+    width: 95%;
+    margin: 5% auto;
+    max-height: 85vh;
+    padding: 20px;
+  }
+
+  /* Business detail adjustments */
+  .business-detail-view {
+    padding: 15px;
+  }
+
+  .business-detail-view > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Business overview grid */
+  .business-overview {
+    padding: 15px;
+    margin-top: 20px !important;
+  }
+
+  .business-overview > div[style*="grid"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 15px !important;
+  }
+
+  /* Search section */
+  .search-section {
+    margin: 1.5rem 0;
+  }
+
+  .search-input {
+    padding: 12px 12px 12px 44px;
+    font-size: 14px;
+  }
+
+  /* Stats in business cards */
+  .business-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 0.625rem;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 40px 20px;
+  }
+
+  .empty-state h2 {
+    font-size: 1.25rem;
+  }
+
+  .empty-state p {
+    font-size: 0.875rem;
+  }
+
+  /* Plan banners responsive */
+  div[style*="gradient(135deg, #667eea"] {
+    flex-direction: column !important;
+    gap: 15px !important;
+    padding: 15px !important;
+  }
+
+  div[style*="gradient(135deg, #667eea"] button {
+    width: 100% !important;
+  }
+
+  /* Improve touch targets */
+  button,
+  a,
+  .nav-link {
+    min-height: 44px;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
   #afaaModal .modal-content {
     width: 98%;
     padding: 15px;
@@ -906,499 +1291,87 @@ body {
     height: 60vh;
   }
 }
-/* =============================================
-   SIDEBAR OVERLAY FOR MOBILE
-   ============================================= */
-   .sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 60px);
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-    backdrop-filter: blur(2px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+
+/* Very small mobile screens */
+@media (max-width: 375px) {
+  .header {
+    padding: 0 6px;
+    gap: 6px;
   }
-  
-  .sidebar-overlay.active {
-    display: block;
-    opacity: 1;
+
+  .header img[alt="Zuke Logo"] {
+    height: 32px !important;
   }
-  
-  /* Prevent body scroll when sidebar is open on mobile */
-  body.sidebar-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
+
+  .tokens-button {
+    padding: 5px 8px;
+    font-size: 10px;
   }
-  
-  /* =============================================
-     MOBILE RESPONSIVE - CRITICAL FIXES
-     ============================================= */
-  
-  @media (max-width: 768px) {
-    /* Dashboard grid changes on mobile */
-    .dashboard-container {
-      grid-template-columns: 1fr !important;
-      grid-template-areas:
-        "header"
-        "content" !important;
-      grid-template-rows: 60px 1fr;
-    }
-  
-    /* Header adjustments */
-    .header {
-      padding: 0 8px;
-      gap: 8px;
-      height: 60px;
-    }
-  
-    .header-right {
-      gap: 0.5rem;
-      margin-left: auto;
-    }
-  
-    .user-welcome {
-      display: none;
-    }
-  
-    /* Logo size adjustment */
-    .header img[alt="Zuke Logo"] {
-      height: 36px !important;
-    }
-  
-    /* Wallet buttons smaller on mobile */
-    .wallet-container {
-      gap: 4px;
-    }
-    
-    .tokens-button {
-      padding: 6px 10px;
-      font-size: 11px;
-      min-width: auto;
-      white-space: nowrap;
-    }
-  
-    .tokens-button svg {
-      width: 14px;
-      height: 14px;
-    }
-    
-    #walletBalance {
-      font-size: 11px;
-    }
-    
-    .topup-icon-btn {
-      width: 32px;
-      height: 32px;
-      flex-shrink: 0;
-    }
-    
-    .topup-icon-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-  
-    .logout-button {
-      padding: 6px 10px;
-      gap: 4px;
-      min-width: auto;
-      font-size: 12px;
-    }
-  
-    .logout-button svg {
-      width: 14px;
-      height: 14px;
-      flex-shrink: 0;
-    }
-  
-    .logout-button span {
-      display: none; /* Hide text, keep icon only */
-    }
-  
-    /* Sidebar positioning on mobile - FIXED */
-    .sidebar {
-      position: fixed !important;
-      left: -250px; /* Hidden by default */
-      top: 60px;
-      width: 250px;
-      height: calc(100vh - 60px);
-      z-index: 999;
-      background: white;
-      border-right: 1px solid #e0e0e0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      transition: left 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: none;
-    }
-  
-    /* When sidebar is open on mobile */
-    .sidebar.mobile-open {
-      left: 0 !important;
-      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
-    }
-  
-    /* Ensure nav links are fully clickable and visible */
-    .nav-menu {
-      padding: 20px 0;
-    }
-  
-    .nav-link {
-      display: flex !important;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 20px;
-      color: #1d1d1d;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      border-right: 3px solid transparent;
-      cursor: pointer;
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-      touch-action: manipulation;
-    }
-  
-    .nav-text {
-      display: inline-block !important;
-      opacity: 1 !important;
-      width: auto !important;
-      overflow: visible !important;
-    }
-  
-    .nav-link:active {
-      background-color: #f0f0f0;
-    }
-  
-    .nav-link.active {
-      background-color: #fdfce3;
-      color: #ff7b00;
-      border-right-color: #ff7b00;
-    }
-  
-    /* User profile at bottom */
-    .user-profile {
-      position: relative;
-      padding: 16px 20px;
-      border-top: 1px solid #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      margin-top: auto;
-    }
-  
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      flex-shrink: 0;
-    }
-  
-    .switch-dropdown-container {
-      display: flex;
-      align-items: center;
-    }
-  
-    .settings-icon-btn {
-      flex-shrink: 0;
-    }
-  
-    /* Main content takes full width */
-    .main-content {
-      margin-left: 0 !important;
-      padding: 1rem;
-      width: 100%;
-    }
-  
-    /* Page header responsive */
-    .page-header {
-      flex-direction: column;
-      gap: 15px;
-      align-items: flex-start;
-      padding-bottom: 0.75rem;
-    }
-  
-    .page-header > div[style*="flex"] {
-      flex-direction: column;
-      width: 100%;
-      gap: 10px !important;
-      align-items: stretch !important;
-    }
-  
-    .page-header select,
-    .page-header button {
-      width: 100% !important;
-    }
-  
-    .page-title {
-      font-size: 1.5rem;
-      line-height: 1.2;
-    }
-  
-    .page-subtitle {
-      font-size: 0.875rem;
-    }
-  
-    /* Business cards responsive */
-    .business-cards-grid,
-    .sim-cards-grid {
-      grid-template-columns: 1fr !important;
-      gap: 1rem;
-      padding: 0;
-      margin-top: 1rem;
-    }
-  
-    .business-card,
-    .sim-card {
-      padding: 1.25rem;
-    }
-  
-    .sim-card {
-      /* Adjust SIM card clip-path corner for mobile */
-      clip-path: polygon(
-        0 0,
-        calc(100% - 35px) 0,
-        100% 35px,
-        100% 100%,
-        0 100%
-      );
-    }
-  
-    .sim-card::after {
-      clip-path: polygon(
-        0 0,
-        calc(100% - 35px) 0,
-        100% 35px,
-        100% 100%,
-        0 100%
-      );
-    }
-  
-    .business-card-header {
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-  
-    .logo-placeholder {
-      width: 50px;
-      height: 50px;
-      font-size: 1.25rem;
-    }
-  
-    .business-name,
-    .sim-name {
-      font-size: 1.125rem;
-    }
-  
-    .business-description,
-    .sim-description {
-      font-size: 0.875rem;
-    }
-  
-    /* Modal adjustments */
-    .modal-content {
-      width: 95%;
-      margin: 5% auto;
-      max-height: 85vh;
-      padding: 20px;
-    }
-  
-    /* Business detail adjustments */
-    .business-detail-view {
-      padding: 15px;
-    }
-  
-    .business-detail-view > div[style*="grid"] {
-      grid-template-columns: 1fr !important;
-    }
-  
-    /* Business overview grid */
-    .business-overview {
-      padding: 15px;
-      margin-top: 20px !important;
-    }
-  
-    .business-overview > div[style*="grid"] {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 15px !important;
-    }
-  
-    /* Search section */
-    .search-section {
-      margin: 1.5rem 0;
-    }
-  
-    .search-input {
-      padding: 12px 12px 12px 44px;
-      font-size: 14px;
-    }
-  
-    /* Stats in business cards */
-    .business-stats {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-  
-    .stat-item {
-      padding: 0.625rem;
-    }
-  
-    /* Empty state */
-    .empty-state {
-      padding: 40px 20px;
-    }
-  
-    .empty-state h2 {
-      font-size: 1.25rem;
-    }
-  
-    .empty-state p {
-      font-size: 0.875rem;
-    }
-  
-    /* Plan banners responsive */
-    div[style*="gradient(135deg, #667eea"] {
-      flex-direction: column !important;
-      gap: 15px !important;
-      padding: 15px !important;
-    }
-  
-    div[style*="gradient(135deg, #667eea"] button {
-      width: 100% !important;
-    }
-  
-    /* Improve touch targets */
-    button,
-    a,
-    .nav-link {
-      min-height: 44px; /* Apple's recommended touch target size */
-    }
-  
-    /* Prevent zoom on input focus (iOS) */
-    input,
-    select,
-    textarea {
-      font-size: 16px !important;
-    }
+
+  .topup-icon-btn {
+    width: 28px;
+    height: 28px;
   }
-  
-  /* Very small mobile screens (iPhone SE, etc.) */
-  @media (max-width: 375px) {
-    .header {
-      padding: 0 6px;
-      gap: 6px;
-    }
-  
-    .header img[alt="Zuke Logo"] {
-      height: 32px !important;
-    }
-  
-    .tokens-button {
-      padding: 5px 8px;
-      font-size: 10px;
-    }
-  
-    .topup-icon-btn {
-      width: 28px;
-      height: 28px;
-    }
-  
-    .logout-button {
-      padding: 6px 8px;
-    }
-  
-    .page-title {
-      font-size: 1.25rem;
-    }
-  
-    .business-card,
-    .sim-card {
-      padding: 1rem;
-    }
-  
-    .main-content {
-      padding: 0.75rem;
-    }
-  
-    .business-overview > div[style*="grid"] {
-      grid-template-columns: 1fr !important;
-    }
+
+  .logout-button {
+    padding: 6px 8px;
   }
-  
-  /* Tablets and medium devices */
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .dashboard-container {
-      grid-template-columns: 200px 1fr;
-    }
-  
-    .sidebar {
-      width: 200px;
-    }
-  
-    .business-cards-grid,
-    .sim-cards-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
+
+  .page-title {
+    font-size: 1.25rem;
   }
-  
-  /* Desktop - ensure sidebar is always visible */
-  @media (min-width: 769px) {
-    .sidebar {
-      position: fixed !important;
-      left: 0 !important;
-      top: 60px !important;
-      width: 250px !important;
-      height: calc(100vh - 60px) !important;
-      z-index: 10 !important;
-    }
-  
-    .sidebar-overlay {
-      display: none !important;
-    }
-  
-    .main-content {
-      margin-left: 250px;
-    }
-  
-    /* Collapsed sidebar state */
-    .dashboard-container.sidebar-collapsed .sidebar {
-      width: 60px !important;
-    }
-  
-    .dashboard-container.sidebar-collapsed .main-content {
-      margin-left: 60px;
-    }
-  
-    .dashboard-container.sidebar-collapsed .nav-text {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-    }
-  
-    .dashboard-container.sidebar-collapsed .nav-link {
-      justify-content: center;
-      padding: 12px;
-    }
-  
-    .dashboard-container.sidebar-collapsed .user-profile {
-      flex-direction: column;
-      padding: 12px;
-      gap: 8px;
-    }
-  
-    .dashboard-container.sidebar-collapsed .switch-dropdown-container,
-    .dashboard-container.sidebar-collapsed .settings-icon-btn {
-      display: none;
-    }
+
+  .business-card,
+  .sim-card {
+    padding: 1rem;
   }
-  
-  /* Remove tap highlight on all devices */
-  * {
-    -webkit-tap-highlight-color: transparent;
+
+  .main-content {
+    padding: 0.75rem;
   }
-  
-  /* Improve button touch */
-  button {
-    touch-action: manipulation;
+
+  .business-overview > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
   }
+}
+
+/* Tablets and medium devices */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    left: 200px;
+  }
+
+  .dashboard-container.sidebar-collapsed .sidebar {
+    width: 60px;
+  }
+
+  .dashboard-container.sidebar-collapsed .main-content {
+    left: 60px;
+  }
+
+  .business-cards-grid,
+  .sim-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* Desktop - ensure proper spacing */
+@media (min-width: 769px) {
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+/* Remove tap highlight on all devices */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Improve button touch */
+button {
+  touch-action: manipulation;
+}
