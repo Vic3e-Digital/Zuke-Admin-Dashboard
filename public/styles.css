@@ -43,7 +43,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: #2d2d2d
+  background-color: #1d1d1d
 }
 
 .login-card {
@@ -82,9 +82,6 @@ body {
   gap: 0.5rem;
 }
 
-.password-toggle:hover {
-  color: var(--foreground);
-}
 
 .eye-icon {
   width: 16px;
@@ -103,7 +100,7 @@ body {
 .submit-button {
   width: 100%;
   padding: 0.5rem 1rem;
-  background-color: var(--primary);
+  background-color: #1d1d1d;
   color: var(--primary-foreground);
   border: none;
   border-radius: calc(var(--radius) - 2px);
@@ -131,16 +128,6 @@ body {
   height: 16px;
 }
 
-.demo-credentials {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
-}
-
-.demo-credentials p {
-  margin: 0.25rem 0;
-}
 
 /* Dashboard Styles */
 .dashboard-container {
