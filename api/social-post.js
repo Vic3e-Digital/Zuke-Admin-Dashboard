@@ -274,7 +274,7 @@ async function refreshLinkedInToken(platformSettings, businessId, db) {
 
 router.post('/post', async (req, res) => {
   try {
-    const { businessId, platforms, postContent, userEmail, totalCost, skipPosting } = req.body;  // ✅ Add skipPosting here
+    const { businessId, platforms, postContent, userEmail, totalCost, skipPosting, skipWalletCheck } = req.body;
     
     // Validate input
     if (!businessId || !platforms || !postContent || !userEmail) {
@@ -286,10 +286,12 @@ router.post('/post', async (req, res) => {
 
     console.log(`[Social Post] Request for business: ${businessId}, platforms: ${platforms.join(', ')}`);
 
-    
     // ✅ STEP 1: Calculate cost (use totalCost if provided)
     const cost = totalCost !== undefined ? totalCost : calculateCost(platforms);
     console.log(`[Social Post] ${totalCost !== undefined ? 'Total cost (incl. AI generation)' : 'Calculated cost'}: R${cost.toFixed(2)}`);
+
+    // ✅ Generate requestId BEFORE wallet check (so it's always available)
+    const requestId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // ✅ STEP 2: Get business from MongoDB
     const db = await getDatabase();
@@ -307,79 +309,122 @@ router.post('/post', async (req, res) => {
     // Check if n8n webhook is configured
     const webhookUrl = business.automation_settings?.n8n_config?.webhook_url;
     
-    if (!webhookUrl) {
+    if (!webhookUrl && !skipWalletCheck) {
       return res.status(400).json({ 
         success: false, 
         error: 'n8n webhook URL not configured. Please set it in Settings.' 
       });
     }
 
-    // ✅ STEP 3: Call n8n wallet webhook to check balance and deduct
-    const requestId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    let walletResult; // ← Declare here with 'let' instead of inside try block
-
-    
-    const walletPayload = {
-      userEmail: userEmail,
-      businessId: businessId,
-      businessName: business.store_info?.name || 'Unknown Business',
-      platforms: platforms,
-      cost: cost, // ✅ Will use totalCost if provided
-      postContent: postContent,
-      requestId: requestId,
-      description: req.body.description || `Posting to ${platforms.join(', ')}` // ✅ Allow custom description
-    };
-
-    console.log('[Social Post] Checking wallet balance via n8n...');
-
-    try {
-      const walletResponse = await axios.post(N8N_WALLET_WEBHOOK, walletPayload, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 10000 // 10 second timeout
-      });
-
-      walletResult = walletResponse.data;  // ✅ This line is correct
-
-      if (!walletResult.success) {
-        console.log('[Social Post] Insufficient funds:', walletResult);
-        return res.status(402).json({
-          success: false,
-          error: 'Insufficient funds',
-          current_balance: walletResult.current_balance,
-          required: walletResult.required || cost,
-          formatted_balance: walletResult.formatted_balance,
-          formatted_required: walletResult.formatted_required || `R${cost.toFixed(2)}`,
-          message: 'Please add credits or upgrade to a subscription plan.'
-        });
-      }
-
-      console.log('[Social Post] ✓ Wallet deduction successful. New balance:', walletResult.formatted_balance);
-
-      // ✅ ADD THIS RIGHT AFTER WALLET SUCCESS:
-      // ✅ If skipPosting is true, return after wallet deduction
-      if (skipPosting) {
-        console.log('[Social Post] skipPosting=true, returning after wallet deduction');
-        
-        return res.json({
-          success: true,
-          message: 'Wallet deducted successfully',
-          cost: cost,
-          charged: true,
-          formatted_cost: `R${cost.toFixed(2)}`,
-          new_balance: walletResult.new_balance,
-          formatted_balance: walletResult.formatted_balance || `R${(walletResult.new_balance || 0).toFixed(2)}`
-        });
-      }
-
-    } catch (walletError) {
-      console.error('[Social Post] Wallet webhook error:', walletError.message);
+    // ✅ NEW: Skip wallet check if already charged
+    let walletResult;
+    if (skipWalletCheck) {
+      console.log('[Social Post] ⊘ Skipping wallet check (already charged)');
+      walletResult = { success: true, message: 'Wallet already charged' };
+    } else if (cost > 0) {
+      // ✅ STEP 3: Call n8n wallet webhook to check balance and deduct
       
-      // If wallet service is down, return error
-      return res.status(503).json({
-        success: false,
-        error: 'Wallet service unavailable. Please try again later.',
-        details: walletError.message
-      });
+      // ✅ CHECK: Ensure N8N_WALLET_WEBHOOK is configured
+      if (!N8N_WALLET_WEBHOOK) {
+        console.error('[Social Post] ✗ N8N_WALLET_WEBHOOK_URL is not set in environment variables');
+        return res.status(500).json({
+          success: false,
+          error: 'Wallet service not configured. Please contact support.',
+          details: 'N8N_WALLET_WEBHOOK_URL environment variable is missing'
+        });
+      }
+
+      const walletPayload = {
+        userEmail: userEmail,
+        businessId: businessId,
+        businessName: business.store_info?.name || 'Unknown Business',
+        platforms: platforms,
+        cost: cost,
+        postContent: postContent,
+        requestId: requestId,
+        description: req.body.description || `Posting to ${platforms.join(', ')}`
+      };
+
+      console.log('[Social Post] 📤 Calling wallet webhook:', N8N_WALLET_WEBHOOK);
+      console.log('[Social Post] 📦 Wallet payload:', JSON.stringify(walletPayload, null, 2));
+
+      try {
+        const walletResponse = await axios.post(N8N_WALLET_WEBHOOK, walletPayload, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000, // 30 seconds
+          validateStatus: function (status) {
+            // ✅ Treat 402 as valid response (insufficient funds)
+            return status >= 200 && status < 300 || status === 402;
+          }
+        });
+
+        walletResult = walletResponse.data;
+        
+        console.log('[Social Post] 📥 Wallet response:', JSON.stringify(walletResult, null, 2));
+
+        // ✅ Handle insufficient funds (402 status)
+        if (walletResponse.status === 402 || !walletResult.success) {
+          console.log('[Social Post] ⚠️ Insufficient funds:', walletResult);
+          return res.status(402).json({
+            success: false,
+            error: 'Insufficient funds',
+            current_balance: walletResult.current_balance,
+            required: walletResult.required || cost,
+            formatted_balance: walletResult.formatted_balance,
+            formatted_required: walletResult.formatted_required || `R${cost.toFixed(2)}`,
+            message: 'Please add credits or upgrade to a subscription plan.'
+          });
+        }
+
+        console.log('[Social Post] ✓ Wallet deduction successful. New balance:', walletResult.formatted_balance);
+
+        // ✅ If skipPosting is true, return after wallet deduction
+        if (skipPosting) {
+          console.log('[Social Post] skipPosting=true, returning after wallet deduction');
+          
+          return res.json({
+            success: true,
+            message: 'Wallet deducted successfully',
+            cost: cost,
+            charged: true,
+            formatted_cost: `R${cost.toFixed(2)}`,
+            new_balance: walletResult.new_balance,
+            formatted_balance: walletResult.formatted_balance || `R${(walletResult.new_balance || 0).toFixed(2)}`
+          });
+        }
+
+      } catch (walletError) {
+        console.error('[Social Post] ✗ Wallet webhook error:');
+        console.error('  - Error message:', walletError.message);
+        console.error('  - Error code:', walletError.code);
+        console.error('  - Response status:', walletError.response?.status);
+        console.error('  - Response data:', JSON.stringify(walletError.response?.data, null, 2));
+        console.error('  - Webhook URL:', N8N_WALLET_WEBHOOK);
+        
+        // More specific error messages
+        let errorMessage = 'Wallet service unavailable. Please try again later.';
+        let errorDetails = walletError.message;
+        
+        if (walletError.code === 'ECONNREFUSED') {
+          errorMessage = 'Cannot connect to wallet service. Service may be down.';
+          errorDetails = 'Connection refused to ' + N8N_WALLET_WEBHOOK;
+        } else if (walletError.code === 'ETIMEDOUT' || walletError.message.includes('timeout')) {
+          errorMessage = 'Wallet service timeout. Please try again.';
+          errorDetails = 'Request timed out after 30 seconds';
+        } else if (walletError.response?.status === 404) {
+          errorMessage = 'Wallet webhook endpoint not found.';
+          errorDetails = 'Check N8N_WALLET_WEBHOOK_URL configuration';
+        }
+        
+        return res.status(503).json({
+          success: false,
+          error: errorMessage,
+          details: errorDetails,
+          webhook_url: N8N_WALLET_WEBHOOK.replace(/\/\/.*@/, '//***@') // Hide credentials
+        });
+      }
+
+    // ... rest of the code continues (token refresh, n8n posting, etc.)
     }
     
 
