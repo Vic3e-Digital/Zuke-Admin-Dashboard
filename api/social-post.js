@@ -316,6 +316,8 @@ router.post('/post', async (req, res) => {
 
     // ✅ STEP 3: Call n8n wallet webhook to check balance and deduct
     const requestId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    let walletResult; // ← Declare here with 'let' instead of inside try block
+
     
     const walletPayload = {
       userEmail: userEmail,
@@ -336,7 +338,7 @@ router.post('/post', async (req, res) => {
         timeout: 10000 // 10 second timeout
       });
 
-      const walletResult = walletResponse.data;  // ✅ This line is correct
+      walletResult = walletResponse.data;  // ✅ This line is correct
 
       if (!walletResult.success) {
         console.log('[Social Post] Insufficient funds:', walletResult);

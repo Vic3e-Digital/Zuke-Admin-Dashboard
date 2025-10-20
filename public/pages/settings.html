@@ -244,16 +244,37 @@
       </div>
     </div>
 
-    <!-- Automation Settings -->
-    <div class="settings-panel" id="automation-panel">
-      <h2>n8n Automation Configuration</h2>
-      
+<!-- Automation Settings -->
+<div class="settings-panel" id="automation-panel">
+  <h2>Automation Hub</h2>
+  <p class="panel-description">Connect your business tools and automate workflows</p>
+
+  <!-- Social Media Category (Always Available) -->
+  <div class="automation-category">
+    <div class="category-header">
+      <div class="category-icon social">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+        </svg>
+      </div>
+      <div class="category-info">
+        <h3>Social Media</h3>
+        <p>Automate your social media posting and engagement</p>
+      </div>
+      <span class="availability-badge active">Active</span>
+    </div>
+    
+    <div class="automation-links">
       <div class="settings-section">
         <div class="form-group">
           <label>n8n Webhook URL</label>
           <input type="url" id="n8nWebhookUrl" class="form-input" 
                  placeholder="https://your-n8n.com/webhook/social-post" />
-          <span class="field-note">This is the main webhook URL that will receive post requests</span>
+          <span class="field-note">Main webhook for social media posting</span>
         </div>
 
         <div class="form-group">
@@ -265,7 +286,7 @@
 
         <div class="toggle-setting">
           <div class="toggle-info">
-            <h4>Enable Automation</h4>
+            <h4>Enable Social Automation</h4>
             <p>Allow this business to post via n8n workflows</p>
           </div>
           <label class="toggle-switch">
@@ -274,12 +295,129 @@
           </label>
         </div>
       </div>
-
-      <div class="settings-actions">
-        <button class="btn-primary" onclick="saveAutomationSettings()">Save Automation Settings</button>
-        <button class="btn-secondary" onclick="testWebhook()">Test Webhook</button>
-      </div>
     </div>
+  </div>
+
+<!-- Sales Category (Growth & Blaze Plans) -->
+<div class="automation-category">
+  <div class="category-header">
+    <div class="category-icon sales">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+    </div>
+    <div class="category-info">
+      <h3>Sales Automation</h3>
+      <p>Automate lead tracking, CRM updates, and sales workflows</p>
+    </div>
+    <span class="availability-badge growth">Growth & Blaze Plans</span>
+  </div>
+  
+  <div class="automation-links locked">
+    <div class="locked-message">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <p>Available on Growth and Blaze plans</p>
+      <button class="btn-upgrade" data-page="pricing">Upgrade Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Marketing Category (Growth & Blaze Plans) -->
+<div class="automation-category">
+  <div class="category-header">
+    <div class="category-icon marketing">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    </div>
+    <div class="category-info">
+      <h3>Marketing Campaigns</h3>
+      <p>Automate email campaigns, ads, and marketing analytics</p>
+    </div>
+    <span class="availability-badge growth">Growth & Blaze Plans</span>
+  </div>
+  
+  <div class="automation-links locked">
+    <div class="locked-message">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <p>Available on Growth and Blaze plans</p>
+      <button class="btn-upgrade" data-page="pricing">Upgrade Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Category (Growth & Blaze Plans) -->
+<div class="automation-category">
+  <div class="category-header">
+    <div class="category-icon email">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+        <polyline points="22,6 12,13 2,6"></polyline>
+      </svg>
+    </div>
+    <div class="category-info">
+      <h3>Email Automation</h3>
+      <p>Automate email sequences, responses, and newsletters</p>
+    </div>
+    <span class="availability-badge growth">Growth & Blaze Plans</span>
+  </div>
+  
+  <div class="automation-links locked">
+    <div class="locked-message">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <p>Available on Growth and Blaze plans</p>
+      <button class="btn-upgrade" data-page="pricing">Upgrade Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Assistants Category (Coming Soon) -->
+<div class="automation-category">
+  <div class="category-header">
+    <div class="category-icon ai">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </div>
+    <div class="category-info">
+      <h3>AI Assistants</h3>
+      <p>Deploy custom AI agents for customer support and automation</p>
+    </div>
+    <span class="availability-badge coming-soon">Coming Soon</span>
+  </div>
+  
+  <div class="automation-links coming-soon-content">
+    <div class="coming-soon-message">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <p>Automatic AI assistants are launching soon!</p>
+      <p class="small-text">Get notified when this feature becomes available</p>
+      <button class="btn-notify" data-feature="ai-assistants">Notify Me</button>
+    </div>
+  </div>
+</div>
+
+  <div class="settings-actions">
+    <button class="btn-primary" onclick="saveAutomationSettings()">Save Automation Settings</button>
+    <button class="btn-secondary" onclick="testWebhook()">Test Webhook</button>
+  </div>
+</div>
 
     <!-- Preferences -->
     <div class="settings-panel" id="preferences-panel">
@@ -702,6 +840,151 @@
   
   .node-input {
     max-width: 100%;
+  }
+}
+
+/* Automation Categories */
+.automation-category {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.automation-category:hover {
+  border-color: #667eea;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+.category-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-icon.social { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.category-icon.sales { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+.category-icon.marketing { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+.category-icon.email { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; }
+.category-icon.ai { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+
+.category-info {
+  flex: 1;
+}
+
+.category-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  color: #2c3e50;
+}
+
+.category-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.availability-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.availability-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.availability-badge.growth {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.availability-badge.coming-soon {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.automation-links {
+  padding: 20px;
+}
+
+.automation-links.locked,
+.automation-links.coming-soon-content {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+}
+
+.locked-message,
+.coming-soon-message {
+  text-align: center;
+  max-width: 400px;
+}
+
+.locked-message svg,
+.coming-soon-message svg {
+  margin-bottom: 15px;
+}
+
+.locked-message p,
+.coming-soon-message p {
+  color: #666;
+  font-size: 15px;
+  margin: 10px 0;
+}
+
+.small-text {
+  font-size: 13px !important;
+  color: #999 !important;
+}
+
+.btn-upgrade,
+.btn-notify {
+  margin-top: 15px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-upgrade:hover,
+.btn-notify:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .category-header {
+    flex-wrap: wrap;
+  }
+  
+  .availability-badge {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
   }
 }
 </style>

@@ -865,3 +865,61 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+// Add this function at the bottom of settings.js
+window.notifyMe = async function(feature) {
+  try {
+    showNotification(`You'll be notified when ${feature.replace('-', ' ')} launches!`, 'success');
+    
+    // Optional: Save to database
+    const user = await auth0Client.getUser();
+    const response = await fetch(`${API_BASE}/notifications/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: user.email,
+        feature: feature,
+        businessId: currentBusiness._id
+      })
+    });
+    
+    if (!response.ok) {
+      console.warn('Failed to save notification preference');
+    }
+  } catch (error) {
+    console.error('Error subscribing to notifications:', error);
+  }
+};
+
+// Add at the bottom of settings.js
+
+// Handle upgrade button clicks
+// document.addEventListener('click', function(event) {
+//   const upgradeBtn = event.target.closest('.btn-upgrade, .btn-notify');
+  
+//   if (upgradeBtn && upgradeBtn.hasAttribute('data-page')) {
+//     const page = upgradeBtn.getAttribute('data-page');
+    
+//     // Navigate using the same pattern as dashboard
+//     if (window.parent && window.parent.navigateToPage) {
+//       window.parent.navigateToPage(page);
+//     } else {
+//       // Fallback: use postMessage to communicate with parent
+//       window.parent.postMessage({
+//         type: 'navigate',
+//         page: page
+//       }, '*');
+//     }
+//   }
+// });
+
+// Add at the bottom of settings.js
+
+// Handle upgrade button clicks
+document.addEventListener('click', function(event) {
+  const upgradeBtn = event.target.closest('.btn-upgrade');
+  
+  if (upgradeBtn && upgradeBtn.hasAttribute('data-page')) {
+    const page = upgradeBtn.getAttribute('data-page');
+    window.loadPage(page); // Direct call since loadPage is global
+  }
+});
