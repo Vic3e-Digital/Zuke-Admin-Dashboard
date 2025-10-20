@@ -8,6 +8,7 @@ const { getDatabase } = require("./lib/mongodb");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const getOpenAIConfig = require('./api/get-openai-config');
 
 // -------------------------
 // Middleware
@@ -38,6 +39,8 @@ app.use('/api/businesses', require('./api/businesses'));
 app.use('/api/business-settings', require('./api/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/social-post', require('./api/social-post')); // ✅ Add this
+
+
 
 // Paystack key route
 app.get("/api/paystack-key", (req, res) => {
@@ -72,6 +75,8 @@ app.get("/api/products", async (req, res) => {
     res.status(500).json({ success: false, error: "Failed to fetch products" });
   }
 });
+
+app.get('/api/get-openai-config', getOpenAIConfig);
 
 // -------------------------
 // Serve Static Files

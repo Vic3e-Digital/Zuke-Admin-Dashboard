@@ -80,6 +80,12 @@ export async function initAfaaPage() {
         btn: document.getElementById("afaaTool5Btn"),
         title: "Post Image to Socials",
         url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      
+      {
+        btn: document.getElementById("afaaTool6Btn"),
+        title: "Generate AI Content",
+        url: `/tools/generate-content.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       }
     ];
 

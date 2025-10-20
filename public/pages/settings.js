@@ -3,17 +3,25 @@ let auth0Client = null;
 let currentBusiness = null;
 let businessSettings = {};
 
-const API_BASE = '/api'; // Your backend API base URL
+const API_BASE = '/api';
 
 async function getAuth0Client() {
+  // ✅ Return cached client if already loaded
+  if (auth0Client) {
+    return auth0Client;
+  }
+
+  // ✅ Check if already initialized globally
   if (window.auth0Client) {
-    return window.auth0Client;
+    auth0Client = window.auth0Client;
+    return auth0Client;
   }
 
   try {
     const response = await fetch("/auth_config.json");
     const config = await response.json();
 
+    // ✅ Auth0 will automatically check its own cache (localStorage)
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
@@ -30,14 +38,16 @@ async function getAuth0Client() {
 }
 
 export async function initSettingsPage() {
-  const auth0Client = await getAuth0Client();
-  
-  if (!auth0Client) {
-    console.error("Failed to get Auth0 client");
-    return;
-  }
-
   try {
+    // ✅ IMPORTANT: Get auth0Client FIRST before doing anything
+    auth0Client = await getAuth0Client();
+    
+    if (!auth0Client) {
+      console.error("Failed to get Auth0 client");
+      return;
+    }
+
+    // ✅ Check authentication (Auth0 checks its own cache here)
     const isAuthenticated = await auth0Client.isAuthenticated();
     
     if (!isAuthenticated) {
@@ -46,7 +56,7 @@ export async function initSettingsPage() {
       return;
     }
 
-    // Get selected business
+    // Get selected business from dataManager cache
     currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
     
     if (!currentBusiness) {
@@ -72,10 +82,11 @@ export async function initSettingsPage() {
     // Setup connection buttons
     setupConnectionButtons();
 
-    console.log('Settings initialized for:', currentBusiness.store_info?.name);
+    console.log('✅ Settings initialized for:', currentBusiness.store_info?.name);
     
   } catch (error) {
-    console.error("Error in initSettingsPage:", error);
+    console.error("❌ Error in initSettingsPage:", error);
+    showNotification('Failed to initialize settings page', 'error');
   }
 }
 
@@ -113,22 +124,21 @@ async function loadBusinessSettings() {
       const data = await response.json();
       businessSettings = data.automation_settings || {};
       
-      // Populate social media connections
+      // Populate all sections
       populateSocialConnections();
-      
-      // Populate automation settings
       populateAutomationSettings();
-      
-      // Populate preferences
       populatePreferences();
-
-      populateProfileTab(); // Add this line
-
+      
+      // ✅ Populate profile tab (async but don't block)
+      await populateProfileTab();
       
       showNotification('Settings loaded', 'success');
     } else {
       console.log('No existing settings found, using defaults');
       businessSettings = getDefaultSettings();
+      
+      // Still populate profile
+      await populateProfileTab();
     }
   } catch (error) {
     console.error('Error loading business settings:', error);
@@ -158,117 +168,153 @@ function getDefaultSettings() {
   };
 }
 
+async function populateProfileTab() {
+  try {
+    // ✅ Ensure auth0Client is available (it should be by now)
+    if (!auth0Client) {
+      console.warn('Auth0 client not available for profile tab');
+      return;
+    }
+
+    // ✅ Auth0 will check its cache (localStorage) automatically
+    const user = await auth0Client.getUser();
+    
+    if (user) {
+      // Populate Auth0 User Profile
+      const profilePicture = document.getElementById('profilePicture');
+      const profileName = document.getElementById('profileName');
+      const profileEmail = document.getElementById('profileEmail');
+      const profileSub = document.getElementById('profileSub');
+      const profileEmailVerified = document.getElementById('profileEmailVerified');
+      const profileUpdated = document.getElementById('profileUpdated');
+
+      if (profilePicture) profilePicture.src = user.picture || '/images/default-avatar.png';
+      if (profileName) profileName.textContent = user.name || 'N/A';
+      if (profileEmail) profileEmail.textContent = user.email || 'N/A';
+      if (profileSub) profileSub.textContent = user.sub || 'N/A';
+      if (profileEmailVerified) profileEmailVerified.textContent = user.email_verified ? 'Yes ✓' : 'No ✗';
+      
+      if (user.updated_at && profileUpdated) {
+        profileUpdated.textContent = new Date(user.updated_at).toLocaleString();
+      }
+    }
+  } catch (error) {
+    console.error('Error loading Auth0 user profile:', error);
+    // Don't throw - just log the error
+  }
+
+  // Populate Active Business Profile (independent of Auth0)
+  if (currentBusiness) {
+    const businessProfileId = document.getElementById('businessProfileId');
+    const businessProfileName = document.getElementById('businessProfileName');
+    const businessProfileEmail = document.getElementById('businessProfileEmail');
+    const businessProfilePhone = document.getElementById('businessProfilePhone');
+    const businessProfileAddress = document.getElementById('businessProfileAddress');
+    const businessProfileCategory = document.getElementById('businessProfileCategory');
+    const businessProfileCreated = document.getElementById('businessProfileCreated');
+    const businessProfileUpdated = document.getElementById('businessProfileUpdated');
+    const businessProfileLogo = document.getElementById('businessProfileLogo');
+
+    if (businessProfileId) businessProfileId.textContent = currentBusiness._id || 'N/A';
+    if (businessProfileName) businessProfileName.textContent = currentBusiness.store_info?.name || 'N/A';
+    if (businessProfileEmail) businessProfileEmail.textContent = currentBusiness.personal_info?.email || 'N/A';
+    if (businessProfilePhone) businessProfilePhone.textContent = currentBusiness.personal_info?.phone || 'N/A';
+    if (businessProfileAddress) businessProfileAddress.textContent = currentBusiness.store_info?.address || 'N/A';
+    if (businessProfileCategory) businessProfileCategory.textContent = currentBusiness.store_info?.category || 'N/A';
+    
+    if (currentBusiness.created_at && businessProfileCreated) {
+      businessProfileCreated.textContent = new Date(currentBusiness.created_at).toLocaleString();
+    }
+    
+    if (currentBusiness.updated_at && businessProfileUpdated) {
+      businessProfileUpdated.textContent = new Date(currentBusiness.updated_at).toLocaleString();
+    }
+
+    // Display business logo
+    if (businessProfileLogo && currentBusiness.media_files?.store_logo) {
+      businessProfileLogo.src = currentBusiness.media_files.store_logo;
+      businessProfileLogo.style.display = 'block';
+    }
+  }
+}
 
 function populateSocialConnections() {
-    const platforms = ['facebook', 'instagram', 'linkedin', 'youtube'];
+  const platforms = ['facebook', 'instagram', 'linkedin', 'youtube'];
+  
+  platforms.forEach(platform => {
+    const settings = businessSettings.social_media?.[platform];
     
-    platforms.forEach(platform => {
-      const settings = businessSettings.social_media?.[platform];
-      
-      // ✅ FIXED: Handle linkedin prefix correctly
-      let prefix;
-      if (platform === 'facebook') {
-        prefix = 'fb';
-      } else if (platform === 'instagram') {
-        prefix = 'ig';
-      } else if (platform === 'linkedin') {
-        prefix = 'li';
-      } else if (platform === 'youtube') {
-        prefix = 'yt';
+    // ✅ Handle prefix correctly
+    let prefix;
+    if (platform === 'facebook') {
+      prefix = 'fb';
+    } else if (platform === 'instagram') {
+      prefix = 'ig';
+    } else if (platform === 'linkedin') {
+      prefix = 'li';
+    } else if (platform === 'youtube') {
+      prefix = 'yt';
+    }
+
+    // Get UI elements
+    const statusEl = document.getElementById(`${prefix}Status`);
+    const badgeEl = document.getElementById(`${prefix}Badge`);
+    const connectBtn = document.getElementById(`connect${capitalize(platform)}Btn`);
+    const connectedInfo = document.getElementById(`${prefix}ConnectedInfo`);
+    
+    console.log(`[Settings] ${platform} settings:`, settings);
+    
+    if (settings && settings.connected && settings.status === 'active') {
+      // Platform is connected
+      if (statusEl) statusEl.textContent = 'Connected';
+      if (badgeEl) {
+        badgeEl.textContent = 'Active';
+        badgeEl.className = 'status-badge connected';
       }
-      // Get UI elements
-      const statusEl = document.getElementById(`${prefix}Status`);
-      const badgeEl = document.getElementById(`${prefix}Badge`);
-      const connectBtn = document.getElementById(`connect${capitalize(platform)}Btn`);
-      const connectedInfo = document.getElementById(`${prefix}ConnectedInfo`);
       
-      console.log(`[Settings] ${platform} settings:`, settings);
-      console.log(`[Settings] ${platform} UI elements:`, {
-        statusEl: !!statusEl,
-        badgeEl: !!badgeEl,
-        connectBtn: !!connectBtn,
-        connectedInfo: !!connectedInfo
-      }); // ✅ Debug log
+      // Hide connect button, show connected info
+      if (connectBtn) {
+        connectBtn.style.display = 'none';
+      }
+      if (connectedInfo) {
+        connectedInfo.style.display = 'block';
+      }
       
-      if (settings && settings.connected && settings.status === 'active') {
-        // Platform is connected
-        if (statusEl) statusEl.textContent = 'Connected';
-        if (badgeEl) {
-          badgeEl.textContent = 'Active';
-          badgeEl.className = 'status-badge connected';
+      // Populate platform-specific details
+      if (platform === 'facebook') {
+        const pageName = document.getElementById('fbPageName');
+        const pageId = document.getElementById('fbPageId');
+        const expiry = document.getElementById('fbExpiry');
+        
+        if (pageName) pageName.textContent = settings.page_name || '—';
+        if (pageId) pageId.textContent = settings.page_id || '—';
+        if (expiry && settings.expires_at) {
+          expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
+        }
+      } else if (platform === 'instagram') {
+        const accountName = document.getElementById('igAccountName');
+        const username = document.getElementById('igUsername');
+        const accountId = document.getElementById('igAccountId');
+        const connectedPage = document.getElementById('igConnectedPage');
+        const expiry = document.getElementById('igExpiry');
+        
+        if (accountName) accountName.textContent = settings.account_name || settings.username || '—';
+        if (username) username.textContent = settings.username ? `@${settings.username}` : '—';
+        if (accountId) accountId.textContent = settings.account_id || '—';
+        
+        if (connectedPage) {
+          if (settings.connected_page_name) {
+            connectedPage.textContent = settings.connected_page_name;
+            connectedPage.style.fontWeight = '500';
+          } else {
+            connectedPage.textContent = '—';
+          }
         }
         
-        // Hide connect button, show connected info
-        if (connectBtn) {
-          connectBtn.style.display = 'none';
+        if (expiry && settings.expires_at) {
+          expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
         }
-        if (connectedInfo) {
-          connectedInfo.style.display = 'block';
-        }
-        
-        // Populate platform-specific details
-        if (platform === 'facebook') {
-          const pageName = document.getElementById('fbPageName');
-          const pageId = document.getElementById('fbPageId');
-          const expiry = document.getElementById('fbExpiry');
-          
-          if (pageName) pageName.textContent = settings.page_name || '—';
-          if (pageId) pageId.textContent = settings.page_id || '—';
-          if (expiry && settings.expires_at) {
-            expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
-          }
-        } else if (platform === 'instagram') {
-          const accountName = document.getElementById('igAccountName');
-          const username = document.getElementById('igUsername');
-          const accountId = document.getElementById('igAccountId');
-          const connectedPage = document.getElementById('igConnectedPage');
-          const expiry = document.getElementById('igExpiry');
-          
-          if (accountName) accountName.textContent = settings.account_name || settings.username || '—';
-          if (username) username.textContent = settings.username ? `@${settings.username}` : '—';
-          if (accountId) accountId.textContent = settings.account_id || '—';
-          
-          if (connectedPage) {
-            if (settings.connected_page_name) {
-              connectedPage.textContent = settings.connected_page_name;
-              connectedPage.style.fontWeight = '500';
-            } else {
-              connectedPage.textContent = '—';
-            }
-          }
-          
-          if (expiry && settings.expires_at) {
-            expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
-          }
-        } else if (platform === 'linkedin') {
-          // ✅ UPDATED: Populate LinkedIn organization details
-          const orgName = document.getElementById('liOrgName');
-          const vanityName = document.getElementById('liVanityName');
-          const orgId = document.getElementById('liOrgId');
-          const expiry = document.getElementById('liExpiry');
-          
-          if (orgName) {
-            orgName.textContent = settings.organization_name || '—';
-          }
-          if (vanityName) {
-            if (settings.organization_vanity) {
-              vanityName.textContent = `linkedin.com/company/${settings.organization_vanity}`;
-              vanityName.style.fontFamily = 'monospace';
-              vanityName.style.fontSize = '13px';
-            } else {
-              vanityName.textContent = '—';
-            }
-          }
-          if (orgId) {
-            orgId.textContent = settings.organization_id || '—';
-          }
-          if (expiry && settings.expires_at) {
-            expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
-          }
-        
-        // Add YouTube-specific population after the linkedin block:
       } else if (platform === 'linkedin') {
-        // ✅ UPDATED: Populate LinkedIn organization details
         const orgName = document.getElementById('liOrgName');
         const vanityName = document.getElementById('liVanityName');
         const orgId = document.getElementById('liOrgId');
@@ -293,7 +339,6 @@ function populateSocialConnections() {
           expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
         }
       } else if (platform === 'youtube') {
-        // ✅ YouTube population - MOVED OUT of LinkedIn block
         const channelName = document.getElementById('ytChannelName');
         const channelId = document.getElementById('ytChannelId');
         const customUrl = document.getElementById('ytCustomUrl');
@@ -322,24 +367,24 @@ function populateSocialConnections() {
           expiry.textContent = new Date(settings.expires_at).toLocaleDateString();
         }
       }
-      } else {
-        // Platform is not connected or disconnected
-        if (statusEl) statusEl.textContent = 'Not Connected';
-        if (badgeEl) {
-          badgeEl.textContent = 'Disconnected';
-          badgeEl.className = 'status-badge';
-        }
-        
-        // Show connect button, hide connected info
-        if (connectBtn) {
-          connectBtn.style.display = 'inline-block';
-        }
-        if (connectedInfo) {
-          connectedInfo.style.display = 'none';
-        }
+    } else {
+      // Platform is not connected or disconnected
+      if (statusEl) statusEl.textContent = 'Not Connected';
+      if (badgeEl) {
+        badgeEl.textContent = 'Disconnected';
+        badgeEl.className = 'status-badge';
       }
-    });
-  }
+      
+      // Show connect button, hide connected info
+      if (connectBtn) {
+        connectBtn.style.display = 'inline-block';
+      }
+      if (connectedInfo) {
+        connectedInfo.style.display = 'none';
+      }
+    }
+  });
+}
 
 function populateAutomationSettings() {
   const webhookUrl = document.getElementById('n8nWebhookUrl');
@@ -357,16 +402,6 @@ function populateAutomationSettings() {
   if (enabled && businessSettings.n8n_config?.enabled !== undefined) {
     enabled.checked = businessSettings.n8n_config.enabled;
   }
-}
-
-// Add this helper function
-function formatNumber(num) {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  } else if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
 }
 
 function populatePreferences() {
@@ -387,49 +422,15 @@ function populatePreferences() {
   }
 }
 
-function populateProfileTab() {
-    // Populate Auth0 User Profile
-    auth0Client.getUser().then(user => {
-      if (user) {
-        document.getElementById('profilePicture').src = user.picture || '/images/default-avatar.png';
-        document.getElementById('profileName').textContent = user.name || 'N/A';
-        document.getElementById('profileEmail').textContent = user.email || 'N/A';
-        document.getElementById('profileSub').textContent = user.sub || 'N/A';
-        document.getElementById('profileEmailVerified').textContent = user.email_verified ? 'Yes' : 'No';
-        
-        if (user.updated_at) {
-          document.getElementById('profileUpdated').textContent = new Date(user.updated_at).toLocaleString();
-        }
-      }
-    }).catch(error => {
-      console.error('Error loading user profile:', error);
-    });
-  
-    // Populate Active Business Profile
-    if (currentBusiness) {
-      document.getElementById('businessProfileId').textContent = currentBusiness._id || 'N/A';
-      document.getElementById('businessProfileName').textContent = currentBusiness.store_info?.name || 'N/A';
-      document.getElementById('businessProfileEmail').textContent = currentBusiness.personal_info?.email || 'N/A';
-      document.getElementById('businessProfilePhone').textContent = currentBusiness.personal_info?.phone || 'N/A';
-      document.getElementById('businessProfileAddress').textContent = currentBusiness.store_info?.address || 'N/A';
-      document.getElementById('businessProfileCategory').textContent = currentBusiness.store_info?.category || 'N/A';
-      
-      if (currentBusiness.created_at) {
-        document.getElementById('businessProfileCreated').textContent = new Date(currentBusiness.created_at).toLocaleString();
-      }
-      
-      if (currentBusiness.updated_at) {
-        document.getElementById('businessProfileUpdated').textContent = new Date(currentBusiness.updated_at).toLocaleString();
-      }
-  
-      // Display business logo
-      const businessProfileLogo = document.getElementById('businessProfileLogo');
-      if (businessProfileLogo && currentBusiness.media_files?.store_logo) {
-        businessProfileLogo.src = currentBusiness.media_files.store_logo;
-        businessProfileLogo.style.display = 'block';
-      }
-    }
+// Helper function for formatting numbers
+function formatNumber(num) {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
   }
+  return num.toString();
+}
 
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.settings-tab');
@@ -668,7 +669,8 @@ window.saveSocialSettings = async function() {
     }
   };
 
-window.saveAutomationSettings = async function() {
+
+  window.saveAutomationSettings = async function() {
     try {
       showNotification('Saving automation settings...', 'info');
       
@@ -676,11 +678,17 @@ window.saveAutomationSettings = async function() {
       const apiKey = document.getElementById('n8nApiKey')?.value || '';
       const enabled = document.getElementById('automationEnabled')?.checked || false;
   
+      // ✅ Validate webhook URL
+      if (webhookUrl && !webhookUrl.startsWith('http')) {
+        showNotification('Invalid webhook URL. Must start with http:// or https://', 'error');
+        return;
+      }
+  
       const response = await fetch(`${API_BASE}/business-settings/${currentBusiness._id}`, {
-        method: 'PATCH', // Changed from PUT to PATCH
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          'automation_settings.n8n_config': { // Use dot notation
+          'automation_settings.n8n_config': {
             webhook_url: webhookUrl,
             api_key: apiKey,
             enabled: enabled
@@ -697,10 +705,9 @@ window.saveAutomationSettings = async function() {
       }
     } catch (error) {
       console.error('Error saving automation settings:', error);
-      showNotification('Failed to save automation settings', 'error');
+      showNotification(`Failed to save automation settings: ${error.message}`, 'error');
     }
   };
-
 
 window.savePreferences = async function() {
     try {
