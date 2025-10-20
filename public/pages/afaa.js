@@ -23,6 +23,108 @@ async function getAuth0Client() {
   }
 }
 
+// Function to show beta warning popup
+function showBetaWarning(title, url, modal, modalTitle, iframe) {
+  const popupHTML = `
+    <div id="betaWarningPopup" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    ">
+      <div style="
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 500px;
+        margin: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        text-align: center;
+        animation: slideUp 0.3s ease;
+      ">
+        <div style="font-size: 64px; margin-bottom: 20px;">🧪</div>
+        <div style="
+          background: #fff3cd;
+          border: 2px solid #ffc107;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 20px;
+        ">
+          <span style="color: #856404; font-weight: bold; font-size: 14px;">⚠️ BETA FEATURE</span>
+        </div>
+        <h2 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 24px;">Testing in Progress</h2>
+        <p style="color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 16px;">
+          This feature is currently in beta testing. You may experience some bugs or unexpected behavior. We're working hard to make it perfect for you!
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button id="proceedBetaBtn" style="
+            background: linear-gradient(135deg, #ff8b00 0%, #ff6b35 100%);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+          " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            Try it anyway
+          </button>
+          <button onclick="document.getElementById('betaWarningPopup').remove()" style="
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+          " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            Maybe later
+          </button>
+        </div>
+      </div>
+    </div>
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes slideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+    </style>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', popupHTML);
+  
+  // Handle proceed button
+  document.getElementById('proceedBetaBtn').addEventListener('click', function() {
+    document.getElementById('betaWarningPopup').remove();
+    // Open the actual modal
+    modalTitle.textContent = title;
+    iframe.src = url;
+    modal.style.display = "block";
+    document.body.style.overflow = 'hidden';
+  });
+  
+  // Close on background click
+  document.getElementById('betaWarningPopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.remove();
+    }
+  });
+}
+
 export async function initAfaaPage() {
   const auth0Client = await getAuth0Client();
   if (!auth0Client) {
@@ -74,14 +176,14 @@ export async function initAfaaPage() {
       {
         btn: document.getElementById("afaaTool4Btn"),
         title: "Post Video to Socials",
-        url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+        url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`,
+        isBeta: true  // Special flag for beta features
       },
       {
         btn: document.getElementById("afaaTool5Btn"),
         title: "Post Image to Socials",
         url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       },
-      
       {
         btn: document.getElementById("afaaTool6Btn"),
         title: "Generate AI Content",
@@ -90,10 +192,18 @@ export async function initAfaaPage() {
     ];
 
     // Add click handlers
-    buttons.forEach(({btn, title, url}) => {
+    buttons.forEach(({btn, title, url, isBeta}) => {
       if (btn) {
         btn.onclick = function(e) {
           e.stopPropagation();
+          
+          // Check if this is a beta feature
+          if (isBeta) {
+            showBetaWarning(title, url, modal, modalTitle, iframe);
+            return;
+          }
+          
+          // Normal behavior for other buttons
           modalTitle.textContent = title;
           iframe.src = url;
           modal.style.display = "block";
