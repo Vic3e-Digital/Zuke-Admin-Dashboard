@@ -289,91 +289,222 @@
     }
 
     // Publish
-    publishBtn.addEventListener('click', async () => {
-      if (!selectedFile || selectedPlatforms.length === 0) return;
+    // publishBtn.addEventListener('click', async () => {
+
+    //   if (!selectedFile || selectedPlatforms.length === 0) return;
       
-      publishBtn.disabled = true;
-      progress.style.display = 'block';
-      status.style.display = 'none';
+    //   publishBtn.disabled = true;
+    //   progress.style.display = 'block';
+    //   status.style.display = 'none';
 
-      try {
-        // Upload to Cloudinary
-        progressText.textContent = 'Uploading image to cloud storage...';
+    //   try {
+    //     // Upload to Cloudinary
+    //     progressText.textContent = 'Uploading image to cloud storage...';
         
-        const imageUrl = await uploadToCloudinary(selectedFile);
+    //     const imageUrl = await uploadToCloudinary(selectedFile);
 
-        if (!imageUrl) {
-          throw new Error('Failed to upload image');
-        }
+    //     if (!imageUrl) {
+    //       throw new Error('Failed to upload image');
+    //     }
 
-        console.log('✅ Image uploaded:', imageUrl);
+    //     console.log('✅ Image uploaded:', imageUrl);
 
-        // Prepare post content
-        const postContent = {
-          text: document.getElementById('caption').value,
-          image: imageUrl
-        };
+    //     // Prepare post content
+    //     const postContent = {
+    //       text: document.getElementById('caption').value,
+    //       image: imageUrl
+    //     };
 
-        // Post to social media
-        progressText.textContent = 'Publishing to social media...';
-        progressFill.style.width = '100%';
-        progressPercent.textContent = 'Processing...';
+    //     // Post to social media
+    //     progressText.textContent = 'Publishing to social media...';
+    //     progressFill.style.width = '100%';
+    //     progressPercent.textContent = 'Processing...';
 
-        const response = await fetch('/api/social-post/post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            businessId: businessId,
-            userEmail: userEmail,
-            platforms: selectedPlatforms,
-            postContent: postContent
-          })
-        });
+    //     const response = await fetch('/api/social-post/post', {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify({
+    //         businessId: businessId,
+    //         userEmail: userEmail,
+    //         platforms: selectedPlatforms,
+    //         postContent: postContent
+    //       })
+    //     });
 
-        const result = await response.json();
+    //     const result = await response.json();
 
-        if (result.success) {
-          showStatus(
-            `✅ Image posted to ${result.platforms.join(', ')}!\n\n` +
-            `Cost: ${result.formatted_cost}\n` +
-            `New Balance: ${result.formatted_balance}`, 
-            'success'
-          );
-          setTimeout(() => resetForm(), 5000);
-        } else if (response.status === 402) {
-          throw new Error(
-            `Insufficient funds!\n\n` +
-            `Required: ${result.formatted_required}\n` +
-            `Balance: ${result.formatted_balance}\n\n` +
-            `Please add credits or upgrade.`
-          );
-        } else {
-          throw new Error(result.error || 'Failed to publish image');
-        }
+    //     if (result.success) {
+    //       showStatus(
+    //         `✅ Image posted to ${result.platforms.join(', ')}!\n\n` +
+    //         `Cost: ${result.formatted_cost}\n` +
+    //         `New Balance: ${result.formatted_balance}`, 
+    //         'success'
+    //       );
+    //       setTimeout(() => resetForm(), 5000);
+    //     } else if (response.status === 402) {
+    //       throw new Error(
+    //         `Insufficient funds!\n\n` +
+    //         `Required: ${result.formatted_required}\n` +
+    //         `Balance: ${result.formatted_balance}\n\n` +
+    //         `Please add credits or upgrade.`
+    //       );
+    //     } else {
+    //       throw new Error(result.error || 'Failed to publish image');
+    //     }
 
-      } catch (error) {
-        console.error('Error:', error);
+    //   } catch (error) {
+    //     console.error('Error:', error);
         
-        // Enhanced error handling
-        if (error.message.includes('token expired') || 
-            error.message.includes('reconnect') ||
-            error.message.includes('Token refresh failed')) {
+    //     // Enhanced error handling
+    //     if (error.message.includes('token expired') || 
+    //         error.message.includes('reconnect') ||
+    //         error.message.includes('Token refresh failed')) {
           
-          showStatus(
-            '❌ Authentication Error\n\n' + 
-            error.message + '\n\n' +
-            '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
-            'error'
-          );
-        } else {
-          showStatus('❌ ' + error.message, 'error');
-        }
-      } finally {
-        progress.style.display = 'none';
-        publishBtn.disabled = false;
-      }
+    //       showStatus(
+    //         '❌ Authentication Error\n\n' + 
+    //         error.message + '\n\n' +
+    //         '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+    //         'error'
+    //       );
+    //     } else {
+    //       showStatus('❌ ' + error.message, 'error');
+    //     }
+    //   } finally {
+    //     progress.style.display = 'none';
+    //     publishBtn.disabled = false;
+    //   }
+    // });
+
+    publishBtn.addEventListener('click', async () => {
+  if (!selectedFile || selectedPlatforms.length === 0) return;
+  
+  publishBtn.disabled = true;
+  progress.style.display = 'block';
+  status.style.display = 'none';
+
+  try {
+    // ✅ STEP 1: Check wallet balance and deduct cost FIRST
+    progressText.textContent = 'Checking wallet balance...';
+    progressFill.style.width = '10%';
+    progressPercent.textContent = '10%';
+
+    // Calculate cost
+    let totalCost = 0;
+    selectedPlatforms.forEach(platform => {
+      const btn = document.querySelector(`[data-platform="${platform}"]`);
+      if (btn) totalCost += parseInt(btn.dataset.cost);
     });
 
+    // Check wallet and deduct (without posting yet)
+    const walletCheckResponse = await fetch('/api/social-post/post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessId: businessId,
+        userEmail: userEmail,
+        platforms: selectedPlatforms,
+        postContent: { text: 'Wallet check for image post' }, // Dummy content
+        totalCost: totalCost,
+        skipPosting: true, // ✅ Only deduct wallet, don't post yet
+        description: `Image post to ${selectedPlatforms.join(', ')}` // ✅ Custom description
+      })
+    });
+
+    const walletResult = await walletCheckResponse.json();
+
+    // Handle insufficient funds
+    if (!walletResult.success) {
+      if (walletCheckResponse.status === 402) {
+        throw new Error(
+          `Insufficient funds!\n\n` +
+          `Required: ${walletResult.formatted_required || `R${totalCost.toFixed(2)}`}\n` +
+          `Balance: ${walletResult.formatted_balance}\n\n` +
+          `Please add credits or upgrade.`
+        );
+      } else {
+        throw new Error(walletResult.error || 'Wallet check failed');
+      }
+    }
+
+    console.log('✅ Wallet deducted:', walletResult);
+
+    // ✅ STEP 2: Upload to Cloudinary (only if wallet check passed)
+    progressText.textContent = 'Uploading image to cloud storage...';
+    progressFill.style.width = '30%';
+    
+    const imageUrl = await uploadToCloudinary(selectedFile);
+
+    if (!imageUrl) {
+      // ⚠️ TODO: Consider refunding the user here if upload fails
+      throw new Error('Failed to upload image to cloud storage');
+    }
+
+    console.log('✅ Image uploaded:', imageUrl);
+
+    // ✅ STEP 3: Post to social media (wallet already deducted, so skip charging)
+    progressText.textContent = 'Publishing to social media...';
+    progressFill.style.width = '90%';
+    progressPercent.textContent = '90%';
+
+    // Prepare post content
+    const postContent = {
+      text: document.getElementById('caption').value,
+      image: imageUrl
+    };
+
+    const response = await fetch('/api/social-post/post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessId: businessId,
+        userEmail: userEmail,
+        platforms: selectedPlatforms,
+        postContent: postContent,
+        totalCost: 0, // ✅ Set to 0 to prevent double charging
+        skipWalletCheck: true // ✅ Add this flag to skip wallet check
+      })
+    });
+
+    const result = await response.json();
+
+    progressFill.style.width = '100%';
+    progressPercent.textContent = '100%';
+
+    if (result.success) {
+      showStatus(
+        `✅ Image posted to ${selectedPlatforms.join(', ')}!\n\n` +
+        `Cost: R${totalCost.toFixed(2)}\n` +
+        `New Balance: ${walletResult.formatted_balance}`, 
+        'success'
+      );
+      setTimeout(() => resetForm(), 5000);
+    } else {
+      throw new Error(result.error || 'Failed to publish image');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    
+    // Enhanced error handling
+    if (error.message.includes('token expired') || 
+        error.message.includes('reconnect') ||
+        error.message.includes('Token refresh failed')) {
+      
+      showStatus(
+        '❌ Authentication Error\n\n' + 
+        error.message + '\n\n' +
+        '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+        'error'
+      );
+    } else {
+      showStatus('❌ ' + error.message, 'error');
+    }
+  } finally {
+    progress.style.display = 'none';
+    publishBtn.disabled = false;
+  }
+});
+    
     async function uploadToCloudinary(file) {
       return new Promise((resolve, reject) => {
         const formData = new FormData();
