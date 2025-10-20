@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate AI Content</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    
+    .radio-option {
+      flex: 1;
+      position: relative;
+    }
+    
+    .radio-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    .radio-option input[type="radio"]:checked + .radio-label {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .radio-label:hover {
+      border-color: #667eea;
+    }
+    
+    .radio-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .radio-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    
+    .field-note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .platform-btn {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 12px;
+    }
+    
+    .platform-btn:hover:not([disabled]) { border-color: #667eea; }
+    
+    .platform-btn.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+      font-weight: 600;
+    }
+    
+    .platform-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .cost {
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .generate-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .generate-btn:hover:not(:disabled) { opacity: 0.9; }
+    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.info { background: #d1ecf1; color: #0c5460; }
+    
+    .progress {
+      display: none;
+      margin-top: 15px;
+      text-align: center;
+    }
+    
+    .progress-text {
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .preview-section {
+      display: none;
+      margin-top: 20px;
+    }
+    
+    .preview-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .preview-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .preview-media {
+      width: 100%;
+      max-height: 400px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .preview-caption {
+      color: #333;
+      line-height: 1.5;
+    }
+    
+    .suggestion-card {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .suggestion-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    
+    .suggestion-card.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
+    }
+    
+    .suggestion-card::before {
+      content: '✨';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 20px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .suggestion-card:hover::before {
+      opacity: 1;
+    }
+    
+    .suggestion-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    
+    .suggestion-preview {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .suggestion-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 1️⃣ Content Type Selection -->
+        <div class="section">
+          <div class="section-title">1. Choose Content Type</div>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="typeImage" name="contentType" value="image" checked>
+              <label for="typeImage" class="radio-label">
+                <div class="radio-icon">📷</div>
+                <div class="radio-text">Image</div>
+              </label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="typeVideo" name="contentType" value="video">
+              <label for="typeVideo" class="radio-label">
+                <div class="radio-icon">🎥</div>
+                <div class="radio-text">Video</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3️⃣ AI Suggestions Section (MOVED HERE) -->
+        <div class="section" id="suggestionsSection" style="display: none;">
+            <div class="section-title">
+              💡 AI Content Suggestions for <span id="businessNameDisplay">Your Business</span>
+            </div>
+            
+            <div id="suggestionsLoading" style="text-align: center; padding: 20px; color: #666;">
+              <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <p style="margin-top: 10px;">Generating personalized suggestions...</p>
+            </div>
+            
+            <div id="suggestionsContent" style="display: none;">
+              <div id="suggestionCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                <!-- Cards will be injected here -->
+              </div>
+              <button id="refreshSuggestionsBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                🔄 Get New Suggestions
+              </button>
+            </div>
+            
+            <div id="suggestionsError" style="display: none; color: #d9534f; padding: 12px; background: #f8d7da; border-radius: 6px;"></div>
+          </div>
+      
+        <!-- 2️⃣ Concept Input -->
+        <div class="section">
+          <div class="section-title">2. Describe Your Content</div>
+          
+          <div class="form-group">
+            <label for="concept">Content Concept</label>
+            <textarea 
+              id="concept" 
+              placeholder="E.g., A professional African businesswoman in a modern office, smiling confidently..."
+              rows="4"
+            ></textarea>
+            <p class="field-note">Describe what you want to see in your image/video. Be specific about style, setting, mood, etc.</p>
+          </div>
+      
+          <div class="form-group">
+            <label for="caption">Caption (Optional)</label>
+            <textarea 
+              id="caption" 
+              placeholder="Write the caption that will accompany your post..."
+              rows="3"
+            ></textarea>
+            <p class="field-note">Leave blank to have AI generate a caption based on your concept</p>
+          </div>
+        </div>
+      
+        
+      
+        <!-- 4️⃣ Platform Selection -->
+        <div class="section">
+          <div class="section-title">3. Select Platforms</div>
+          <div class="platforms">
+            <button class="platform-btn" data-platform="facebook" data-cost="10">
+              📘<br>Facebook<br><small>R10.00</small>
+            </button>
+            <button class="platform-btn" data-platform="instagram" data-cost="10">
+              📷<br>Instagram<br><small>R10.00</small>
+            </button>
+            <button class="platform-btn" data-platform="linkedin" data-cost="10">
+              💼<br>LinkedIn<br><small>R10.00</small>
+            </button>
+            <button class="platform-btn" data-platform="youtube" data-cost="10" id="youtubeBtn" disabled>
+              🎥<br>YouTube<br><small>R10.00</small>
+            </button>
+          </div>
+          
+          <div class="cost" id="costDisplay">
+            Select platforms to see cost
+          </div>
+        </div>
+      
+        <!-- 5️⃣ Generate Button -->
+        <button class="generate-btn" id="generateBtn" disabled>
+          Generate & Publish Content
+        </button>
+      
+        <!-- Progress -->
+        <div class="progress" id="progress">
+          <p class="progress-text" id="progressText">Generating content with AI...</p>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      
+        <!-- Status Messages -->
+        <div class="status" id="status"></div>
+      
+        <!-- Preview Section -->
+        <div class="preview-section" id="previewSection">
+          <div class="section">
+            <div class="section-title">Generated Content Preview</div>
+            <div class="preview-card">
+              <div class="preview-label">Media</div>
+              <img id="previewImage" class="preview-media" style="display: none;" alt="Generated content">
+              <video id="previewVideo" class="preview-media" controls style="display: none;"></video>
+              
+              <div class="preview-label" style="margin-top: 20px;">Caption</div>
+              <p class="preview-caption" id="previewCaption">—</p>
+              
+              <div class="preview-label" style="margin-top: 20px;">Platforms</div>
+              <p class="preview-caption" id="previewPlatforms">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <script src="/js/dataManager.js"></script>
+
+  <script>
+    // ========== GLOBAL VARIABLES ==========
+    let auth0Client = null;
+    let currentBusiness = null;
+    let openAIConfig = null;
+    let selectedPlatforms = [];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email');
+    const businessId = urlParams.get('businessId');
+    const businessName = urlParams.get('businessName');
+
+    const N8N_WEBHOOK = 'https://aigents.southafricanorth.azurecontainer.io/webhook/social-media-content-generator';
+
+    const generateBtn = document.getElementById('generateBtn');
+    const costDisplay = document.getElementById('costDisplay');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const previewSection = document.getElementById('previewSection');
+    const youtubeBtn = document.getElementById('youtubeBtn');
+
+    // ========== AUTH0 CLIENT ==========
+    async function getAuth0Client() {
+      if (window.auth0Client) return window.auth0Client;
+      
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error configuring Auth0:", error);
+        return null;
+      }
+    }
+
+    // ========== FETCH OPENAI CONFIG FROM BACKEND ==========
+    async function getOpenAIConfig() {
+      if (openAIConfig) return openAIConfig;
+      
+      try {
+        const response = await fetch('/api/get-openai-config');
+        if (!response.ok) throw new Error('Failed to get OpenAI config');
+        openAIConfig = await response.json();
+        return openAIConfig;
+      } catch (error) {
+        console.error('Error fetching OpenAI config:', error);
+        return null;
+      }
+    }
+
+    // ========== CALL AZURE OPENAI ==========
+    async function callAzureOpenAI(prompt) {
+      const config = await getOpenAIConfig();
+      if (!config) throw new Error('OpenAI config not available');
+
+      const url = `${config.endpoint}openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': config.apiKey
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: "You are a creative social media content strategist. You MUST respond with valid JSON only. Generate exactly 3 specific AI generation prompts for social media content: 2 for single images and 1 for a single video. Each suggestion should include a detailed prompt that can be used with AI image/video generation tools like DALL-E, Midjourney, or Runway. The first two should be for images, the third for video. Return a JSON object with a 'suggestions' array containing 3 objects with 'title', 'concept', and 'caption' fields. exclude carousels"
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_tokens: 800,
+          temperature: 0.8,
+          top_p: 0.95,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Azure OpenAI error:', errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    }
+
+    // ========== LOAD BUSINESS & SUGGESTIONS ==========
+    async function loadBusinessAndSuggestions() {
+      const auth0 = await getAuth0Client();
+      if (!auth0) return;
+
+      try {
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (!isAuthenticated) {
+          console.warn('User not authenticated');
+          return;
+        }
+
+        currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
+        
+        if (!currentBusiness) {
+          console.warn('No business found in cache');
+          return;
+        }
+
+        const businessName = currentBusiness?.store_info?.name || 'Your Business';
+        document.getElementById('businessNameDisplay').textContent = businessName;
+        document.getElementById('suggestionsSection').style.display = 'block';
+
+        await fetchSuggestions();
+
+      } catch (error) {
+        console.error('Error loading business:', error);
+      }
+    }
+
+    // ========== FETCH AI SUGGESTIONS ==========
+    async function fetchSuggestions() {
+    const loadingDiv = document.getElementById('suggestionsLoading');
+    const contentDiv = document.getElementById('suggestionsContent');
+    const errorDiv = document.getElementById('suggestionsError');
+    const cardsContainer = document.getElementById('suggestionCards');
+
+    loadingDiv.style.display = 'block';
+    contentDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+
+    try {
+        const contentType = document.querySelector('input[name="contentType"]:checked').value;
+        const businessCase = currentBusiness?.initial_business_case || {};
+        const businessInfo = JSON.stringify(businessCase, null, 2);
+
+        let prompt;
+
+        // ✅ DIFFERENT PROMPTS FOR IMAGE VS VIDEO
+        if (contentType === 'video') {
+        // 🎥 SHORT-FORM INFLUENCER VIDEO PROMPT
+        prompt = `Based on this business information:
+
+    ${businessInfo}
+
+    Generate exactly 3 short-form influencer video ideas (MAXIMUM 8 SECONDS each) for TikTok, Instagram Reels, YouTube Shorts, and Facebook Reels.
+
+    Focus on:
+    - Viral hooks and attention-grabbing openings
+    - Trending formats (POV, "Watch me...", "Day in the life", Quick tips, Before/After)
+    - Fast-paced, engaging content
+    - Relatable, authentic influencer style
+    - Content that can be filmed quickly with a phone
+
+    Return ONLY valid JSON in this exact format:
+    {
+    "suggestions": [
+        {
+        "title": "Catchy Video Concept (Max 8 sec)",
+        "concept": "Detailed shot-by-shot description of the 8-second video. Include the hook (first 2 seconds), main content (middle 4 seconds), and CTA/ending (last 2 seconds). Be specific about camera angles, movements, and actions.",
+        "caption": "Engaging caption with hook, relevant hashtags (#Reels #Viral #BusinessTips), and CTA. Keep it conversational and influencer-style."
+        }
+    ]
+    }
+
+    Make each suggestion actionable, authentic, and designed for maximum engagement in under 8 seconds.`;
+
+        } else {
+        // 📷 IMAGE CONTENT PROMPT (existing)
+        prompt = `Based on this business information:
+
+    ${businessInfo}
+
+    Generate exactly 3 creative image content ideas for social media (Facebook, Instagram, LinkedIn).
+
+    Return ONLY valid JSON in this exact format:
+    {
+    "suggestions": [
+        {
+        "title": "Image Concept Title",
+        "concept": "Detailed description of the image content (2-3 sentences). Include composition, style, colors, mood, and key elements.",
+        "caption": "Ready-to-use engaging caption with hooks and relevant hashtags"
+        }
+    ]
+    }
+
+    Make each suggestion specific, actionable, and relevant to the business goals.`;
+        }
+
+        console.log('🤖 Calling Azure OpenAI...');
+        const response = await callAzureOpenAI(prompt);
+        
+        // Parse JSON response
+        let data;
+        try {
+        data = JSON.parse(response);
+        } catch (e) {
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            data = JSON.parse(jsonMatch[0]);
+        } else {
+            throw new Error('Invalid JSON response from AI');
+        }
+        }
+
+        const suggestions = data.suggestions || [];
+        
+        if (suggestions.length === 0) {
+        throw new Error('No suggestions generated');
+        }
+
+        cardsContainer.innerHTML = '';
+
+        suggestions.forEach((suggestion, index) => {
+        const card = document.createElement('div');
+        card.className = 'suggestion-card';
+        
+        // ✅ Add video badge for video suggestions
+        const badge = contentType === 'video' 
+            ? '<span style="background: #ff6b6b; color: white; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-right: 6px;">⚡ 8sec</span>'
+            : '';
+        
+        card.innerHTML = `
+            ${badge}<div class="suggestion-title">${suggestion.title}</div>
+            <div class="suggestion-preview">${suggestion.concept}</div>
+            <span class="suggestion-badge">Click to use</span>
+        `;
+        
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.suggestion-card').forEach(c => 
+            c.classList.remove('selected')
+            );
+            
+            card.classList.add('selected');
+            
+            document.getElementById('concept').value = suggestion.concept;
+            document.getElementById('caption').value = suggestion.caption;
+            
+            updateGenerateButton();
+            
+            document.getElementById('concept').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+            });
+            
+            showStatus('✅ Suggestion applied! Review and select platforms below.', 'info');
+            setTimeout(() => {
+            status.style.display = 'none';
+            }, 3000);
+        });
+        
+        cardsContainer.appendChild(card);
+        });
+        
+        loadingDiv.style.display = 'none';
+        contentDiv.style.display = 'block';
+
+    } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = '⚠️ Failed to generate suggestions. Please try again.';
+    }
+    }
+
+
+    // ========== INITIALIZE ON PAGE LOAD ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBusinessAndSuggestions();
+
+      document.querySelectorAll('input[name="contentType"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (currentBusiness) fetchSuggestions();
+        });
+      });
+
+      const refreshBtn = document.getElementById('refreshSuggestionsBtn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', fetchSuggestions);
+      }
+    });
+
+    // ========== CONTENT TYPE CHANGES ==========
+    document.querySelectorAll('input[name="contentType"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const isVideo = e.target.value === 'video';
+        
+        if (isVideo) {
+          youtubeBtn.disabled = false;
+          youtubeBtn.style.opacity = '1';
+        } else {
+          youtubeBtn.disabled = true;
+          youtubeBtn.style.opacity = '0.3';
+          if (selectedPlatforms.includes('youtube')) {
+            selectedPlatforms = selectedPlatforms.filter(p => p !== 'youtube');
+            youtubeBtn.classList.remove('selected');
+            updateCost();
+          }
+        }
+        
+        updateGenerateButton();
+      });
+    });
+
+    // ========== CONCEPT INPUT ==========
+    document.getElementById('concept').addEventListener('input', updateGenerateButton);
+
+    // ========== PLATFORM SELECTION ==========
+    document.querySelectorAll('.platform-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        
+        btn.classList.toggle('selected');
+        const platform = btn.dataset.platform;
+        
+        if (selectedPlatforms.includes(platform)) {
+          selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+        } else {
+          selectedPlatforms.push(platform);
+        }
+        
+        updateCost();
+        updateGenerateButton();
+      });
+    });
+
+    // ========== UPDATE COST ==========
+    function updateCost() {
+        let postingCost = 0;
+        selectedPlatforms.forEach(platform => {
+            const btn = document.querySelector(`[data-platform="${platform}"]`);
+            if (btn) postingCost += parseInt(btn.dataset.cost);
+        });
+        
+        const generationCost = 20; // R20 for AI generation
+        const total = generationCost + postingCost;
+        
+        if (selectedPlatforms.length > 0) {
+            costDisplay.innerHTML = `AI Generation: R${generationCost.toFixed(2)} + Posting: R${postingCost.toFixed(2)}<br><strong>Total: R${total.toFixed(2)}</strong>`;
+        } else {
+            costDisplay.textContent = 'Select platforms to see cost';
+        }
+    }
+    // ========== UPDATE GENERATE BUTTON ==========
+    function updateGenerateButton() {
+      const concept = document.getElementById('concept').value.trim();
+      const isValid = concept.length > 10 && selectedPlatforms.length > 0;
+      generateBtn.disabled = !isValid;
+    }
+
+    generateBtn.addEventListener('click', async () => {
+  const contentType = document.querySelector('input[name="contentType"]:checked').value;
+  const concept = document.getElementById('concept').value.trim();
+  const caption = document.getElementById('caption').value.trim();
+
+  if (!concept || selectedPlatforms.length === 0) return;
+
+  generateBtn.disabled = true;
+  progress.style.display = 'block';
+  status.style.display = 'none';
+  previewSection.style.display = 'none';
+  progressFill.style.width = '20%';
+
+  try {
+    // ✅ Calculate total cost
+    const generationCost = 20;
+    let postingCost = 0;
+    selectedPlatforms.forEach(platform => {
+      const btn = document.querySelector(`[data-platform="${platform}"]`);
+      if (btn) postingCost += parseInt(btn.dataset.cost);
+    });
+    const totalCost = generationCost + postingCost;
+
+    progressText.textContent = 'Checking wallet balance...';
+    progressFill.style.width = '30%';
+
+    // ✅ STEP 1: Deduct from wallet using existing endpoint
+    const walletResponse = await fetch('/api/social-post/post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessId: businessId,
+        userEmail: userEmail,
+        platforms: selectedPlatforms,
+        postContent: { text: concept }, // Dummy content
+        totalCost: totalCost,
+        skipPosting: true // ✅ Only deduct wallet, don't post
+      })
+    });
+
+    if (!walletResponse.ok) {
+      const walletError = await walletResponse.json();
+      
+      if (walletResponse.status === 402) {
+        throw new Error(
+          `Insufficient funds!\n\n` +
+          `Required: ${walletError.formatted_required || `R${totalCost.toFixed(2)}`}\n` +
+          `Balance: ${walletError.formatted_balance}\n\n` +
+          `Please add credits or upgrade.`
+        );
+      }
+      
+      throw new Error(walletError.error || 'Wallet check failed');
+    }
+
+    const walletResult = await walletResponse.json();
+    console.log('✅ Wallet deducted:', walletResult);
+
+    progressText.textContent = `Generating AI ${contentType}...`;
+    progressFill.style.width = '50%';
+
+    // ✅ STEP 2: Call n8n to generate content
+    const payload = {
+      contentType: contentType,
+      concept: concept,
+      caption: caption || '',
+      platforms: selectedPlatforms,
+      businessId: businessId,
+      businessName: businessName,
+      userEmail: userEmail,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('📤 Sending to n8n webhook:', payload);
+
+    const response = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Webhook error:', errorText);
+      throw new Error(`Content generation failed: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ n8n response:', result);
+
+    progressFill.style.width = '100%';
+
+    if (result.success !== false) {
+      if (result.mediaUrl || result.media_url) {
+        showPreview(
+          contentType, 
+          result.mediaUrl || result.media_url, 
+          result.caption || result.generated_caption || caption,
+          selectedPlatforms
+        );
+      }
+
+      showStatus(
+        `✅ Content generated and posted successfully!\n\n` +
+        `Platforms: ${selectedPlatforms.join(', ')}\n` +
+        `Cost: R${totalCost.toFixed(2)}\n` +
+        `New Balance: ${walletResult.formatted_balance}`,
+        'success'
+      );
+      
+      setTimeout(() => resetForm(), 8000);
+    } else {
+      throw new Error(result.error || result.message || 'Generation failed');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    
+    if (error.message.includes('Insufficient funds')) {
+      showStatus(
+        '❌ Insufficient Funds\n\n' +
+        'Please add credits or upgrade your plan to continue.',
+        'error'
+      );
+    } else if (error.message.includes('token expired') || error.message.includes('reconnect')) {
+      showStatus(
+        '❌ Authentication Error\n\n' + 
+        error.message + '\n\n' +
+        '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+        'error'
+      );
+    } else {
+      showStatus('❌ ' + error.message, 'error');
+    }
+  } finally {
+    progress.style.display = 'none';
+    generateBtn.disabled = false;
+  }
+});
+    // ========== SHOW PREVIEW ==========
+    function showPreview(type, mediaUrl, caption, platforms) {
+      const previewImage = document.getElementById('previewImage');
+      const previewVideo = document.getElementById('previewVideo');
+      const previewCaption = document.getElementById('previewCaption');
+      const previewPlatforms = document.getElementById('previewPlatforms');
+
+      if (type === 'image') {
+        previewImage.src = mediaUrl;
+        previewImage.style.display = 'block';
+        previewVideo.style.display = 'none';
+      } else {
+        previewVideo.src = mediaUrl;
+        previewVideo.style.display = 'block';
+        previewImage.style.display = 'none';
+      }
+
+      previewCaption.textContent = caption;
+      previewPlatforms.textContent = platforms.map(p => 
+        p.charAt(0).toUpperCase() + p.slice(1)
+      ).join(', ');
+      
+      previewSection.style.display = 'block';
+    }
+
+    // ========== SHOW STATUS ==========
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.style.display = 'block';
+    }
+
+    // ========== RESET FORM ==========
+    function resetForm() {
+      document.getElementById('concept').value = '';
+      document.getElementById('caption').value = '';
+      selectedPlatforms = [];
+      
+      document.querySelectorAll('.platform-btn').forEach(btn => 
+        btn.classList.remove('selected')
+      );
+      
+      progressFill.style.width = '0%';
+      previewSection.style.display = 'none';
+      updateCost();
+      updateGenerateButton();
+    }
+  </script>
+</body>
+</html>

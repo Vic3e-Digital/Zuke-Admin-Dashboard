@@ -88,6 +88,7 @@ router.get('/:businessId', async (req, res) => {
   }
 });
 
+
 // -------------------------
 // PATCH Business Settings - FIXED
 // -------------------------
@@ -108,21 +109,18 @@ router.patch('/:businessId', async (req, res) => {
 
     const db = await getDatabase();
     
-    // ✅ Use $set with the updates object directly (which has dot notation keys)
-    const result = await db.collection('store_submissions').findOneAndUpdate(
+    // ✅ Update the document
+    const result = await db.collection('store_submissions').updateOne(
       { _id: new ObjectId(businessId) },
       { 
         $set: {
           ...updates,
           updated_at: new Date()
         }
-      },
-      { 
-        returnDocument: 'after'
       }
     );
 
-    if (!result.value) {
+    if (result.matchedCount === 0) {
       return res.status(404).json({ 
         success: false, 
         error: 'Business not found' 
@@ -131,10 +129,15 @@ router.patch('/:businessId', async (req, res) => {
 
     console.log(`[Settings] PATCH successful for business: ${businessId}`);
 
+    // ✅ Fetch the updated document to return
+    const updatedBusiness = await db.collection('store_submissions').findOne({
+      _id: new ObjectId(businessId)
+    });
+
     res.json({
       success: true,
       message: 'Settings updated successfully',
-      data: result.value
+      automation_settings: updatedBusiness.automation_settings || {}
     });
   } catch (error) {
     console.error('[Settings] Error updating business settings:', error);
@@ -2592,24 +2595,6 @@ router.post('/auth/:platform/refresh', async (req, res) => {
   }
 });
   
-// -------------------------
-// Refresh Token
-// -------------------------
-// router.post('/auth/:platform/refresh', async (req, res) => {
-//   try {
-//     const { platform } = req.params;
-//     const { businessId } = req.body;
-
-//     // TODO: Implement token refresh logic for each platform
-//     res.json({ 
-//       success: true, 
-//       message: 'Token refresh not yet implemented for this platform' 
-//     });
-//   } catch (error) {
-//     console.error(`[Settings] Error refreshing token:`, error);
-//     res.json({ success: false, error: error.message });
-//   }
-// });
 
 // -------------------------
 // Get Decrypted Token (for n8n)
