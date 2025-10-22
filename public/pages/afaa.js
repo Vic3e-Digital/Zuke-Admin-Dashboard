@@ -184,10 +184,17 @@ export async function initAfaaPage() {
         title: "Post Image to Socials",
         url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       },
+      // {
+      //   btn: document.getElementById("afaaTool6Btn"),
+      //   title: "Post Image to Socials",
+      //   url: `/tools/generate-content.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+      //   isBeta: true
+      // },
       {
-        btn: document.getElementById("afaaTool6Btn"),
-        title: "Generate AI Content",
-        url: `/tools/generate-content.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+        btn: document.getElementById("afaaTool7Btn"),
+        title: "Generate Videos with AI",
+        url: `/tools/create-ai-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+        isBeta: true
       }
     ];
 

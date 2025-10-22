@@ -127,6 +127,15 @@ const updateUI = async () => {
 const login = async () => {
   try {
     console.log("Starting login...");
+    
+    // Track login attempt
+    if (window.analytics) {
+      window.analytics.trackEvent('login_attempt', {
+        category: 'Authentication',
+        label: 'Login Button Click'
+      });
+    }
+    
     // Clear any existing flags before login
     sessionStorage.removeItem('hasRedirected');
     sessionStorage.removeItem('lastUserSub');
@@ -138,12 +147,28 @@ const login = async () => {
     });
   } catch (error) {
     console.error("Login error:", error);
+    
+    // Track login error
+    if (window.analytics) {
+      window.analytics.trackError('Login failed', 'Login Page', {
+        error_message: error.message
+      });
+    }
   }
 };
 
 const logout = () => {
   try {
     console.log("Starting logout...");
+    
+    // Track logout event
+    if (window.analytics) {
+      window.analytics.trackEvent('logout', {
+        category: 'Authentication',
+        label: 'Logout Button Click'
+      });
+    }
+    
     // Clear all session data on logout
     sessionStorage.clear();
     localStorage.removeItem('lastUserId');
@@ -155,6 +180,13 @@ const logout = () => {
     });
   } catch (error) {
     console.error("Logout error:", error);
+    
+    // Track logout error
+    if (window.analytics) {
+      window.analytics.trackError('Logout failed', 'Dashboard', {
+        error_message: error.message
+      });
+    }
   }
 };
 
@@ -177,6 +209,14 @@ window.onload = async () => {
       await auth0Client.handleRedirectCallback();
       console.log("Callback handled successfully");
       
+      // Track successful login
+      if (window.analytics) {
+        window.analytics.trackEvent('login_success', {
+          category: 'Authentication',
+          label: 'Login Successful'
+        });
+      }
+      
       // Clear the query parameters
       window.history.replaceState({}, document.title, window.location.pathname);
       
@@ -185,6 +225,13 @@ window.onload = async () => {
       
     } catch (error) {
       console.error("Error handling callback:", error);
+      
+      // Track login callback error
+      if (window.analytics) {
+        window.analytics.trackError('Login callback failed', 'Login Page', {
+          error_message: error.message
+        });
+      }
     }
   }
 

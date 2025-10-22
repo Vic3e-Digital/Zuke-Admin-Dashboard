@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+
+# Crawl delay (optional - helps prevent overloading server)
+Crawl-delay: 1
+
+# Disallow access to sensitive areas
+Disallow: /api/
+Disallow: /node_modules/
+Disallow: /lib/
+Disallow: /auth_config.json
+Disallow: /server.js
+Disallow: /package.json
+Disallow: /package-lock.json
+Disallow: /nodemon.json
+Disallow: /deploy_setup.ps1
+Disallow: /publishProfile-*.xml
+Disallow: /az_deploy/
+Disallow: /styling/
+
+# Allow access to public assets
+Allow: /css/
+Allow: /js/
+Allow: /pages/
+Allow: /tools/
+Allow: /images/
+Allow: /favicon.ico
+Allow: /sitemap.xml
+Allow: /robots.txt
