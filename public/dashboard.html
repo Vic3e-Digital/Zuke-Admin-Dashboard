@@ -3,23 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard >> ZukeX</title>
-    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Primary Meta Tags -->
+    <title>ZukeX Dashboard - AI-Powered Business Management Platform</title>
+    <meta name="title" content="ZukeX Dashboard - AI-Powered Business Management Platform">
+    <meta name="description" content="Manage your business with ZukeX dashboard - comprehensive AI-powered platform featuring creative tools, marketing automation, marketplace solutions, and business analytics. Streamline operations with intelligent automation.">
+    <meta name="keywords" content="ZukeX dashboard, business management, AI platform, creative tools, marketing automation, marketplace, business analytics, workflow automation, business intelligence">
+    <meta name="author" content="ZukeX">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zuke.com/dashboard">
+    <meta property="og:title" content="ZukeX Dashboard - AI-Powered Business Management Platform">
+    <meta property="og:description" content="Comprehensive business management dashboard with AI-powered creative tools, marketing automation, and marketplace solutions. Transform your business operations with intelligent automation.">
+    <meta property="og:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
+    <meta property="og:site_name" content="ZukeX">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://zuke.com/dashboard">
+    <meta property="twitter:title" content="ZukeX Dashboard - AI-Powered Business Management Platform">
+    <meta property="twitter:description" content="Comprehensive business management dashboard with AI-powered creative tools, marketing automation, and marketplace solutions.">
+    <meta property="twitter:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
+    
+    <!-- Favicon and Icons -->
     <link rel="icon" type="image/png" href="css/faviconV2.png">
+    <link rel="apple-touch-icon" href="css/faviconV2.png">
+    
+    <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.auth0.com">
+    <link rel="preconnect" href="https://js.paystack.co">
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ZukeX Dashboard",
+        "description": "AI-powered business management dashboard with creative tools, marketing automation, and marketplace solutions",
+        "url": "https://zuke.com/dashboard",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "featureList": [
+            "Business Management",
+            "Creative Tools",
+            "Marketing Automation",
+            "Marketplace Solutions",
+            "Analytics Dashboard",
+            "Workflow Automation"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "ZukeX"
+        }
+    }
+    </script>
+    
+    <!-- Analytics will be loaded lazily after page load -->
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Header -->
-        <header class="header">
-            <button class="hamburger-menu" id="hamburgerMenu">
+        <header class="header" role="banner">
+            <button class="hamburger-menu" id="hamburgerMenu" aria-label="Toggle navigation menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" alt="Zuke Logo" style="height:48px;">
+            <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" alt="ZukeX Logo - AI-Powered Business Management Platform" style="height:48px;">
       
             
             <div class="header-right">
@@ -63,9 +130,9 @@
         </header>
 
         <!-- Sidebar -->
-        <nav class="sidebar" id="sidebar">
+        <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
             <div class="sidebar-content">
-                <ul class="nav-menu">
+                <ul class="nav-menu" role="menubar">
                     <li class="nav-item">
                         <a href="#" class="nav-link active" data-page="dashboard">
                             <!-- Modern dashboard grid icon -->
@@ -203,15 +270,17 @@
         
 
         <!-- Main Content Area -->
-        <main class="main-content" id="mainContent">
-            <div id="pageContent">
+        <main class="main-content" id="mainContent" role="main">
+            <div id="pageContent" aria-live="polite" aria-label="Page content">
                 <!-- Dynamic content will be loaded here -->
+                <h1 class="sr-only">ZukeX Dashboard</h1>
             </div>
         </main>
     </div>
 
     <!-- Fix the script order -->
     <script src="js/dataManager.js"></script>
+    <script src="js/analytics.js"></script>
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <!-- Paystack Inline JS -->
     <script src="https://js.paystack.co/v2/inline.js"></script>

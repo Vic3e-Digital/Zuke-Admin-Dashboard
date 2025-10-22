@@ -125,6 +125,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const user = await auth0Client.getUser();
       console.log("User logged in:", user);
       
+      // Set user information for analytics tracking
+      if (window.analytics) {
+        window.analytics.setUserInfo(user.sub, null);
+      }
+      
       await loadWalletBalance();
 
       // Clear cache if user changed
@@ -527,6 +532,17 @@ if (!isAdmin) {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         const page = link.getAttribute("data-page");
+        const linkText = link.textContent?.trim() || link.getAttribute('title') || 'Unknown Link';
+        
+        // Track navigation event
+        if (window.analytics) {
+          window.analytics.trackNavigation(currentPage, page, 'click');
+          window.analytics.trackButtonClick(linkText, currentPage, {
+            button_type: 'navigation',
+            target_page: page
+          });
+        }
+        
         loadPage(page);
 
         // Update active nav item
@@ -543,6 +559,11 @@ if (!isAdmin) {
 
   async function loadPage(page) {
     currentPage = page;
+
+    // Track page view
+    if (window.analytics) {
+      window.analytics.trackPageView(page, window.location.pathname);
+    }
 
     try {
       let content = "";

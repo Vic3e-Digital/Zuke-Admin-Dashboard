@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate AI Content</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    
+    .radio-option {
+      flex: 1;
+      position: relative;
+    }
+    
+    .radio-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    .radio-option input[type="radio"]:checked + .radio-label {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .radio-label:hover {
+      border-color: #667eea;
+    }
+    
+    .radio-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .radio-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    
+    select {
+      background: white;
+      cursor: pointer;
+    }
+    
+    textarea:focus, input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .field-note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .platform-btn {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 12px;
+    }
+    
+    .platform-btn:hover:not([disabled]) { border-color: #667eea; }
+    
+    .platform-btn.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+      font-weight: 600;
+    }
+    
+    .platform-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .cost {
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .generate-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .generate-btn:hover:not(:disabled) { opacity: 0.9; }
+    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.info { background: #d1ecf1; color: #0c5460; }
+    
+    .progress {
+      display: none;
+      margin-top: 15px;
+      text-align: center;
+    }
+    
+    .progress-text {
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .preview-section {
+      display: none;
+      margin-top: 20px;
+    }
+    
+    .preview-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .preview-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .preview-media {
+      width: 100%;
+      max-height: 400px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .preview-caption {
+      color: #333;
+      line-height: 1.5;
+    }
+    
+    .suggestion-card {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .suggestion-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    
+    .suggestion-card.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
+    }
+    
+    .suggestion-card::before {
+      content: '✨';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 20px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .suggestion-card:hover::before {
+      opacity: 1;
+    }
+    
+    .suggestion-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    
+    .suggestion-preview {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .suggestion-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    /* Video-specific fields styling */
+    .video-fields {
+      display: none;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .video-fields.show {
+      display: block;
+    }
+
+    /* Duration button group styling */
+    /* Update this CSS rule */
+.duration-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.duration-btn {
+  flex: 1;
+  padding: 10px 8px; /* Slightly reduced padding for 3 buttons */
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  font-size: 13px; /* Slightly smaller font for 3 buttons */
+  font-weight: 600;
+}
+    
+
+    .duration-btn:hover {
+      border-color: #667eea;
+    }
+
+    .duration-btn.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+      color: #667eea;
+    }
+
+    /* Image upload styling */
+    .image-upload-container {
+      margin-top: 16px;
+      padding: 16px;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      text-align: center;
+      transition: all 0.2s;
+      background: #f8f9fa;
+    }
+
+    .image-upload-container:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .image-upload-container input[type="file"] {
+      display: none;
+    }
+
+    .upload-label {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .upload-label:hover {
+      opacity: 0.9;
+    }
+
+    .image-preview {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .image-preview img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .remove-image {
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* Disclaimer styles */
+    .disclaimer {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #856404;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .disclaimer:hover {
+      background: #ffe69c;
+    }
+
+    .disclaimer-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .disclaimer-text {
+      font-weight: 600;
+    }
+
+    /* Disclaimer modal styles */
+    .disclaimer-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .disclaimer-modal.show {
+      display: flex;
+    }
+
+    .disclaimer-modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      margin: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+
+    .disclaimer-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .disclaimer-modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .disclaimer-modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .disclaimer-modal-close:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .disclaimer-modal-body {
+      color: #555;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .disclaimer-modal-body strong {
+      color: #856404;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* Upload progress styles */
+    .upload-progress {
+      display: none;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .upload-progress-text {
+      color: #667eea;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .upload-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .upload-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .generate-suggestions-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-bottom: 16px;
+    }
+    
+    .generate-suggestions-btn:hover:not(:disabled) { opacity: 0.9; }
+    .generate-suggestions-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .coming-soon-badge {
+      display: inline-block;
+      background: #ffc107;
+      color: #333;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 1️⃣ Content Type Selection -->
+    <div class="section">
+      <div class="section-title">1. Choose Content Type</div>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="typeImage" name="contentType" value="image" checked>
+          <label for="typeImage" class="radio-label">
+            <div class="radio-icon">📷</div>
+            <div class="radio-text">Image</div>
+          </label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="typeVideo" name="contentType" value="video">
+          <label for="typeVideo" class="radio-label">
+            <div class="radio-icon">🎥</div>
+            <div class="radio-text">Video</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2️⃣ AI Suggestions Section (UPDATED) -->
+    <div class="section">
+      <div class="section-title">
+        💡 AI Content Suggestions
+      </div>
+      
+      <!-- ✅ NEW: Generate Suggestions Button -->
+      <button id="generateSuggestionsBtn" class="generate-suggestions-btn">
+        ✨ Generate AI Suggestions for <span id="businessNameInline">Your Business</span>
+      </button>
+      
+      <div id="suggestionsSection" style="display: none;">
+        <div id="suggestionsLoading" style="text-align: center; padding: 20px; color: #666;">
+          <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          <p style="margin-top: 10px;">Generating personalized suggestions...</p>
+        </div>
+        
+        <div id="suggestionsContent" style="display: none;">
+          <div id="suggestionCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 12px;">
+            <!-- Cards will be injected here -->
+          </div>
+          <button id="refreshSuggestionsBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+            🔄 Get New Suggestions
+          </button>
+        </div>
+        
+        <div id="suggestionsError" style="display: none; color: #d9534f; padding: 12px; background: #f8d7da; border-radius: 6px;"></div>
+      </div>
+    </div>
+  
+    <!-- 3️⃣ Concept Input -->
+    <div class="section">
+      <div class="section-title">2. Describe Your Content</div>
+      
+      <div class="form-group">
+        <label for="concept">Content Concept</label>
+        <textarea 
+          id="concept" 
+          placeholder="E.g., A professional African businesswoman in a modern office, smiling confidently..."
+          rows="4"
+        ></textarea>
+        <p class="field-note">Describe what you want to see in your image/video. Be specific about style, setting, mood, etc.</p>
+      </div>
+  
+      <div class="form-group">
+        <label for="caption">Caption (Optional)</label>
+        <textarea 
+          id="caption" 
+          placeholder="Write the caption that will accompany your post..."
+          rows="3"
+        ></textarea>
+        <p class="field-note">Leave blank to have AI generate a caption based on your concept</p>
+      </div>
+
+      <!-- ADD THIS SECTION after the caption form-group and before imageUploadSection -->
+
+<!-- ✅ UPDATED VIDEO-SPECIFIC OPTIONS (Replace the videoOptions section) -->
+<div class="video-fields" id="videoOptions" style="display: none;">
+  <div class="form-group">
+    <label>Video Duration</label>
+    <div class="duration-buttons">
+      <button type="button" class="duration-btn" data-duration="4">
+        ⚡ 4 seconds<br><small>Ultra Quick</small>
+      </button>
+      <button type="button" class="duration-btn selected" data-duration="8">
+        🎬 8 seconds<br><small>Recommended</small>
+      </button>
+      <button type="button" class="duration-btn" data-duration="12">
+        🎥 12 seconds<br><small>Maximum</small>
+      </button>
+    </div>
+    <input type="hidden" id="videoDuration" value="8">
+  </div>
+
+  <div class="form-group">
+    <label for="videoSize">Video Resolution & Aspect Ratio</label>
+    <select id="videoSize">
+      <option value="720x1280" selected>9:16 - Vertical (720x1280) - Reels, TikTok, Shorts</option>
+      <option value="1280x720">16:9 - Horizontal (1280x720) - YouTube</option>
+      <option value="720x720">1:1 - Square (720x720) - Feed Posts</option>
+    </select>
+    <p class="field-note">Maximum resolution: 1280x720 (720p)</p>
+  </div>
+
+  <div class="form-group">
+    <label for="videoStyle">Video Style</label>
+    <select id="videoStyle">
+      <option value="dynamic">Dynamic - Fast cuts and movement</option>
+      <option value="smooth" selected>Smooth - Flowing transitions</option>
+      <option value="minimal">Minimal - Simple and clean</option>
+      <option value="cinematic">Cinematic - Professional look</option>
+    </select>
+  </div>
+</div>
+<!-- Keep your existing imageUploadSection here -->
+
+      <!-- ✅ UPDATED: Image Upload Section with Coming Soon for Video -->
+      <div class="form-group" id="imageUploadSection">
+        <label for="imageUpload">
+          📷 Image to Video (Optional)
+          <span id="videoComingSoonBadge" style="display: none;" class="coming-soon-badge">Coming Soon for Video</span>
+          <span style="font-size: 12px; color: #666; font-weight: normal;">
+            <span id="imageUploadHint">- For video style reference or image posts</span>
+          </span>
+        </label>
+        <input 
+          type="file" 
+          id="imageUpload" 
+          accept="image/jpeg,image/jpg,image/png"
+          style="display: block; padding: 10px; border: 2px dashed #ddd; border-radius: 8px; cursor: pointer; width: 100%;"
+        >
+        <p class="field-note">Max 5MB, JPEG/PNG only</p>
+        
+        <!-- Upload Progress -->
+        <div id="uploadProgress" style="display: none; margin-top: 12px;">
+          <p id="uploadProgressText" style="color: #667eea; font-weight: 600; margin-bottom: 8px;">Uploading...</p>
+          <div class="progress-bar">
+            <div class="progress-fill" id="uploadProgressFill"></div>
+          </div>
+        </div>
+        
+        <!-- Image Preview -->
+        <div id="imagePreview" style="display: none; margin-top: 12px; position: relative;">
+          <img id="previewImg" style="max-width: 100%; border-radius: 8px; border: 2px solid #e0e0e0;">
+          <button 
+            id="removeImage" 
+            style="position: absolute; top: 8px; right: 8px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 18px; line-height: 1;"
+          >×</button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- 4️⃣ Platform Selection -->
+    <div class="section">
+      <div class="section-title">3. Select Platforms</div>
+      <div class="platforms">
+        <button class="platform-btn" data-platform="facebook" data-cost="10">
+          📘<br>Facebook<br><small>R10.00</small>
+        </button>
+        <button class="platform-btn" data-platform="instagram" data-cost="10">
+          📷<br>Instagram<br><small>R10.00</small>
+        </button>
+        <button class="platform-btn" data-platform="linkedin" data-cost="10">
+          💼<br>LinkedIn<br><small>R10.00</small>
+        </button>
+        <button class="platform-btn" data-platform="youtube" data-cost="10" id="youtubeBtn" disabled>
+          🎥<br>YouTube<br><small>R10.00</small>
+        </button>
+      </div>
+      
+      <div class="cost" id="costDisplay">
+        Select platforms to see cost
+      </div>
+    </div>
+  
+    <!-- 5️⃣ Generate Button -->
+    <button class="generate-btn" id="generateBtn" disabled>
+      Generate & Publish Content
+    </button>
+  
+    <!-- Progress -->
+    <div class="progress" id="progress">
+      <p class="progress-text" id="progressText">Generating content with AI...</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  
+    <!-- Status Messages -->
+    <div class="status" id="status"></div>
+  
+    <!-- Preview Section -->
+    <div class="preview-section" id="previewSection">
+      <div class="section">
+        <div class="section-title">Generated Content Preview</div>
+        <div class="preview-card">
+          <div class="preview-label">Media</div>
+          <img id="previewImage" class="preview-media" style="display: none;" alt="Generated content">
+          <video id="previewVideo" class="preview-media" controls style="display: none;"></video>
+          
+          <div class="preview-label" style="margin-top: 20px;">Caption</div>
+          <p class="preview-caption" id="previewCaption">—</p>
+          
+          <div class="preview-label" style="margin-top: 20px;">Platforms</div>
+          <p class="preview-caption" id="previewPlatforms">—</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="/js/dataManager.js"></script>
+
+<script>
+// ========== GLOBAL VARIABLES ==========
+let auth0Client = null;
+let currentBusiness = null;
+let openAIConfig = null;
+let selectedPlatforms = [];
+let uploadedImageUrl = null;
+
+const urlParams = new URLSearchParams(window.location.search);
+const userEmail = urlParams.get('email');
+const businessId = urlParams.get('businessId');
+const businessName = urlParams.get('businessName');
+
+const N8N_WEBHOOK = 'https://aigents.southafricanorth.azurecontainer.io/webhook/ai-video-generation-form';
+
+// ✅ CLOUDINARY CONFIG
+const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
+const CLOUDINARY_CLOUD_NAME = 'vic-3e';
+
+const generateBtn = document.getElementById('generateBtn');
+const costDisplay = document.getElementById('costDisplay');
+const status = document.getElementById('status');
+const progress = document.getElementById('progress');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const previewSection = document.getElementById('previewSection');
+const youtubeBtn = document.getElementById('youtubeBtn');
+
+// ========== AUTH0 CLIENT ==========
+async function getAuth0Client() {
+  if (window.auth0Client) return window.auth0Client;
+  
+  try {
+    const response = await fetch("/auth_config.json");
+    const config = await response.json();
+    auth0Client = await auth0.createAuth0Client({
+      domain: config.domain,
+      clientId: config.clientId,
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
+    });
+    window.auth0Client = auth0Client;
+    return auth0Client;
+  } catch (error) {
+    console.error("Error configuring Auth0:", error);
+    return null;
+  }
+}
+
+// ========== FETCH OPENAI CONFIG FROM BACKEND ==========
+async function getOpenAIConfig() {
+  if (openAIConfig) return openAIConfig;
+  
+  try {
+    const response = await fetch('/api/get-openai-config');
+    if (!response.ok) throw new Error('Failed to get OpenAI config');
+    openAIConfig = await response.json();
+    return openAIConfig;
+  } catch (error) {
+    console.error('Error fetching OpenAI config:', error);
+    return null;
+  }
+}
+
+// ========== CALL AZURE OPENAI ==========
+async function callAzureOpenAI(prompt) {
+  const config = await getOpenAIConfig();
+  if (!config) throw new Error('OpenAI config not available');
+
+  const url = `${config.endpoint}openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': config.apiKey
+    },
+    body: JSON.stringify({
+      messages: [
+        {
+          role: "system",
+          content: "You are a creative social media content strategist. You MUST respond with valid JSON only. Generate exactly 3 specific AI generation prompts for social media content. Each suggestion should include a detailed prompt that can be used with AI media generation. Return a JSON object with a 'suggestions' array containing 3 objects with 'title', 'concept', and 'caption' fields. exclude carousels"
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 800,
+      temperature: 0.8,
+      top_p: 0.95,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Azure OpenAI error:', errorText);
+    throw new Error(`OpenAI API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// ✅ UPDATED: Load Business Info Only (No Auto Suggestions)
+async function loadBusinessInfo() {
+  const auth0 = await getAuth0Client();
+  if (!auth0) return;
+
+  try {
+    const isAuthenticated = await auth0.isAuthenticated();
+    if (!isAuthenticated) {
+      console.warn('User not authenticated');
+      return;
+    }
+
+    currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
+    
+    if (!currentBusiness) {
+      console.warn('No business found in cache');
+      return;
+    }
+
+    const businessName = currentBusiness?.store_info?.name || 'Your Business';
+    document.getElementById('businessNameInline').textContent = businessName;
+
+  } catch (error) {
+    console.error('Error loading business:', error);
+  }
+}
+
+// ========== FETCH AI SUGGESTIONS ==========
+async function fetchSuggestions() {
+  const loadingDiv = document.getElementById('suggestionsLoading');
+  const contentDiv = document.getElementById('suggestionsContent');
+  const errorDiv = document.getElementById('suggestionsError');
+  const cardsContainer = document.getElementById('suggestionCards');
+  const suggestionsSection = document.getElementById('suggestionsSection');
+
+  suggestionsSection.style.display = 'block';
+  loadingDiv.style.display = 'block';
+  contentDiv.style.display = 'none';
+  errorDiv.style.display = 'none';
+
+  try {
+    const contentType = document.querySelector('input[name="contentType"]:checked').value;
+    const businessCase = currentBusiness?.initial_business_case || {};
+    const businessInfo = JSON.stringify(businessCase, null, 2);
+
+    let prompt;
+
+    if (contentType === 'video') {
+      prompt = `Based on this business information:
+
+${businessInfo}
+
+Generate exactly 3 short-form influencer video ideas (MAXIMUM 8 SECONDS each) for TikTok, Instagram Reels, YouTube Shorts, and Facebook Reels.
+
+Focus on:
+- Viral hooks and attention-grabbing openings
+- Trending formats (POV, "Watch me...", "Day in the life", Quick tips, Before/After)
+- Fast-paced, engaging content
+- Relatable, authentic influencer style
+- Content that can be filmed quickly with a phone
+
+Return ONLY valid JSON in this exact format:
+{
+  "suggestions": [
+    {
+      "title": "Catchy Video Concept (Max 8 sec)",
+      "concept": "Detailed shot-by-shot description of the 8-second video. Include the hook (first 2 seconds), main content (middle 4 seconds), and CTA/ending (last 2 seconds). Be specific about camera angles, movements, and actions.",
+      "caption": "Engaging caption with hook, relevant hashtags (#Reels #Viral #BusinessTips), and CTA. Keep it conversational and influencer-style."
+    }
+  ]
+}
+
+Make each suggestion actionable, authentic, and designed for maximum engagement in under 8 seconds.`;
+
+    } else {
+      prompt = `Based on this business information:
+
+${businessInfo}
+
+Generate exactly 3 creative image content ideas for social media (Facebook, Instagram, LinkedIn).
+
+Return ONLY valid JSON in this exact format:
+{
+  "suggestions": [
+    {
+      "title": "Image Concept Title",
+      "concept": "Detailed description of the image content (2-3 sentences). Include composition, style, colors, mood, and key elements.",
+      "caption": "Ready-to-use engaging caption with hooks and relevant hashtags"
+    }
+  ]
+}
+
+Make each suggestion specific, actionable, and relevant to the business goals.`;
+    }
+
+    console.log('🤖 Calling Azure OpenAI...');
+    const response = await callAzureOpenAI(prompt);
+    
+    let data;
+    try {
+      data = JSON.parse(response);
+    } catch (e) {
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        data = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Invalid JSON response from AI');
+      }
+    }
+
+    const suggestions = data.suggestions || [];
+    
+    if (suggestions.length === 0) {
+      throw new Error('No suggestions generated');
+    }
+
+    cardsContainer.innerHTML = '';
+
+    suggestions.forEach((suggestion, index) => {
+      const card = document.createElement('div');
+      card.className = 'suggestion-card';
+      
+      const contentType = document.querySelector('input[name="contentType"]:checked').value;
+      const badge = contentType === 'video' 
+        ? '<span style="background: #ff6b6b; color: white; font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-right: 6px;">⚡ 8sec</span>'
+        : '';
+      
+      card.innerHTML = `
+        ${badge}<div class="suggestion-title">${suggestion.title}</div>
+        <div class="suggestion-preview">${suggestion.concept}</div>
+        <span class="suggestion-badge">Click to use</span>
+      `;
+      
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.suggestion-card').forEach(c => 
+          c.classList.remove('selected')
+        );
+        
+        card.classList.add('selected');
+        
+        document.getElementById('concept').value = suggestion.concept;
+        document.getElementById('caption').value = suggestion.caption;
+        
+        updateGenerateButton();
+        
+        document.getElementById('concept').scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        
+        showStatus('✅ Suggestion applied! Review and select platforms below.', 'info');
+        setTimeout(() => {
+          status.style.display = 'none';
+        }, 3000);
+      });
+      
+      cardsContainer.appendChild(card);
+    });
+    
+    loadingDiv.style.display = 'none';
+    contentDiv.style.display = 'block';
+
+  } catch (error) {
+    console.error('Error fetching suggestions:', error);
+    loadingDiv.style.display = 'none';
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = '⚠️ Failed to generate suggestions. Please try again.';
+  }
+}
+
+// ========== LOAD BUSINESS INFO ONLY ==========
+async function loadBusinessInfo() {
+  const auth0 = await getAuth0Client();
+  if (!auth0) return;
+
+  try {
+    const isAuthenticated = await auth0.isAuthenticated();
+    if (!isAuthenticated) {
+      console.warn('User not authenticated');
+      return;
+    }
+
+    currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
+    
+    if (!currentBusiness) {
+      console.warn('No business found in cache');
+      return;
+    }
+
+    const businessName = currentBusiness?.store_info?.name || 'Your Business';
+    document.getElementById('businessNameInline').textContent = businessName;
+
+  } catch (error) {
+    console.error('Error loading business:', error);
+  }
+}
+
+// ========== CLOUDINARY UPLOAD FUNCTION ==========
+async function uploadToCloudinary(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'ai-content-uploads');
+    
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && onProgress) {
+        const percentComplete = Math.round((e.loaded / e.total) * 100);
+        onProgress(percentComplete);
+      }
+    });
+    
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 200) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          console.log('Cloudinary response:', response);
+          resolve(response.secure_url);
+        } catch (error) {
+          reject(new Error('Failed to parse Cloudinary response'));
+        }
+      } else {
+        try {
+          const error = JSON.parse(xhr.responseText);
+          reject(new Error(error.error?.message || 'Upload failed'));
+        } catch {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      }
+    });
+    
+    xhr.addEventListener('error', () => {
+      reject(new Error('Network error during upload'));
+    });
+    
+    xhr.addEventListener('timeout', () => {
+      reject(new Error('Upload timed out'));
+    });
+    
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    xhr.open('POST', url);
+    xhr.timeout = 30000;
+    xhr.send(formData);
+  });
+}
+
+
+// ========== GENERATE REQUEST ID ==========
+function generateRequestId() {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `gen_${timestamp}_${random}`;
+}
+
+
+
+function setupVideoDurationButtons() {
+  document.querySelectorAll('.duration-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('videoDuration').value = btn.dataset.duration;
+    });
+  });
+}
+
+// ========== INITIALIZE ON PAGE LOAD ==========
+document.addEventListener('DOMContentLoaded', () => {
+  loadBusinessInfo();
+
+  setupVideoDurationButtons();
+
+
+  // ✅ Generate Suggestions Button Handler
+  const generateSuggestionsBtn = document.getElementById('generateSuggestionsBtn');
+  if (generateSuggestionsBtn) {
+    generateSuggestionsBtn.addEventListener('click', async () => {
+      if (!currentBusiness) {
+        showStatus('⚠️ Please wait while business information loads...', 'info');
+        await loadBusinessInfo();
+        if (!currentBusiness) {
+          showStatus('❌ Could not load business information', 'error');
+          return;
+        }
+      }
+      await fetchSuggestions();
+    });
+  }
+
+  // Refresh Suggestions Button
+  const refreshBtn = document.getElementById('refreshSuggestionsBtn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', fetchSuggestions);
+  }
+
+  // ✅ IMAGE UPLOAD HANDLER
+  const imageUploadInput = document.getElementById('imageUpload');
+  if (imageUploadInput) {
+    imageUploadInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+        showStatus('❌ Please upload a JPEG or PNG image', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        showStatus('❌ Image must be less than 5MB', 'error');
+        return;
+      }
+
+      const uploadProgressDiv = document.getElementById('uploadProgress');
+      const uploadProgressFill = document.getElementById('uploadProgressFill');
+      const uploadProgressText = document.getElementById('uploadProgressText');
+
+      try {
+        uploadProgressDiv.style.display = 'block';
+        uploadProgressFill.style.width = '10%';
+        uploadProgressText.textContent = 'Uploading to cloud...';
+
+        uploadedImageUrl = await uploadToCloudinary(file, (percent) => {
+          uploadProgressFill.style.width = percent + '%';
+          uploadProgressText.textContent = `Uploading... ${percent}%`;
+        });
+
+        uploadProgressFill.style.width = '100%';
+        uploadProgressText.textContent = '✅ Upload complete!';
+
+        console.log('☁️ Image uploaded to Cloudinary:', uploadedImageUrl);
+
+        document.getElementById('previewImg').src = uploadedImageUrl;
+        document.getElementById('imagePreview').style.display = 'block';
+
+        setTimeout(() => {
+          uploadProgressDiv.style.display = 'none';
+          uploadProgressFill.style.width = '0%';
+        }, 2000);
+
+        showStatus('✅ Image uploaded successfully', 'success');
+        setTimeout(() => status.style.display = 'none', 2000);
+
+      } catch (error) {
+        console.error('Image upload error:', error);
+        uploadProgressDiv.style.display = 'none';
+        showStatus('❌ Failed to upload image: ' + error.message, 'error');
+      }
+    });
+  }
+
+  // ✅ REMOVE IMAGE HANDLER
+  const removeImageBtn = document.getElementById('removeImage');
+  if (removeImageBtn) {
+    removeImageBtn.addEventListener('click', () => {
+      uploadedImageUrl = null;
+      document.getElementById('imageUpload').value = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      showStatus('Image removed', 'info');
+      setTimeout(() => status.style.display = 'none', 2000);
+    });
+  }
+});
+
+// ✅ CONTENT TYPE CHANGES
+document.querySelectorAll('input[name="contentType"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const isVideo = e.target.value === 'video';
+    const imageUploadInput = document.getElementById('imageUpload');
+    const videoComingSoonBadge = document.getElementById('videoComingSoonBadge');
+    const imageUploadHint = document.getElementById('imageUploadHint');
+    const videoOptions = document.getElementById('videoOptions'); // ✅ ADD THIS
+    
+    // ✅ Show/hide video options
+    if (videoOptions) {
+      videoOptions.style.display = isVideo ? 'block' : 'none';
+    }
+    
+    // Disable image upload for video (Coming Soon)
+    if (isVideo) {
+      imageUploadInput.disabled = true;
+      imageUploadInput.style.opacity = '0.5';
+      imageUploadInput.style.cursor = 'not-allowed';
+      videoComingSoonBadge.style.display = 'inline-block';
+      imageUploadHint.style.display = 'none';
+      
+      if (uploadedImageUrl) {
+        uploadedImageUrl = null;
+        imageUploadInput.value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+      }
+      
+      youtubeBtn.disabled = false;
+      youtubeBtn.style.opacity = '1';
+    } else {
+      imageUploadInput.disabled = false;
+      imageUploadInput.style.opacity = '1';
+      imageUploadInput.style.cursor = 'pointer';
+      videoComingSoonBadge.style.display = 'none';
+      imageUploadHint.style.display = 'inline';
+      
+      youtubeBtn.disabled = true;
+      youtubeBtn.style.opacity = '0.3';
+      if (selectedPlatforms.includes('youtube')) {
+        selectedPlatforms = selectedPlatforms.filter(p => p !== 'youtube');
+        youtubeBtn.classList.remove('selected');
+        updateCost();
+      }
+    }
+    
+    updateGenerateButton();
+  });
+});
+
+// ========== CONCEPT INPUT ==========
+document.getElementById('concept').addEventListener('input', updateGenerateButton);
+
+// ========== PLATFORM SELECTION ==========
+document.querySelectorAll('.platform-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    
+    btn.classList.toggle('selected');
+    const platform = btn.dataset.platform;
+    
+    if (selectedPlatforms.includes(platform)) {
+      selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+    } else {
+      selectedPlatforms.push(platform);
+    }
+    
+    updateCost();
+    updateGenerateButton();
+  });
+});
+
+// ========== UPDATE COST ==========
+function updateCost() {
+  let postingCost = 0;
+  selectedPlatforms.forEach(platform => {
+    const btn = document.querySelector(`[data-platform="${platform}"]`);
+    if (btn) postingCost += parseInt(btn.dataset.cost);
+  });
+  
+  const generationCost = 20;
+  const total = generationCost + postingCost;
+  
+  if (selectedPlatforms.length > 0) {
+    costDisplay.innerHTML = `AI Generation: R${generationCost.toFixed(2)} + Posting: R${postingCost.toFixed(2)}<br><strong>Total: R${total.toFixed(2)}</strong>`;
+  } else {
+    costDisplay.textContent = 'Select platforms to see cost';
+  }
+}
+
+// ========== UPDATE GENERATE BUTTON ==========
+function updateGenerateButton() {
+  const concept = document.getElementById('concept').value.trim();
+  const isValid = concept.length > 10 && selectedPlatforms.length > 0;
+  generateBtn.disabled = !isValid;
+}
+
+
+
+// ========== UPDATED GENERATE BUTTON CLICK (Adapted to social-post.js structure) ==========
+generateBtn.addEventListener('click', async () => {
+  const contentType = document.querySelector('input[name="contentType"]:checked').value;
+  const concept = document.getElementById('concept').value.trim();
+  const caption = document.getElementById('caption').value.trim();
+
+  if (!concept || selectedPlatforms.length === 0) return;
+
+  generateBtn.disabled = true;
+  progress.style.display = 'block';
+  status.style.display = 'none';
+  previewSection.style.display = 'none';
+  progressFill.style.width = '20%';
+
+  try {
+    const generationCost = 20;
+    let postingCost = 0;
+    selectedPlatforms.forEach(platform => {
+      const btn = document.querySelector(`[data-platform="${platform}"]`);
+      if (btn) postingCost += parseInt(btn.dataset.cost);
+    });
+    const totalCost = generationCost + postingCost;
+
+    progressText.textContent = 'Processing request...';
+    progressFill.style.width = '30%';
+
+    // ✅ BUILD POST CONTENT BASED ON CONTENT TYPE
+    const postContent = {
+      text: concept,
+      caption: caption || ''
+    };
+
+    // ✅ Add video-specific fields if video type
+    if (contentType === 'video') {
+      const durationEl = document.getElementById('videoDuration');
+      const sizeEl = document.getElementById('videoSize');
+      
+      if (!durationEl || !sizeEl) {
+        throw new Error('Video options not found. Please refresh the page.');
+      }
+      
+      postContent.contentType = 'video';
+      postContent.duration = parseInt(durationEl.value);
+      postContent.resolution = sizeEl.value; // e.g., "720x1280"
+      
+      // ✅ Add uploaded image if available
+      if (uploadedImageUrl) {
+        postContent.inputImage = uploadedImageUrl;
+      }
+      
+      console.log(`🎥 Video request: ${postContent.duration}s, ${postContent.resolution}`);
+    } else {
+      // ✅ For image content, add image URL if uploaded
+      if (uploadedImageUrl) {
+        postContent.image = uploadedImageUrl;
+      }
+    }
+
+    // ✅ SIMPLE PAYLOAD - Let backend handle tokens
+    const payload = {
+      businessId: businessId,
+      userEmail: userEmail,
+      platforms: selectedPlatforms, // ✅ Just array of platform names
+      postContent: postContent,
+      totalCost: totalCost
+    };
+
+    console.log('📤 Sending to social-post API:', payload);
+
+    progressText.textContent = `Generating AI ${contentType}...`;
+    progressFill.style.width = '60%';
+
+    // ✅ Call your existing social-post endpoint
+    const response = await fetch('/api/social-post/post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    console.log('✅ API response:', result);
+
+    if (!response.ok) {
+      // Handle 402 Insufficient Funds
+      if (response.status === 402) {
+        throw new Error(
+          `Insufficient funds!\n\n` +
+          `Required: ${result.formatted_required || `R${totalCost.toFixed(2)}`}\n` +
+          `Balance: ${result.formatted_balance}\n\n` +
+          `Please add credits or upgrade.`
+        );
+      }
+      
+      throw new Error(result.error || 'Failed to generate content');
+    }
+
+    progressFill.style.width = '100%';
+
+    if (result.success) {
+      // Show preview if media URL is available
+      if (result.n8nResponse?.mediaUrl || result.n8nResponse?.media_url) {
+        showPreview(
+          contentType, 
+          result.n8nResponse.mediaUrl || result.n8nResponse.media_url, 
+          result.n8nResponse.caption || result.n8nResponse.generated_caption || caption,
+          selectedPlatforms
+        );
+      }
+
+      // ✅ Build success message with token warnings
+      let message = `✅ Content generated and posted successfully!\n\n` +
+                    `Platforms: ${selectedPlatforms.join(', ')}\n` +
+                    `Cost: ${result.formatted_cost}\n` +
+                    `New Balance: ${result.formatted_balance}`;
+      
+      // ✅ Show token refresh warnings if any
+      if (result.token_refresh_warnings && result.token_refresh_warnings.length > 0) {
+        message += '\n\n⚠️ Warnings:\n' + result.token_refresh_warnings.join('\n');
+      }
+
+      showStatus(message, 'success');
+      
+      setTimeout(() => resetForm(), 8000);
+    } else {
+      throw new Error(result.error || result.message || 'Generation failed');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    
+    // Enhanced error handling
+    if (error.message.includes('Insufficient funds')) {
+      showStatus(
+        '❌ Insufficient Funds\n\n' +
+        'Please add credits or upgrade your plan to continue.',
+        'error'
+      );
+    } else if (
+      error.message.includes('token expired') || 
+      error.message.includes('reconnect') ||
+      error.message.includes('Token refresh failed') ||
+      error.message.includes('authentication')
+    ) {
+      showStatus(
+        '❌ Authentication Error\n\n' + 
+        error.message + '\n\n' +
+        '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+        'error'
+      );
+    } else {
+      showStatus('❌ ' + error.message, 'error');
+    }
+  } finally {
+    progress.style.display = 'none';
+    generateBtn.disabled = false;
+  }
+});
+// ========== SHOW PREVIEW ==========
+function showPreview(type, mediaUrl, caption, platforms) {
+  const previewImage = document.getElementById('previewImage');
+  const previewVideo = document.getElementById('previewVideo');
+  const previewCaption = document.getElementById('previewCaption');
+  const previewPlatforms = document.getElementById('previewPlatforms');
+
+  if (type === 'image') {
+    previewImage.src = mediaUrl;
+    previewImage.style.display = 'block';
+    previewVideo.style.display = 'none';
+  } else {
+    previewVideo.src = mediaUrl;
+    previewVideo.style.display = 'block';
+    previewImage.style.display = 'none';
+  }
+
+  previewCaption.textContent = caption;
+  previewPlatforms.textContent = platforms.map(p => 
+    p.charAt(0).toUpperCase() + p.slice(1)
+  ).join(', ');
+  
+  previewSection.style.display = 'block';
+}
+
+// ========== SHOW STATUS ==========
+function showStatus(message, type) {
+  status.textContent = message;
+  status.className = `status ${type}`;
+  status.style.display = 'block';
+}
+
+// ========== RESET FORM ==========
+function resetForm() {
+  document.getElementById('concept').value = '';
+  document.getElementById('caption').value = '';
+  selectedPlatforms = [];
+  uploadedImageUrl = null;
+  
+  document.getElementById('imageUpload').value = '';
+  document.getElementById('imagePreview').style.display = 'none';
+  
+  document.querySelectorAll('.platform-btn').forEach(btn => 
+    btn.classList.remove('selected')
+  );
+  
+  document.querySelectorAll('.suggestion-card').forEach(card => 
+    card.classList.remove('selected')
+  );
+  
+  progressFill.style.width = '0%';
+  previewSection.style.display = 'none';
+  updateCost();
+  updateGenerateButton();
+}
+</script>
+</body>
+</html>
