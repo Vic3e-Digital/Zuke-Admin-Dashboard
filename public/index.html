@@ -34,36 +34,36 @@
     <link rel="icon" type="image/png" href="css/faviconV2.png">
     <link rel="apple-touch-icon" href="css/faviconV2.png">
     
-    <!-- Preconnect for Performance -->
+    <!-- Preconnect for Performance
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.auth0.com">
-    
+     -->
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Structured Data -->
-    <script type="application/ld+json">
+    <!-- <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "ZukeX",
         "description": "AI-powered business management platform with creative tools, marketing automation, and marketplace solutions",
-        "url": "https://zuke.com",
+        "url": "https://zuke.co.za",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web Browser",
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD"
+            "priceCurrency": "ZAR"
         },
         "creator": {
             "@type": "Organization",
             "name": "ZukeX"
         }
     }
-    </script>
+    </script> -->
     
     <!-- Analytics will be loaded lazily after page load -->
 </head>
@@ -76,10 +76,10 @@
             <div class="card-content">
                 <form class="login-form" role="form" aria-label="User authentication">
                     <div class="button-group" style="text-align:center; margin-bottom: 1.5rem;">
-                        <button id="btn-login" class="submit-button" disabled="true" onclick="login()" style="width: 100%; margin-bottom: 1rem;" aria-label="Sign in to your ZukeX account">
+                        <button id="btn-login" class="submit-button" disabled="true" onclick="console.log('Login button clicked'); login();" style="width: 100%; margin-bottom: 1rem;" aria-label="Sign in to your ZukeX account">
                             Log in
                         </button>
-                        <button id="btn-logout" class="submit-button" disabled="true" onclick="logout()" style="width: 100%; background: #eee; color: #333;" aria-label="Sign out of your ZukeX account">
+                        <button id="btn-logout" class="submit-button" disabled="true" onclick="console.log('Logout button clicked'); logout();" style="width: 100%; background: #eee; color: #333;" aria-label="Sign out of your ZukeX account">
                             Log out
                         </button>
                     </div>
@@ -88,7 +88,7 @@
         </section>
     </main>
     
-    <script src="js/analytics.js"></script>
+    <!-- <script src="js/analytics.js"></script> -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script src="js/app.js"></script>
 </body>

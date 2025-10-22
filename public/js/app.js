@@ -46,13 +46,24 @@ const updateUI = async () => {
       loginBtn.disabled = isAuthenticated;
       if (!isAuthenticated) {
         loginBtn.textContent = "Click here to get started";
+        loginBtn.style.backgroundColor = "#007bff";
+        loginBtn.style.color = "white";
+      } else {
+        loginBtn.textContent = "Log in";
+        loginBtn.style.backgroundColor = "#6c757d";
+        loginBtn.style.color = "white";
       }
     }
     
     if (logoutBtn) {
       logoutBtn.disabled = !isAuthenticated;
       if (isAuthenticated) {
+        logoutBtn.textContent = "Log out";
         logoutBtn.style.backgroundColor = "#dc3545";
+        logoutBtn.style.color = "white";
+      } else {
+        logoutBtn.textContent = "Log out";
+        logoutBtn.style.backgroundColor = "#6c757d";
         logoutBtn.style.color = "white";
       }
     }
@@ -128,6 +139,20 @@ const login = async () => {
   try {
     console.log("Starting login...");
     
+    // Check if Auth0 client is initialized
+    if (!auth0Client) {
+      console.error("Auth0 client not initialized");
+      alert("Authentication system is not ready. Please refresh the page and try again.");
+      return;
+    }
+    
+    // Prevent multiple clicks
+    const loginBtn = document.getElementById("btn-login");
+    if (loginBtn) {
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Loading...";
+    }
+    
     // Track login attempt
     if (window.analytics) {
       window.analytics.trackEvent('login_attempt', {
@@ -148,6 +173,16 @@ const login = async () => {
   } catch (error) {
     console.error("Login error:", error);
     
+    // Reset button state on error
+    const loginBtn = document.getElementById("btn-login");
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Click here to get started";
+    }
+    
+    // Show user-friendly error message
+    alert(`Login failed: ${error.message}. Please try again.`);
+    
     // Track login error
     if (window.analytics) {
       window.analytics.trackError('Login failed', 'Login Page', {
@@ -160,6 +195,13 @@ const login = async () => {
 const logout = () => {
   try {
     console.log("Starting logout...");
+    
+    // Check if Auth0 client is initialized
+    if (!auth0Client) {
+      console.error("Auth0 client not initialized");
+      alert("Authentication system is not ready. Please refresh the page and try again.");
+      return;
+    }
     
     // Track logout event
     if (window.analytics) {
@@ -181,6 +223,9 @@ const logout = () => {
   } catch (error) {
     console.error("Logout error:", error);
     
+    // Show user-friendly error message
+    alert(`Logout failed: ${error.message}. Please try again.`);
+    
     // Track logout error
     if (window.analytics) {
       window.analytics.trackError('Logout failed', 'Dashboard', {
@@ -197,6 +242,16 @@ window.onload = async () => {
   const configured = await configureClient();
   if (!configured) {
     console.error("Failed to configure Auth0");
+    
+    // Show error message to user
+    const loginBtn = document.getElementById("btn-login");
+    if (loginBtn) {
+      loginBtn.textContent = "Authentication Error - Please Refresh";
+      loginBtn.style.backgroundColor = "#dc3545";
+      loginBtn.onclick = () => {
+        window.location.reload();
+      };
+    }
     return;
   }
   

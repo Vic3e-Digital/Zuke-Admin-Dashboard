@@ -417,19 +417,22 @@ class AnalyticsTracker {
      * Setup automatic event listeners
      */
     setupEventListeners() {
-        // Track all button clicks automatically
+        // Track all button clicks automatically with a small delay to avoid interference
         document.addEventListener('click', (event) => {
-            const button = event.target.closest('button');
-            if (button) {
-                const buttonText = button.textContent?.trim() || button.getAttribute('title') || 'Unknown Button';
-                const buttonId = button.id || 'no-id';
-                
-                this.trackButtonClick(buttonText, this.currentPage, {
-                    button_id: buttonId,
-                    button_class: button.className
-                });
-            }
-        });
+            // Use setTimeout to avoid interfering with the main event handling
+            setTimeout(() => {
+                const button = event.target.closest('button');
+                if (button && !button.disabled) {
+                    const buttonText = button.textContent?.trim() || button.getAttribute('title') || 'Unknown Button';
+                    const buttonId = button.id || 'no-id';
+                    
+                    this.trackButtonClick(buttonText, this.currentPage, {
+                        button_id: buttonId,
+                        button_class: button.className
+                    });
+                }
+            }, 10);
+        }, { passive: true });
 
         // Track form submissions
         document.addEventListener('submit', (event) => {
