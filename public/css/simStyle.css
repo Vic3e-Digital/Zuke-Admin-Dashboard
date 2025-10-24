@@ -32,14 +32,22 @@
     top: 25px;
     left: 25px;
     width: 40px;
-    height: 40px;
+    height: auto;
     /* background: #f0f0f0; */
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #666;
+    overflow: hidden; /* To hide any image overflow */
   }
+  
+
+  sim-icon img {
+    width: 100%;  /* Ensures the image fills the container's width */
+    height: auto; /* Ensures the image fills the container's height */
+    object-fit: block; /* Scales the image to fit while maintaining aspect ratio */
+}
   
   /* Icon styles - you can replace with actual icons */
   .sim-icon svg {
