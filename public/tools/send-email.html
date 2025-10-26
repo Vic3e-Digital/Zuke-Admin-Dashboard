@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Smart Outreach Emails</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    
+    .radio-option {
+      flex: 1;
+      position: relative;
+    }
+    
+    .radio-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+    }
+    
+    .radio-option input[type="radio"]:checked + .radio-label {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .radio-label:hover {
+      border-color: #667eea;
+    }
+    
+    .radio-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .radio-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    input[type="text"], input[type="email"], input[type="url"], input[type="number"], input[type="date"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .field-note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    
+    .cost {
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .send-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .send-btn:hover:not(:disabled) { opacity: 0.9; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.info { background: #d1ecf1; color: #0c5460; }
+    
+    .progress {
+      display: none;
+      margin-top: 15px;
+      text-align: center;
+    }
+    
+    .progress-text {
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .email-fields {
+      display: none;
+    }
+    
+    .email-fields.show {
+      display: block;
+    }
+
+    .template-btn {
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+
+    .template-btn:hover {
+      opacity: 0.9;
+    }
+
+    .templates-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .template-btn.afaa-btn {
+      background: linear-gradient(135deg, #2E7D32 0%, #FBC02D 30%, #F57C00 70%, #E53935 100%);
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .template-btn.afaa-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+    }
+
+    .ai-btn {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #ff8b00 0%, #ff6b35 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-btn:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .ai-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ai-btn-secondary {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ai-btn-secondary:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .ai-btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ai-btn-afaa {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #2E7D32 0%, #FBC02D 30%, #F57C00 70%, #E53935 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .ai-btn-afaa:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+    }
+
+    .ai-btn-afaa:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .afaa-builder-toggle {
+      background: linear-gradient(135deg, #2E7D32 0%, #FBC02D 30%, #F57C00 70%, #E53935 100%);
+      color: white;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .afaa-builder-toggle:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+    }
+
+    .variable-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .variable-tag {
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .variable-tag:hover {
+      background: #c7d2fe;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 1️⃣ Email Type Selection -->
+    <div class="section">
+      <div class="section-title">1. Choose Email Type</div>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="typeIndividual" name="emailType" value="individual" checked>
+          <label for="typeIndividual" class="radio-label">
+            <div class="radio-icon">📧</div>
+            <div class="radio-text">Individual</div>
+            <small style="margin-top: 4px; color: #666;">Send to one person</small>
+          </label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="typeBulk" name="emailType" value="bulk">
+          <label for="typeBulk" class="radio-label">
+            <div class="radio-icon">📨</div>
+            <div class="radio-text">Bulk</div>
+            <small style="margin-top: 4px; color: #666;">Send to multiple (from sheet)</small>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2️⃣ Individual Email Fields -->
+    <div class="section email-fields show" id="individualFields">
+      <div class="section-title">2. Individual Email Details</div>
+      
+      <div class="form-group">
+        <label for="recipientName">Recipient Name</label>
+        <input type="text" id="recipientName" placeholder="John Doe">
+      </div>
+
+      <div class="form-group">
+        <label for="recipientEmail">Recipient Email</label>
+        <input type="email" id="recipientEmail" placeholder="john@example.com">
+      </div>
+    </div>
+
+    <!-- 2️⃣ Bulk Email Fields -->
+    <div class="section email-fields" id="bulkFields">
+      <div class="section-title">2. Bulk Email Details</div>
+      
+      <div class="form-group">
+        <label for="sheetsUrl">Google Sheets URL</label>
+        <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+        <p class="field-note">
+          Your sheet must have columns: <code>Name</code>, <code>Email</code>, <code>Company</code> (optional)
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Available Variables</label>
+        <div class="variable-tags">
+          <span class="variable-tag" onclick="insertVariable('{name}')">{name}</span>
+          <span class="variable-tag" onclick="insertVariable('{email}')">{email}</span>
+          <span class="variable-tag" onclick="insertVariable('{company}')">{company}</span>
+        </div>
+        <p class="field-note">Click to insert into subject or message</p>
+      </div>
+    </div>
+
+    <!-- AFAA Builder Toggle Button -->
+<button class="template-btn afaa-builder-toggle" onclick="toggleAfaaBuilder()" style="margin-bottom: 16px; width: 100%;">
+    🎯 Use AFAA Sponsorship Builder
+  </button>
+  
+  <!-- AFAA Sponsorship Builder -->
+  <div class="section" id="afaaBuilder" style="display: none;">
+    <div class="section-title" style="background: linear-gradient(135deg, #2E7D32, #FBC02D, #F57C00, #E53935); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+      🏆 AFAA Sponsorship Builder
+    </div>
+    
+    <div class="form-group">
+      <label for="afaaFundingAmount">Total Funding Needed (ZAR)</label>
+      <input type="number" id="afaaFundingAmount" value="50000" step="1000">
+      <p class="field-note">Example: R50,000 for comprehensive travel package (adjust as needed)</p>
+    </div>
+  
+    <div class="form-group">
+      <label for="afaaLowAmount">Minimum Sponsorship Amount (ZAR)</label>
+      <input type="number" id="afaaLowAmount" value="20000" step="1000">
+      <p class="field-note">Lower range for partial sponsorship (adjust as needed)</p>
+    </div>
+  
+    <div class="form-group">
+      <label for="afaaBreakdown">Cost Breakdown</label>
+      <textarea id="afaaBreakdown" rows="8">Return flights (South Africa to Abuja): R18,000
+  Accommodation (5 nights): R12,000
+  Nigerian visa: R2,000
+  Local transport in Abuja: R3,000
+  Event participation fees: R8,000
+  Marketing materials & exhibition setup: R5,000
+  Daily meals & sustenance: R2,000</textarea>
+      <p class="field-note">Standard breakdown for one person - adjust amounts and add/remove items as needed</p>
+    </div>
+  
+    <div class="form-group">
+      <label for="afaaImpact">Expected Impact & What You'll Deliver</label>
+      <textarea id="afaaImpact" rows="6">• Represent South African innovation at Africa's premier creative platform
+  • Network with 25,000+ industry leaders, investors, and buyers from across the continent
+  • Showcase our products/services to a pan-African audience
+  • Generate brand exposure for sponsors through event content and social media
+  • Provide comprehensive post-event report with attendance metrics, media reach, and business leads generated
+  • Feature sponsor logos in all event materials and social media posts</textarea>
+      <p class="field-note">Standard deliverables - customize based on what you can offer sponsors</p>
+    </div>
+  
+    <button class="ai-btn-afaa" onclick="generateAfaaProposal()" style="width: 100%; margin-top: 8px; padding: 14px;">
+      🎯 Generate AFAA Sponsorship Request
+    </button>
+    
+    <p style="font-size: 12px; color: #666; margin-top: 12px; text-align: center; font-style: italic;">
+      Pre-filled with standard values - customize amounts and details before generating
+    </p>
+  </div>
+
+    <!-- 3️⃣ Email Content -->
+    <div class="section">
+      <div class="section-title">3. Email Content</div>
+      
+      <!-- Template Buttons -->
+      <div class="templates-container">
+        <button class="template-btn" onclick="useTemplate('introduction')">🤝 Introduction</button>
+        <button class="template-btn" onclick="useTemplate('partnership')">💼 Partnership</button>
+        <button class="template-btn" onclick="useTemplate('followup')">📬 Follow-up</button>
+        <button class="template-btn afaa-btn" onclick="useTemplate('afaa')">🏆 AFAA Sponsorship</button>
+      </div>
+      
+      <!-- AI Generation Options -->
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+        <button class="ai-btn" id="generateAIBtn" onclick="generateAIEmail()">
+          ✨ Generate with AI
+        </button>
+        <button class="ai-btn-afaa" onclick="generateAIEmail('afaa')">
+          🏆 Generate AFAA Request
+        </button>
+        <button class="ai-btn-secondary" onclick="showCustomPromptModal()">
+          🎯 Custom AI Prompt
+        </button>
+      </div>
+      
+      <div class="form-group">
+        <label for="emailSubject">Subject Line</label>
+        <input type="text" id="emailSubject" placeholder="Let's collaborate on...">
+      </div>
+    
+      <div class="form-group">
+        <label for="emailMessage">Message</label>
+        <textarea id="emailMessage" placeholder="Hi {name},
+    
+I came across your profile and was impressed by...
+
+Would love to explore potential collaboration opportunities.
+
+Best regards,"></textarea>
+        <p class="field-note">
+          💡 Use {name}, {email}, {company} for bulk emails. For individual emails, these will be replaced with actual values.
+        </p>
+        
+        <!-- AFAA Helper -->
+        <div class="afaa-helper" style="display: none; background: linear-gradient(135deg, #2E7D32 0%, #FBC02D 50%, #E53935 100%); padding: 2px; border-radius: 8px; margin-top: 12px;">
+          <div style="background: white; padding: 12px; border-radius: 6px;">
+            <strong style="background: linear-gradient(135deg, #2E7D32, #FBC02D, #F57C00, #E53935); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+              🏆 AFAA Sponsorship Request Checklist:
+            </strong>
+            <ul style="margin: 8px 0 0 20px; padding: 0; font-size: 13px;">
+              <li>Review funding amounts (low and high range)</li>
+              <li>Customize the breakdown for your specific needs</li>
+              <li>Insert your contact details at the bottom</li>
+              <li>Add specific benefits you'll provide sponsors</li>
+              <li>Personalize the "About Us" section</li>
+              <li>Consider mentioning visa deadline (Oct 31st)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Preview -->
+    <div class="section" id="emailPreview" style="display: none;">
+      <div class="section-title">📧 Live Preview</div>
+      
+      <div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; padding: 20px;">
+        <div style="margin-bottom: 16px;">
+          <strong style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Subject:</strong>
+          <div id="previewSubject" style="font-size: 15px; color: #333; margin-top: 6px; font-weight: 600; line-height: 1.4;"></div>
+        </div>
+        
+        <div style="border-top: 2px solid #ddd; padding-top: 16px;">
+          <strong style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Message:</strong>
+          <div id="previewMessage" style="font-size: 14px; color: #333; margin-top: 10px; line-height: 1.7; white-space: pre-wrap;"></div>
+        </div>
+        
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #ddd;">
+          <p style="font-size: 12px; color: #999; font-style: italic; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            💡 
+            <span>Highlighted placeholders show how variables will appear. 
+            <span style="background: #2E7D32; color: white; padding: 2px 6px; border-radius: 3px; font-weight: 600;">{company}</span> = Your business name,
+            <span style="background: #FBC02D; color: black; padding: 2px 6px; border-radius: 3px; font-weight: 600;">{name}</span> = Recipient name,
+            <span style="background: #F57C00; color: white; padding: 2px 6px; border-radius: 3px; font-weight: 600;">{email}</span> = Recipient email
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Custom Prompt Modal -->
+    <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;" onclick="hideCustomPromptModal()"></div>
+    
+    <div id="customPromptModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; padding: 24px; max-width: 500px; width: 90%; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0; font-size: 18px;">Custom AI Prompt</h3>
+        <button onclick="hideCustomPromptModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">×</button>
+      </div>
+      
+      <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+        Describe what type of email you want to generate. Be specific about the purpose, tone, and key points.
+      </p>
+      
+      <textarea 
+        id="customPromptInput" 
+        placeholder="Example: Generate a professional email requesting a meeting to discuss a potential collaboration on a sustainability project. Keep it friendly but formal, and mention our company's expertise in renewable energy."
+        style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; resize: vertical; margin-bottom: 16px;"
+      ></textarea>
+      
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button onclick="hideCustomPromptModal()" style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer;">
+          Cancel
+        </button>
+        <button onclick="generateCustomAIEmail()" style="padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+          Generate Email
+        </button>
+      </div>
+    </div>
+
+    <!-- 4️⃣ Cost Display -->
+    <div class="section">
+      <div class="cost" id="costDisplay">
+        Individual Email: R5.00
+      </div>
+    </div>
+
+    <!-- 5️⃣ Send Button -->
+    <button class="send-btn" id="sendBtn" disabled>
+      <span id="sendBtnText">Send Email</span>
+    </button>
+
+    <!-- Progress -->
+    <div class="progress" id="progress">
+      <p class="progress-text" id="progressText">Sending emails...</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="/js/dataManager.js"></script>
+  <script src="send-email.js"></script>
+</body>
+</html>

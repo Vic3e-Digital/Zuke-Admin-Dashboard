@@ -482,14 +482,38 @@ if (!isAdmin) {
         `).join('');
     }
     
-    // Toggle dropdown
-    if (switchDropdownBtn) {
-      switchDropdownBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        switchDropdownMenu.classList.toggle('active');
-      });
+    // // Toggle dropdown
+    // if (switchDropdownBtn) {
+    //   switchDropdownBtn.addEventListener('click', function(e) {
+    //     e.stopPropagation();
+    //     switchDropdownMenu.classList.toggle('active');
+    //   });
+    // }
+    // Update the toggle dropdown section in your setupEventListeners function
+if (switchDropdownBtn) {
+  switchDropdownBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
+    const isActive = switchDropdownMenu.classList.contains('active');
+    
+    if (!isActive) {
+      // Position the dropdown relative to the button
+      const buttonRect = switchDropdownBtn.getBoundingClientRect();
+      
+      // Position above the button
+      switchDropdownMenu.style.bottom = `${window.innerHeight - buttonRect.top + 8}px`;
+      switchDropdownMenu.style.left = `${buttonRect.left}px`;
+      
+      // Alternative: Position to the right of button (if you prefer)
+      // switchDropdownMenu.style.top = `${buttonRect.top}px`;
+      // switchDropdownMenu.style.left = `${buttonRect.right + 8}px`;
     }
     
+    switchDropdownMenu.classList.toggle('active');
+  });
+}
+
+
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
       if (switchDropdownMenu && !switchDropdownMenu.contains(e.target) && 

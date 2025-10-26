@@ -1,22 +1,17 @@
 // pages/settings.js
-
-// ===== CONFIGURATION (Declare ONCE at top) =====
 let auth0Client = null;
 let currentBusiness = null;
 let businessSettings = {};
-let cloudinaryConfig = null;
-let isEditingProfile = false;
-let originalProfilePicture = '';
 
 const API_BASE = '/api';
 
-// ===== HELPER FUNCTIONS (Declare ONCE) =====
-
 async function getAuth0Client() {
+  // ✅ Return cached client if already loaded
   if (auth0Client) {
     return auth0Client;
   }
 
+  // ✅ Check if already initialized globally
   if (window.auth0Client) {
     auth0Client = window.auth0Client;
     return auth0Client;
@@ -26,6 +21,7 @@ async function getAuth0Client() {
     const response = await fetch("/auth_config.json");
     const config = await response.json();
 
+    // ✅ Auth0 will automatically check its own cache (localStorage)
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
@@ -41,141 +37,9 @@ async function getAuth0Client() {
   }
 }
 
-// Cloudinary functions (DECLARE ONLY ONCE)
-async function loadCloudinaryConfig() {
-  if (cloudinaryConfig) return cloudinaryConfig;
-  
-  try {
-    const response = await fetch(`${API_BASE}/cloudinary-config`);
-    cloudinaryConfig = await response.json();
-    return cloudinaryConfig;
-  } catch (error) {
-    console.error('Failed to load Cloudinary config:', error);
-    return null;
-  }
-}
-
-async function uploadToCloudinary(file) {
-  const config = await loadCloudinaryConfig();
-  
-  if (!config) {
-    throw new Error('Cloudinary not configured');
-  }
-  
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', config.uploadPreset);
-  formData.append('folder', 'user-profiles');
-  
-  try {
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
-      {
-        method: 'POST',
-        body: formData
-      }
-    );
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Upload failed');
-    }
-    
-    const data = await response.json();
-    return data.secure_url;
-    
-  } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    throw new Error('Failed to upload image');
-  }
-}
-
-// Utility functions
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function showNotification(message, type = 'info') {
-  document.querySelectorAll('.settings-notification').forEach(n => n.remove());
-  
-  const notification = document.createElement('div');
-  notification.className = `settings-notification ${type}`;
-  notification.style.cssText = `
-    position: fixed;
-    top: 80px;
-    right: 20px;
-    padding: 15px 20px;
-    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-    color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 10000;
-    max-width: 350px;
-    animation: slideIn 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  `;
-  
-  const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
-  
-  notification.innerHTML = `
-    <span style="font-size: 20px; font-weight: bold;">${icon}</span>
-    <span style="flex: 1;">${message}</span>
-    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">×</button>
-  `;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    if (notification.parentElement) {
-      notification.style.animation = 'slideOut 0.3s ease';
-      setTimeout(() => notification.remove(), 300);
-    }
-  }, 5000);
-}
-
-function formatNumber(num) {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  } else if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
-}
-
-// Profile picture upload setup
-function setupProfilePictureUpload() {
-  const profilePictureInput = document.getElementById('profilePictureInput');
-  if (profilePictureInput && !profilePictureInput._listenerAdded) {
-    profilePictureInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        if (file.size > 2 * 1024 * 1024) {
-          showNotification('File size must be less than 2MB', 'error');
-          return;
-        }
-        
-        if (!file.type.match('image.*')) {
-          showNotification('Please select an image file', 'error');
-          return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('profilePicturePreview').src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-    profilePictureInput._listenerAdded = true;
-  }
-}
-
-// ===== MAIN INITIALIZATION =====
-
 export async function initSettingsPage() {
   try {
+    // ✅ IMPORTANT: Get auth0Client FIRST before doing anything
     auth0Client = await getAuth0Client();
     
     if (!auth0Client) {
@@ -183,6 +47,7 @@ export async function initSettingsPage() {
       return;
     }
 
+    // ✅ Check authentication (Auth0 checks its own cache here)
     const isAuthenticated = await auth0Client.isAuthenticated();
     
     if (!isAuthenticated) {
@@ -191,22 +56,31 @@ export async function initSettingsPage() {
       return;
     }
 
+    // Get selected business from dataManager cache
     currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
     
     if (!currentBusiness) {
+      // Show no business state
       document.getElementById('noBusinessState').style.display = 'block';
       document.getElementById('settingsContent').style.display = 'none';
       return;
     }
 
+    // Show settings content
     document.getElementById('noBusinessState').style.display = 'none';
     document.getElementById('settingsContent').style.display = 'block';
 
+    // Update business info
     updateBusinessInfo();
+    
+    // Load business settings from MongoDB
     await loadBusinessSettings();
+    
+    // Setup tab navigation
     setupTabNavigation();
+    
+    // Setup connection buttons
     setupConnectionButtons();
-    setupProfilePictureUpload(); // Add this call
 
     console.log('✅ Settings initialized for:', currentBusiness.store_info?.name);
     
@@ -512,42 +386,13 @@ function populateSocialConnections() {
   });
 }
 
-// function populateAutomationSettings() {
-//   const webhookUrl = document.getElementById('n8nWebhookUrl');
-//   const apiKey = document.getElementById('n8nApiKey');
-//   const enabled = document.getElementById('automationEnabled');
-  
-//   if (webhookUrl && businessSettings.n8n_config?.webhook_url) {
-//     webhookUrl.value = businessSettings.n8n_config.webhook_url;
-//   }
-  
-//   if (apiKey && businessSettings.n8n_config?.api_key) {
-//     apiKey.value = businessSettings.n8n_config.api_key;
-//   }
-  
-//   if (enabled && businessSettings.n8n_config?.enabled !== undefined) {
-//     enabled.checked = businessSettings.n8n_config.enabled;
-//   }
-// }
-
-async function populateAutomationSettings() {
+function populateAutomationSettings() {
   const webhookUrl = document.getElementById('n8nWebhookUrl');
   const apiKey = document.getElementById('n8nApiKey');
   const enabled = document.getElementById('automationEnabled');
   
-  // If business has webhook, use it
   if (webhookUrl && businessSettings.n8n_config?.webhook_url) {
     webhookUrl.value = businessSettings.n8n_config.webhook_url;
-  } else if (webhookUrl) {
-    // Otherwise, load default from server
-    try {
-      const response = await fetch(`${API_BASE}/default-webhook-config`);
-      const defaultConfig = await response.json();
-      webhookUrl.value = defaultConfig.webhook_url;
-      webhookUrl.placeholder = defaultConfig.webhook_url; // Also set as placeholder
-    } catch (error) {
-      console.error('Failed to load default webhook:', error);
-    }
   }
   
   if (apiKey && businessSettings.n8n_config?.api_key) {
@@ -577,6 +422,15 @@ function populatePreferences() {
   }
 }
 
+// Helper function for formatting numbers
+function formatNumber(num) {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
+}
 
 function setupTabNavigation() {
   const tabs = document.querySelectorAll('.settings-tab');
@@ -889,432 +743,6 @@ window.savePreferences = async function() {
   };
 
 
-window.toggleEditProfile = function() {
-  const viewMode = document.getElementById('profileViewMode');
-  const editMode = document.getElementById('profileEditMode');
-  const editBtn = document.querySelector('.section-title-row .btn-secondary');
-  
-  isEditingProfile = !isEditingProfile;
-  
-  if (isEditingProfile) {
-    // Switch to edit mode
-    viewMode.style.display = 'none';
-    editMode.style.display = 'block';
-    editBtn.textContent = 'Cancel';
-    
-    // Populate edit form
-    const profileName = document.getElementById('profileName').textContent;
-    const profileEmail = document.getElementById('profileEmail').textContent;
-    const profilePicture = document.getElementById('profilePicture').src;
-    
-    document.getElementById('profileNameInput').value = profileName;
-    document.getElementById('profileEmailInput').value = profileEmail;
-    document.getElementById('profilePicturePreview').src = profilePicture;
-    originalProfilePicture = profilePicture;
-  } else {
-    // Switch back to view mode
-    viewMode.style.display = 'block';
-    editMode.style.display = 'none';
-    editBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-      </svg>
-      Edit Profile
-    `;
-  }
-};
-
-// Handle profile picture upload
-// document.addEventListener('DOMContentLoaded', () => {
-//   const profilePictureInput = document.getElementById('profilePictureInput');
-//   if (profilePictureInput) {
-//     profilePictureInput.addEventListener('change', function(e) {
-//       const file = e.target.files[0];
-//       if (file) {
-//         // Validate file size (max 2MB)
-//         if (file.size > 2 * 1024 * 1024) {
-//           showNotification('File size must be less than 2MB', 'error');
-//           return;
-//         }
-        
-//         // Validate file type
-//         if (!file.type.match('image.*')) {
-//           showNotification('Please select an image file', 'error');
-//           return;
-//         }
-        
-//         // Preview image
-//         const reader = new FileReader();
-//         reader.onload = function(e) {
-//           document.getElementById('profilePicturePreview').src = e.target.result;
-//         };
-//         reader.readAsDataURL(file);
-//       }
-//     });
-//   }
-// });
-
-window.cancelProfileEdit = function() {
-  toggleEditProfile();
-  // Reset preview
-  document.getElementById('profilePicturePreview').src = originalProfilePicture;
-};
-
-window.saveProfileChanges = async function() {
-  try {
-    showNotification('Updating profile...', 'info');
-    
-    const name = document.getElementById('profileNameInput').value;
-    const pictureFile = document.getElementById('profilePictureInput').files[0];
-    
-    if (!name.trim()) {
-      showNotification('Name cannot be empty', 'error');
-      return;
-    }
-    
-    let pictureUrl = originalProfilePicture;
-    
-    // Upload picture directly to Cloudinary if provided
-    if (pictureFile) {
-      showNotification('Uploading image...', 'info');
-      pictureUrl = await uploadToCloudinary(pictureFile);
-    }
-    
-    // Get user info
-    const user = await auth0Client.getUser();
-    
-    // Save to your server
-    const response = await fetch(`${API_BASE}/user/update-profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: user.sub,
-        name: name,
-        picture: pictureUrl
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      
-      // Update UI
-      document.getElementById('profileName').textContent = name;
-      document.getElementById('profilePicture').src = pictureUrl;
-      
-      // Update header avatar if exists
-      const userAvatar = document.getElementById('userAvatar');
-      if (userAvatar) {
-        userAvatar.innerHTML = `<img src="${pictureUrl}" alt="Profile" class="profile-img">`;
-      }
-      
-      showNotification('Profile updated successfully!', 'success');
-      toggleEditProfile();
-      
-    } else {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update profile');
-    }
-    
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    showNotification(`Failed to update profile: ${error.message}`, 'error');
-  }
-};
-
-// Business Management Functions
-window.openBusinessManagement = function() {
-  const modal = document.getElementById('businessManagementModal');
-  modal.style.display = 'block';
-  
-  // Load current business managers
-  loadBusinessManagers();
-  
-  // Set current business status
-  const statusToggle = document.getElementById('businessActiveToggle');
-  if (currentBusiness.status) {
-    statusToggle.checked = currentBusiness.status === 'active';
-  }
-};
-
-window.closeBusinessManagement = function() {
-  const modal = document.getElementById('businessManagementModal');
-  modal.style.display = 'none';
-};
-
-async function loadBusinessManagers() {
-  try {
-    const managersList = document.getElementById('managersList');
-    
-    // Get managers from current business
-    const managers = currentBusiness.managers || [];
-    const owner = currentBusiness.personal_info?.email;
-    
-    if (managers.length === 0 && !owner) {
-      managersList.innerHTML = `
-        <p style="text-align: center; color: #666; padding: 20px; margin: 0;">
-          No managers assigned yet
-        </p>
-      `;
-      return;
-    }
-    
-    // Build managers list
-    let managersHTML = '';
-    
-    // Add owner first
-    if (owner) {
-      managersHTML += `
-        <div class="manager-item">
-          <div class="manager-info">
-            <div class="manager-avatar">${owner.charAt(0).toUpperCase()}</div>
-            <div class="manager-details">
-              <p style="font-weight: 600; margin: 0 0 2px 0;">Owner</p>
-              <p class="manager-email">${owner}</p>
-            </div>
-          </div>
-          <span class="status-badge connected">Owner</span>
-        </div>
-      `;
-    }
-    
-    // Add other managers
-    managers.forEach(manager => {
-      managersHTML += `
-        <div class="manager-item">
-          <div class="manager-info">
-            <div class="manager-avatar">${manager.email.charAt(0).toUpperCase()}</div>
-            <div class="manager-details">
-              <p style="font-weight: 600; margin: 0 0 2px 0;">${manager.name || 'Manager'}</p>
-              <p class="manager-email">${manager.email}</p>
-            </div>
-          </div>
-          <button class="btn-danger btn-sm" onclick="removeBusinessManager('${manager.email}')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      `;
-    });
-    
-    managersList.innerHTML = managersHTML;
-    
-  } catch (error) {
-    console.error('Error loading managers:', error);
-    showNotification('Failed to load managers', 'error');
-  }
-}
-
-window.addBusinessManager = async function() {
-  try {
-    const emailInput = document.getElementById('managerEmailInput');
-    const email = emailInput.value.trim();
-    
-    if (!email) {
-      showNotification('Please enter an email address', 'error');
-      return;
-    }
-    
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      showNotification('Please enter a valid email address', 'error');
-      return;
-    }
-    
-    // Check if already owner
-    if (email === currentBusiness.personal_info?.email) {
-      showNotification('This email is the business owner', 'error');
-      return;
-    }
-    
-    // Check if already a manager
-    const existingManagers = currentBusiness.managers || [];
-    if (existingManagers.some(m => m.email === email)) {
-      showNotification('This user is already a manager', 'error');
-      return;
-    }
-    
-    showNotification('Adding manager...', 'info');
-    
-    const response = await fetch(`${API_BASE}/business/${currentBusiness._id}/managers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    
-    if (response.ok) {
-      showNotification('Manager added successfully!', 'success');
-      emailInput.value = '';
-      
-      // Reload business data
-      await loadBusinessSettings();
-      await loadBusinessManagers();
-      
-    } else {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to add manager');
-    }
-    
-  } catch (error) {
-    console.error('Error adding manager:', error);
-    showNotification(`Failed to add manager: ${error.message}`, 'error');
-  }
-};
-
-window.removeBusinessManager = async function(email) {
-  if (!confirm(`Remove ${email} as a manager?`)) {
-    return;
-  }
-  
-  try {
-    showNotification('Removing manager...', 'info');
-    
-    const response = await fetch(`${API_BASE}/business/${currentBusiness._id}/managers`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    
-    if (response.ok) {
-      showNotification('Manager removed successfully!', 'success');
-      
-      // Reload business data
-      await loadBusinessSettings();
-      await loadBusinessManagers();
-      
-    } else {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to remove manager');
-    }
-    
-  } catch (error) {
-    console.error('Error removing manager:', error);
-    showNotification(`Failed to remove manager: ${error.message}`, 'error');
-  }
-};
-
-window.toggleBusinessStatus = async function() {
-  try {
-    const statusToggle = document.getElementById('businessActiveToggle');
-    const newStatus = statusToggle.checked ? 'active' : 'disabled';
-    
-    const confirmMsg = statusToggle.checked 
-      ? 'Enable this business? All automations will resume.'
-      : 'Disable this business? All automations will be paused.';
-    
-    if (!confirm(confirmMsg)) {
-      // Revert toggle
-      statusToggle.checked = !statusToggle.checked;
-      return;
-    }
-    
-    showNotification('Updating business status...', 'info');
-    
-    const response = await fetch(`${API_BASE}/business/${currentBusiness._id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    });
-    
-    if (response.ok) {
-      showNotification(`Business ${newStatus === 'active' ? 'enabled' : 'disabled'} successfully!`, 'success');
-      
-      // Update UI
-      const statusBadge = document.getElementById('businessStatusBadge');
-      if (statusBadge) {
-        statusBadge.textContent = newStatus === 'active' ? 'Active' : 'Disabled';
-        statusBadge.className = newStatus === 'active' ? 'status-badge connected' : 'status-badge';
-      }
-      
-      // Reload business data
-      await loadBusinessSettings();
-      
-    } else {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update status');
-    }
-    
-  } catch (error) {
-    console.error('Error updating business status:', error);
-    showNotification(`Failed to update status: ${error.message}`, 'error');
-    
-    // Revert toggle
-    const statusToggle = document.getElementById('businessActiveToggle');
-    statusToggle.checked = !statusToggle.checked;
-  }
-};
-
-window.confirmDeleteBusiness = function() {
-  const businessName = currentBusiness.store_info?.name || 'this business';
-  
-  const confirmed = confirm(
-    `⚠️ DELETE BUSINESS?\n\n` +
-    `You are about to permanently delete "${businessName}".\n\n` +
-    `This will:\n` +
-    `• Remove all business data\n` +
-    `• Disconnect all social media accounts\n` +
-    `• Delete all automation settings\n` +
-    `• Cannot be undone\n\n` +
-    `Type the business name to confirm deletion.`
-  );
-  
-  if (!confirmed) return;
-  
-  // Second confirmation with typed name
-  const typedName = prompt(`Type "${businessName}" to confirm deletion:`);
-  
-  if (typedName !== businessName) {
-    showNotification('Business name did not match. Deletion cancelled.', 'error');
-    return;
-  }
-  
-  deleteBusiness();
-};
-
-async function deleteBusiness() {
-  try {
-    showNotification('Deleting business...', 'info');
-    
-    const response = await fetch(`${API_BASE}/business/${currentBusiness._id}`, {
-      method: 'DELETE'
-    });
-    
-    if (response.ok) {
-      showNotification('Business deleted successfully', 'success');
-      
-      // Close modal
-      closeBusinessManagement();
-      
-      // Clear cache
-      window.dataManager.clearBusinesses();
-      
-      // Redirect to dashboard after delay
-      setTimeout(() => {
-        window.loadPage('dashboard');
-      }, 2000);
-      
-    } else {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to delete business');
-    }
-    
-  } catch (error) {
-    console.error('Error deleting business:', error);
-    showNotification(`Failed to delete business: ${error.message}`, 'error');
-  }
-}
-
-// Close modal when clicking outside
-window.addEventListener('click', function(event) {
-  const modal = document.getElementById('businessManagementModal');
-  if (event.target === modal) {
-    closeBusinessManagement();
-  }
-});
-
 // Add this function
 window.changeLinkedInOrganization = async function() {
     try {
@@ -1366,6 +794,50 @@ window.testWebhook = async function() {
   }
 };
 
+// Utility functions
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function showNotification(message, type = 'info') {
+  document.querySelectorAll('.settings-notification').forEach(n => n.remove());
+  
+  const notification = document.createElement('div');
+  notification.className = `settings-notification ${type}`;
+  notification.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    padding: 15px 20px;
+    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    max-width: 350px;
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `;
+  
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+  
+  notification.innerHTML = `
+    <span style="font-size: 20px; font-weight: bold;">${icon}</span>
+    <span style="flex: 1;">${message}</span>
+    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; line-height: 1;">×</button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }
+}, 5000);
+}
 
 // Add CSS animations
 const style = document.createElement('style');

@@ -9,13 +9,13 @@
 }
 
 #btn-login:not(:disabled) {
-  background-color: #007bff;
+  background-color: #1d1d1d;
   color: white;
   cursor: pointer;
 }
 
 #btn-login:not(:disabled):hover {
-  background-color: #0056b3;
+  background-color: #1d1d1d;
 }
 
 button:disabled {

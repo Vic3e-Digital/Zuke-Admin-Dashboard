@@ -156,47 +156,41 @@ export async function initAfaaPage() {
 
     console.log("AFAA page loaded for:", businessName);
 
-    // Setup buttons
-    const buttons = [
-      {
-        btn: document.getElementById("afaaTool1Btn"),
-        title: "Find Partners from LinkedIn",
-        url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
-      },
-      {
-        btn: document.getElementById("afaaTool2Btn"),
-        title: "Find Partner Emails",
-        url: `https://aigents.southafricanorth.azurecontainer.io/form/dineo-enrichment?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
-      },
-      {
-        btn: document.getElementById("afaaTool3Btn"),
-        title: "Email Partners",
-        url: `https://your-email-outreach-tool.com?email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}`
-      },
-      {
-        btn: document.getElementById("afaaTool4Btn"),
-        title: "Post Video to Socials",
-        url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`,
-        isBeta: true  // Special flag for beta features
-      },
-      {
-        btn: document.getElementById("afaaTool5Btn"),
-        title: "Post Image to Socials",
-        url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
-      },
-      // {
-      //   btn: document.getElementById("afaaTool6Btn"),
-      //   title: "Post Image to Socials",
-      //   url: `/tools/generate-content.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
-      //   isBeta: true
-      // },
-      {
-        btn: document.getElementById("afaaTool7Btn"),
-        title: "Generate Videos with AI",
-        url: `/tools/create-ai-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
-        isBeta: true
-      }
-    ];
+ // Setup buttons
+const buttons = [
+  {
+    btn: document.getElementById("afaaTool1Btn"),
+    title: "Find Partners from LinkedIn",
+    url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+  },
+  {
+    btn: document.getElementById("afaaTool2Btn"),
+    title: "Find Partner Emails",
+    url: `https://aigents.southafricanorth.azurecontainer.io/form/dineo-enrichment?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+  },
+  {
+    btn: document.getElementById("afaaTool3Btn"),
+    title: "Email Partners",
+    url: `/tools/send-email.html`
+  },
+  {
+    btn: document.getElementById("afaaTool4Btn"),
+    title: "Post Video to Socials",
+    url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`,
+    isBeta: true
+  },
+  {
+    btn: document.getElementById("afaaTool5Btn"),
+    title: "Post Image to Socials",
+    url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+  },
+  {
+    btn: document.getElementById("afaaTool6Btn"),  // ✅ Changed from afaaTool7Btn
+    title: "Generate Videos with AI",
+    url: `/tools/create-ai-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+    isBeta: true
+  }
+];
 
     // Add click handlers
     buttons.forEach(({btn, title, url, isBeta}) => {
