@@ -46,12 +46,12 @@ const updateUI = async () => {
       loginBtn.disabled = isAuthenticated;
       if (!isAuthenticated) {
         loginBtn.textContent = "Click here to get started";
-        loginBtn.style.backgroundColor = "#007bff";
-        loginBtn.style.color = "white";
+        // loginBtn.style.backgroundColor = "#007bff";
+        // loginBtn.style.color = "white";
       } else {
-        loginBtn.textContent = "Log in";
-        loginBtn.style.backgroundColor = "#6c757d";
-        loginBtn.style.color = "white";
+        // loginBtn.textContent = "Log in";
+        // loginBtn.style.backgroundColor = "#6c757d";
+        // loginBtn.style.color = "white";
       }
     }
     
