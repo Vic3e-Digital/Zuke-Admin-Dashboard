@@ -185,9 +185,15 @@ const buttons = [
     url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
   },
   {
-    btn: document.getElementById("afaaTool6Btn"),  // ✅ Changed from afaaTool7Btn
+    btn: document.getElementById("afaaTool6Btn"), 
     title: "Generate Videos with AI",
     url: `/tools/create-ai-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+    isBeta: true
+  },
+  {
+    btn: document.getElementById("afaaTool7Btn"),
+    title: "Generate Images with AI",
+    url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
     isBeta: true
   }
 ];
