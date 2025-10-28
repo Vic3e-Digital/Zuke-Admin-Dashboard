@@ -13,7 +13,7 @@ async function getAuth0Client() {
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
-      cacheLocation: 'memory', // Changed from 'localstorage'
+      cacheLocation: 'memory',
       useRefreshTokens: true
     });
     
@@ -28,8 +28,6 @@ async function getAuth0Client() {
 // Function to load social media cards
 async function loadSocialMediaCards(userEmail, userName) {
   return `
-  
-
       <!-- Text + AI Image Card -->
       <div class="sim-card" id="textAIImageCard">
         <div class="sim-icon">
@@ -56,8 +54,6 @@ async function loadSocialMediaCards(userEmail, userName) {
           </div>
         </div>
       </div>
-
-     
   `;
 }
 
@@ -505,7 +501,6 @@ function renderAIImageEditor(container, userEmail, userName) {
     </div>
   `;
 
-  // Initialize AI Image Editor functionality
   initAIImageEditor();
 }
 
@@ -533,7 +528,6 @@ function initAIImageEditor() {
     box2: { file: null, url: null, isModel: false }
   };
 
-  // Initialize model gallery
   function initModelGallery() {
     const gallery = document.getElementById('aiModelImagesContainer');
     if (!gallery) return;
@@ -558,7 +552,6 @@ function initAIImageEditor() {
     });
   }
 
-  // Set mode
   window.aiEditorSetMode = function(mode) {
     currentMode = mode;
     
@@ -588,14 +581,12 @@ function initAIImageEditor() {
     document.getElementById('aiResultContainer').style.display = 'none';
   };
 
-  // Use template
   window.aiEditorUseTemplate = function(mode, prompt) {
     if (mode === 'single') {
       document.getElementById('aiInstructionSingle').value = prompt;
     }
   };
 
-  // Drag and drop handlers
   const setupDragDrop = () => {
     const dropZoneSingle = document.getElementById('aiDropZoneSingle');
     const dropZone1 = document.getElementById('aiDropZone1');
@@ -635,7 +626,6 @@ function initAIImageEditor() {
     });
   };
 
-  // Trigger file input
   window.aiEditorTriggerFileInput = function(boxId) {
     if (boxId === 'single') {
       document.getElementById('aiFileInputSingle').click();
@@ -645,7 +635,6 @@ function initAIImageEditor() {
     }
   };
 
-  // Process file
   function processFile(file, boxId) {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
@@ -661,7 +650,6 @@ function initAIImageEditor() {
     }
   }
 
-  // Display image
   function displayImage(boxId, url, file, isModel = false) {
     const idPrefix = boxId === 'single' ? 'Single' : boxId;
     const dropZone = document.getElementById(`aiDropZone${idPrefix}`);
@@ -678,7 +666,6 @@ function initAIImageEditor() {
     dropZone.classList.add('has-image');
   }
 
-  // Remove image
   window.aiEditorRemoveImage = function(boxId) {
     const idPrefix = boxId === 'single' ? 'Single' : boxId;
     const dropZone = document.getElementById(`aiDropZone${idPrefix}`);
@@ -701,7 +688,6 @@ function initAIImageEditor() {
     }
   };
 
-  // Upload to Cloudinary
   async function uploadToCloudinary(file, url, isModel) {
     if (isModel && url) return url;
 
@@ -723,7 +709,6 @@ function initAIImageEditor() {
     }
   }
 
-  // Submit images
   window.aiEditorSubmitImages = async function() {
     const submitBtn = document.getElementById('aiSubmitBtn');
     const loadingOverlay = document.getElementById('aiLoadingOverlay');
@@ -823,7 +808,6 @@ function initAIImageEditor() {
     }
   };
 
-  // Display result
   function displayResult(result) {
     const resultContainer = document.getElementById('aiResultContainer');
     const resultContent = document.getElementById('aiResultContent');
@@ -876,7 +860,6 @@ ${JSON.stringify(result, null, 2)}
     resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  // Download image
   window.aiEditorDownloadImage = function(imageUrl) {
     const link = document.createElement('a');
     link.href = imageUrl;
@@ -887,7 +870,6 @@ ${JSON.stringify(result, null, 2)}
     document.body.removeChild(link);
   };
 
-  // Reset and edit again
   window.aiEditorResetAndEdit = function() {
     if (currentMode === 'single') {
       document.getElementById('aiInstructionSingle').value = '';
@@ -900,7 +882,6 @@ ${JSON.stringify(result, null, 2)}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // File input handlers
   const fileInputSingle = document.getElementById('aiFileInputSingle');
   const fileInput2 = document.getElementById('aiFileInput2');
 
@@ -918,12 +899,10 @@ ${JSON.stringify(result, null, 2)}
     });
   }
 
-  // Initialize
   initModelGallery();
   setupDragDrop();
 }
 
-// Function to render video upload form
 function renderVideoUploadForm(container, userEmail, userName) {
   const WEBHOOK_URL = `https://aigent-staging.zuke.co.za/webhook/fbb44378-5d09-45f4-8393-19dbf91a317c?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
   
@@ -1085,6 +1064,32 @@ export async function initMarketingPage() {
   const iframe = document.getElementById("modalIframe");
   const closeBtn = document.getElementsByClassName("close")[0];
 
+  // Function to show Coming Soon modal
+  function showComingSoon(featureName) {
+    const comingSoonHTML = `
+      <div id="comingSoonModal" class="modal" style="display: block;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <span class="close" onclick="document.getElementById('comingSoonModal').remove(); document.body.style.overflow = 'auto';">&times;</span>
+          <div style="padding: 30px 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🛠️</div>
+            <h2 style="margin: 0 0 15px 0; color: #2c3e50;">Coming Soon!</h2>
+            <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
+              <strong>${featureName}</strong> is currently in development and will be available soon.
+            </p>
+            <p style="color: #999; font-size: 14px; margin-bottom: 25px;">
+              Stay tuned for exciting updates!
+            </p>
+            <button class="btn-primary" onclick="document.getElementById('comingSoonModal').remove(); document.body.style.overflow = 'auto';" style="width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+              Got it!
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', comingSoonHTML);
+    document.body.style.overflow = 'hidden';
+  }
+
   try {
     const isAuthenticated = await auth0Client.isAuthenticated();
     
@@ -1127,6 +1132,15 @@ export async function initMarketingPage() {
         }
       });
     });
+
+    // Handle "Add Service" button with Coming Soon message
+    const serviceBtn = document.getElementById('openServiceBtn');
+    if (serviceBtn) {
+      serviceBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showComingSoon('Add Service');
+      });
+    }
 
     window.backToMarketing = function() {
       document.getElementById("marketingMainContent").style.display = "block";
