@@ -1272,7 +1272,7 @@ async function deleteBusiness() {
     closeBusinessManagement();
     
     // Clear cache
-    window.dataManager.clearBusinesses();
+    window.dataManager.clearCache();
     
     // Redirect to dashboard after delay
     setTimeout(() => {
