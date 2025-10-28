@@ -1,7 +1,9 @@
 // api/business-webhook-config.js
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
 
 // POST proxy to forward business management actions to n8n webhook
 router.post('/', async (req, res) => {
