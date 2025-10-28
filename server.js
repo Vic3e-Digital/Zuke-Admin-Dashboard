@@ -311,6 +311,11 @@ app.delete('/api/business/:businessId', async (req, res) => {
   }
 });
 
+
+// Add this where you have other route registrations
+const businessWebhookConfig = require('./api/business-webhook-config');
+app.use('/api/business-webhook-config', businessWebhookConfig);
+
 // -------------------------
 // Root Route
 // -------------------------
