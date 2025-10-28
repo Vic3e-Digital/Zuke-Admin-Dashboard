@@ -125,6 +125,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const user = await auth0Client.getUser();
       console.log("User logged in:", user);
       
+      // Set user information for analytics tracking
+      if (window.analytics) {
+        window.analytics.setUserInfo(user.sub, null);
+      }
+      
       await loadWalletBalance();
 
       // Clear cache if user changed
@@ -477,14 +482,38 @@ if (!isAdmin) {
         `).join('');
     }
     
-    // Toggle dropdown
-    if (switchDropdownBtn) {
-      switchDropdownBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        switchDropdownMenu.classList.toggle('active');
-      });
+    // // Toggle dropdown
+    // if (switchDropdownBtn) {
+    //   switchDropdownBtn.addEventListener('click', function(e) {
+    //     e.stopPropagation();
+    //     switchDropdownMenu.classList.toggle('active');
+    //   });
+    // }
+    // Update the toggle dropdown section in your setupEventListeners function
+if (switchDropdownBtn) {
+  switchDropdownBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
+    const isActive = switchDropdownMenu.classList.contains('active');
+    
+    if (!isActive) {
+      // Position the dropdown relative to the button
+      const buttonRect = switchDropdownBtn.getBoundingClientRect();
+      
+      // Position above the button
+      switchDropdownMenu.style.bottom = `${window.innerHeight - buttonRect.top + 8}px`;
+      switchDropdownMenu.style.left = `${buttonRect.left}px`;
+      
+      // Alternative: Position to the right of button (if you prefer)
+      // switchDropdownMenu.style.top = `${buttonRect.top}px`;
+      // switchDropdownMenu.style.left = `${buttonRect.right + 8}px`;
     }
     
+    switchDropdownMenu.classList.toggle('active');
+  });
+}
+
+
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
       if (switchDropdownMenu && !switchDropdownMenu.contains(e.target) && 
@@ -527,6 +556,17 @@ if (!isAdmin) {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         const page = link.getAttribute("data-page");
+        const linkText = link.textContent?.trim() || link.getAttribute('title') || 'Unknown Link';
+        
+        // Track navigation event
+        if (window.analytics) {
+          window.analytics.trackNavigation(currentPage, page, 'click');
+          window.analytics.trackButtonClick(linkText, currentPage, {
+            button_type: 'navigation',
+            target_page: page
+          });
+        }
+        
         loadPage(page);
 
         // Update active nav item
@@ -543,6 +583,11 @@ if (!isAdmin) {
 
   async function loadPage(page) {
     currentPage = page;
+
+    // Track page view
+    if (window.analytics) {
+      window.analytics.trackPageView(page, window.location.pathname);
+    }
 
     try {
       let content = "";

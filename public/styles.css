@@ -1,3 +1,16 @@
+/* Screen reader only content for accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* CSS Variables - Design System */
 :root {
   --background: oklch(1 0 0);
@@ -46,7 +59,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: #2d2d2d
+  background-color: #1d1d1d
 }
 
 .login-card {
@@ -85,9 +98,6 @@ body {
   gap: 0.5rem;
 }
 
-.password-toggle:hover {
-  color: var(--foreground);
-}
 
 .eye-icon {
   width: 16px;
@@ -106,7 +116,7 @@ body {
 .submit-button {
   width: 100%;
   padding: 0.5rem 1rem;
-  background-color: var(--primary);
+  background-color: #1d1d1d;
   color: var(--primary-foreground);
   border: none;
   border-radius: calc(var(--radius) - 2px);
@@ -134,16 +144,6 @@ body {
   height: 16px;
 }
 
-.demo-credentials {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
-}
-
-.demo-credentials p {
-  margin: 0.25rem 0;
-}
 
 /* =============================================
    DASHBOARD LAYOUT - FIXED
@@ -382,6 +382,7 @@ body {
 .businesses-container {
   padding: 0;
 }
+
 
 .page-header {
   display: flex;
@@ -635,7 +636,7 @@ body {
   to { transform: rotate(360deg); }
 }
 
-.settings-icon-btn {
+/* .settings-icon-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -658,6 +659,34 @@ body {
 .settings-icon-btn svg {
   width: 18px;
   height: 18px;
+} */
+
+/* Settings Button - Bottom Left */
+.settings-icon-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: transparent;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  color: #6b7280;
+  z-index: 10;
+}
+
+.settings-icon-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  transform: rotate(90deg);
+}
+
+.settings-icon-btn svg {
+  transition: transform 0.3s ease;
 }
 
 /* Switch Dropdown Styles */
@@ -693,29 +722,87 @@ body {
 }
 
 .switch-dropdown-menu {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  margin-bottom: 8px;
+  position: fixed; /* Changed from absolute to fixed */
+  bottom: auto; /* Reset bottom */
+  left: auto; /* Will be set by JS, but reset for now */
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   min-width: 250px;
+  max-width: 300px;
   padding: 8px;
   opacity: 0;
   visibility: hidden;
   transform: translateY(10px);
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 10000; /* Increased z-index significantly */
+  pointer-events: none; /* Prevent interaction when hidden */
 }
 
 .switch-dropdown-menu.active {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+  pointer-events: auto; /* Re-enable interaction when visible */
 }
 
+.dropdown-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+}
+
+.switch-business-selector {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2937;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.switch-business-selector:hover {
+  border-color: #6366f1;
+  background: #f9fafb;
+}
+
+.switch-business-selector:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Ensure sidebar doesn't clip the dropdown */
+.sidebar {
+  overflow-x: hidden;
+  overflow-y: auto; /* Keep vertical scroll */
+}
+
+.user-profile {
+  overflow: visible; /* Important: allow dropdown to overflow */
+}
+
+/* Adjust user profile */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Remove settings button from user profile section */
+.user-profile .settings-icon-btn {
+  display: none;
+}
 .dropdown-header {
   padding: 8px 12px;
   font-size: 12px;

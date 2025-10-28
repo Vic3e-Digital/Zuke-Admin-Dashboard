@@ -20,10 +20,26 @@
       cursor: pointer;
       background: white;
       margin-bottom: 20px;
+      transition: all 0.2s;
     }
     .upload-box:hover { border-color: #667eea; }
     .upload-box.dragover { border-color: #667eea; background: #f0f4ff; }
-    #imagePreview { max-width: 100%; border-radius: 8px; margin-top: 15px; display: none; }
+    #imagePreview { 
+      max-width: 100%; 
+      max-height: 400px;
+      border-radius: 8px; 
+      margin-top: 15px; 
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .file-info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #666;
+    }
     textarea {
       width: 100%;
       padding: 12px;
@@ -33,6 +49,12 @@
       font-family: inherit;
       resize: vertical;
       min-height: 80px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
     }
     .platforms {
       display: grid;
@@ -50,11 +72,15 @@
       text-align: center;
       font-size: 12px;
     }
-    .platform-btn:hover { border-color: #667eea; }
+    .platform-btn:hover:not([disabled]) { border-color: #667eea; }
     .platform-btn.selected {
       border-color: #667eea;
       background: #f0f4ff;
       font-weight: 600;
+    }
+    .platform-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
     }
     .cost { 
       background: #fff3cd;
@@ -74,17 +100,45 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      transition: opacity 0.2s;
     }
+    .publish-btn:hover:not(:disabled) { opacity: 0.9; }
     .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .status {
       margin-top: 15px;
       padding: 12px;
       border-radius: 8px;
       display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
     }
     .status.success { background: #d4edda; color: #155724; }
     .status.error { background: #f8d7da; color: #721c24; }
-    .progress { display: none; margin-top: 15px; }
+    .progress { 
+      display: none; 
+      margin-top: 15px;
+      text-align: center;
+      color: #667eea;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -95,31 +149,41 @@
       <p style="color: #999; margin-top: 10px;">JPG, PNG, GIF (max 10MB)</p>
       <input type="file" id="fileInput" accept="image/*" style="display: none;">
       <img id="imagePreview" alt="Preview">
+      <div class="file-info" id="fileInfo" style="display: none;"></div>
     </div>
 
-    <textarea id="caption" placeholder="Write your caption... (optional)"></textarea>
+    <div>
+      <label for="caption">Image Caption:</label>
+      <textarea id="caption" placeholder="Write your caption... (optional)"></textarea>
+    </div>
 
     <h4 style="margin-bottom: 10px;">Select Platforms:</h4>
     <div class="platforms">
-      <button class="platform-btn" data-platform="facebook" data-cost="5">
-        📘<br>Facebook<br><small>R5.00</small>
+      <button class="platform-btn" data-platform="facebook" data-cost="10">
+        📘<br>Facebook<br><small>R10.00</small>
       </button>
-      <button class="platform-btn" data-platform="instagram" data-cost="5">
-        📷<br>Instagram<br><small>R5.00</small>
+      <button class="platform-btn" data-platform="instagram" data-cost="10">
+        📷<br>Instagram<br><small>R10.00</small>
       </button>
-      <button class="platform-btn" data-platform="linkedin" data-cost="5">
-        💼<br>LinkedIn<br><small>R5.00</small>
+      <button class="platform-btn" data-platform="linkedin" data-cost="10">
+        💼<br>LinkedIn<br><small>R10.00</small>
       </button>
-      <button class="platform-btn" data-platform="youtube" data-cost="5" style="opacity: 0.3; cursor: not-allowed;" disabled>
+      <button class="platform-btn" data-platform="youtube" data-cost="10" disabled title="YouTube does not support image posts">
         🎥<br>YouTube<br><small>(N/A)</small>
       </button>
     </div>
 
     <div class="cost" id="costDisplay">Select platforms to see cost</div>
 
-    <button class="publish-btn" id="publishBtn" disabled>Publish to Selected Platforms</button>
+    <button class="publish-btn" id="publishBtn" disabled>Publish Image to Selected Platforms</button>
 
-    <div class="progress" id="progress">Uploading...</div>
+    <div class="progress" id="progress">
+      <p id="progressText">Uploading image...</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p id="progressPercent" style="margin-top: 8px; font-size: 14px; color: #666;">0%</p>
+    </div>
     <div class="status" id="status"></div>
   </div>
 
@@ -128,7 +192,6 @@
     const userEmail = urlParams.get('email');
     const businessId = urlParams.get('businessId');
     const businessName = urlParams.get('businessName');
-    const businessCase = urlParams.get('businessCase');
 
     let selectedFile = null;
     let selectedPlatforms = [];
@@ -136,16 +199,18 @@
     const uploadBox = document.getElementById('uploadBox');
     const fileInput = document.getElementById('fileInput');
     const imagePreview = document.getElementById('imagePreview');
+    const fileInfo = document.getElementById('fileInfo');
     const publishBtn = document.getElementById('publishBtn');
     const costDisplay = document.getElementById('costDisplay');
     const status = document.getElementById('status');
     const progress = document.getElementById('progress');
-
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
 
     // Cloudinary config
     const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
     const CLOUDINARY_CLOUD_NAME = 'vic-3e';
-
 
     // Upload handlers
     uploadBox.addEventListener('click', () => fileInput.click());
@@ -167,13 +232,28 @@
         showStatus('Please select an image file', 'error');
         return;
       }
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        showStatus('Image file is too large. Maximum size is 10MB.', 'error');
+        return;
+      }
+
       selectedFile = file;
+      
+      // Show preview
       const reader = new FileReader();
       reader.onload = (e) => {
         imagePreview.src = e.target.result;
         imagePreview.style.display = 'block';
       };
       reader.readAsDataURL(file);
+
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.textContent = `📁 ${file.name} (${sizeMB} MB)`;
+      fileInfo.style.display = 'block';
+
       updatePublishButton();
     }
 
@@ -196,19 +276,20 @@
       let total = 0;
       selectedPlatforms.forEach(platform => {
         const btn = document.querySelector(`[data-platform="${platform}"]`);
-        total += parseInt(btn.dataset.cost);
+        if (btn) total += parseInt(btn.dataset.cost);
       });
       costDisplay.textContent = selectedPlatforms.length > 0 
-        ? `Total Cost: R${(total * 1).toFixed(2)}` 
+        ? `Total Cost: R${total.toFixed(2)}` 
         : 'Select platforms to see cost';
     }
 
     function updatePublishButton() {
-      publishBtn.disabled = !selectedFile || selectedPlatforms.length === 0;
+      const isValid = selectedFile && selectedPlatforms.length > 0;
+      publishBtn.disabled = !isValid;
     }
 
-// Publish
-publishBtn.addEventListener('click', async () => {
+
+    publishBtn.addEventListener('click', async () => {
   if (!selectedFile || selectedPlatforms.length === 0) return;
   
   publishBtn.disabled = true;
@@ -216,26 +297,75 @@ publishBtn.addEventListener('click', async () => {
   status.style.display = 'none';
 
   try {
-    // Upload to Cloudinary
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET); // ✅ FIXED
-    
-    const cloudinaryResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, // ✅ FIXED
-      { method: 'POST', body: formData }
-    );
-    
-    if (!cloudinaryResponse.ok) {
-      throw new Error('Failed to upload to Cloudinary. Check your preset settings.');
+    // ✅ STEP 1: Check wallet balance and deduct cost FIRST
+    progressText.textContent = 'Checking wallet balance...';
+    progressFill.style.width = '10%';
+    progressPercent.textContent = '10%';
+
+    // Calculate cost
+    let totalCost = 0;
+    selectedPlatforms.forEach(platform => {
+      const btn = document.querySelector(`[data-platform="${platform}"]`);
+      if (btn) totalCost += parseInt(btn.dataset.cost);
+    });
+
+    // Check wallet and deduct (without posting yet)
+    const walletCheckResponse = await fetch('/api/social-post/post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessId: businessId,
+        userEmail: userEmail,
+        platforms: selectedPlatforms,
+        postContent: { text: 'Wallet check for image post' }, // Dummy content
+        totalCost: totalCost,
+        skipPosting: true, // ✅ Only deduct wallet, don't post yet
+        description: `Image post to ${selectedPlatforms.join(', ')}` // ✅ Custom description
+      })
+    });
+
+    const walletResult = await walletCheckResponse.json();
+
+    // Handle insufficient funds
+    if (!walletResult.success) {
+      if (walletCheckResponse.status === 402) {
+        throw new Error(
+          `Insufficient funds!\n\n` +
+          `Required: ${walletResult.formatted_required || `R${totalCost.toFixed(2)}`}\n` +
+          `Balance: ${walletResult.formatted_balance}\n\n` +
+          `Please add credits or upgrade.`
+        );
+      } else {
+        throw new Error(walletResult.error || 'Wallet check failed');
+      }
     }
+
+    console.log('✅ Wallet deducted:', walletResult);
+
+    // ✅ STEP 2: Upload to Cloudinary (only if wallet check passed)
+    progressText.textContent = 'Uploading image to cloud storage...';
+    progressFill.style.width = '30%';
     
-    const cloudinaryData = await cloudinaryResponse.json();
-    const imageUrl = cloudinaryData.secure_url;
+    const imageUrl = await uploadToCloudinary(selectedFile);
 
-    console.log('✅ Uploaded to Cloudinary:', imageUrl);
+    if (!imageUrl) {
+      // ⚠️ TODO: Consider refunding the user here if upload fails
+      throw new Error('Failed to upload image to cloud storage');
+    }
 
-    // Post to social media
+    console.log('✅ Image uploaded:', imageUrl);
+
+    // ✅ STEP 3: Post to social media (wallet already deducted, so skip charging)
+    progressText.textContent = 'Publishing to social media...';
+    progressFill.style.width = '90%';
+    progressPercent.textContent = '90%';
+
+    // Prepare post content
+    const postContent = {
+      text: document.getElementById('caption').value,
+      image: imageUrl
+    };
+
     const response = await fetch('/api/social-post/post', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -243,30 +373,88 @@ publishBtn.addEventListener('click', async () => {
         businessId: businessId,
         userEmail: userEmail,
         platforms: selectedPlatforms,
-        postContent: {
-          text: document.getElementById('caption').value,
-          image: imageUrl
-        }
+        postContent: postContent,
+        totalCost: 0, // ✅ Set to 0 to prevent double charging
+        skipWalletCheck: true // ✅ Add this flag to skip wallet check
       })
     });
 
     const result = await response.json();
 
+    progressFill.style.width = '100%';
+    progressPercent.textContent = '100%';
+
     if (result.success) {
-      showStatus(`✅ Posted to ${result.platforms.join(', ')}!\nCost: ${result.formatted_cost}\nBalance: ${result.formatted_balance}`, 'success');
-      setTimeout(() => resetForm(), 3000);
+      showStatus(
+        `✅ Image posted to ${selectedPlatforms.join(', ')}!\n\n` +
+        `Cost: R${totalCost.toFixed(2)}\n` +
+        `New Balance: ${walletResult.formatted_balance}`, 
+        'success'
+      );
+      setTimeout(() => resetForm(), 5000);
     } else {
-      throw new Error(result.error || 'Failed to post');
+      throw new Error(result.error || 'Failed to publish image');
     }
 
   } catch (error) {
     console.error('Error:', error);
-    showStatus('❌ ' + error.message, 'error');
+    
+    // Enhanced error handling
+    if (error.message.includes('token expired') || 
+        error.message.includes('reconnect') ||
+        error.message.includes('Token refresh failed')) {
+      
+      showStatus(
+        '❌ Authentication Error\n\n' + 
+        error.message + '\n\n' +
+        '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+        'error'
+      );
+    } else {
+      showStatus('❌ ' + error.message, 'error');
+    }
   } finally {
     progress.style.display = 'none';
     publishBtn.disabled = false;
   }
 });
+    
+    async function uploadToCloudinary(file) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const xhr = new XMLHttpRequest();
+        
+        // Track upload progress
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressFill.style.width = percentComplete + '%';
+            progressPercent.textContent = Math.round(percentComplete) + '%';
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
     function showStatus(message, type) {
       status.textContent = message;
       status.className = `status ${type}`;
@@ -277,8 +465,12 @@ publishBtn.addEventListener('click', async () => {
       selectedFile = null;
       selectedPlatforms = [];
       imagePreview.style.display = 'none';
+      imagePreview.src = '';
+      fileInfo.style.display = 'none';
       document.getElementById('caption').value = '';
       document.querySelectorAll('.platform-btn').forEach(btn => btn.classList.remove('selected'));
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
       updateCost();
       updatePublishButton();
     }

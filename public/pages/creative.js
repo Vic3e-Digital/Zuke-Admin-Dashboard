@@ -1,4 +1,4 @@
-// pages/business.js
+// pages/creative.js
 let auth0Client = null;
 
 async function getAuth0Client() {
@@ -60,26 +60,54 @@ export async function initCreativePage() {
     console.log("User email:", userEmail);
     console.log("User name:", userName);
 
+    // Function to show Coming Soon modal
+    function showComingSoon(featureName) {
+      const comingSoonHTML = `
+        <div id="comingSoonModal" class="modal" style="display: block;">
+          <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <span class="close" onclick="document.getElementById('comingSoonModal').remove(); document.body.style.overflow = 'auto';">&times;</span>
+            <div style="padding: 30px 20px;">
+              <div style="font-size: 64px; margin-bottom: 20px;">🎨</div>
+              <h2 style="margin: 0 0 15px 0; color: #2c3e50;">Coming Soon!</h2>
+              <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">
+                <strong>${featureName}</strong> is currently in development and will be available soon.
+              </p>
+              <p style="color: #999; font-size: 14px; margin-bottom: 25px;">
+                Stay tuned for exciting updates!
+              </p>
+              <button class="btn-primary" onclick="document.getElementById('comingSoonModal').remove(); document.body.style.overflow = 'auto';" style="width: 100%;">
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', comingSoonHTML);
+      document.body.style.overflow = 'hidden';
+    }
+
     // Setup buttons with dynamic URLs
     const buttons = [
       {
         btn: document.getElementById("openModalBtn"),
         title: "Neo - Find Customers",
         url: `https://aigents.southafricanorth.azurecontainer.io/form/fbfabdbb-a36e-4761-93b2-a55e4bfe62a9?Email=${encodeURIComponent(userEmail)}&Business%20Descripion=${encodeURIComponent(userName)}`
-      },
-      {
-        btn: document.getElementById("openModalBtn2"),
-        title: "Dineo - Sales Analytics",
-        url: `#`
-      },
-    //   {
-    //     btn: document.getElementById("openModalBtn3"),
-    //     title: "Alex - Business Intelligence",
-    //     url: `#`
-    //   }
+      }
     ];
 
-    // Add click handlers
+    // Setup coming soon buttons
+    const comingSoonButtons = [
+      {
+        btn: document.getElementById("openLogoBtn"),
+        name: "Design Logo Concepts"
+      },
+      {
+        btn: document.getElementById("openFlyerBtn"),
+        name: "Design Flyers"
+      }
+    ];
+
+    // Add click handlers for active features
     buttons.forEach(({btn, title, url}) => {
       if (btn) {
         btn.onclick = function(e) {
@@ -88,6 +116,16 @@ export async function initCreativePage() {
           iframe.src = url;
           modal.style.display = "block";
           document.body.style.overflow = 'hidden';
+        }
+      }
+    });
+
+    // Add click handlers for coming soon features
+    comingSoonButtons.forEach(({btn, name}) => {
+      if (btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          showComingSoon(name);
         }
       }
     });
@@ -110,6 +148,6 @@ export async function initCreativePage() {
     });
 
   } catch (error) {
-    console.error("Error in initTestPage:", error);
+    console.error("Error in initCreativePage:", error);
   }
 }

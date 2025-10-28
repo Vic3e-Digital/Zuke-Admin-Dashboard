@@ -4,6 +4,10 @@ const router = express.Router();
 const { getDatabase, connectToDatabase } = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 const crypto = require('crypto');
+const axios = require('axios');
+
+// ✅ n8n Wallet Webhook URL
+const N8N_WALLET_WEBHOOK = process.env.N8N_WALLET_WEBHOOK_URL;
 
 // ✅ Decryption function
 function decryptToken(encryptedToken) {
@@ -23,13 +27,28 @@ function decryptToken(encryptedToken) {
   return decrypted;
 }
 
-// ✅ Pricing configuration (in cents/ZAR)
+// ✅ Encryption function (for storing refreshed tokens)
+function encryptToken(token) {
+  if (!token) return null;
+  
+  const algorithm = 'aes-256-cbc';
+  const key = crypto.createHash('sha256').update(process.env.ENCRYPTION_SECRET || 'your-secret-key').digest();
+  const iv = crypto.randomBytes(16);
+  
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+  let encrypted = cipher.update(token, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  
+  return `${iv.toString('hex')}:${encrypted}`;
+}
+
+// ✅ Pricing configuration (in ZAR)
 const PRICING = {
-  facebook: 500,      // R5.00 per post
-  instagram: 500,     // R5.00 per post
-  linkedin: 1000,     // R10.00 per post
-  youtube: 2000,      // R20.00 per video upload
-  base_fee: 0        // Base fee per request (optional)
+  facebook: 10,     // R10.00 per post
+  instagram: 10,    // R10.00 per post
+  linkedin: 10,     // R10.00 per post
+  youtube: 10,      // R10.00 per video upload
+  base_fee: 0
 };
 
 // ✅ Calculate total cost for the request
@@ -43,23 +62,224 @@ function calculateCost(platforms) {
   return totalCost;
 }
 
-// ✅ Helper to check if subscription is active
-function isSubscriptionActive(wallet) {
-  if (!wallet.subscription_end_date || wallet.subscription_status !== 'active') {
-    return false;
-  }
+// ========================================
+// TOKEN REFRESH FUNCTIONS
+// ========================================
+
+async function refreshYouTubeToken(platformSettings, businessId, db) {
+  console.log('[YouTube] Checking token expiration...');
   
-  const endDate = new Date(wallet.subscription_end_date);
   const now = new Date();
-  
-  return endDate > now;
+  const expiresAt = new Date(platformSettings.expires_at);
+  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+  if (expiresAt > fiveMinutesFromNow) {
+    console.log('[YouTube] ✓ Token is still valid');
+    return decryptToken(platformSettings.access_token);
+  }
+
+  console.log('[YouTube] ⟳ Token expired/expiring, refreshing...');
+
+  try {
+    const refreshToken = decryptToken(platformSettings.refresh_token);
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await axios.post('https://oauth2.googleapis.com/token', {
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token'
+    });
+
+    const newAccessToken = response.data.access_token;
+    const expiresIn = response.data.expires_in || 3600;
+    const newExpiresAt = new Date(Date.now() + expiresIn * 1000);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.youtube.access_token': encryptToken(newAccessToken),
+          'automation_settings.social_media.youtube.expires_at': newExpiresAt,
+          'automation_settings.social_media.youtube.last_refreshed': new Date(),
+          'automation_settings.social_media.youtube.status': 'active'
+        }
+      }
+    );
+
+    console.log('[YouTube] ✓ Token refreshed successfully');
+    return newAccessToken;
+
+  } catch (error) {
+    console.error('[YouTube] ✗ Token refresh failed:', error.response?.data || error.message);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.youtube.status': 'error',
+          'automation_settings.social_media.youtube.error': 'Token refresh failed - please reconnect'
+        }
+      }
+    );
+
+    throw new Error('YouTube token expired. Please reconnect your YouTube account in Settings.');
+  }
 }
 
-// ✅ POST route with wallet integration
+async function refreshFacebookToken(platformSettings, businessId, db) {
+  console.log('[Facebook] Checking token expiration...');
+  
+  const now = new Date();
+  const expiresAt = new Date(platformSettings.expires_at);
+  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+  if (expiresAt > fiveMinutesFromNow) {
+    console.log('[Facebook] ✓ Token is still valid');
+    return decryptToken(platformSettings.access_token);
+  }
+
+  console.log('[Facebook] ⟳ Token expired/expiring, refreshing...');
+
+  try {
+    const currentToken = decryptToken(platformSettings.access_token);
+
+    const response = await axios.get('https://graph.facebook.com/v18.0/oauth/access_token', {
+      params: {
+        grant_type: 'fb_exchange_token',
+        client_id: process.env.FACEBOOK_APP_ID,
+        client_secret: process.env.FACEBOOK_APP_SECRET,
+        fb_exchange_token: currentToken
+      }
+    });
+
+    const newAccessToken = response.data.access_token;
+    const expiresIn = response.data.expires_in || 5184000;
+    const newExpiresAt = new Date(Date.now() + expiresIn * 1000);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.facebook.access_token': encryptToken(newAccessToken),
+          'automation_settings.social_media.facebook.expires_at': newExpiresAt,
+          'automation_settings.social_media.facebook.last_refreshed': new Date(),
+          'automation_settings.social_media.facebook.status': 'active'
+        }
+      }
+    );
+
+    console.log('[Facebook] ✓ Token refreshed successfully');
+    return newAccessToken;
+
+  } catch (error) {
+    console.error('[Facebook] ✗ Token refresh failed:', error.response?.data || error.message);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.facebook.status': 'error',
+          'automation_settings.social_media.facebook.error': 'Token refresh failed - please reconnect'
+        }
+      }
+    );
+
+    throw new Error('Facebook token expired. Please reconnect your Facebook page in Settings.');
+  }
+}
+
+async function refreshInstagramToken(platformSettings, businessId, db) {
+  // Instagram uses Facebook's token
+  return await refreshFacebookToken(platformSettings, businessId, db);
+}
+
+async function refreshLinkedInToken(platformSettings, businessId, db) {
+  console.log('[LinkedIn] Checking token expiration...');
+  
+  const now = new Date();
+  const expiresAt = new Date(platformSettings.expires_at);
+  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+  if (expiresAt > fiveMinutesFromNow) {
+    console.log('[LinkedIn] ✓ Token is still valid');
+    return decryptToken(platformSettings.access_token);
+  }
+
+  console.log('[LinkedIn] ⟳ Token expired/expiring, refreshing...');
+
+  try {
+    const refreshToken = decryptToken(platformSettings.refresh_token);
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', null, {
+      params: {
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        client_id: process.env.LINKEDIN_CLIENT_ID,
+        client_secret: process.env.LINKEDIN_CLIENT_SECRET
+      },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    const newAccessToken = response.data.access_token;
+    const newRefreshToken = response.data.refresh_token;
+    const expiresIn = response.data.expires_in || 5184000;
+    const newExpiresAt = new Date(Date.now() + expiresIn * 1000);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.linkedin.access_token': encryptToken(newAccessToken),
+          'automation_settings.social_media.linkedin.refresh_token': encryptToken(newRefreshToken),
+          'automation_settings.social_media.linkedin.expires_at': newExpiresAt,
+          'automation_settings.social_media.linkedin.last_refreshed': new Date(),
+          'automation_settings.social_media.linkedin.status': 'active'
+        }
+      }
+    );
+
+    console.log('[LinkedIn] ✓ Token refreshed successfully');
+    return newAccessToken;
+
+  } catch (error) {
+    console.error('[LinkedIn] ✗ Token refresh failed:', error.response?.data || error.message);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.linkedin.status': 'error',
+          'automation_settings.social_media.linkedin.error': 'Token refresh failed - please reconnect'
+        }
+      }
+    );
+
+    throw new Error('LinkedIn token expired. Please reconnect your LinkedIn organization in Settings.');
+  }
+}
+
+// ========================================
+// MAIN POST ROUTE
+// ========================================
+
+// ========================================
+// MAIN POST ROUTE
+// ========================================
+
 router.post('/post', async (req, res) => {
   try {
-    const { businessId, platforms, postContent, userEmail } = req.body;
-
+    const { businessId, platforms, postContent, userEmail, totalCost, skipPosting, skipWalletCheck } = req.body;
+    
     // Validate input
     if (!businessId || !platforms || !postContent || !userEmail) {
       return res.status(400).json({ 
@@ -70,65 +290,14 @@ router.post('/post', async (req, res) => {
 
     console.log(`[Social Post] Request for business: ${businessId}, platforms: ${platforms.join(', ')}`);
 
-    // ✅ Calculate cost
-    const cost = calculateCost(platforms);
-    console.log(`[Social Post] Calculated cost: R${(cost / 100).toFixed(2)} (${cost} cents)`);
+    // ✅ STEP 1: Calculate cost (use totalCost if provided)
+    const cost = totalCost !== undefined ? totalCost : calculateCost(platforms);
+    console.log(`[Social Post] ${totalCost !== undefined ? 'Total cost (incl. AI generation)' : 'Calculated cost'}: R${cost.toFixed(2)}`);
 
-    // ✅ Get user's wallet
-    const { db: walletDb } = await connectToDatabase();
-    const walletCollection = walletDb.collection('user_wallets');
-    
-    let wallet = await walletCollection.findOne({ email: userEmail });
+    // ✅ Generate requestId BEFORE wallet check (so it's always available)
+    const requestId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Create wallet if doesn't exist
-    if (!wallet) {
-      console.log('[Social Post] Creating new wallet for:', userEmail);
-      wallet = {
-        email: userEmail,
-        balance: 99,
-        currency: 'ZAR',
-        current_plan: 'free',
-        billing_period: null,
-        subscription_status: 'inactive',
-        subscription_start_date: null,
-        subscription_end_date: null,
-        transactions: [
-          {
-            transaction_id: `initial_${Date.now()}`,
-            type: 'credit',
-            amount: 99,
-            balance_after: 99,
-            description: 'Welcome bonus - Initial credits',
-            timestamp: new Date().toISOString(),
-            metadata: { source: 'signup_bonus' }
-          }
-        ],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      await walletCollection.insertOne(wallet);
-    }
-
-    // ✅ Check if user has active subscription (unlimited posts)
-    const hasActiveSubscription = isSubscriptionActive(wallet);
-
-    if (!hasActiveSubscription) {
-      // Check if user has sufficient balance
-      if (wallet.balance < cost) {
-        return res.status(402).json({ 
-          success: false, 
-          error: 'Insufficient funds',
-          current_balance: wallet.balance,
-          required: cost,
-          formatted_balance: `R${(wallet.balance / 100).toFixed(2)}`,
-          formatted_required: `R${(cost / 100).toFixed(2)}`,
-          message: 'Please add credits or upgrade to a subscription plan.'
-        });
-      }
-    }
-
-    // ✅ Get business from MongoDB
+    // ✅ STEP 2: Get business from MongoDB
     const db = await getDatabase();
     const business = await db.collection('store_submissions').findOne({
       _id: new ObjectId(businessId)
@@ -144,67 +313,343 @@ router.post('/post', async (req, res) => {
     // Check if n8n webhook is configured
     const webhookUrl = business.automation_settings?.n8n_config?.webhook_url;
     
-    if (!webhookUrl) {
+    if (!webhookUrl && !skipWalletCheck && postContent.contentType !== 'video') {
       return res.status(400).json({ 
         success: false, 
         error: 'n8n webhook URL not configured. Please set it in Settings.' 
       });
     }
 
-    // ✅ Build platform credentials object
+    // ✅ STEP 3: Wallet Check and Deduction
+    let walletResult;
+    if (skipWalletCheck) {
+      console.log('[Social Post] ⊘ Skipping wallet check (already charged)');
+      walletResult = { success: true, message: 'Wallet already charged' };
+    } else if (cost > 0) {
+      
+      if (!N8N_WALLET_WEBHOOK) {
+        console.error('[Social Post] ✗ N8N_WALLET_WEBHOOK_URL is not set in environment variables');
+        return res.status(500).json({
+          success: false,
+          error: 'Wallet service not configured. Please contact support.',
+          details: 'N8N_WALLET_WEBHOOK_URL environment variable is missing'
+        });
+      }
+
+      const walletPayload = {
+        userEmail: userEmail,
+        businessId: businessId,
+        businessName: business.store_info?.name || 'Unknown Business',
+        platforms: platforms,
+        cost: cost,
+        postContent: postContent,
+        requestId: requestId,
+        description: req.body.description || `Posting to ${platforms.join(', ')}`
+      };
+
+      console.log('[Social Post] 📤 Calling wallet webhook:', N8N_WALLET_WEBHOOK);
+      console.log('[Social Post] 📦 Wallet payload:', JSON.stringify(walletPayload, null, 2));
+
+      try {
+        const walletResponse = await axios.post(N8N_WALLET_WEBHOOK, walletPayload, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 30000,
+          validateStatus: function (status) {
+            return status >= 200 && status < 300 || status === 402;
+          }
+        });
+
+        walletResult = walletResponse.data;
+        
+        console.log('[Social Post] 📥 Wallet response:', JSON.stringify(walletResult, null, 2));
+
+        if (walletResponse.status === 402 || !walletResult.success) {
+          console.log('[Social Post] ⚠️ Insufficient funds:', walletResult);
+          return res.status(402).json({
+            success: false,
+            error: 'Insufficient funds',
+            current_balance: walletResult.current_balance,
+            required: walletResult.required || cost,
+            formatted_balance: walletResult.formatted_balance,
+            formatted_required: walletResult.formatted_required || `R${cost.toFixed(2)}`,
+            message: 'Please add credits or upgrade to a subscription plan.'
+          });
+        }
+
+        console.log('[Social Post] ✓ Wallet deduction successful. New balance:', walletResult.formatted_balance);
+
+      } catch (walletError) {
+        console.error('[Social Post] ✗ Wallet webhook error:');
+        console.error('  - Error message:', walletError.message);
+        console.error('  - Error code:', walletError.code);
+        console.error('  - Response status:', walletError.response?.status);
+        console.error('  - Response data:', JSON.stringify(walletError.response?.data, null, 2));
+        
+        let errorMessage = 'Wallet service unavailable. Please try again later.';
+        let errorDetails = walletError.message;
+        
+        if (walletError.code === 'ECONNREFUSED') {
+          errorMessage = 'Cannot connect to wallet service. Service may be down.';
+          errorDetails = 'Connection refused to ' + N8N_WALLET_WEBHOOK;
+        } else if (walletError.code === 'ETIMEDOUT' || walletError.message.includes('timeout')) {
+          errorMessage = 'Wallet service timeout. Please try again.';
+          errorDetails = 'Request timed out after 30 seconds';
+        } else if (walletError.response?.status === 404) {
+          errorMessage = 'Wallet webhook endpoint not found.';
+          errorDetails = 'Check N8N_WALLET_WEBHOOK_URL configuration';
+        }
+        
+        return res.status(503).json({
+          success: false,
+          error: errorMessage,
+          details: errorDetails,
+          webhook_url: N8N_WALLET_WEBHOOK.replace(/\/\/.*@/, '//***@')
+        });
+      }
+    }
+
+    // ✅ STEP 4: Handle Video Generation Request
+if (postContent.contentType === 'video' && postContent.duration && postContent.resolution) {
+  console.log('[Social Post] 🎥 Video generation request detected');
+  
+  const platformCredentials = {};
+  const tokenRefreshErrors = [];
+
+  // ✅ ONLY BUILD CREDENTIALS IF PLATFORMS ARE SELECTED
+  if (platforms && platforms.length > 0) {
+    console.log('[Social Post] Building platform credentials for:', platforms);
+    
+    for (const platform of platforms) {
+      const platformSettings = business.automation_settings?.social_media?.[platform];
+
+      if (!platformSettings || !platformSettings.connected || platformSettings.status !== 'active') {
+        console.warn(`[Social Post] ${platform} not connected or inactive`);
+        tokenRefreshErrors.push(`${platform} is not connected`);
+        continue;
+      }
+
+      try {
+        let accessToken;
+
+        if (platform === 'youtube') {
+          accessToken = await refreshYouTubeToken(platformSettings, businessId, db);
+          platformCredentials.youtube = {
+            access_token: accessToken,
+            refresh_token: decryptToken(platformSettings.refresh_token),
+            channel_id: platformSettings.channel_id,
+            channel_name: platformSettings.channel_name
+          };
+        } else if (platform === 'facebook') {
+          accessToken = await refreshFacebookToken(platformSettings, businessId, db);
+          platformCredentials.facebook = {
+            access_token: accessToken,
+            page_id: platformSettings.page_id,
+            page_name: platformSettings.page_name
+          };
+        } else if (platform === 'instagram') {
+          accessToken = await refreshInstagramToken(platformSettings, businessId, db);
+          platformCredentials.instagram = {
+            access_token: accessToken,
+            account_id: platformSettings.account_id,
+            username: platformSettings.username
+          };
+        } else if (platform === 'linkedin') {
+          accessToken = await refreshLinkedInToken(platformSettings, businessId, db);
+          platformCredentials.linkedin = {
+            access_token: accessToken,
+            organization_id: platformSettings.organization_id,
+            organization_name: platformSettings.organization_name
+          };
+        }
+
+      } catch (error) {
+        console.error(`[Social Post] Token refresh failed for ${platform}:`, error.message);
+        tokenRefreshErrors.push(`${platform}: ${error.message}`);
+      }
+    }
+
+    // ✅ ONLY CHECK IF PLATFORMS WERE REQUESTED
+    if (platforms.length > 0 && Object.keys(platformCredentials).length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No active platform connections found for the requested platforms',
+        details: tokenRefreshErrors.length > 0 ? tokenRefreshErrors : undefined
+      });
+    }
+  } else {
+    console.log('[Social Post] No platforms selected - generating video only');
+  }
+
+  // ✅ NOW BUILD VIDEO PAYLOAD (with or without platform credentials)
+  const videoPayload = {
+    contentType: 'video',
+    concept: postContent.text,
+    caption: postContent.caption || '',
+    duration: postContent.duration,
+    resolution: postContent.resolution,
+    platforms: Object.keys(platformCredentials).length > 0 ? platformCredentials : {}, // ✅ Empty object if no platforms
+    businessId: businessId,
+    businessName: business.store_info?.name || 'Unknown Business',
+    userEmail: userEmail,
+    timestamp: new Date().toISOString(),
+    requestId: requestId
+  };
+
+  // ✅ Add inputImage if present
+  if (postContent.inputImage) {
+    videoPayload.inputImage = postContent.inputImage;
+    console.log('[Social Post] Including user-uploaded image in video generation');
+  }
+
+  const VIDEO_WEBHOOK = 'https://aigents.southafricanorth.azurecontainer.io/webhook/ai-video-generation-form';
+  
+  console.log('[Social Post] 📤 Calling video generation webhook:', VIDEO_WEBHOOK);
+  console.log('[Social Post] 📦 Video payload:', {
+    ...videoPayload,
+    platforms: Object.keys(platformCredentials).length > 0 ? Object.keys(platformCredentials) : 'none',
+    hasInputImage: !!postContent.inputImage
+  });
+  
+  try {
+    const videoResponse = await axios.post(VIDEO_WEBHOOK, videoPayload, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 120000 // 2 minutes for video generation
+    });
+
+    console.log('[Social Post] ✓ Video generation initiated:', videoResponse.data);
+
+    // ✅ Store video generation request in MongoDB
+    await db.collection('social_posts').insertOne({
+      businessId: new ObjectId(businessId),
+      userEmail: userEmail,
+      platforms: platforms.length > 0 ? platforms : [],
+      postContent: postContent,
+      contentType: 'video',
+      cost: cost,
+      charged: true,
+      status: 'video_generation_requested',
+      n8nResponse: videoResponse.data,
+      requestId: requestId,
+      token_refresh_warnings: tokenRefreshErrors.length > 0 ? tokenRefreshErrors : undefined,
+      created_at: new Date()
+    });
+
+    // Return success with video generation response
+    return res.json({
+      success: true,
+      message: platforms.length > 0 
+        ? 'Video generation request submitted successfully' 
+        : 'Video generation request submitted (no social posting)',
+      platforms: Object.keys(platformCredentials),
+      cost: cost,
+      charged: true,
+      formatted_cost: `R${cost.toFixed(2)}`,
+      new_balance: walletResult.new_balance,
+      formatted_balance: walletResult.formatted_balance || `R${(walletResult.new_balance || 0).toFixed(2)}`,
+      token_refresh_warnings: tokenRefreshErrors.length > 0 ? tokenRefreshErrors : undefined,
+      n8nResponse: videoResponse.data
+    });
+
+  } catch (videoError) {
+    console.error('[Social Post] ✗ Video generation failed:', videoError.message);
+    console.error('[Social Post] Video error details:', videoError.response?.data || videoError);
+    
+    // ✅ Still log the failed attempt
+    await db.collection('social_posts').insertOne({
+      businessId: new ObjectId(businessId),
+      userEmail: userEmail,
+      platforms: platforms.length > 0 ? platforms : [],
+      postContent: postContent,
+      contentType: 'video',
+      cost: cost,
+      charged: true,
+      status: 'video_generation_failed',
+      error: videoError.message,
+      requestId: requestId,
+      created_at: new Date()
+    });
+
+    throw new Error('Video generation service unavailable: ' + videoError.message);
+  }
+}
+
+    // ✅ STEP 5: Handle skipPosting flag
+    if (skipPosting) {
+      console.log('[Social Post] skipPosting=true, returning after wallet deduction');
+      
+      return res.json({
+        success: true,
+        message: 'Wallet deducted successfully',
+        cost: cost,
+        charged: true,
+        formatted_cost: `R${cost.toFixed(2)}`,
+        new_balance: walletResult.new_balance,
+        formatted_balance: walletResult.formatted_balance || `R${(walletResult.new_balance || 0).toFixed(2)}`
+      });
+    }
+
+    // ✅ STEP 6: Build platform credentials object WITH TOKEN REFRESH
     const platformCredentials = {};
+    const tokenRefreshErrors = [];
 
     for (const platform of platforms) {
       const platformSettings = business.automation_settings?.social_media?.[platform];
 
       if (!platformSettings || !platformSettings.connected || platformSettings.status !== 'active') {
         console.warn(`[Social Post] ${platform} not connected or inactive`);
+        tokenRefreshErrors.push(`${platform} is not connected`);
         continue;
       }
 
-      const accessToken = decryptToken(platformSettings.access_token);
+      try {
+        let accessToken;
 
-      if (!accessToken) {
-        console.warn(`[Social Post] Failed to decrypt token for ${platform}`);
-        continue;
-      }
+        if (platform === 'youtube') {
+          accessToken = await refreshYouTubeToken(platformSettings, businessId, db);
+          platformCredentials.youtube = {
+            access_token: accessToken,
+            refresh_token: decryptToken(platformSettings.refresh_token),
+            channel_id: platformSettings.channel_id,
+            channel_name: platformSettings.channel_name
+          };
+        } else if (platform === 'facebook') {
+          accessToken = await refreshFacebookToken(platformSettings, businessId, db);
+          platformCredentials.facebook = {
+            access_token: accessToken,
+            page_id: platformSettings.page_id,
+            page_name: platformSettings.page_name
+          };
+        } else if (platform === 'instagram') {
+          accessToken = await refreshInstagramToken(platformSettings, businessId, db);
+          platformCredentials.instagram = {
+            access_token: accessToken,
+            account_id: platformSettings.account_id,
+            username: platformSettings.username
+          };
+        } else if (platform === 'linkedin') {
+          accessToken = await refreshLinkedInToken(platformSettings, businessId, db);
+          platformCredentials.linkedin = {
+            access_token: accessToken,
+            organization_id: platformSettings.organization_id,
+            organization_name: platformSettings.organization_name
+          };
+        }
 
-      if (platform === 'facebook') {
-        platformCredentials.facebook = {
-          access_token: accessToken,
-          page_id: platformSettings.page_id,
-          page_name: platformSettings.page_name
-        };
-      } else if (platform === 'instagram') {
-        platformCredentials.instagram = {
-          access_token: accessToken,
-          account_id: platformSettings.account_id,
-          username: platformSettings.username
-        };
-      } else if (platform === 'linkedin') {
-        platformCredentials.linkedin = {
-          access_token: accessToken,
-          organization_id: platformSettings.organization_id,
-          organization_name: platformSettings.organization_name
-        };
-      } else if (platform === 'youtube') {
-        platformCredentials.youtube = {
-          access_token: accessToken,
-          refresh_token: decryptToken(platformSettings.refresh_token),
-          channel_id: platformSettings.channel_id,
-          channel_name: platformSettings.channel_name
-        };
+      } catch (error) {
+        console.error(`[Social Post] Token refresh failed for ${platform}:`, error.message);
+        tokenRefreshErrors.push(`${platform}: ${error.message}`);
       }
     }
 
     if (Object.keys(platformCredentials).length === 0) {
       return res.status(400).json({ 
         success: false, 
-        error: 'No active platform connections found for the requested platforms' 
+        error: 'No active platform connections found for the requested platforms',
+        details: tokenRefreshErrors.length > 0 ? tokenRefreshErrors : undefined
       });
     }
 
-    // ✅ Prepare payload for n8n
+    // ✅ STEP 7: Prepare payload for n8n posting workflow
     const n8nPayload = {
       businessId: businessId,
       businessName: business.store_info?.name || 'Unknown Business',
@@ -212,15 +657,15 @@ router.post('/post', async (req, res) => {
       postContent: postContent,
       platforms: platformCredentials,
       timestamp: new Date().toISOString(),
-      requestId: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      requestId: requestId
     };
 
-    console.log('[Social Post] Sending to n8n:', {
+    console.log('[Social Post] Sending to n8n posting workflow:', {
       url: webhookUrl,
       platforms: Object.keys(platformCredentials)
     });
 
-    // ✅ Send to n8n webhook
+    // ✅ STEP 8: Send to n8n posting webhook
     const n8nResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 
@@ -234,77 +679,40 @@ router.post('/post', async (req, res) => {
 
     if (!n8nResponse.ok) {
       const errorText = await n8nResponse.text();
-      console.error('[Social Post] n8n webhook failed:', errorText);
+      console.error('[Social Post] n8n posting webhook failed:', errorText);
       throw new Error(`n8n webhook failed: ${n8nResponse.status} ${n8nResponse.statusText}`);
     }
 
     const n8nResult = await n8nResponse.json();
 
-    console.log('[Social Post] n8n webhook success:', n8nResult);
+    console.log('[Social Post] ✓ n8n posting webhook success:', n8nResult);
 
-    // ✅ Deduct from wallet (only if no active subscription)
-    let walletTransaction = null;
-    let newBalance = wallet.balance;
-
-    if (!hasActiveSubscription) {
-      newBalance = wallet.balance - cost;
-      walletTransaction = {
-        transaction_id: n8nPayload.requestId,
-        type: 'debit',
-        amount: cost,
-        balance_after: newBalance,
-        description: `Social media post to ${platforms.join(', ')}`,
-        timestamp: new Date().toISOString(),
-        metadata: {
-          businessId: businessId,
-          businessName: business.store_info?.name,
-          platforms: platforms,
-          pricing: PRICING,
-          post_preview: postContent.text?.substring(0, 100) || 'No text'
-        }
-      };
-
-      await walletCollection.updateOne(
-        { email: userEmail },
-        {
-          $set: {
-            balance: newBalance,
-            updated_at: new Date().toISOString()
-          },
-          $push: { transactions: walletTransaction }
-        }
-      );
-
-      console.log(`[Social Post] Deducted R${(cost / 100).toFixed(2)} from wallet. New balance: R${(newBalance / 100).toFixed(2)}`);
-    } else {
-      console.log(`[Social Post] User has active subscription (${wallet.current_plan}). No charge applied.`);
-    }
-
-    // ✅ Store post activity in MongoDB
+    // ✅ STEP 9: Store post activity in MongoDB
     await db.collection('social_posts').insertOne({
       businessId: new ObjectId(businessId),
       userEmail: userEmail,
       platforms: platforms,
       postContent: postContent,
-      cost: hasActiveSubscription ? 0 : cost,
-      charged: !hasActiveSubscription,
-      subscription_used: hasActiveSubscription,
+      cost: cost,
+      charged: true,
       status: 'sent',
       n8nResponse: n8nResult,
-      walletTransaction: walletTransaction,
+      requestId: requestId,
+      token_refresh_warnings: tokenRefreshErrors.length > 0 ? tokenRefreshErrors : undefined,
       created_at: new Date()
     });
 
+    // ✅ STEP 10: Return success response
     res.json({
       success: true,
-      message: 'Post sent to n8n successfully',
+      message: 'Post sent successfully and payment processed',
       platforms: Object.keys(platformCredentials),
-      cost: hasActiveSubscription ? 0 : cost,
-      charged: !hasActiveSubscription,
-      formatted_cost: hasActiveSubscription ? 'Free (Subscription)' : `R${(cost / 100).toFixed(2)}`,
-      new_balance: newBalance,
-      formatted_balance: `R${(newBalance / 100).toFixed(2)}`,
-      subscription_active: hasActiveSubscription,
+      cost: cost,
+      charged: true,
+      formatted_cost: `R${cost.toFixed(2)}`,
+      new_balance: walletResult.new_balance,
+      formatted_balance: walletResult.formatted_balance || `R${(walletResult.new_balance || 0).toFixed(2)}`,
+      token_refresh_warnings: tokenRefreshErrors.length > 0 ? tokenRefreshErrors : undefined,
       n8nResponse: n8nResult
     });
 
@@ -318,17 +726,17 @@ router.post('/post', async (req, res) => {
 });
 
 // ✅ Get pricing info
+// ✅ Get pricing info
 router.get('/pricing', (req, res) => {
   res.json({
     success: true,
     pricing: {
-      facebook: { cents: PRICING.facebook, formatted: `R${(PRICING.facebook / 100).toFixed(2)}` },
-      instagram: { cents: PRICING.instagram, formatted: `R${(PRICING.instagram / 100).toFixed(2)}` },
-      linkedin: { cents: PRICING.linkedin, formatted: `R${(PRICING.linkedin / 100).toFixed(2)}` },
-      youtube: { cents: PRICING.youtube, formatted: `R${(PRICING.youtube / 100).toFixed(2)}` },
-      base_fee: { cents: PRICING.base_fee, formatted: `R${(PRICING.base_fee / 100).toFixed(2)}` }
-    },
-    note: 'Users with active subscriptions post for free'
+      facebook: { amount: PRICING.facebook, formatted: `R${PRICING.facebook.toFixed(2)}` },
+      instagram: { amount: PRICING.instagram, formatted: `R${PRICING.instagram.toFixed(2)}` },
+      linkedin: { amount: PRICING.linkedin, formatted: `R${PRICING.linkedin.toFixed(2)}` },
+      youtube: { amount: PRICING.youtube, formatted: `R${PRICING.youtube.toFixed(2)}` },
+      base_fee: { amount: PRICING.base_fee, formatted: `R${PRICING.base_fee.toFixed(2)}` }
+    }
   });
 });
 
