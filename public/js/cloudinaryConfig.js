@@ -5,3 +5,4 @@ window.CLOUDINARY_CONFIG = {
     maxFileSize: 10000000, // 10MB
     acceptedFormats: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
   };
+

@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Image to Socials</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 600px; margin: 0 auto; }
+    
+    /* Tab Selection Styles */
+    .tab-selector {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .tab-option {
+      flex: 1;
+      position: relative;
+    }
+    
+    .tab-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .tab-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+    }
+    
+    .tab-option input[type="radio"]:checked + .tab-label {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .tab-label:hover {
+      background: #f0f4ff;
+    }
+    
+    .tab-option input[type="radio"]:checked + .tab-label:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .tab-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    
+    .tab-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    /* Content Sections */
+    .content-section {
+      display: none;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .content-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    /* Upload Box Styles */
+    .upload-box {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    .upload-box:hover { border-color: #667eea; }
+    .upload-box.dragover { border-color: #667eea; background: #f0f4ff; }
+    #imagePreview { 
+      max-width: 100%; 
+      max-height: 400px;
+      border-radius: 8px; 
+      margin-top: 15px; 
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .file-info {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    /* AI Generation Styles */
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2c3e50;
+    }
+    
+    .generate-suggestions-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-bottom: 16px;
+    }
+    
+    .generate-suggestions-btn:hover:not(:disabled) { opacity: 0.9; }
+    .generate-suggestions-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .suggestion-card {
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    
+    .suggestion-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    
+    .suggestion-card.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
+    }
+    
+    .suggestion-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+    
+    .suggestion-preview {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+    
+    .suggestion-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    
+    /* Form Styles */
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .field-note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      margin-bottom: 15px;
+      font-style: italic;
+    }
+    
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .platform-btn {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 12px;
+    }
+    .platform-btn:hover:not([disabled]) { border-color: #667eea; }
+    .platform-btn.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+      font-weight: 600;
+    }
+    .platform-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .cost { 
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .publish-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .publish-btn:hover:not(:disabled) { opacity: 0.9; }
+    .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
+    }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.info { background: #d1ecf1; color: #0c5460; }
+    .progress { 
+      display: none; 
+      margin-top: 15px;
+      text-align: center;
+      color: #667eea;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Tab Selector -->
+    <div class="tab-selector">
+      <div class="tab-option">
+        <input type="radio" id="uploadTab" name="imageSource" value="upload" checked>
+        <label for="uploadTab" class="tab-label">
+          <div class="tab-icon">📤</div>
+          <div class="tab-text">Upload Image</div>
+        </label>
+      </div>
+      <div class="tab-option">
+        <input type="radio" id="generateTab" name="imageSource" value="generate">
+        <label for="generateTab" class="tab-label">
+          <div class="tab-icon">✨</div>
+          <div class="tab-text">Generate with AI</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- UPLOAD SECTION -->
+    <div class="content-section active" id="uploadSection">
+      <div class="upload-box" id="uploadBox">
+        <div style="font-size: 48px;">📷</div>
+        <h3>Click or drag image here</h3>
+        <p style="color: #999; margin-top: 10px;">JPG, PNG, GIF (max 10MB)</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        <img id="imagePreview" alt="Preview">
+        <div class="file-info" id="fileInfo" style="display: none;"></div>
+      </div>
+
+      <div>
+        <label for="uploadCaption">Image Caption:</label>
+        <textarea 
+          id="uploadCaption" 
+          placeholder="Write your caption... (optional)"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- GENERATE SECTION -->
+    <div class="content-section" id="generateSection">
+      <!-- AI Suggestions -->
+      <div class="section-title">💡 AI Content Suggestions</div>
+      
+      <button id="generateSuggestionsBtn" class="generate-suggestions-btn">
+        ✨ Generate AI Suggestions for <span id="businessNameInline">Your Business</span>
+      </button>
+      
+      <div id="suggestionsSection" style="display: none;">
+        <div id="suggestionsLoading" style="text-align: center; padding: 20px; color: #666;">
+          <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          <p style="margin-top: 10px;">Generating personalized suggestions...</p>
+        </div>
+        
+        <div id="suggestionsContent" style="display: none;">
+          <div id="suggestionCards" style="margin-bottom: 12px;">
+            <!-- Cards will be injected here -->
+          </div>
+          <button id="refreshSuggestionsBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px;">
+            🔄 Get New Suggestions
+          </button>
+        </div>
+        
+        <div id="suggestionsError" style="display: none; color: #d9534f; padding: 12px; background: #f8d7da; border-radius: 6px; margin-bottom: 20px;"></div>
+      </div>
+
+      <!-- Concept Input -->
+      <div>
+        <label for="concept">Image Concept *</label>
+        <textarea 
+          id="concept" 
+          placeholder="E.g., A professional African businesswoman in a modern office, smiling confidently..."
+          rows="4"
+        ></textarea>
+        <p class="field-note">Describe what you want to see in your AI-generated image. Be specific about style, setting, mood, etc.</p>
+      </div>
+
+      <div>
+        <label for="generateCaption">Caption (Optional)</label>
+        <textarea 
+          id="generateCaption" 
+          placeholder="Write the caption... (leave blank for AI-generated caption)"
+          rows="3"
+        ></textarea>
+        <p class="field-note">Leave blank to have AI generate a caption based on your concept</p>
+      </div>
+    </div>
+
+    <!-- PLATFORMS (Shared) -->
+    <div style="background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+      <h4 style="margin-bottom: 10px;">Select Platforms:</h4>
+      <div class="platforms">
+        <button class="platform-btn" data-platform="facebook" data-cost="10">
+          📘<br>Facebook<br><small>R10.00</small>
+        </button>
+        <button class="platform-btn" data-platform="instagram" data-cost="10">
+          📷<br>Instagram<br><small>R10.00</small>
+        </button>
+        <button class="platform-btn" data-platform="linkedin" data-cost="10">
+          💼<br>LinkedIn<br><small>R10.00</small>
+        </button>
+        <button class="platform-btn" data-platform="youtube" data-cost="10" disabled title="YouTube does not support image posts">
+          🎥<br>YouTube<br><small>(N/A)</small>
+        </button>
+      </div>
+
+      <div class="cost" id="costDisplay">Select platforms to see cost</div>
+
+      <button class="publish-btn" id="publishBtn" disabled>
+        <span id="publishBtnText">Publish Image to Selected Platforms</span>
+      </button>
+
+      <div class="progress" id="progress">
+        <p id="progressText">Processing...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p id="progressPercent" style="margin-top: 8px; font-size: 14px; color: #666;">0%</p>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <script src="/js/dataManager.js"></script>
+  <script>
+    // ========== GLOBAL VARIABLES ==========
+    let auth0Client = null;
+    let currentBusiness = null;
+    let openAIConfig = null;
+    let selectedPlatforms = [];
+    let uploadedImageUrl = null;
+    let currentMode = 'upload'; // 'upload' or 'generate'
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email');
+    const businessId = urlParams.get('businessId');
+    const businessName = urlParams.get('businessName');
+
+    // Cloudinary config
+    const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
+    const CLOUDINARY_CLOUD_NAME = 'vic-3e';
+
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const fileInfo = document.getElementById('fileInfo');
+    const publishBtn = document.getElementById('publishBtn');
+    const publishBtnText = document.getElementById('publishBtnText');
+    const costDisplay = document.getElementById('costDisplay');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+
+    // ========== AUTH0 CLIENT ==========
+    async function getAuth0Client() {
+      if (window.auth0Client) return window.auth0Client;
+      
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error configuring Auth0:", error);
+        return null;
+      }
+    }
+
+    // ========== FETCH OPENAI CONFIG ==========
+    async function getOpenAIConfig() {
+      if (openAIConfig) return openAIConfig;
+      
+      try {
+        const response = await fetch('/api/get-openai-config');
+        if (!response.ok) throw new Error('Failed to get OpenAI config');
+        openAIConfig = await response.json();
+        return openAIConfig;
+      } catch (error) {
+        console.error('Error fetching OpenAI config:', error);
+        return null;
+      }
+    }
+
+    // ========== CALL AZURE OPENAI ==========
+    async function callAzureOpenAI(prompt) {
+      const config = await getOpenAIConfig();
+      if (!config) throw new Error('OpenAI config not available');
+
+      const url = `${config.endpoint}openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': config.apiKey
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: "You are a creative social media content strategist. You MUST respond with valid JSON only. Generate exactly 3 specific AI image generation prompts for social media content. Each suggestion should include a detailed prompt that can be used with AI image generation. Return a JSON object with a 'suggestions' array containing 3 objects with 'title', 'concept', and 'caption' fields."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_tokens: 800,
+          temperature: 0.8,
+          top_p: 0.95,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Azure OpenAI error:', errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    }
+
+    // ========== LOAD BUSINESS INFO ==========
+    async function loadBusinessInfo() {
+      const auth0 = await getAuth0Client();
+      if (!auth0) return;
+
+      try {
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (!isAuthenticated) {
+          console.warn('User not authenticated');
+          return;
+        }
+
+        currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
+        
+        if (!currentBusiness) {
+          console.warn('No business found in cache');
+          return;
+        }
+
+        const businessName = currentBusiness?.store_info?.name || 'Your Business';
+        document.getElementById('businessNameInline').textContent = businessName;
+
+      } catch (error) {
+        console.error('Error loading business:', error);
+      }
+    }
+
+    // ========== FETCH AI SUGGESTIONS ==========
+    async function fetchSuggestions() {
+      const loadingDiv = document.getElementById('suggestionsLoading');
+      const contentDiv = document.getElementById('suggestionsContent');
+      const errorDiv = document.getElementById('suggestionsError');
+      const cardsContainer = document.getElementById('suggestionCards');
+      const suggestionsSection = document.getElementById('suggestionsSection');
+
+      suggestionsSection.style.display = 'block';
+      loadingDiv.style.display = 'block';
+      contentDiv.style.display = 'none';
+      errorDiv.style.display = 'none';
+
+      try {
+        const businessCase = currentBusiness?.initial_business_case || {};
+        const businessInfo = JSON.stringify(businessCase, null, 2);
+
+        const prompt = `Based on this business information:
+
+${businessInfo}
+
+Generate exactly 3 creative image content ideas for social media (Facebook, Instagram, LinkedIn).
+
+Return ONLY valid JSON in this exact format:
+{
+  "suggestions": [
+    {
+      "title": "Image Concept Title",
+      "concept": "Detailed description of the image content (2-3 sentences). Include composition, style, colors, mood, and key elements.",
+      "caption": "Ready-to-use engaging caption with hooks and relevant hashtags"
+    }
+  ]
+}
+
+Make each suggestion specific, actionable, and relevant to the business goals.`;
+
+        console.log('🤖 Calling Azure OpenAI...');
+        const response = await callAzureOpenAI(prompt);
+        
+        let data;
+        try {
+          data = JSON.parse(response);
+        } catch (e) {
+          const jsonMatch = response.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            data = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('Invalid JSON response from AI');
+          }
+        }
+
+        const suggestions = data.suggestions || [];
+        
+        if (suggestions.length === 0) {
+          throw new Error('No suggestions generated');
+        }
+
+        cardsContainer.innerHTML = '';
+
+        suggestions.forEach((suggestion, index) => {
+          const card = document.createElement('div');
+          card.className = 'suggestion-card';
+          
+          card.innerHTML = `
+            <div class="suggestion-title">${suggestion.title}</div>
+            <div class="suggestion-preview">${suggestion.concept}</div>
+            <span class="suggestion-badge">Click to use</span>
+          `;
+          
+          card.addEventListener('click', () => {
+            document.querySelectorAll('.suggestion-card').forEach(c => 
+              c.classList.remove('selected')
+            );
+            
+            card.classList.add('selected');
+            
+            document.getElementById('concept').value = suggestion.concept;
+            document.getElementById('generateCaption').value = suggestion.caption;
+            
+            updatePublishButton();
+            
+            document.getElementById('concept').scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            
+            showStatus('✅ Suggestion applied! Review and select platforms below.', 'info');
+            setTimeout(() => {
+              status.style.display = 'none';
+            }, 3000);
+          });
+          
+          cardsContainer.appendChild(card);
+        });
+        
+        loadingDiv.style.display = 'none';
+        contentDiv.style.display = 'block';
+
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = '⚠️ Failed to generate suggestions. Please try again.';
+      }
+    }
+
+    // ========== CLOUDINARY UPLOAD ==========
+    async function uploadToCloudinary(file, onProgress) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', 'social-media-posts');
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable && onProgress) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            onProgress(percentComplete);
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
+    // ========== TAB SWITCHING ==========
+    document.querySelectorAll('input[name="imageSource"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        currentMode = e.target.value;
+        
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(section => {
+          section.classList.remove('active');
+        });
+        
+        // Show selected section
+        if (currentMode === 'upload') {
+          document.getElementById('uploadSection').classList.add('active');
+          publishBtnText.textContent = 'Publish Image to Selected Platforms';
+        } else {
+          document.getElementById('generateSection').classList.add('active');
+          publishBtnText.textContent = 'Generate & Publish Image';
+        }
+        
+        updatePublishButton();
+      });
+    });
+
+    // ========== UPLOAD HANDLERS ==========
+    uploadBox.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('dragover');
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showStatus('Please select an image file', 'error');
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        showStatus('Image file is too large. Maximum size is 10MB.', 'error');
+        return;
+      }
+
+      uploadedImageUrl = file; // Store file object for later upload
+      
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.textContent = `📁 ${file.name} (${sizeMB} MB)`;
+      fileInfo.style.display = 'block';
+
+      updatePublishButton();
+    }
+
+    // ========== PLATFORM SELECTION ==========
+    document.querySelectorAll('.platform-btn:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const platform = btn.dataset.platform;
+        if (selectedPlatforms.includes(platform)) {
+          selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+        } else {
+          selectedPlatforms.push(platform);
+        }
+        updateCost();
+        updatePublishButton();
+      });
+    });
+
+    function updateCost() {
+      let postingCost = 0;
+      selectedPlatforms.forEach(platform => {
+        const btn = document.querySelector(`[data-platform="${platform}"]`);
+        if (btn) postingCost += parseInt(btn.dataset.cost);
+      });
+      
+      if (currentMode === 'generate') {
+        const generationCost = 20;
+        const total = generationCost + postingCost;
+        costDisplay.innerHTML = `AI Generation: R${generationCost.toFixed(2)} + Posting: R${postingCost.toFixed(2)}<br><strong>Total: R${total.toFixed(2)}</strong>`;
+      } else {
+        costDisplay.textContent = selectedPlatforms.length > 0 
+          ? `Total Cost: R${postingCost.toFixed(2)}` 
+          : 'Select platforms to see cost';
+      }
+    }
+
+    function updatePublishButton() {
+      let isValid = false;
+      
+      if (currentMode === 'upload') {
+        isValid = uploadedImageUrl && selectedPlatforms.length > 0;
+      } else {
+        const concept = document.getElementById('concept').value.trim();
+        isValid = concept.length > 10 && selectedPlatforms.length > 0;
+      }
+      
+      publishBtn.disabled = !isValid;
+    }
+
+    // ========== INPUT LISTENERS ==========
+    document.getElementById('concept').addEventListener('input', updatePublishButton);
+
+    // ========== PUBLISH BUTTON CLICK ==========
+    publishBtn.addEventListener('click', async () => {
+      if (selectedPlatforms.length === 0) return;
+      
+      publishBtn.disabled = true;
+      progress.style.display = 'block';
+      status.style.display = 'none';
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+
+      try {
+        let imageUrl = null;
+        let caption = '';
+        let postContent = {};
+
+        if (currentMode === 'upload') {
+          // ========== UPLOAD MODE ==========
+          progressText.textContent = 'Uploading image to cloud storage...';
+          progressFill.style.width = '30%';
+          progressPercent.textContent = '30%';
+
+          imageUrl = await uploadToCloudinary(uploadedImageUrl, (percent) => {
+            progressFill.style.width = (30 + percent * 0.5) + '%';
+            progressPercent.textContent = Math.round(30 + percent * 0.5) + '%';
+          });
+
+          if (!imageUrl) {
+            throw new Error('Failed to upload image');
+          }
+
+          console.log('✅ Image uploaded:', imageUrl);
+
+          caption = document.getElementById('uploadCaption').value.trim();
+
+          postContent = {
+            text: caption,
+            image: imageUrl,
+            contentType: 'image'
+          };
+
+          progressFill.style.width = '80%';
+          progressPercent.textContent = '80%';
+
+        } else {
+          // ========== GENERATE MODE ==========
+          const concept = document.getElementById('concept').value.trim();
+          caption = document.getElementById('generateCaption').value.trim();
+
+          if (!concept) {
+            throw new Error('Please describe the image you want to generate');
+          }
+
+          postContent = {
+            text: concept,
+            caption: caption || '',
+            contentType: 'image' // Backend will detect this needs AI generation
+          };
+
+          progressText.textContent = 'Generating AI image...';
+          progressFill.style.width = '50%';
+          progressPercent.textContent = '50%';
+        }
+
+        // ========== POST TO SOCIAL MEDIA ==========
+        progressText.textContent = 'Publishing to social media...';
+
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: businessId,
+            userEmail: userEmail,
+            platforms: selectedPlatforms,
+            postContent: postContent
+          })
+        });
+
+        const result = await response.json();
+
+        progressFill.style.width = '100%';
+        progressPercent.textContent = '100%';
+
+        if (result.success) {
+          showStatus(
+            `✅ Image posted to ${selectedPlatforms.join(', ')}!\n\n` +
+            `Cost: ${result.formatted_cost}\n` +
+            `New Balance: ${result.formatted_balance}`, 
+            'success'
+          );
+          setTimeout(() => resetForm(), 5000);
+        } else if (response.status === 402) {
+          throw new Error(
+            `Insufficient funds!\n\n` +
+            `Required: ${result.formatted_required}\n` +
+            `Balance: ${result.formatted_balance}\n\n` +
+            `Please add credits or upgrade.`
+          );
+        } else {
+          throw new Error(result.error || 'Failed to publish image');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        
+        if (error.message.includes('token expired') || 
+            error.message.includes('reconnect') ||
+            error.message.includes('Token refresh failed')) {
+          
+          showStatus(
+            '❌ Authentication Error\n\n' + 
+            error.message + '\n\n' +
+            '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+            'error'
+          );
+        } else {
+          showStatus('❌ ' + error.message, 'error');
+        }
+      } finally {
+        progress.style.display = 'none';
+        publishBtn.disabled = false;
+      }
+    });
+
+    // ========== SUGGESTIONS BUTTON HANDLERS ==========
+    const generateSuggestionsBtn = document.getElementById('generateSuggestionsBtn');
+    if (generateSuggestionsBtn) {
+      generateSuggestionsBtn.addEventListener('click', async () => {
+        if (!currentBusiness) {
+          showStatus('⚠️ Please wait while business information loads...', 'info');
+          await loadBusinessInfo();
+          if (!currentBusiness) {
+            showStatus('❌ Could not load business information', 'error');
+            return;
+          }
+        }
+        await fetchSuggestions();
+      });
+    }
+
+    const refreshBtn = document.getElementById('refreshSuggestionsBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', fetchSuggestions);
+    }
+
+    // ========== UTILITY FUNCTIONS ==========
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.style.display = 'block';
+    }
+
+    function resetForm() {
+      // Reset upload mode
+      uploadedImageUrl = null;
+      imagePreview.style.display = 'none';
+      imagePreview.src = '';
+      fileInfo.style.display = 'none';
+      fileInput.value = '';
+      document.getElementById('uploadCaption').value = '';
+      
+      // Reset generate mode
+      document.getElementById('concept').value = '';
+      document.getElementById('generateCaption').value = '';
+      
+      // Reset suggestions
+      document.querySelectorAll('.suggestion-card').forEach(card => 
+        card.classList.remove('selected')
+      );
+      
+      // Reset platforms
+      selectedPlatforms = [];
+      document.querySelectorAll('.platform-btn').forEach(btn => 
+        btn.classList.remove('selected')
+      );
+      
+      // Reset progress
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      
+      updateCost();
+      updatePublishButton();
+    }
+
+    // ========== INITIALIZE ON PAGE LOAD ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      loadBusinessInfo();
+      updateCost();
+      updatePublishButton();
+    });
+  </script>
+</body>
+</html>

@@ -3,31 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login to Access Zuke</title>
-    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Primary Meta Tags -->
+    <title>ZukeX - AI-Powered Business Management Platform | Login</title>
+    <meta name="title" content="ZukeX - AI-Powered Business Management Platform | Login">
+    <meta name="description" content="Access your ZukeX dashboard - the comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions. Secure login to manage your business operations.">
+    <meta name="keywords" content="ZukeX, business management, AI platform, dashboard, login, business automation, creative tools, marketing, marketplace">
+    <meta name="author" content="ZukeX">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zuke.com/">
+    <meta property="og:title" content="ZukeX - AI-Powered Business Management Platform">
+    <meta property="og:description" content="Comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions. Transform your business operations with intelligent automation.">
+    <meta property="og:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
+    <meta property="og:site_name" content="ZukeX">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://zuke.com/">
+    <meta property="twitter:title" content="ZukeX - AI-Powered Business Management Platform">
+    <meta property="twitter:description" content="Comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions.">
+    <meta property="twitter:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/png" href="css/faviconV2.png">
+    <link rel="apple-touch-icon" href="css/faviconV2.png">
+    
+    <!-- Preconnect for Performance
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.auth0.com">
+     -->
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <!-- <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ZukeX",
+        "description": "AI-powered business management platform with creative tools, marketing automation, and marketplace solutions",
+        "url": "https://zuke.co.za",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "ZAR"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "ZukeX"
+        }
+    }
+    </script> -->
+    
+    <!-- Analytics will be loaded lazily after page load -->
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="card-header">
-                <h1 class="card-title">Login to Zuke</h1>
-            </div>
+    <main class="login-container" role="main">
+        <section class="login-card" aria-labelledby="login-title">
+            <header class="card-header">
+                <h1 id="login-title" class="card-title">Login to ZukeX</h1>
+            </header>
             <div class="card-content">
-                <div style="text-align:center; margin-bottom: 1.5rem;">
-                    <button id="btn-login" class="submit-button" disabled="true" onclick="login()" style="width: 100%; margin-bottom: 1rem;">
-                        Log in
-                    </button>
-                    <button id="btn-logout" class="submit-button" disabled="true" onclick="logout()" style="width: 100%; background: #eee; color: #333;">
-                        Log out
-                    </button>
-                </div>
+                <form class="login-form" role="form" aria-label="User authentication">
+                    <div class="button-group" style="text-align:center; margin-bottom: 1.5rem;">
+                        <button id="btn-login" class="submit-button" disabled="true" onclick="console.log('Login button clicked'); login();" style="width: 100%; margin-bottom: 1rem;" aria-label="Sign in to your ZukeX account">
+                            Log in
+                        </button>
+                        <button id="btn-logout" class="submit-button" disabled="true" onclick="console.log('Logout button clicked'); logout();" style="width: 100%; background: #eee; color: #333;" aria-label="Sign out of your ZukeX account">
+                            Log out
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
     
+    <!-- <script src="js/analytics.js"></script> -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <script src="js/app.js"></script>
 </body>

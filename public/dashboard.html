@@ -3,23 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard >> ZukeX</title>
-    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Primary Meta Tags -->
+    <title>ZukeX Dashboard - AI-Powered Business Management Platform</title>
+    <meta name="title" content="ZukeX Dashboard - AI-Powered Business Management Platform">
+    <meta name="description" content="Manage your business with ZukeX dashboard - comprehensive AI-powered platform featuring creative tools, marketing automation, marketplace solutions, and business analytics. Streamline operations with intelligent automation.">
+    <meta name="keywords" content="ZukeX dashboard, business management, AI platform, creative tools, marketing automation, marketplace, business analytics, workflow automation, business intelligence">
+    <meta name="author" content="ZukeX">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://business.zuke.co.za/dashboard">
+    <meta property="og:title" content="ZukeX Dashboard - AI-Powered Business Management Platform">
+    <meta property="og:description" content="Comprehensive business management dashboard with AI-powered creative tools, marketing automation, and marketplace solutions. Transform your business operations with intelligent automation.">
+    <meta property="og:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
+    <meta property="og:site_name" content="ZukeX">
+    <meta property="og:locale" content="en_ZA">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://business.zuke.co.za/dashboard">
+    <meta property="twitter:title" content="ZukeX Dashboard - AI-Powered Business Management Platform">
+    <meta property="twitter:description" content="Comprehensive business management dashboard with AI-powered creative tools, marketing automation, and marketplace solutions.">
+    <meta property="twitter:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
+    
+    <!-- Favicon and Icons -->
     <link rel="icon" type="image/png" href="css/faviconV2.png">
+    <link rel="apple-touch-icon" href="css/faviconV2.png">
+    
+    <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.auth0.com">
+    <link rel="preconnect" href="https://js.paystack.co">
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ZukeX Dashboard",
+        "description": "AI-powered business management dashboard with creative tools, marketing automation, and marketplace solutions",
+        "url": "https://business.zuke.co.za/dashboard",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser",
+        "featureList": [
+            "Business Management",
+            "Creative Tools",
+            "Marketing Automation",
+            "Marketplace Solutions",
+            "Analytics Dashboard",
+            "Workflow Automation"
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "ZukeX"
+        }
+    }
+    </script>
+    
+    <!-- Analytics will be loaded lazily after page load -->
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Header -->
-        <header class="header">
-            <button class="hamburger-menu" id="hamburgerMenu">
+        <header class="header" role="banner">
+            <button class="hamburger-menu" id="hamburgerMenu" aria-label="Toggle navigation menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" alt="Zuke Logo" style="height:48px;">
+            <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" alt="ZukeX Logo - AI-Powered Business Management Platform" style="height:48px;">
       
             
             <div class="header-right">
@@ -35,20 +102,15 @@
                         </svg>
                         <span id="walletBalance">0.00</span>
                     </button>
-                    <button class="topup-icon-btn" id="topupButton" title="Top up credits">
-                        <!-- Plus icon for top-up -->
-                        <!-- <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 8V16M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg> -->
-                        <svg width="48" height="48" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" transform="rotate(0 0 0)">
-                            <path opacity="0.4" d="M6.38688 9.23329C6.45702 6.19302 8.94354 3.75 12.0007 3.75C15.0578 3.75 17.5444 6.19308 17.6144 9.23338C20.0688 9.42706 22.0001 11.4801 22.0001 13.9842C22.0001 16.0917 20.6321 17.8797 18.7357 18.5087C18.827 18.0617 18.875 17.599 18.875 17.125C18.875 17.0203 18.8727 16.9162 18.868 16.8126C19.8437 16.2478 20.5001 15.1927 20.5001 13.9842C20.5001 12.1806 19.038 10.7184 17.2343 10.7184H16.866C16.4518 10.7184 16.116 10.3827 16.116 9.96844V9.3653C16.116 7.09248 14.2735 5.25 12.0007 5.25C9.72784 5.25 7.88536 7.09248 7.88536 9.3653V9.96844C7.88536 10.3827 7.54957 10.7184 7.13536 10.7184H6.76578C4.96214 10.7184 3.5 12.1806 3.5 13.9842C3.5 15.1926 4.15634 16.2478 5.13197 16.8126C5.12734 16.9161 5.125 17.0203 5.125 17.125C5.125 17.599 5.17296 18.0617 5.26429 18.5087C3.36791 17.8796 2 16.0917 2 13.9842C2 11.4797 3.93195 9.42638 6.38688 9.23329Z" fill="#ff8b02"/>
-                            <path d="M9.54297 11.75C9.21221 11.75 8.92049 11.9667 8.82495 12.2834L7.32495 17.2547C7.2564 17.4819 7.29941 17.7281 7.4409 17.9186C7.5824 18.1091 7.80569 18.2214 8.04297 18.2214H9.48163V21.75C9.48163 22.0533 9.66436 22.3268 9.94462 22.4429C10.2249 22.559 10.5475 22.4948 10.762 22.2803L16.4833 16.559C16.6978 16.3445 16.762 16.0219 16.6459 15.7416C16.5298 15.4614 16.2564 15.2786 15.953 15.2786H13.7644V12.5C13.7644 12.0858 13.4286 11.75 13.0144 11.75H9.54297ZM9.05267 16.7214L10.1001 13.25H12.2644V16.0286C12.2644 16.2275 12.3434 16.4183 12.484 16.559C12.6247 16.6996 12.8154 16.7786 13.0144 16.7786H14.1423L10.9816 19.9393V17.4714C10.9816 17.0572 10.6458 16.7214 10.2316 16.7214H9.05267Z" fill="#ff8b02"/>
-                            </svg>
-                            
-                            
-                                                                      
-                    </button>
+                   
+<button class="topup-icon-btn" id="topupButton" title="Top up credits">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" 
+              fill="#ff8b02"/>
+    </svg>
+    <span class="topup-text">TOP ⚡ UP</span>
+</button>
+
                 </div>
                 <button class="logout-button" id="logoutButton">
                     <!-- Modern logout icon -->
@@ -63,9 +125,9 @@
         </header>
 
         <!-- Sidebar -->
-        <nav class="sidebar" id="sidebar">
+        <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
             <div class="sidebar-content">
-                <ul class="nav-menu">
+                <ul class="nav-menu" role="menubar">
                     <li class="nav-item">
                         <a href="#" class="nav-link active" data-page="dashboard">
                             <!-- Modern dashboard grid icon -->
@@ -142,6 +204,17 @@
                     </li>
                 </ul>
 
+                <li class="nav-item settings-nav">
+                    <a href="#" class="nav-link" data-page="settings">
+                        <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                            <path d="M2.5809 8.9224C1.96404 9.99083 2.33012 11.357 3.39854 11.9739C3.88777 12.2563 3.88776 12.9625 3.39856 13.2449C2.33013 13.8618 1.96407 15.2279 2.58092 16.2964L4.09692 18.9222C4.71391 19.9908 6.08044 20.3568 7.14896 19.7399C7.63844 19.4573 8.25011 19.8106 8.25011 20.3754C8.25011 21.6092 9.2503 22.6094 10.4841 22.6094H13.5165C14.7502 22.6094 15.7501 21.6091 15.7501 20.3756C15.7501 19.8108 16.3615 19.458 16.8503 19.7402C17.9185 20.357 19.2845 19.991 19.9012 18.9227L21.4176 16.2963C22.0344 15.2279 21.6684 13.8617 20.6 13.2449C20.1108 12.9624 20.1108 12.2563 20.6 11.9739C21.6684 11.3571 22.0345 9.99089 21.4176 8.92247L19.9012 6.29604C19.2845 5.2278 17.9185 4.86179 16.8503 5.47854C16.3615 5.76076 15.7501 5.40794 15.7501 4.84314C15.7501 3.60961 14.7502 2.60938 13.5165 2.60938H10.4841C9.2503 2.60938 8.25011 3.60957 8.25011 4.84337C8.25011 5.40822 7.63842 5.76152 7.14894 5.47892C6.08042 4.86201 4.71388 5.22797 4.09689 6.29663L2.5809 8.9224ZM4.14854 10.6748C3.79755 10.4722 3.6773 10.0234 3.87994 9.6724L5.39593 7.04663C5.59863 6.69554 6.04772 6.57518 6.39894 6.77796C7.88811 7.63773 9.75011 6.56327 9.75011 4.84337C9.75011 4.43799 10.0787 4.10937 10.4841 4.10937L13.5165 4.10937C13.9216 4.10937 14.2501 4.43788 14.2501 4.84314C14.2501 6.56227 16.1112 7.63733 17.6003 6.77758C17.9511 6.57504 18.3997 6.69524 18.6022 7.04604L20.1186 9.67247C20.3212 10.0234 20.201 10.4722 19.85 10.6749C18.3608 11.5346 18.3608 13.6841 19.85 14.5439C20.2009 14.7465 20.3212 15.1953 20.1186 15.5463L18.6022 18.1727C18.3996 18.5235 17.9511 18.6437 17.6003 18.4412C16.1112 17.5815 14.2501 18.6565 14.2501 20.3756C14.2501 20.7809 13.9216 21.1094 13.5165 21.1094H10.4841C10.0787 21.1094 9.75011 20.7808 9.75011 20.3754C9.75011 18.6555 7.88812 17.5811 6.39896 18.4408C6.04774 18.6436 5.59866 18.5232 5.39596 18.1722L3.87996 15.5464C3.67732 15.1954 3.79757 14.7466 4.14856 14.5439C5.63778 13.6841 5.63775 11.5346 4.14854 10.6748Z" fill="#323544"/>
+                            <path opacity="0.4" d="M11.9993 8.77344C9.8813 8.77344 8.16431 10.4904 8.16431 12.6084C8.16431 14.7264 9.8813 16.4434 11.9993 16.4434C14.1173 16.4434 15.8343 14.7264 15.8343 12.6084C15.8343 10.4904 14.1173 8.77344 11.9993 8.77344ZM9.66431 12.6084C9.66431 11.3189 10.7097 10.2734 11.9993 10.2734C13.2889 10.2734 14.3343 11.3189 14.3343 12.6084C14.3343 13.898 13.2889 14.9434 11.9993 14.9434C10.7097 14.9434 9.66431 13.898 9.66431 12.6084Z" fill="#323544"/>
+                        </svg>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+
                 
 
                 <!-- User profile section -->
@@ -163,11 +236,11 @@
                                 <path d="M21 12C21 16.9706 16.9706 21 12 21M21 12C21 7.02944 16.9706 3 12 3M21 12H3M12 21C7.02944 21 3 16.9706 3 12M12 21C13.6569 21 15 16.9706 15 12C15 7.02944 13.6569 3 12 3M12 21C10.3431 21 9 16.9706 9 12C9 7.02944 10.3431 3 12 3M3 12C3 7.02944 7.02944 3 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <circle cx="12" cy="12" r="2" fill="currentColor"/>
                             </svg> -->
+                            <span class="nav-text">Switch </span>
                             <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9.60845 10.2197C9.31556 9.92678 8.84069 9.92678 8.54779 10.2197C8.2549 10.5126 8.2549 10.9874 8.54779 11.2803L11.7978 14.5303C12.0907 14.8232 12.5656 14.8232 12.8585 14.5303L16.1085 11.2803C16.4013 10.9874 16.4013 10.5126 16.1085 10.2197C15.8156 9.92678 15.3407 9.92678 15.0478 10.2197L12.3281 12.9393L9.60845 10.2197Z" fill="#323544"/>
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12.3281 2C6.80528 2 2.32812 6.47715 2.32812 12C2.32812 17.5228 6.80528 22 12.3281 22C17.851 22 22.3281 17.5228 22.3281 12C22.3281 6.47715 17.851 2 12.3281 2ZM3.82812 12C3.82812 7.30558 7.6337 3.5 12.3281 3.5C17.0225 3.5 20.8281 7.30558 20.8281 12C20.8281 16.6944 17.0225 20.5 12.3281 20.5C7.6337 20.5 3.82812 16.6944 3.82812 12Z" fill="#323544"/>
-                                </svg>
-                                
+                                </svg>    
                         </button>
                         
                         <!-- Dropdown Menu -->
@@ -199,19 +272,20 @@
     <!-- ADD THIS OVERLAY -->
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-
         
 
         <!-- Main Content Area -->
-        <main class="main-content" id="mainContent">
-            <div id="pageContent">
+        <main class="main-content" id="mainContent" role="main">
+            <div id="pageContent" aria-live="polite" aria-label="Page content">
                 <!-- Dynamic content will be loaded here -->
+                <h1 class="sr-only">ZukeX Dashboard</h1>
             </div>
         </main>
     </div>
 
     <!-- Fix the script order -->
     <script src="js/dataManager.js"></script>
+    <script src="js/analytics.js"></script>
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <!-- Paystack Inline JS -->
     <script src="https://js.paystack.co/v2/inline.js"></script>
