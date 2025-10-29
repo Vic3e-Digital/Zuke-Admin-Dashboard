@@ -231,7 +231,7 @@ body {
   flex-direction: column;
   transition: all 0.3s ease;
   overflow: hidden;
-  z-index: 50;
+  /* z-index: 50; */
 }
 
 .sidebar-content {
@@ -846,6 +846,8 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  overflow-x: hidden;
+  overflow-y: auto; /* Keep vertical scroll */
 }
 
 .modal-content {
@@ -859,6 +861,8 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow-x: hidden;
+  overflow-y: auto; /* Keep vertical scroll */
 }
 
 .close {
@@ -1108,7 +1112,7 @@ body.sidebar-open {
     top: 60px;
     width: 250px;
     height: calc(100vh - 60px);
-    z-index: 999;
+    /* z-index: 999; */
     background: white;
     border-right: 1px solid #e0e0e0;
     overflow-y: auto;
