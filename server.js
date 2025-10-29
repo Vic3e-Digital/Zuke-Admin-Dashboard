@@ -7,6 +7,7 @@ require("dotenv").config();
 const { getDatabase } = require("./lib/mongodb");
 
 const sendEmailRoutes = require('./api/send-email-api');
+const veoRoutes = require('./api/veo-api');
 
 
 
@@ -32,8 +33,10 @@ const management = new ManagementClient({
 app.use(cors({ origin: true, credentials: true }));
 // app.use(express.json());
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+app.use(express.json({ limit: '50mb' }));  
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 
 app.use(cookieParser());
 
@@ -340,6 +343,8 @@ app.get("/dashboard/", (req, res) => {
 });
 
 app.use('/api/send-email', sendEmailRoutes);
+app.use('/api/veo', veoRoutes);  // ✅ Add this
+
 
 
 // -------------------------

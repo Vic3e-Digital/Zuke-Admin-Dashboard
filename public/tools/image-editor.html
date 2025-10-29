@@ -533,6 +533,30 @@
     .hidden {
       display: none !important;
     }
+    .download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  text-decoration: none;
+}
+
+.download-btn:hover {
+  opacity: 0.9;
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
   </style>
 </head>
 <body>
@@ -701,6 +725,9 @@
               <button class="regenerate-btn" id="regenerateBtn">
                 🔄 Regenerate (R2.00)
               </button>
+              <a class="download-btn" id="downloadBtn" download="ai-generated-image.png" style="display: none;">
+                ⬇️ Download
+              </a>
               <button class="use-image-btn" id="useImageBtn">
                 ✓ Use This Image
               </button>
@@ -1234,8 +1261,14 @@ Make each suggestion specific, visual, and optimized for AI image generation.`;
 
     // ========== UPDATE PUBLISH BUTTON ==========
     function updatePublishButton() {
-      const isValid = generatedImageUrl && selectedPlatforms.length > 0;
+      // ✅ Check if we have image (either base64 or URL) and platforms selected
+      const hasImage = generatedImageBase64 || generatedImageUrl;
+      const hasPlatforms = selectedPlatforms.length > 0;
+      const isValid = hasImage && hasPlatforms;
+      
       publishBtn.disabled = !isValid;
+      
+      console.log('Publish button state:', { hasImage, hasPlatforms, isValid });
     }
 
     // ========== UPDATE COST ==========
@@ -1260,6 +1293,7 @@ Make each suggestion specific, visual, and optimized for AI image generation.`;
       targetElement.style.display = 'block';
     }
 
+    // ========== GENERATE IMAGE ==========
     // ========== GENERATE IMAGE ==========
 async function generateImage() {
   const concept = document.getElementById('concept').value.trim();
@@ -1330,7 +1364,15 @@ async function generateImage() {
     progressFill.style.width = '100%';
 
     // Show preview (base64, not uploaded yet)
-    previewImage.src = `data:image/png;base64,${generatedImageBase64}`;
+    const imageDataUrl = `data:image/png;base64,${generatedImageBase64}`;
+    previewImage.src = imageDataUrl;
+    
+    // ✅ Setup download button
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.href = imageDataUrl;
+    downloadBtn.download = `ai-generated-${Date.now()}.png`;
+    downloadBtn.style.display = 'inline-flex';
+    
     imagePreviewContainer.classList.add('show');
 
     showStatus(
@@ -1358,7 +1400,6 @@ async function generateImage() {
     generateBtn.disabled = false;
   }
 }
-
     // ========== UPLOAD TO CLOUDINARY (only when approved) ==========
     async function uploadApprovedImage() {
       if (!generatedImageBase64) {
@@ -1539,6 +1580,11 @@ async function generateImage() {
       uploadedImageFile = null;
       selectedPlatforms = [];
       
+      // ✅ Reset download button
+      const downloadBtn = document.getElementById('downloadBtn');
+      downloadBtn.style.display = 'none';
+      downloadBtn.href = '';
+      
       // Reset upload
       uploadPreview.style.display = 'none';
       uploadPreview.src = '';
@@ -1576,6 +1622,7 @@ async function generateImage() {
       updatePublishButton();
     }
 
+    
     // ========== EVENT LISTENERS ==========
     
     // Creation mode change
@@ -1658,13 +1705,21 @@ async function generateImage() {
     // Use image button
     useImageBtn.addEventListener('click', () => {
       platformSection.classList.remove('hidden');
-      platformSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      // Scroll to platform section
+      setTimeout(() => {
+        platformSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
       
       showStatus('✅ Image approved! Select platforms and publish below.', 'success');
       setTimeout(() => {
         status.style.display = 'none';
       }, 3000);
+      
+      // Update publish button state
+      updatePublishButton();
     });
+
 
     // Platform selection
     document.querySelectorAll('.platform-btn:not([disabled])').forEach(btn => {

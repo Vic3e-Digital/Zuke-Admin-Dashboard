@@ -618,6 +618,31 @@
     .webhook-indicator.video {
       background: #ff6b6b;
     }
+    .download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 12px;
+  text-decoration: none;
+}
+
+.download-btn:hover {
+  opacity: 0.9;
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
   </style>
 </head>
 <body>
@@ -1451,12 +1476,31 @@ function showPreview(mediaUrl, caption, platforms) {
   previewVideo.src = mediaUrl;
   previewVideo.style.display = 'block';
 
+  // ✅ Add download button after video
+  const existingDownloadBtn = document.getElementById('downloadVideoBtn');
+  if (existingDownloadBtn) {
+    existingDownloadBtn.remove();
+  }
+
+  const downloadBtn = document.createElement('a');
+  downloadBtn.id = 'downloadVideoBtn';
+  downloadBtn.className = 'download-btn';
+  downloadBtn.href = mediaUrl;
+  downloadBtn.download = `ai-generated-video-${Date.now()}.mp4`;
+  downloadBtn.innerHTML = '⬇️ Download Video';
+  
+  previewVideo.parentNode.insertBefore(downloadBtn, previewVideo.nextSibling);
+
   previewCaption.textContent = caption;
-  previewPlatforms.textContent = platforms.map(p => 
-    p.charAt(0).toUpperCase() + p.slice(1)
-  ).join(', ');
+  previewPlatforms.textContent = platforms.length > 0 
+    ? platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')
+    : 'None (Video only)';
   
   previewSection.style.display = 'block';
+
+  // ✅ FIX: Re-enable the generate button after preview is shown
+  generateBtn.disabled = false;
+  updateGenerateButton();
 }
 
 // ========== SHOW STATUS ==========

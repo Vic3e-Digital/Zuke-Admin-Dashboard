@@ -195,6 +195,12 @@ const buttons = [
     title: "Generate Images with AI",
     url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
     isBeta: true
+  },
+  {
+    btn: document.getElementById("afaaTool8Btn"),
+    title: "Generate Images with AI",
+    url: `/tools/veo-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+    isBeta: true
   }
 ];
 

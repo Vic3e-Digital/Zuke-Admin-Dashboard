@@ -119,7 +119,27 @@ class DataManager {
       
       return selected;
     }
+
+    // Add this method to the DataManager class in dataManager.js
+    updateBusiness(updatedBusiness) {
+      // Update in the businesses array if it exists
+      if (this.cache.businesses) {
+        const index = this.cache.businesses.findIndex(b => b._id === updatedBusiness._id);
+        if (index !== -1) {
+          this.cache.businesses[index] = updatedBusiness;
+          // Update the cache in sessionStorage
+          this.setBusinesses(this.cache.businesses);
+        }
+      }
+      
+      // Update if it's the selected business
+      if (this.cache.selectedBusiness && this.cache.selectedBusiness._id === updatedBusiness._id) {
+        this.setSelectedBusiness(updatedBusiness);
+      }
+    }
   }
+
+  
   
   // Create singleton instance
   window.dataManager = new DataManager();
