@@ -1,22 +1,20 @@
 // pages/marketing.js
 let auth0Client = null;
+let currentBusiness = null;
 
 async function getAuth0Client() {
   if (window.auth0Client) {
     return window.auth0Client;
   }
-
   try {
     const response = await fetch("/auth_config.json");
     const config = await response.json();
-
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
-      cacheLocation: 'memory',
+      cacheLocation: 'localstorage',
       useRefreshTokens: true
     });
-    
     window.auth0Client = auth0Client;
     return auth0Client;
   } catch (error) {
