@@ -859,12 +859,12 @@
     
           <!-- Generation Cost Notice -->
           <div style="background: #e7f3ff; border: 1px solid #2196F3; color: #0d47a1; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; text-align: center;">
-            <strong>💰 Generation Cost: R20.00</strong> per video preview<br>
+            <strong>💰 Generation Cost: R80.00</strong> per video preview<br>
             <small>Videos include native audio generation</small>
           </div>
     
           <button class="generate-btn" id="generateBtn" disabled>
-            ✨ Generate Video Preview (R20.00)
+            ✨ Generate Video Preview (R80.00)
           </button>
     
           <!-- Progress -->
@@ -889,7 +889,7 @@
                 🗑️ Discard
               </button>
               <button class="regenerate-btn" id="regenerateBtn">
-                🔄 Regenerate (R20.00)
+                🔄 Regenerate (R80.00)
               </button>
               <a class="download-btn" id="downloadBtn" download="veo-generated-video.mp4" style="display: none;">
                 ⬇️ Download
@@ -961,7 +961,7 @@
         const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
         const CLOUDINARY_CLOUD_NAME = 'vic-3e';
     
-        const GENERATION_COST = 20; // R20.00 per video preview
+        const GENERATION_COST = 80; // R80.00 per video preview
     
         // Quick idea templates
         const ideaTemplates = {
@@ -1208,131 +1208,19 @@ async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageF
   return data.operationName;
 }
 
-// ========== POLL VIDEO GENERATION STATUS (UPDATED FOR BOTH APIS) ==========
-//   let attempts = 0;
-//   const maxAttempts = 60;
-//   const apiProvider = document.querySelector('input[name="apiProvider"]:checked').value;
   
-//   // Choose endpoint based on provider
-//   const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/veo/check-status';
-  
-//   while (attempts < maxAttempts) {
-//     await new Promise(resolve => setTimeout(resolve, 10000));
-    
-//     attempts++;
-//     progressText.textContent = `Generating video... (${attempts * 10}s elapsed)`;
-    
-//     try {
-//       const response = await fetch(endpoint, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ operationName })
-//       });
-
-//       if (!response.ok) {
-//         throw new Error('Failed to check video status');
-//       }
-
-//       const data = await response.json();
-      
-//       console.log(`📊 Poll attempt ${attempts}:`, {
-//         done: data.done,
-//         hasResponse: !!data.response,
-//         hasError: !!data.error,
-//         provider: apiProvider
-//       });
-      
-//       if (data.done) {
-//         console.log('🎉 Operation complete!');
-        
-//         // Check for errors
-//         if (data.error) {
-//           console.error('❌ Generation failed:', data.error);
-//           throw new Error(data.error.message || 'Video generation failed');
-//         }
-        
-//         // ✅ HANDLE DIFFERENT RESPONSE STRUCTURES
-//         let videoSample = null;
-        
-//         if (apiProvider === 'vertex-ai') {
-//           // Vertex AI response structure
-//           console.log('📦 Vertex AI response:', data.response);
-          
-//           const videos = data.response?.videos;
-          
-//           if (!videos || videos.length === 0) {
-//             console.error('❌ No videos in Vertex AI response');
-//             console.error('📦 Full response:', JSON.stringify(data, null, 2));
-//             throw new Error('No videos generated');
-//           }
-          
-//           const firstVideo = videos[0];
-//           console.log('✅ First video:', firstVideo);
-          
-//           // Convert to common format
-//           videoSample = {
-//             video: {
-//               uri: firstVideo.gcsUri,
-//               mimeType: firstVideo.mimeType || 'video/mp4',
-//               bytesBase64Encoded: firstVideo.bytesBase64Encoded
-//             }
-//           };
-          
-//           console.log('📹 Video URI:', firstVideo.gcsUri || 'Base64 encoded');
-          
-//         } else {
-//           // Gemini API response structure
-//           console.log('📦 Gemini API response:', data.response);
-          
-//           const videoResponse = data.response?.generateVideoResponse;
-          
-//           if (!videoResponse) {
-//             console.error('❌ No generateVideoResponse');
-//             throw new Error('Invalid response structure from Gemini API');
-//           }
-          
-//           const generatedSamples = videoResponse.generatedSamples;
-          
-//           if (!generatedSamples || generatedSamples.length === 0) {
-//             console.error('❌ No generatedSamples');
-//             throw new Error('No video samples generated');
-//           }
-          
-//           videoSample = generatedSamples[0];
-//           console.log('✅ Video sample:', videoSample);
-//           console.log('📹 Video URI:', videoSample.video?.uri);
-//         }
-        
-//         if (!videoSample.video || (!videoSample.video.uri && !videoSample.video.bytesBase64Encoded)) {
-//           console.error('❌ No video data in sample');
-//           throw new Error('Video data not found in response');
-//         }
-        
-//         return videoSample;
-//       }
-      
-//       const progressPercent = Math.min(50 + (attempts * 2), 90);
-//       progressFill.style.width = `${progressPercent}%`;
-      
-//     } catch (error) {
-//       console.error('❌ Poll error:', error);
-//       throw error;
-//     }
-//   }
-  
-//   throw new Error('Video generation timed out after 10 minutes');
-// }
-// ========== POLL VIDEO GENERATION STATUS (UPDATED) ==========
-async function pollVideoGeneration(operationName, provider) { // ✅ Accept provider parameter
+    // ========== POLL VIDEO GENERATION STATUS (WITH DETAILED LOGGING) ==========
+async function pollVideoGeneration(operationName, provider) {
   let attempts = 0;
   const maxAttempts = 60;
   
-  // ✅ Use the passed provider instead of reading from DOM
   const apiProvider = provider || currentProvider || 'vertex-ai';
   
-  console.log('🔍 Polling with provider:', apiProvider);
+  console.log('🔍 ========== STARTING VIDEO POLLING ==========');
+  console.log('📍 Operation Name:', operationName);
+  console.log('🔧 Provider:', apiProvider);
+  console.log('📡 Endpoint:', apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/veo/check-status');
   
-  // Choose endpoint based on provider
   const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/veo/check-status';
   
   while (attempts < maxAttempts) {
@@ -1354,78 +1242,112 @@ async function pollVideoGeneration(operationName, provider) { // ✅ Accept prov
 
       const data = await response.json();
       
-      console.log(`📊 Poll attempt ${attempts}:`, {
-        done: data.done,
-        hasResponse: !!data.response,
-        hasError: !!data.error,
-        provider: apiProvider
-      });
+      console.log(`\n📊 ========== POLL ATTEMPT ${attempts} ==========`);
+      console.log('Raw response:', JSON.stringify(data, null, 2));
+      console.log('✓ done:', data.done);
+      console.log('✓ hasResponse:', !!data.response);
+      console.log('✓ hasError:', !!data.error);
       
       if (data.done) {
-        console.log('🎉 Operation complete!');
+        console.log('\n🎉 ========== VIDEO GENERATION COMPLETE! ==========');
         
         // Check for errors
         if (data.error) {
-          console.error('❌ Generation failed:', data.error);
+          console.error('❌ Operation error:', JSON.stringify(data.error, null, 2));
           throw new Error(data.error.message || 'Video generation failed');
         }
+        
+        // Log complete response structure
+        console.log('📦 Full response object:', data.response);
+        console.log('📦 Response type:', data.response?.['@type']);
         
         // ✅ HANDLE DIFFERENT RESPONSE STRUCTURES
         let videoSample = null;
         
         if (apiProvider === 'vertex-ai') {
-          // Vertex AI response structure
-          console.log('📦 Vertex AI response:', data.response);
+          console.log('\n🔵 ========== VERTEX AI RESPONSE ==========');
+          console.log('Response keys:', Object.keys(data.response || {}));
           
           const videos = data.response?.videos;
+          console.log('✓ videos array exists:', !!videos);
+          console.log('✓ videos array length:', videos?.length);
           
           if (!videos || videos.length === 0) {
             console.error('❌ No videos in Vertex AI response');
-            console.error('📦 Full response:', JSON.stringify(data, null, 2));
+            console.error('📦 Full data:', JSON.stringify(data, null, 2));
             throw new Error('No videos generated');
           }
           
           const firstVideo = videos[0];
-          console.log('✅ First video:', firstVideo);
+          console.log('\n📹 ========== FIRST VIDEO OBJECT ==========');
+          console.log('Video keys:', Object.keys(firstVideo));
+          console.log('✓ Has gcsUri:', !!firstVideo.gcsUri);
+          console.log('✓ Has bytesBase64Encoded:', !!firstVideo.bytesBase64Encoded);
+          console.log('✓ mimeType:', firstVideo.mimeType);
+          
+          if (firstVideo.gcsUri) {
+            console.log('📹 GCS URI:', firstVideo.gcsUri);
+          }
+          
+          if (firstVideo.bytesBase64Encoded) {
+            console.log('📹 Base64 length:', firstVideo.bytesBase64Encoded.length, 'characters');
+            console.log('📹 Estimated size:', (firstVideo.bytesBase64Encoded.length * 0.75 / 1024 / 1024).toFixed(2), 'MB');
+          }
           
           // Convert to common format
           videoSample = {
             video: {
               gcsUri: firstVideo.gcsUri,
-              mimeType: firstVideo.mimeType || 'video/mp4',
-              bytesBase64Encoded: firstVideo.bytesBase64Encoded
+              bytesBase64Encoded: firstVideo.bytesBase64Encoded,
+              mimeType: firstVideo.mimeType || 'video/mp4'
             }
           };
           
-          console.log('📹 Video:', firstVideo.gcsUri ? 'GCS URI' : 'Base64 encoded');
+          console.log('\n✅ Video sample created:', {
+            hasGcsUri: !!videoSample.video.gcsUri,
+            hasBase64: !!videoSample.video.bytesBase64Encoded,
+            mimeType: videoSample.video.mimeType
+          });
           
         } else {
-          // Gemini API response structure
-          console.log('📦 Gemini API response:', data.response);
+          console.log('\n💎 ========== GEMINI API RESPONSE ==========');
+          console.log('Response keys:', Object.keys(data.response || {}));
           
           const videoResponse = data.response?.generateVideoResponse;
+          console.log('✓ generateVideoResponse exists:', !!videoResponse);
           
           if (!videoResponse) {
             console.error('❌ No generateVideoResponse');
+            console.error('📦 Full data:', JSON.stringify(data, null, 2));
             throw new Error('Invalid response structure from Gemini API');
           }
           
           const generatedSamples = videoResponse.generatedSamples;
+          console.log('✓ generatedSamples exists:', !!generatedSamples);
+          console.log('✓ generatedSamples length:', generatedSamples?.length);
           
           if (!generatedSamples || generatedSamples.length === 0) {
             console.error('❌ No generatedSamples');
+            console.error('📦 Full data:', JSON.stringify(data, null, 2));
             throw new Error('No video samples generated');
           }
           
           videoSample = generatedSamples[0];
-          console.log('✅ Video sample:', videoSample);
-          console.log('📹 Video URI:', videoSample.video?.uri);
+          console.log('\n📹 ========== FIRST SAMPLE OBJECT ==========');
+          console.log('Sample keys:', Object.keys(videoSample));
+          console.log('✓ Has video:', !!videoSample.video);
+          console.log('✓ Video URI:', videoSample.video?.uri);
+          console.log('✓ Video keys:', videoSample.video ? Object.keys(videoSample.video) : 'N/A');
         }
         
         if (!videoSample.video) {
           console.error('❌ No video data in sample');
+          console.error('📦 videoSample:', JSON.stringify(videoSample, null, 2));
           throw new Error('Video data not found in response');
         }
+        
+        console.log('\n✅ ========== RETURNING VIDEO SAMPLE ==========');
+        console.log('Final video sample:', JSON.stringify(videoSample, null, 2));
         
         return videoSample;
       }
@@ -1442,16 +1364,60 @@ async function pollVideoGeneration(operationName, provider) { // ✅ Accept prov
   throw new Error('Video generation timed out after 10 minutes');
 }
 
-// ========== DOWNLOAD VIDEO FROM API (UPDATED) ==========
+// ========== DOWNLOAD VIDEO FROM API (WITH DETAILED LOGGING) ==========
 async function downloadVideoFromGemini(videoFile) {
-  // ✅ Use stored provider
+  console.log('\n⬇️ ========== DOWNLOADING VIDEO ==========');
+  
   const apiProvider = currentProvider || 'vertex-ai';
+  console.log('🔧 Provider:', apiProvider);
+  console.log('📦 Received videoFile object:', JSON.stringify(videoFile, null, 2));
+  console.log('✓ Has gcsUri:', !!videoFile.gcsUri);
+  console.log('✓ Has bytesBase64Encoded:', !!videoFile.bytesBase64Encoded);
+  console.log('✓ Has uri:', !!videoFile.uri);
+  console.log('✓ mimeType:', videoFile.mimeType);
   
-  // Choose endpoint based on provider
+  // ✅ Check if video is already base64 - decode directly!
+  if (videoFile.bytesBase64Encoded) {
+    console.log('📦 Video is Base64 encoded');
+    console.log('📊 Base64 string length:', videoFile.bytesBase64Encoded.length);
+    console.log('📊 Estimated decoded size:', (videoFile.bytesBase64Encoded.length * 0.75 / 1024 / 1024).toFixed(2), 'MB');
+    console.log('🔄 Decoding base64 to binary...');
+    
+    try {
+      // Decode base64 string to binary
+      const binaryString = atob(videoFile.bytesBase64Encoded);
+      console.log('✓ Decoded to binary string, length:', binaryString.length);
+      
+      const bytes = new Uint8Array(binaryString.length);
+      
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      console.log('✓ Converted to byte array, length:', bytes.length);
+      
+      // Create blob from binary data
+      const blob = new Blob([bytes], { type: videoFile.mimeType || 'video/mp4' });
+      
+      console.log('✅ Blob created successfully!');
+      console.log('📊 Blob size:', blob.size, 'bytes');
+      console.log('📊 Blob size:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
+      console.log('📊 Blob type:', blob.type);
+      
+      return blob;
+      
+    } catch (error) {
+      console.error('❌ Base64 decode error:', error);
+      console.error('Error stack:', error.stack);
+      throw new Error('Failed to decode base64 video: ' + error.message);
+    }
+  }
+  
+  // ✅ If not base64, download from server
+  console.log('🌐 Video requires server download (GCS URI or regular URI)');
+  
   const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/download' : '/api/veo/download';
-  
-  console.log('⬇️ Downloading video from:', apiProvider);
-  console.log('📦 Video file:', videoFile);
+  console.log('📡 Using endpoint:', endpoint);
   
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -1459,34 +1425,23 @@ async function downloadVideoFromGemini(videoFile) {
     body: JSON.stringify({ videoFile })
   });
 
+  console.log('📡 Server response status:', response.status);
+  console.log('📡 Server response headers:', Object.fromEntries(response.headers.entries()));
+
   if (!response.ok) {
-    throw new Error('Failed to download video');
+    const errorText = await response.text();
+    console.error('❌ Download error response:', errorText);
+    throw new Error('Failed to download video: ' + response.status);
   }
 
   const blob = await response.blob();
-  console.log('✅ Video downloaded, size:', blob.size, 'bytes');
+  console.log('✅ Video downloaded from server');
+  console.log('📊 Blob size:', blob.size, 'bytes');
+  console.log('📊 Blob size:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
+  console.log('📊 Blob type:', blob.type);
+  
   return blob;
 }
-
-
-// ========== DOWNLOAD VIDEO FROM GEMINI ==========
-async function downloadVideoFromGemini(videoFile) {
-  // ✅ Call YOUR backend API
-  const response = await fetch('/api/veo/download', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ videoFile })
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to download video');
-  }
-
-  const blob = await response.blob();
-  return blob;
-}
-
-
 
     // ========== UPLOAD VIDEO TO CLOUDINARY ==========
     async function uploadVideoToCloudinary(videoBlob) {
