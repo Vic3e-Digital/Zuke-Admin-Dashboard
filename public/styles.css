@@ -231,7 +231,7 @@ body {
   flex-direction: column;
   transition: all 0.3s ease;
   overflow: hidden;
-  /* z-index: 50; */
+  z-index: 50;
 }
 
 .sidebar-content {
@@ -636,19 +636,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* .settings-icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid #e0e0e0;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #666;
-}
 
 .settings-icon-btn:hover {
   background: #f5f5f5;
@@ -693,6 +680,62 @@ body {
 .switch-dropdown-container {
   position: relative;
   display: inline-block;
+}
+
+
+#settingsContent {
+  padding: 2rem 2rem 2rem 6rem;
+  max-width: 100%;
+}
+
+/* Settings page container */
+.settings-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Settings header - consistent with page-header */
+.settings-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Settings tabs container */
+.settings-tabs {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* Settings panels */
+.settings-panel {
+  padding: 2rem 0;
+  margin-left: 0;
+}
+
+/* Settings sections within panels */
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Section title row */
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Form groups in settings */
+.settings-section .form-group {
+  margin-bottom: 1.5rem;
 }
 
 .switch-dropdown-btn {
@@ -846,8 +889,6 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  overflow-x: hidden;
-  overflow-y: auto; /* Keep vertical scroll */
 }
 
 .modal-content {
@@ -861,8 +902,6 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  overflow-x: hidden;
-  overflow-y: auto; /* Keep vertical scroll */
 }
 
 .close {
