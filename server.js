@@ -8,6 +8,7 @@ const { getDatabase } = require("./lib/mongodb");
 
 const sendEmailRoutes = require('./api/send-email-api');
 const veoRoutes = require('./api/veo-api');
+const veoVertexApiRouter = require('./api/veo-vertex-api');
 
 
 
@@ -62,6 +63,7 @@ app.use('/api/businesses', require('./api/businesses'));
 app.use('/api/business-settings', require('./api/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/social-post', require('./api/social-post')); // ✅ Add this
+
 
 
 
@@ -343,7 +345,8 @@ app.get("/dashboard/", (req, res) => {
 });
 
 app.use('/api/send-email', sendEmailRoutes);
-app.use('/api/veo', veoRoutes);  // ✅ Add this
+app.use('/api/veo', veoRoutes);
+app.use('/api/veo-vertex', veoVertexApiRouter);
 
 
 
