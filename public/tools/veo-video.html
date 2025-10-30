@@ -603,7 +603,7 @@
 <body>
   <div class="container">
     <!-- 1️⃣ Model Selection -->
-    <div class="section">
+    <!-- <div class="section">
       <div class="section-title">
         <span>🎬</span> 1. Choose Veo Model
       </div>
@@ -627,7 +627,74 @@
           </label>
         </div>
       </div>
+    </div> -->
+<!-- 1️⃣ Model Selection -->
+<div class="section">
+  <div class="section-title">
+    <span>🎬</span> 1. Choose Veo Model
+  </div>
+  
+ 
+  <!-- Model Selection -->
+  <div class="model-selector">
+    <div class="model-option">
+      <input type="radio" id="modelVeo31" name="veoModel" value="veo-3.1" checked>
+      <label for="modelVeo31" class="model-label">
+        <div class="model-icon">⚡</div>
+        <div class="model-name">Veo 3.1</div>
+        <div class="model-desc">Latest & Best</div>
+        <span class="model-badge">Recommended</span>
+      </label>
     </div>
+    <div class="model-option">
+      <input type="radio" id="modelVeo31Fast" name="veoModel" value="veo-3.1-fast">
+      <label for="modelVeo31Fast" class="model-label">
+        <div class="model-icon">🚀</div>
+        <div class="model-name">Veo 3.1 Fast</div>
+        <div class="model-desc">Faster Generation</div>
+        <span class="model-badge">Quick</span>
+      </label>
+    </div>
+    <div class="model-option">
+      <input type="radio" id="modelVeo30" name="veoModel" value="veo-3.0">
+      <label for="modelVeo30" class="model-label">
+        <div class="model-icon">🎥</div>
+        <div class="model-name">Veo 3.0</div>
+        <div class="model-desc">Stable Version</div>
+      </label>
+    </div>
+    <div class="model-option">
+      <input type="radio" id="modelVeo30Fast" name="veoModel" value="veo-3.0-fast">
+      <label for="modelVeo30Fast" class="model-label">
+        <div class="model-icon">⚡</div>
+        <div class="model-name">Veo 3.0 Fast</div>
+        <div class="model-desc">Quick & Stable</div>
+      </label>
+    </div>
+  </div>
+</div>
+
+    <!-- API Provider Selection -->
+<div class="section">
+  <div class="section-title">
+    <span>🔧</span> API Provider
+  </div>
+  <div class="creation-mode">
+    <div class="mode-option">
+      <input type="radio" id="providerVertex" name="apiProvider" value="vertex-ai" checked>
+      <label for="providerVertex" class="mode-label">
+        <span>☁️</span> Vertex AI (Recommended)
+      </label>
+    </div>
+    <div class="mode-option">
+      <input type="radio" id="providerGemini" name="apiProvider" value="gemini-api">
+      <label for="providerGemini" class="mode-label">
+        <span>💎</span> Gemini API
+      </label>
+    </div>
+  </div>
+  <p class="field-note">Vertex AI provides better rate limits and reliability for production use.</p>
+</div>
 
     <!-- 2️⃣ Creation Mode -->
     <div class="section">
@@ -881,6 +948,9 @@
         let generatedCaption = null;
         let uploadedImageFile = null;
         let selectedDuration = 8;
+        let currentProvider = null;
+
+
     
         const urlParams = new URLSearchParams(window.location.search);
         const userEmail = urlParams.get('email');
@@ -1020,7 +1090,67 @@
         // In your HTML file - Replace the Veo functions
 
 // ========== GENERATE VIDEO WITH VEO ==========
+// async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageFile = null) {
+//   const requestBody = {
+//     businessId: businessId,
+//     userEmail: userEmail,
+//     model: model,
+//     prompt: prompt,
+//     config: {
+//       aspectRatio: document.getElementById('aspectRatio').value,
+//       resolution: document.getElementById('resolution').value,
+//       durationSeconds: selectedDuration.toString(),
+//       numberOfVideos: 1
+//     }
+//   };
+
+//   if (negativePrompt && negativePrompt.trim()) {
+//     requestBody.negativePrompt = negativePrompt.trim();
+//   }
+
+//   if (imageFile) {
+//     const imageBase64 = await fileToBase64(imageFile);
+//     requestBody.image = {
+//       imageBytes: imageBase64.split(',')[1],
+//       mimeType: imageFile.type 
+//     };
+//   }
+
+//   console.log('🎬 Generating video with Veo:', model);
+//   console.log('📦 Request body:', requestBody);
+
+//   // ✅ Call YOUR backend API
+//   const response = await fetch('/api/veo/generate', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify(requestBody)
+//   });
+
+//   if (!response.ok) {
+//     const errorData = await response.json();
+    
+//     if (response.status === 402) {
+//       throw new Error(
+//         `Insufficient funds!\n\n` +
+//         `Required: ${errorData.formatted_required}\n` +
+//         `Balance: ${errorData.formatted_balance}\n\n` +
+//         `Please add credits to continue.`
+//       );
+//     }
+    
+//     throw new Error(errorData.error || 'Video generation failed');
+//   }
+
+//   const data = await response.json();
+//   console.log('✅ Backend response:', data);
+//   return data.operationName;
+// }
+
+
+// ========== GENERATE VIDEO WITH VERTEX AI OR GEMINI ==========
 async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageFile = null) {
+  const apiProvider = document.querySelector('input[name="apiProvider"]:checked').value;
+  
   const requestBody = {
     businessId: businessId,
     userEmail: userEmail,
@@ -1046,11 +1176,13 @@ async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageF
     };
   }
 
-  console.log('🎬 Generating video with Veo:', model);
+  console.log('🎬 Generating video with:', apiProvider);
   console.log('📦 Request body:', requestBody);
 
-  // ✅ Call YOUR backend API
-  const response = await fetch('/api/veo/generate', {
+  // ✅ Choose API endpoint based on provider
+  const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/generate' : '/api/veo/generate';
+
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody)
@@ -1076,116 +1208,132 @@ async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageF
   return data.operationName;
 }
 
-// ========== GENERATE VIDEO ==========
-// async function generateVideo() {
-//   const videoPrompt = document.getElementById('videoPrompt').value.trim();
-//   const negativePrompt = document.getElementById('negativePrompt').value.trim();
-//   const selectedModel = document.querySelector('input[name="veoModel"]:checked').value;
-//   const creationMode = document.querySelector('input[name="creationMode"]:checked').value;
-
-//   if (!videoPrompt) {
-//     showStatus('❌ Please describe the video you want to generate', 'error');
-//     return;
-//   }
-
-//   if (creationMode === 'image-to-video' && !uploadedImageFile) {
-//     showStatus('❌ Please upload an initial frame image', 'error');
-//     return;
-//   }
-
-//   // Validate settings
-//   validateResolutionSettings();
-
-//   generateBtn.disabled = true;
-//   progress.style.display = 'block';
-//   status.style.display = 'none';
-//   videoPreviewContainer.classList.remove('show');
-//   platformSection.classList.add('hidden');
-//   progressFill.style.width = '10%';
-
-//   try {
-//     // Step 1: Start video generation (backend will handle wallet deduction)
-//     progressText.textContent = 'Starting video generation...';
-//     progressFill.style.width = '30%';
-
-//     const operationName = await generateVideoWithVeo(
-//       videoPrompt,
-//       selectedModel,
-//       negativePrompt,
-//       creationMode === 'image-to-video' ? uploadedImageFile : null
-//     );
-
-//     // Step 2: Poll for completion
-//     progressText.textContent = 'Generating video with AI... This may take a few minutes.';
-//     progressFill.style.width = '50%';
-
-//     const videoResult = await pollVideoGeneration(operationName);
-
-//     // Step 3: Download the video
-//     progressText.textContent = 'Downloading generated video...';
-//     progressFill.style.width = '90%';
-
-//     const videoBlob = await downloadVideoFromGemini(videoResult.video);
-//     generatedVideoBlob = videoBlob;
-
-//     progressText.textContent = 'Generating caption...';
-//     progressFill.style.width = '95%';
-
-//     // Generate caption if not provided
-//     let caption = document.getElementById('caption').value.trim();
-//     if (!caption) {
-//       caption = await generateCaption(videoPrompt);
-//       document.getElementById('caption').value = caption;
-//     }
-//     generatedCaption = caption;
-
-//     progressFill.style.width = '100%';
-
-//     // Show preview
-//     const videoUrl = URL.createObjectURL(videoBlob);
-//     previewVideo.src = videoUrl;
+// ========== POLL VIDEO GENERATION STATUS (UPDATED FOR BOTH APIS) ==========
+//   let attempts = 0;
+//   const maxAttempts = 60;
+//   const apiProvider = document.querySelector('input[name="apiProvider"]:checked').value;
+  
+//   // Choose endpoint based on provider
+//   const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/veo/check-status';
+  
+//   while (attempts < maxAttempts) {
+//     await new Promise(resolve => setTimeout(resolve, 10000));
     
-//     // Setup download button
-//     downloadBtn.href = videoUrl;
-//     downloadBtn.download = `veo-generated-${Date.now()}.mp4`;
-//     downloadBtn.style.display = 'inline-flex';
+//     attempts++;
+//     progressText.textContent = `Generating video... (${attempts * 10}s elapsed)`;
     
-//     videoPreviewContainer.classList.add('show');
-
-//     showStatus(
-//       `✅ Video generated! (R${GENERATION_COST.toFixed(2)} deducted)\n\n` +
-//       `Duration: ${selectedDuration}s\n` +
-//       `Resolution: ${document.getElementById('resolution').value}\n` +
-//       `Aspect Ratio: ${document.getElementById('aspectRatio').value}\n\n` +
-//       'Review the video and choose an action below.',
-//       'success'
-//     );
-
-//     // ✨ AUTO-SCROLL TO PREVIEW
-//     setTimeout(() => {
-//       const previewTop = videoPreviewContainer.getBoundingClientRect().top + window.pageYOffset;
-//       const offset = 80;
-      
-//       window.scrollTo({
-//         top: previewTop - offset,
-//         behavior: 'smooth'
+//     try {
+//       const response = await fetch(endpoint, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ operationName })
 //       });
-//     }, 300);
 
-//   } catch (error) {
-//     console.error('Error generating video:', error);
-//     showStatus('❌ ' + error.message, 'error');
-//   } finally {
-//     progress.style.display = 'none';
-//     generateBtn.disabled = false;
+//       if (!response.ok) {
+//         throw new Error('Failed to check video status');
+//       }
+
+//       const data = await response.json();
+      
+//       console.log(`📊 Poll attempt ${attempts}:`, {
+//         done: data.done,
+//         hasResponse: !!data.response,
+//         hasError: !!data.error,
+//         provider: apiProvider
+//       });
+      
+//       if (data.done) {
+//         console.log('🎉 Operation complete!');
+        
+//         // Check for errors
+//         if (data.error) {
+//           console.error('❌ Generation failed:', data.error);
+//           throw new Error(data.error.message || 'Video generation failed');
+//         }
+        
+//         // ✅ HANDLE DIFFERENT RESPONSE STRUCTURES
+//         let videoSample = null;
+        
+//         if (apiProvider === 'vertex-ai') {
+//           // Vertex AI response structure
+//           console.log('📦 Vertex AI response:', data.response);
+          
+//           const videos = data.response?.videos;
+          
+//           if (!videos || videos.length === 0) {
+//             console.error('❌ No videos in Vertex AI response');
+//             console.error('📦 Full response:', JSON.stringify(data, null, 2));
+//             throw new Error('No videos generated');
+//           }
+          
+//           const firstVideo = videos[0];
+//           console.log('✅ First video:', firstVideo);
+          
+//           // Convert to common format
+//           videoSample = {
+//             video: {
+//               uri: firstVideo.gcsUri,
+//               mimeType: firstVideo.mimeType || 'video/mp4',
+//               bytesBase64Encoded: firstVideo.bytesBase64Encoded
+//             }
+//           };
+          
+//           console.log('📹 Video URI:', firstVideo.gcsUri || 'Base64 encoded');
+          
+//         } else {
+//           // Gemini API response structure
+//           console.log('📦 Gemini API response:', data.response);
+          
+//           const videoResponse = data.response?.generateVideoResponse;
+          
+//           if (!videoResponse) {
+//             console.error('❌ No generateVideoResponse');
+//             throw new Error('Invalid response structure from Gemini API');
+//           }
+          
+//           const generatedSamples = videoResponse.generatedSamples;
+          
+//           if (!generatedSamples || generatedSamples.length === 0) {
+//             console.error('❌ No generatedSamples');
+//             throw new Error('No video samples generated');
+//           }
+          
+//           videoSample = generatedSamples[0];
+//           console.log('✅ Video sample:', videoSample);
+//           console.log('📹 Video URI:', videoSample.video?.uri);
+//         }
+        
+//         if (!videoSample.video || (!videoSample.video.uri && !videoSample.video.bytesBase64Encoded)) {
+//           console.error('❌ No video data in sample');
+//           throw new Error('Video data not found in response');
+//         }
+        
+//         return videoSample;
+//       }
+      
+//       const progressPercent = Math.min(50 + (attempts * 2), 90);
+//       progressFill.style.width = `${progressPercent}%`;
+      
+//     } catch (error) {
+//       console.error('❌ Poll error:', error);
+//       throw error;
+//     }
 //   }
+  
+//   throw new Error('Video generation timed out after 10 minutes');
 // }
-
-
-// ========== POLL VIDEO GENERATION STATUS (FIXED) ==========
-async function pollVideoGeneration(operationName) {
+// ========== POLL VIDEO GENERATION STATUS (UPDATED) ==========
+async function pollVideoGeneration(operationName, provider) { // ✅ Accept provider parameter
   let attempts = 0;
   const maxAttempts = 60;
+  
+  // ✅ Use the passed provider instead of reading from DOM
+  const apiProvider = provider || currentProvider || 'vertex-ai';
+  
+  console.log('🔍 Polling with provider:', apiProvider);
+  
+  // Choose endpoint based on provider
+  const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/veo/check-status';
   
   while (attempts < maxAttempts) {
     await new Promise(resolve => setTimeout(resolve, 10000));
@@ -1194,7 +1342,7 @@ async function pollVideoGeneration(operationName) {
     progressText.textContent = `Generating video... (${attempts * 10}s elapsed)`;
     
     try {
-      const response = await fetch('/api/veo/check-status', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ operationName })
@@ -1209,7 +1357,8 @@ async function pollVideoGeneration(operationName) {
       console.log(`📊 Poll attempt ${attempts}:`, {
         done: data.done,
         hasResponse: !!data.response,
-        hasError: !!data.error
+        hasError: !!data.error,
+        provider: apiProvider
       });
       
       if (data.done) {
@@ -1221,34 +1370,64 @@ async function pollVideoGeneration(operationName) {
           throw new Error(data.error.message || 'Video generation failed');
         }
         
-        // ✅ CORRECT PATH: response.generateVideoResponse.generatedSamples[0]
-        const videoResponse = data.response?.generateVideoResponse;
+        // ✅ HANDLE DIFFERENT RESPONSE STRUCTURES
+        let videoSample = null;
         
-        if (!videoResponse) {
-          console.error('❌ No generateVideoResponse in response');
-          console.error('📦 Full response:', JSON.stringify(data, null, 2));
-          throw new Error('Invalid response structure from Google API');
+        if (apiProvider === 'vertex-ai') {
+          // Vertex AI response structure
+          console.log('📦 Vertex AI response:', data.response);
+          
+          const videos = data.response?.videos;
+          
+          if (!videos || videos.length === 0) {
+            console.error('❌ No videos in Vertex AI response');
+            console.error('📦 Full response:', JSON.stringify(data, null, 2));
+            throw new Error('No videos generated');
+          }
+          
+          const firstVideo = videos[0];
+          console.log('✅ First video:', firstVideo);
+          
+          // Convert to common format
+          videoSample = {
+            video: {
+              gcsUri: firstVideo.gcsUri,
+              mimeType: firstVideo.mimeType || 'video/mp4',
+              bytesBase64Encoded: firstVideo.bytesBase64Encoded
+            }
+          };
+          
+          console.log('📹 Video:', firstVideo.gcsUri ? 'GCS URI' : 'Base64 encoded');
+          
+        } else {
+          // Gemini API response structure
+          console.log('📦 Gemini API response:', data.response);
+          
+          const videoResponse = data.response?.generateVideoResponse;
+          
+          if (!videoResponse) {
+            console.error('❌ No generateVideoResponse');
+            throw new Error('Invalid response structure from Gemini API');
+          }
+          
+          const generatedSamples = videoResponse.generatedSamples;
+          
+          if (!generatedSamples || generatedSamples.length === 0) {
+            console.error('❌ No generatedSamples');
+            throw new Error('No video samples generated');
+          }
+          
+          videoSample = generatedSamples[0];
+          console.log('✅ Video sample:', videoSample);
+          console.log('📹 Video URI:', videoSample.video?.uri);
         }
         
-        const generatedSamples = videoResponse.generatedSamples;
-        
-        if (!generatedSamples || generatedSamples.length === 0) {
-          console.error('❌ No generatedSamples in response');
-          console.error('📦 Full response:', JSON.stringify(data, null, 2));
-          throw new Error('No video samples generated');
+        if (!videoSample.video) {
+          console.error('❌ No video data in sample');
+          throw new Error('Video data not found in response');
         }
         
-        const firstSample = generatedSamples[0];
-        console.log('✅ First sample:', firstSample);
-        console.log('✅ Video URI:', firstSample.video?.uri);
-        
-        if (!firstSample.video || !firstSample.video.uri) {
-          console.error('❌ No video URI in sample');
-          console.error('📦 Sample:', JSON.stringify(firstSample, null, 2));
-          throw new Error('Video URI not found in response');
-        }
-        
-        return firstSample;  // Returns { video: { uri: "..." } }
+        return videoSample;
       }
       
       const progressPercent = Math.min(50 + (attempts * 2), 90);
@@ -1262,6 +1441,33 @@ async function pollVideoGeneration(operationName) {
   
   throw new Error('Video generation timed out after 10 minutes');
 }
+
+// ========== DOWNLOAD VIDEO FROM API (UPDATED) ==========
+async function downloadVideoFromGemini(videoFile) {
+  // ✅ Use stored provider
+  const apiProvider = currentProvider || 'vertex-ai';
+  
+  // Choose endpoint based on provider
+  const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/download' : '/api/veo/download';
+  
+  console.log('⬇️ Downloading video from:', apiProvider);
+  console.log('📦 Video file:', videoFile);
+  
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ videoFile })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to download video');
+  }
+
+  const blob = await response.blob();
+  console.log('✅ Video downloaded, size:', blob.size, 'bytes');
+  return blob;
+}
+
 
 // ========== DOWNLOAD VIDEO FROM GEMINI ==========
 async function downloadVideoFromGemini(videoFile) {
@@ -1586,6 +1792,9 @@ Make each suggestion cinematic, specific, and optimized for 8-second AI video ge
       const selectedModel = document.querySelector('input[name="veoModel"]:checked').value;
       const creationMode = document.querySelector('input[name="creationMode"]:checked').value;
 
+      const selectedProvider = document.querySelector('input[name="apiProvider"]:checked').value;
+
+
       if (!videoPrompt) {
         showStatus('❌ Please describe the video you want to generate', 'error');
         return;
@@ -1605,6 +1814,9 @@ Make each suggestion cinematic, specific, and optimized for 8-second AI video ge
       videoPreviewContainer.classList.remove('show');
       platformSection.classList.add('hidden');
       progressFill.style.width = '10%';
+
+      currentProvider = selectedProvider;
+      
 
       try {
         // Step 1: Deduct generation cost from wallet
@@ -1630,7 +1842,10 @@ Make each suggestion cinematic, specific, and optimized for 8-second AI video ge
         progressText.textContent = 'Generating video with AI... This may take a few minutes.';
         progressFill.style.width = '50%';
 
-        const videoResult = await pollVideoGeneration(operationName);
+        const videoResult = await pollVideoGeneration(operationName, currentProvider); // ✅ Pass provider
+
+
+        // const videoResult = await pollVideoGeneration(operationName);
 
         // Step 4: Download the video
         progressText.textContent = 'Downloading generated video...';
