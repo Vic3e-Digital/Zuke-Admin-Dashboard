@@ -156,53 +156,58 @@ export async function initAfaaPage() {
 
     console.log("AFAA page loaded for:", businessName);
 
- // Setup buttons
-const buttons = [
-  {
-    btn: document.getElementById("afaaTool1Btn"),
-    title: "Find Partners from LinkedIn",
-    url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
-  },
-  {
-    btn: document.getElementById("afaaTool2Btn"),
-    title: "Find Partner Emails",
-    url: `https://aigents.southafricanorth.azurecontainer.io/form/dineo-enrichment?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
-  },
-  {
-    btn: document.getElementById("afaaTool3Btn"),
-    title: "Email Partners",
-    url: `/tools/send-email.html`
-  },
-  {
-    btn: document.getElementById("afaaTool4Btn"),
-    title: "Post Video to Socials",
-    url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`,
-    isBeta: true
-  },
-  {
-    btn: document.getElementById("afaaTool5Btn"),
-    title: "Post Image to Socials",
-    url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
-  },
-  {
-    btn: document.getElementById("afaaTool6Btn"), 
-    title: "Generate Videos with AI",
-    url: `/tools/create-ai-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
-    isBeta: true
-  },
-  {
-    btn: document.getElementById("afaaTool7Btn"),
-    title: "Generate Images with AI",
-    url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
-    isBeta: true
-  },
-  {
-    btn: document.getElementById("afaaTool8Btn"),
-    title: "Generate Images with AI",
-    url: `/tools/veo-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
-    isBeta: true
-  }
-];
+    // Setup buttons
+    const buttons = [
+      {
+        btn: document.getElementById("afaaTool1Btn"),
+        title: "Find Partners from LinkedIn",
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+      },
+      {
+        btn: document.getElementById("afaaTool2Btn"),
+        title: "Find Partner Emails",
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/dineo-enrichment?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+      },
+      {
+        btn: document.getElementById("afaaTool3Btn"),
+        title: "Email Partners",
+        url: `/tools/send-email.html`
+      },
+      {
+        btn: document.getElementById("afaaTool4Btn"),
+        title: "Post Video to Socials",
+        url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`,
+        isBeta: true
+      },
+      {
+        btn: document.getElementById("afaaTool5Btn"),
+        title: "Post Image to Socials",
+        url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("afaaTool6Btn"), 
+        title: "Generate Videos with AI",
+        url: `/tools/create-ai-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+        isBeta: true
+      },
+      {
+        btn: document.getElementById("afaaTool7Btn"),
+        title: "Generate Images with AI",
+        url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+        isBeta: true
+      },
+      {
+        btn: document.getElementById("afaaTool8Btn"),
+        title: "Create Videos with VEO AI",
+        url: `/tools/veo-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`,
+        isBeta: true
+      },
+      {
+        btn: document.getElementById("afaaTool9Btn"),
+        title: "Draft Partner Email",
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/Draft-Outreach-Mail?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+      }
+    ];
 
     // Add click handlers
     buttons.forEach(({btn, title, url, isBeta}) => {
@@ -247,3 +252,4 @@ const buttons = [
     console.error("Error in initAfaaPage:", error);
   }
 }
+
