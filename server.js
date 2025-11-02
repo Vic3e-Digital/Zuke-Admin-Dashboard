@@ -57,13 +57,15 @@ app.use("/api", (req, res, next) => {
 });
 
 // -------------------------
-// API Routes (BEFORE static files)
+// API Routes
 // -------------------------
 app.use('/api/businesses', require('./api/businesses'));
 app.use('/api/business-settings', require('./api/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/social-post', require('./api/social-post')); // ✅ Add this
-
+app.use('/api/send-email', sendEmailRoutes);
+app.use('/api/veo', veoRoutes);
+app.use('/api/veo-vertex', veoVertexApiRouter);
 
 
 
@@ -103,7 +105,6 @@ app.get("/api/products", async (req, res) => {
 
 app.get('/api/get-openai-config', getOpenAIConfig);
 
-
 // Get Cloudinary config
 app.get('/api/cloudinary-config', (req, res) => {
   res.json({
@@ -111,7 +112,6 @@ app.get('/api/cloudinary-config', (req, res) => {
     uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET || 'user_profiles'
   });
 });
-
 
 
 // Update user profile in User metadata
@@ -162,6 +162,7 @@ app.post('/api/user/update-profile', express.json(), async (req, res) => {
     });
   }
 });
+
 // -------------------------
 // Serve Static Files
 // -------------------------
@@ -344,9 +345,7 @@ app.get("/dashboard/", (req, res) => {
   }
 });
 
-app.use('/api/send-email', sendEmailRoutes);
-app.use('/api/veo', veoRoutes);
-app.use('/api/veo-vertex', veoVertexApiRouter);
+
 
 
 
