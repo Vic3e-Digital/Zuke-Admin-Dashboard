@@ -164,6 +164,16 @@ const buttons = [
     url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
   },
   {
+    btn: document.getElementById("afaaToolFishoekBtn"),
+    title: "Project Fishoek",
+    url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-rediscoverme-coaching?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+  },
+  {
+    btn: document.getElementById("afaaToolFindLeadsBtn"),
+    title: "Find Leads",
+    url: `/tools/find-leads.html`
+  },
+  {
     btn: document.getElementById("afaaTool2Btn"),
     title: "Find Partner Emails",
     url: `https://aigents.southafricanorth.azurecontainer.io/form/dineo-enrichment?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
