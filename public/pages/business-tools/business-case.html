@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Business Case - Zuke Marketplace</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    
+    .container { 
+      max-width: 800px; 
+      margin: 0 auto; 
+    }
+    
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    
+    .progress-indicator {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .progress-bar-container {
+      background: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 15px;
+    }
+    
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    
+    .badge-guessed {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .badge-complete {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .badge-needed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    textarea, input[type="text"], input[type="email"], input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    textarea.guessed, input.guessed {
+      border-color: #ffc107;
+      background: #fff9e6;
+    }
+    
+    textarea.needed, input.needed {
+      border-color: #dc3545;
+      background: #fff5f5;
+    }
+    
+    .field-note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+    
+    .ai-suggest-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    
+    .ai-suggest-btn:hover {
+      background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
+      transform: translateY(-1px);
+    }
+    
+    .ai-suggest-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .ai-suggestion-box {
+      display: none;
+      margin-top: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .ai-suggestion-box.show {
+      display: block;
+    }
+    
+    .ai-suggestion-text {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    
+    .ai-suggestion-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .ai-suggestion-actions button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .use-suggestion-btn {
+      background: #667eea;
+      color: white;
+    }
+    
+    .use-suggestion-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .dismiss-suggestion-btn {
+      background: #e0e0e0;
+      color: #666;
+    }
+    
+    .dismiss-suggestion-btn:hover {
+      background: #d0d0d0;
+    }
+    
+    .character-count {
+      font-size: 12px;
+      color: #999;
+      text-align: right;
+      margin-top: 4px;
+    }
+    
+    .save-draft-btn, .submit-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+    
+    .save-draft-btn {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .save-draft-btn:hover:not(:disabled) {
+      background: #5a6268;
+    }
+    
+    .submit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .submit-btn:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+    
+    .save-draft-btn:disabled, .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .status {
+      display: none;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 14px;
+      animation: slideIn 0.3s ease;
+      white-space: pre-wrap;
+    }
+    
+    .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .info-box p {
+      font-size: 14px;
+      color: #0d47a1;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>📝 Complete Your Business Case</h1>
+      <p>Help us understand your business better so we can provide tailored support. We've pre-filled what we know—just confirm, clarify, and add missing details.</p>
+    </div>
+    
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+      <p class="progress-text" id="progressText">0% Complete</p>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <p>
+        <strong>💡 Why this matters:</strong> A complete business case helps us match you with the right partners, suggest better automation, and unlock features tailored to your needs. 
+        Use the <strong>✨ AI Suggest</strong> buttons (R10.00 each) if you need help crafting better answers!
+      </p>
+    </div>
+    
+    <form id="businessCaseForm">
+      
+      <!-- Section 1: Basic Info -->
+      <div class="section">
+        <div class="section-title">
+          <span>🏢</span> About Your Business
+        </div>
+        <p class="section-subtitle">Let's start with the basics about what you do.</p>
+        
+        <div class="form-group">
+          <label for="businessName">
+            Business Name
+            <span class="badge badge-complete">✓ Confirmed</span>
+          </label>
+          <input type="text" id="businessName" readonly>
+          <p class="field-note">This is pulled from your profile and cannot be changed here.</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="whatYouDo">
+            What does your business do?
+            <span class="badge badge-complete" id="whatYouDoBadge">✓ Complete</span>
+          </label>
+          <textarea 
+            id="whatYouDo" 
+            placeholder="Describe your products, services, or what you offer customers..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="whatYouDoCount">0</span> / 500</div>
+          <p class="field-note">Simple explanation: What do you sell or offer? Who benefits from it?</p>
+          <button type="button" class="ai-suggest-btn" data-field="whatYouDo">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="whatYouDoSuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Section 2: The Problem & Solution -->
+      <div class="section">
+        <div class="section-title">
+          <span>🎯</span> The Challenge You're Solving
+        </div>
+        <p class="section-subtitle">Every great business solves a problem. What's yours?</p>
+        
+        <div class="form-group">
+          <label for="theChallenge">
+            What challenge or problem are you addressing?
+            <span class="badge badge-guessed" id="theChallengeBadge">⚠️ Please Confirm</span>
+          </label>
+          <textarea 
+            id="theChallenge" 
+            class="guessed"
+            placeholder="What pain point, frustration, or need does your business address?"
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="theChallengeCount">0</span> / 500</div>
+          <p class="field-note">Think: What would happen if your business didn't exist? What problem would remain unsolved?</p>
+          <button type="button" class="ai-suggest-btn" data-field="theChallenge">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="theChallengeSuggestion"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="yourSolution">
+            How does your business solve this problem?
+            <span class="badge badge-complete" id="yourSolutionBadge">✓ Complete</span>
+          </label>
+          <textarea 
+            id="yourSolution" 
+            placeholder="Explain your approach, method, or unique way of solving the problem..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="yourSolutionCount">0</span> / 500</div>
+          <p class="field-note">What makes your solution work? What's your approach?</p>
+          <button type="button" class="ai-suggest-btn" data-field="yourSolution">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="yourSolutionSuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Section 3: Competitive Advantage -->
+      <div class="section">
+        <div class="section-title">
+          <span>⭐</span> Why You?
+        </div>
+        <p class="section-subtitle">What makes customers choose you over alternatives?</p>
+        
+        <div class="form-group">
+          <label for="whyChooseYou">
+            Why will people choose your business?
+            <span class="badge badge-complete" id="whyChooseYouBadge">✓ Complete</span>
+          </label>
+          <textarea 
+            id="whyChooseYou" 
+            placeholder="What's special, different, or better about your business?"
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="whyChooseYouCount">0</span> / 500</div>
+          <p class="field-note">Think: Quality, price, convenience, trust, unique features, customer service, local focus, etc.</p>
+          <button type="button" class="ai-suggest-btn" data-field="whyChooseYou">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="whyChooseYouSuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Section 4: Customers -->
+      <div class="section">
+        <div class="section-title">
+          <span>👥</span> Your Customers
+        </div>
+        <p class="section-subtitle">Who benefits most from what you offer?</p>
+        
+        <div class="form-group">
+          <label for="yourCustomers">
+            Who are your ideal customers?
+            <span class="badge badge-guessed" id="yourCustomersBadge">⚠️ Please Confirm</span>
+          </label>
+          <textarea 
+            id="yourCustomers" 
+            class="guessed"
+            placeholder="Describe your target audience: age, location, interests, needs..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="yourCustomersCount">0</span> / 500</div>
+          <p class="field-note">Examples: "Young professionals in Cape Town who care about sustainability" or "Small restaurant owners who need affordable marketing"</p>
+          <button type="button" class="ai-suggest-btn" data-field="yourCustomers">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="yourCustomersSuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Section 5: Revenue Model -->
+      <div class="section">
+        <div class="section-title">
+          <span>💰</span> How You Make Money
+        </div>
+        <p class="section-subtitle">Understanding your revenue helps us suggest the right growth tools.</p>
+        
+        <div class="form-group">
+          <label for="howYouMakeMoney">
+            How does your business generate income?
+            <span class="badge badge-guessed" id="howYouMakeMoneyBadge">⚠️ Please Confirm</span>
+          </label>
+          <textarea 
+            id="howYouMakeMoney" 
+            class="guessed"
+            placeholder="Do you sell products? Charge for services? Subscriptions? Commissions?"
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="howYouMakeMoneyCount">0</span> / 500</div>
+          <p class="field-note">Examples: "Sell handmade products online", "Charge R500/hour for consulting", "Monthly subscription of R199"</p>
+          <button type="button" class="ai-suggest-btn" data-field="howYouMakeMoney">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="howYouMakeMoneySuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Section 6: Additional Details -->
+      <div class="section" id="additionalDetailsSection">
+        <div class="section-title">
+          <span>📋</span> Additional Details We Need
+        </div>
+        <p class="section-subtitle">These details will help us provide better support and match you with the right opportunities.</p>
+        
+        <div class="form-group">
+          <label for="productsServices">
+            What specific products or services do you offer?
+            <span class="badge badge-needed">⚠️ Required</span>
+          </label>
+          <textarea 
+            id="productsServices" 
+            class="needed"
+            placeholder="List your main products/services with brief descriptions..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="productsServicesCount">0</span> / 500</div>
+          <p class="field-note">Be specific: "Organic skincare (face creams, body butters, lip balms)" or "Social media management packages (R2000-R8000/month)"</p>
+          <button type="button" class="ai-suggest-btn" data-field="productsServices">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="productsServicesSuggestion"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="customerProfile">
+            Describe your typical customer
+            <span class="badge badge-needed">⚠️ Required</span>
+          </label>
+          <textarea 
+            id="customerProfile" 
+            class="needed"
+            placeholder="Age range, gender, location, income level, interests, behaviors..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="customerProfileCount">0</span> / 500</div>
+          <p class="field-note">Example: "Women 25-40 in urban areas, eco-conscious, willing to pay premium for quality, active on Instagram"</p>
+          <button type="button" class="ai-suggest-btn" data-field="customerProfile">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="customerProfileSuggestion"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="growthGoals">
+            What are your growth goals for the next 6-12 months?
+            <span class="badge badge-needed">⚠️ Required</span>
+          </label>
+          <textarea 
+            id="growthGoals" 
+            class="needed"
+            placeholder="Revenue targets, customer acquisition, new products, expansion plans..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="growthGoalsCount">0</span> / 500</div>
+          <p class="field-note">Examples: "Double monthly revenue to R20k", "Launch 3 new products", "Expand to Johannesburg market", "Build email list to 1000 subscribers"</p>
+          <button type="button" class="ai-suggest-btn" data-field="growthGoals">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="growthGoalsSuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Section 7: How Zuke Can Help -->
+      <div class="section">
+        <div class="section-title">
+          <span>🤝</span> Partnership with Zuke
+        </div>
+        <p class="section-subtitle">Tell us what support you need most (optional but helpful!).</p>
+        
+        <div class="form-group">
+          <label for="howZukeCanHelp">
+            What specific support do you need from Zuke?
+          </label>
+          <textarea 
+            id="howZukeCanHelp" 
+            placeholder="Marketing? Branding? Automation? Connections? Funding? Be specific about what would help most..."
+            maxlength="500"
+          ></textarea>
+          <div class="character-count"><span id="howZukeCanHelpCount">0</span> / 500</div>
+          <p class="field-note">This helps us prioritize the right tools and connections for your business.</p>
+          <button type="button" class="ai-suggest-btn" data-field="howZukeCanHelp">
+            <span>✨</span> AI Suggest (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="howZukeCanHelpSuggestion"></div>
+        </div>
+      </div>
+      
+      <!-- Submit Section -->
+      <div class="section">
+        <button type="button" class="save-draft-btn" id="saveDraftBtn">
+          💾 Save Draft
+        </button>
+        <button type="submit" class="submit-btn" id="submitBtn">
+          🚀 Submit Business Case
+        </button>
+        <div class="status" id="statusMessage"></div>
+      </div>
+      
+    </form>
+    
+  </div>
+
+  <script src="/js/dataManager.js"></script>
+  
+  <script>
+    // ========== GLOBAL CONFIGURATION ==========
+    let auth0Client = null;
+    let currentBusiness = null;
+    let openAIConfig = null;
+    let businessCaseData = null;
+    
+    // ✅ SINGLE SOURCE OF TRUTH FOR URL PARAMETERS
+    const urlParams = new URLSearchParams(window.location.search);
+    let userEmail = urlParams.get('Email');      // Capital 'E' from your URL
+    let businessId = urlParams.get('ID');        // Capital 'I' from your URL
+    
+    const AI_SUGGESTION_COST = 10.00;
+    
+    const formFields = {
+      whatYouDo: { required: true, guessed: false },
+      theChallenge: { required: true, guessed: true },
+      yourSolution: { required: true, guessed: false },
+      whyChooseYou: { required: true, guessed: false },
+      yourCustomers: { required: true, guessed: true },
+      howYouMakeMoney: { required: true, guessed: true },
+      productsServices: { required: true, guessed: false },
+      customerProfile: { required: true, guessed: false },
+      growthGoals: { required: true, guessed: false },
+      howZukeCanHelp: { required: false, guessed: false }
+    };
+    
+    // ========== AUTH0 CLIENT ==========
+    async function getAuth0Client() {
+      if (window.auth0Client) return window.auth0Client;
+      
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error configuring Auth0:", error);
+        return null;
+      }
+    }
+    
+    // ========== FETCH OPENAI CONFIG ==========
+    async function getOpenAIConfig() {
+      if (openAIConfig) return openAIConfig;
+      
+      try {
+        const response = await fetch('/api/get-openai-config');
+        if (!response.ok) throw new Error('Failed to get OpenAI config');
+        openAIConfig = await response.json();
+        return openAIConfig;
+      } catch (error) {
+        console.error('Error fetching OpenAI config:', error);
+        return null;
+      }
+    }
+    
+    // ========== CALL AZURE OPENAI ==========
+    async function callAzureOpenAI(prompt) {
+      const config = await getOpenAIConfig();
+      if (!config) throw new Error('OpenAI config not available');
+    
+      const url = `${config.endpoint}openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview`;
+    
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': config.apiKey
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: "You are a business consultant helping African entrepreneurs articulate their business case. Provide clear, concise, professional answers in simple English. Keep responses under 300 words."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      });
+    
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+    
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    }
+    
+    // ========== LOAD BUSINESS DATA ==========
+    async function loadBusinessData() {
+      try {
+        const auth0 = await getAuth0Client();
+        if (!auth0) {
+          showStatus('Authentication required. Please log in.', 'error');
+          return;
+        }
+    
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (!isAuthenticated) {
+          showStatus('Please log in to continue.', 'error');
+          return;
+        }
+    
+        console.log('🔍 Checking for dataManager...');
+        
+        // Wait for dataManager with retry logic
+        let retries = 0;
+        while (!window.dataManager && retries < 10) {
+          console.log(`⏳ Waiting for dataManager (attempt ${retries + 1}/10)...`);
+          await new Promise(resolve => setTimeout(resolve, 300));
+          retries++;
+        }
+    
+        if (!window.dataManager) {
+          console.error('❌ DataManager not available after 3 seconds');
+          
+          // Fallback: Fetch directly from API
+          console.log('📡 Fetching business data from API...');
+          const response = await fetch(
+            `/api/business-case/get?businessId=${businessId}&userEmail=${encodeURIComponent(userEmail)}`
+          );
+          
+          if (!response.ok) {
+            throw new Error('Failed to load business data from API');
+          }
+          
+          const data = await response.json();
+          
+          currentBusiness = {
+            _id: businessId,
+            store_info: {
+              name: data.businessInfo?.name || ''
+            },
+            initial_business_case: data.businessCase || {}
+          };
+          
+          businessCaseData = currentBusiness.initial_business_case;
+          
+          console.log('✅ Business data loaded from API');
+        } else {
+          console.log('✅ DataManager available');
+          currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+          
+          if (!currentBusiness) {
+            console.error('❌ No business selected in dataManager');
+            showStatus('No business found. Please select a business from the dashboard.', 'error');
+            setTimeout(() => {
+              window.location.href = `/dashboard.html?email=${userEmail}`;
+            }, 3000);
+            return;
+          }
+    
+          businessCaseData = currentBusiness.initial_business_case || {};
+          console.log('✅ Business data loaded from dataManager cache');
+        }
+        
+        console.log('📊 Business case data:', {
+          name: currentBusiness.store_info?.name,
+          hasBusinessCase: !!businessCaseData,
+          businessCaseFields: Object.keys(businessCaseData)
+        });
+        
+        // Pre-fill form fields
+        populateForm();
+        updateProgress();
+        
+      } catch (error) {
+        console.error('❌ Error loading business data:', error);
+        showStatus('Failed to load business information. Please refresh the page.', 'error');
+      }
+    }
+    
+    // ========== POPULATE FORM WITH EXISTING DATA ==========
+    function populateForm() {
+      if (!currentBusiness) {
+        console.warn('⚠️ No currentBusiness available for populating form');
+        return;
+      }
+      
+      // Business name
+      const businessName = currentBusiness.store_info?.name || 
+                          currentBusiness.marketplace_info?.store_owner_first_name + ' ' + 
+                          currentBusiness.marketplace_info?.store_owner_last_name || 
+                          '';
+      
+      document.getElementById('businessName').value = businessName;
+      console.log('📝 Business name set:', businessName);
+      
+      if (!businessCaseData || Object.keys(businessCaseData).length === 0) {
+        console.log('ℹ️ No existing business case data to populate');
+        return;
+      }
+      
+      // Map database fields to form fields
+      const fieldMapping = {
+        whatYouDo: 'what_you_do',
+        theChallenge: 'the_challenge',
+        yourSolution: 'your_solution',
+        whyChooseYou: 'why_people_will_choose_you',
+        yourCustomers: 'your_customers',
+        howYouMakeMoney: 'how_you_make_money',
+        howZukeCanHelp: 'how_zuke_can_help',
+        productsServices: 'products_services',
+        customerProfile: 'customer_profile',
+        growthGoals: 'growth_goals'
+      };
+      
+      let fieldsPopulated = 0;
+      
+      Object.keys(fieldMapping).forEach(fieldId => {
+        const dbField = fieldMapping[fieldId];
+        const value = businessCaseData[dbField] || '';
+        const element = document.getElementById(fieldId);
+        
+        if (element && value) {
+          element.value = value;
+          updateCharCount(fieldId);
+          fieldsPopulated++;
+          
+          const badge = document.getElementById(`${fieldId}Badge`);
+          if (badge) {
+            const isGuessed = value.includes('(Guessed)') || formFields[fieldId]?.guessed;
+            
+            if (isGuessed) {
+              badge.className = 'badge badge-guessed';
+              badge.textContent = '⚠️ Please Confirm';
+              element.classList.add('guessed');
+            } else {
+              badge.className = 'badge badge-complete';
+              badge.textContent = '✓ Complete';
+              element.classList.remove('guessed');
+            }
+          }
+        }
+      });
+      
+      console.log(`✅ Form populated with ${fieldsPopulated} fields`);
+    }
+    
+    // ========== UPDATE CHARACTER COUNT ==========
+    function updateCharCount(fieldId) {
+      const field = document.getElementById(fieldId);
+      const counter = document.getElementById(`${fieldId}Count`);
+      
+      if (field && counter) {
+        counter.textContent = field.value.length;
+        
+        if (field.value.length > 450) {
+          counter.style.color = '#dc3545';
+        } else if (field.value.length > 400) {
+          counter.style.color = '#ffc107';
+        } else {
+          counter.style.color = '#999';
+        }
+      }
+    }
+    
+    // ========== CALCULATE PROGRESS ==========
+    function updateProgress() {
+      const totalFields = Object.keys(formFields).filter(f => formFields[f].required).length;
+      let completedFields = 0;
+      
+      Object.keys(formFields).forEach(fieldId => {
+        if (!formFields[fieldId].required) return;
+        
+        const field = document.getElementById(fieldId);
+        if (field && field.value.trim().length > 20) {
+          completedFields++;
+        }
+      });
+      
+      const progress = Math.round((completedFields / totalFields) * 100);
+      
+      document.getElementById('progressBar').style.width = `${progress}%`;
+      document.getElementById('progressText').textContent = `${progress}% Complete (${completedFields}/${totalFields} fields)`;
+    }
+    
+    // ========== BUILD PROMPT FOR FIELD ==========
+    function buildPromptForField(fieldId) {
+      const businessName = document.getElementById('businessName').value;
+      const businessDescription = currentBusiness?.store_info?.description || 
+                                 currentBusiness?.marketplace_info?.marketplace_description || '';
+      
+      const prompts = {
+        whatYouDo: `Business: ${businessName}\n\nBased on this info: ${businessDescription}\n\nWrite a clear, compelling 2-3 sentence description of what this business does and who it serves.`,
+        theChallenge: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\n\nWhat problem or challenge does this business solve for its customers? Write 2-3 sentences.`,
+        yourSolution: `Business: ${businessName}\nChallenge: ${document.getElementById('theChallenge').value}\n\nHow does this business solve that problem? What's their approach or method? Write 2-3 sentences.`,
+        whyChooseYou: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\n\nWhat makes this business different or better than alternatives? Why would customers choose them? Write 2-3 sentences.`,
+        yourCustomers: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\n\nWho are the ideal customers for this business? Describe their demographics, needs, and behaviors. Write 2-3 sentences.`,
+        howYouMakeMoney: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\n\nHow does this business generate revenue? What's their business model? Write 2-3 sentences.`,
+        productsServices: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\n\nList the specific products or services this business offers. Be detailed and specific.`,
+        customerProfile: `Business: ${businessName}\nIdeal customers: ${document.getElementById('yourCustomers').value}\n\nCreate a detailed customer profile: age, gender, location, income, interests, behaviors, pain points.`,
+        growthGoals: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\n\nSuggest realistic, specific growth goals for this business over the next 6-12 months. Include revenue, customers, products, or expansion targets.`,
+        howZukeCanHelp: `Business: ${businessName}\nWhat they do: ${document.getElementById('whatYouDo').value}\nGoals: ${document.getElementById('growthGoals').value}\n\nBased on this business and their goals, what specific support could Zuke Marketplace provide? (Marketing, branding, automation, partnerships, etc.)`
+      };
+      
+      return prompts[fieldId] || `Improve this answer for ${fieldId}`;
+    }
+    
+    // ========== AI SUGGESTION HANDLER ==========
+    async function handleAISuggestion(fieldId) {
+      const button = document.querySelector(`[data-field="${fieldId}"]`);
+      const suggestionBox = document.getElementById(`${fieldId}Suggestion`);
+      const field = document.getElementById(fieldId);
+      
+      button.disabled = true;
+      button.innerHTML = '<span class="loading-spinner"></span> Generating...';
+      
+      try {
+        // First, deduct from wallet
+        const deductResponse = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,  // ✅ Now using the global variable
+            amount: 10,      // R10.00 = 1000 cents
+            description: `AI Business Case Suggestion: ${fieldId}`,
+            metadata: {
+              field: fieldId,
+              businessId: businessId
+            }
+          })
+        });
+    
+        if (!deductResponse.ok) {
+          const errorData = await deductResponse.json();
+          
+          if (deductResponse.status === 400) {
+            throw new Error(
+              `Insufficient funds!\n\n` +
+              `Required: R10.00\n` +
+              `Balance: ${errorData.current_balance ? 'R' + (errorData.current_balance / 100).toFixed(2) : 'Unknown'}\n\n` +
+              `Please add credits to continue.`
+            );
+          }
+          
+          throw new Error(errorData.error || 'Failed to process payment');
+        }
+    
+        const walletData = await deductResponse.json();
+        
+        // Now generate the AI suggestion
+        const prompt = buildPromptForField(fieldId);
+        const suggestion = await callAzureOpenAI(prompt);
+        
+        // Show suggestion box
+        suggestionBox.innerHTML = `
+          <div style="background: #d4edda; color: #155724; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; font-weight: 600;">
+            ✅ R${AI_SUGGESTION_COST.toFixed(2)} deducted • New balance: ${walletData.formatted_balance}
+          </div>
+          <p class="ai-suggestion-text">${suggestion}</p>
+          <div class="ai-suggestion-actions">
+            <button class="use-suggestion-btn" onclick="useSuggestion('${fieldId}')">
+              ✓ Use This
+            </button>
+            <button class="dismiss-suggestion-btn" onclick="dismissSuggestion('${fieldId}')">
+              ✕ Dismiss
+            </button>
+          </div>
+        `;
+        
+        suggestionBox.classList.add('show');
+        suggestionBox.dataset.suggestion = suggestion;
+        
+      } catch (error) {
+        console.error('AI suggestion error:', error);
+        showStatus('❌ ' + error.message, 'error');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = '<span>✨</span> AI Suggest (R10.00)';
+      }
+    }
+    
+    // ========== USE AI SUGGESTION ==========
+    window.useSuggestion = function(fieldId) {
+      const suggestionBox = document.getElementById(`${fieldId}Suggestion`);
+      const field = document.getElementById(fieldId);
+      const suggestion = suggestionBox.dataset.suggestion;
+      
+      if (suggestion) {
+        field.value = suggestion;
+        updateCharCount(fieldId);
+        updateProgress();
+        
+        field.classList.remove('guessed', 'needed');
+        field.style.borderColor = '#28a745';
+        
+        setTimeout(() => {
+          field.style.borderColor = '';
+        }, 2000);
+        
+        const badge = document.getElementById(`${fieldId}Badge`);
+        if (badge) {
+          badge.className = 'badge badge-complete';
+          badge.textContent = '✓ Complete';
+        }
+        
+        dismissSuggestion(fieldId);
+        showStatus('✅ AI suggestion applied!', 'success');
+        
+        setTimeout(() => {
+          document.getElementById('statusMessage').style.display = 'none';
+        }, 2000);
+      }
+    };
+    
+    // ========== DISMISS AI SUGGESTION ==========
+    window.dismissSuggestion = function(fieldId) {
+      const suggestionBox = document.getElementById(`${fieldId}Suggestion`);
+      suggestionBox.classList.remove('show');
+    };
+    
+    // ========== SAVE DRAFT FUNCTION ==========
+    async function saveDraft() {
+      try {
+        console.log('💾 Saving draft...');
+        
+        if (!businessId || !userEmail) {
+          console.error('❌ Missing businessId or userEmail');
+          showStatus('Cannot save: Missing required information', 'error');
+      return;
+    }
+    
+    const formData = collectFormData();
+    
+    // Check if there's any content to save
+    const hasContent = Object.values(formData).some(val => val && val.length > 0);
+    if (!hasContent) {
+      console.log('⚠️ No content to save yet');
+      return;
+    }
+    
+    const payload = {
+      businessId: businessId,
+      userEmail: userEmail,
+      businessCase: formData,
+      isDraft: true
+    };
+    
+    console.log('📤 Sending draft payload');
+    
+    const response = await fetch('/api/business-case/save-draft', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Server error:', errorData);
+      throw new Error(errorData.error || 'Failed to save draft');
+    }
+    
+    const data = await response.json();
+    console.log('✅ Draft saved:', data);
+    
+    showStatus('✓ Draft saved successfully', 'success');
+    
+    setTimeout(() => {
+      document.getElementById('statusMessage').style.display = 'none';
+    }, 3000);
+    
+  } catch (error) {
+    console.error('❌ Save draft error:', error);
+    showStatus('Failed to save draft: ' + error.message, 'error');
+  }
+}
+
+// ========== COLLECT FORM DATA ==========
+function collectFormData() {
+  return {
+    business_name: document.getElementById('businessName').value.trim(),
+    what_you_do: document.getElementById('whatYouDo').value.trim(),
+    the_challenge: document.getElementById('theChallenge').value.trim(),
+    your_solution: document.getElementById('yourSolution').value.trim(),
+    why_people_will_choose_you: document.getElementById('whyChooseYou').value.trim(),
+    your_customers: document.getElementById('yourCustomers').value.trim(),
+    how_you_make_money: document.getElementById('howYouMakeMoney').value.trim(),
+    products_services: document.getElementById('productsServices').value.trim(),
+    customer_profile: document.getElementById('customerProfile').value.trim(),
+    growth_goals: document.getElementById('growthGoals').value.trim(),
+    how_zuke_can_help: document.getElementById('howZukeCanHelp').value.trim()
+  };
+}
+
+// ========== VALIDATE FORM ==========
+function validateForm() {
+  const errors = [];
+  
+  Object.keys(formFields).forEach(fieldId => {
+    if (!formFields[fieldId].required) return;
+    
+    const field = document.getElementById(fieldId);
+    const value = field.value.trim();
+    
+    if (value.length < 20) {
+      const labelText = field.previousElementSibling.textContent.split('\n')[0].trim();
+      errors.push(`"${labelText}" needs at least 20 characters`);
+      field.style.borderColor = '#dc3545';
+    } else {
+      field.style.borderColor = '';
+    }
+  });
+  
+  return errors;
+}
+
+// ========== SUBMIT FORM ==========
+async function submitForm(e) {
+  e.preventDefault();
+  
+  const submitBtn = document.getElementById('submitBtn');
+  
+  // Validate
+  const errors = validateForm();
+  
+  if (errors.length > 0) {
+    showStatus(
+      '❌ Please complete all required fields:\n\n' + errors.join('\n'),
+      'error'
+    );
+    
+    // Scroll to first error
+    const firstErrorField = document.querySelector('textarea[style*="border-color: rgb(220, 53, 69)"]');
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    return;
+  }
+  
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
+  
+  try {
+    const formData = collectFormData();
+    formData.completed_at = new Date().toISOString();
+    
+    console.log('📤 Submitting business case...');
+    
+    const saveResponse = await fetch('/api/business-case/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        businessId: businessId,
+        userEmail: userEmail,
+        businessCase: formData,
+        isDraft: false
+      })
+    });
+    
+    if (!saveResponse.ok) {
+      const errorData = await saveResponse.json();
+      console.error('❌ Server error:', errorData);
+      throw new Error(errorData.error || 'Failed to save business case');
+    }
+    
+    const saveResult = await saveResponse.json();
+    console.log('✅ Business case submitted:', saveResult);
+    
+    showStatus(
+      '🎉 Business Case Submitted Successfully!\n\n' +
+      'Your business profile has been updated. Our team will review your information and unlock relevant features for your business.\n\n' +
+      'You will receive an email confirmation shortly.',
+      'success'
+    );
+    
+    // Update progress to 100%
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressText').textContent = '100% Complete';
+    
+    // Disable form after successful submission
+    setTimeout(() => {
+      const formElements = document.querySelectorAll('textarea:not([readonly]), button:not(.save-draft-btn):not(.submit-btn)');
+      formElements.forEach(el => el.disabled = true);
+      
+      submitBtn.textContent = '✓ Submitted';
+      submitBtn.style.background = '#28a745';
+      
+      // Redirect after 5 seconds
+      setTimeout(() => {
+        window.location.href = `/pages/business-tools/business-case.html?email=${userEmail}&businessId=${businessId}`;
+      }, 5000);
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Submit error:', error);
+    showStatus('❌ Failed to submit business case. Please try again.', 'error');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '🚀 Submit Business Case';
+  }
+}
+
+
+// ========== SHOW STATUS ==========
+function showStatus(message, type) {
+  const statusMessage = document.getElementById('statusMessage');
+  statusMessage.textContent = message;
+  statusMessage.className = `status ${type}`;
+  statusMessage.style.display = 'block';
+  
+  // Auto-hide info messages after 5 seconds
+  if (type === 'info') {
+    setTimeout(() => {
+      statusMessage.style.display = 'none';
+    }, 5000);
+  }
+}
+
+// ========== EVENT LISTENERS ==========
+
+// Character counters for all textareas
+Object.keys(formFields).forEach(fieldId => {
+  const field = document.getElementById(fieldId);
+  if (field) {
+    field.addEventListener('input', () => {
+      updateCharCount(fieldId);
+      updateProgress();
+      
+      // Remove error styling on input
+      if (field.style.borderColor === 'rgb(220, 53, 69)') {
+        field.style.borderColor = '';
+      }
+    });
+  }
+});
+
+// AI Suggestion buttons
+document.querySelectorAll('.ai-suggest-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    const fieldId = button.dataset.field;
+    handleAISuggestion(fieldId);
+  });
+});
+
+// Save Draft button
+document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
+
+// Form submission
+document.getElementById('businessCaseForm').addEventListener('submit', submitForm);
+
+// ========== AUTO-SAVE DRAFT ==========
+let autoSaveInterval;
+
+function startAutoSave() {
+  // Clear any existing interval
+  if (autoSaveInterval) {
+    clearInterval(autoSaveInterval);
+  }
+  
+  autoSaveInterval = setInterval(() => {
+    // Only auto-save if there's content
+    const hasContent = Object.keys(formFields).some(fieldId => {
+      const field = document.getElementById(fieldId);
+      return field && field.value.trim().length > 0;
+    });
+    
+    if (hasContent) {
+      console.log('🔄 Auto-saving draft...');
+      saveDraft();
+    }
+  }, 120000); // 2 minutes
+  
+  console.log('✅ Auto-save enabled (every 2 minutes)');
+}
+
+function stopAutoSave() {
+  if (autoSaveInterval) {
+    clearInterval(autoSaveInterval);
+    autoSaveInterval = null;
+    console.log('🛑 Auto-save stopped');
+  }
+}
+
+// ========== INITIALIZE ON PAGE LOAD ==========
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Business Case Form Initializing...');
+  
+  // Check if we have required parameters
+  if (!userEmail || !businessId) {
+    console.warn('⚠️ No URL parameters, attempting to load from session...');
+    
+    const auth0 = await getAuth0Client();
+    if (auth0) {
+      const isAuthenticated = await auth0.isAuthenticated();
+      if (isAuthenticated) {
+        const user = await auth0.getUser();
+        userEmail = user.email || user.name;
+        console.log('✅ Got email from Auth0:', userEmail);
+        
+        // Wait for dataManager
+        let retries = 0;
+        while (!window.dataManager && retries < 10) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          retries++;
+        }
+        
+        if (window.dataManager) {
+          const business = window.dataManager.getSelectedBusinessOrFirst();
+          if (business) {
+            businessId = business._id;
+            console.log('✅ Got businessId from dataManager:', businessId);
+          }
+        }
+      }
+    }
+  }
+  
+  // Final validation
+  if (!userEmail || !businessId) {
+    console.error('❌ Missing required data:', { userEmail, businessId });
+    showStatus('❌ Unable to load business information. Please access this page from the dashboard.', 'error');
+    
+    setTimeout(() => {
+      window.location.href = '/dashboard.html';
+    }, 3000);
+    return;
+  }
+  
+  console.log('✅ Using:', { email: userEmail, businessId: businessId });
+  
+  // Load business data
+  await loadBusinessData();
+  
+  // Start auto-save
+  startAutoSave();
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    stopAutoSave();
+  });
+  
+  console.log('✅ Business Case Form Initialized');
+});
+
+</script>
+  
+</body>
+</html>

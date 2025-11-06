@@ -4,17 +4,19 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
-const { getDatabase } = require("./lib/mongodb");
+const { connectToDatabase, getDatabase } = require("./lib/mongodb");
+const { ObjectId } = require('mongodb');
+
+
 
 const sendEmailRoutes = require('./api/send-email-api');
-const veoRoutes = require('./api/veo-api');
 const veoVertexApiRouter = require('./api/veo-vertex-api');
-
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const getOpenAIConfig = require('./api/get-openai-config');
+
+const businessCaseApi = require('./api/business-case-api');
 
 // Add these at the top with other imports
 const { ManagementClient } = require('auth0');
@@ -27,18 +29,12 @@ const management = new ManagementClient({
   scope: 'read:users update:users'
 });
 
-
 // -------------------------
 // Middleware
 // -------------------------
 app.use(cors({ origin: true, credentials: true }));
-// app.use(express.json());
-
-
 app.use(express.json({ limit: '50mb' }));  
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-
 app.use(cookieParser());
 
 app.use((req, res, next) => {
@@ -46,6 +42,39 @@ app.use((req, res, next) => {
   console.log(`[v0] Headers:`, req.headers);
   console.log(`[v0] Body:`, req.body);
   next();
+});
+
+async function initializeDatabase() {
+  try {
+    const { db } = await connectToDatabase();
+    app.locals.db = db;
+    
+    console.log('✅ Database connected to:', db.databaseName);
+    
+    // ✅ Changed from 'businesses' to 'store_submissions'
+    const businessCount = await db.collection('store_submissions').countDocuments();
+    console.log(`✅ Found ${businessCount} store submissions in database`);
+    
+    // ✅ Changed from 'businesses' to 'store_submissions'
+    const testBusiness = await db.collection('store_submissions').findOne({
+      _id: new ObjectId('689f2187374ee7475a5f64d2')
+    });
+    
+    console.log('✅ Test query result:', testBusiness ? 'Business found ✓' : 'Business NOT found');
+    
+    if (testBusiness) {
+      console.log('   Business name:', testBusiness.store_info?.name);
+    }
+    
+  } catch (error) {
+    console.error('❌ Failed to connect to database:', error);
+    process.exit(1);
+  }
+}
+
+// Connect to database before setting up routes
+initializeDatabase().then(() => {
+  console.log('✅ Database initialized, starting server...');
 });
 
 // -------------------------
@@ -62,12 +91,10 @@ app.use("/api", (req, res, next) => {
 app.use('/api/businesses', require('./api/businesses'));
 app.use('/api/business-settings', require('./api/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
-app.use('/api/social-post', require('./api/social-post')); // ✅ Add this
+app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/send-email', sendEmailRoutes);
-app.use('/api/veo', veoRoutes);
 app.use('/api/veo-vertex', veoVertexApiRouter);
-
-
+app.use('/api/business-case', businessCaseApi);  // ✅ Now it will have access to app.locals.db
 
 // Paystack key route
 app.get("/api/paystack-key", (req, res) => {
@@ -113,7 +140,6 @@ app.get('/api/cloudinary-config', (req, res) => {
   });
 });
 
-
 // Update user profile in User metadata
 app.post('/api/user/update-profile', express.json(), async (req, res) => {
   try {
@@ -125,16 +151,14 @@ app.post('/api/user/update-profile', express.json(), async (req, res) => {
       return res.status(400).json({ success: false, message: 'User ID required' });
     }
 
-    // ✅ Store EVERYTHING in user_metadata (for social logins)
     const updateData = {
       user_metadata: {
-        custom_name: name,           // Store custom name here
-        custom_picture: picture,      // Store custom picture here
+        custom_name: name,
+        custom_picture: picture,
         updated_at: new Date().toISOString()
       }
     };
 
-    // ✅ Pass user_id directly as string
     const updatedUser = await management.users.update(
       user_id,
       updateData
@@ -185,28 +209,6 @@ app.get("/:page", (req, res, next) => {
   next();
 });
 
-
-// User Profile Update
-app.post('/api/user/update-profile', express.json(), async (req, res) => {
-  try {
-    const { user_id, name, picture } = req.body;
-    
-    // Store in your database (optional)
-    // await UserProfile.updateOne({ user_id }, { name, picture });
-    
-    res.json({
-      success: true,
-      name,
-      picture
-    });
-    
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-
 // Get default webhook config
 app.get('/api/default-webhook-config', (req, res) => {
   res.json({
@@ -221,27 +223,29 @@ app.post('/api/business/:businessId/managers', async (req, res) => {
     const { businessId } = req.params;
     const { email } = req.body;
     
-    const business = await Business.findById(businessId);
+    const db = req.app.locals.db;  // ✅ Use app.locals.db
+    const business = await db.collection('businesses').findOne({ _id: new ObjectId(businessId) });
     
     if (!business) {
       return res.status(404).json({ success: false, message: 'Business not found' });
     }
     
     // Initialize managers array if not exists
-    if (!business.managers) {
-      business.managers = [];
-    }
+    const managers = business.managers || [];
     
     // Add manager
-    business.managers.push({
+    managers.push({
       email,
       added_at: new Date(),
       role: 'manager'
     });
     
-    await business.save();
+    await db.collection('businesses').updateOne(
+      { _id: new ObjectId(businessId) },
+      { $set: { managers, updated_at: new Date() } }
+    );
     
-    res.json({ success: true, managers: business.managers });
+    res.json({ success: true, managers });
     
   } catch (error) {
     console.error('Error adding manager:', error);
@@ -255,18 +259,22 @@ app.delete('/api/business/:businessId/managers', async (req, res) => {
     const { businessId } = req.params;
     const { email } = req.body;
     
-    const business = await Business.findById(businessId);
+    const db = req.app.locals.db;  // ✅ Use app.locals.db
+    const business = await db.collection('businesses').findOne({ _id: new ObjectId(businessId) });
     
     if (!business) {
       return res.status(404).json({ success: false, message: 'Business not found' });
     }
     
     // Remove manager
-    business.managers = business.managers.filter(m => m.email !== email);
+    const managers = (business.managers || []).filter(m => m.email !== email);
     
-    await business.save();
+    await db.collection('businesses').updateOne(
+      { _id: new ObjectId(businessId) },
+      { $set: { managers, updated_at: new Date() } }
+    );
     
-    res.json({ success: true, managers: business.managers });
+    res.json({ success: true, managers });
     
   } catch (error) {
     console.error('Error removing manager:', error);
@@ -280,17 +288,18 @@ app.patch('/api/business/:businessId/status', async (req, res) => {
     const { businessId } = req.params;
     const { status } = req.body;
     
-    const business = await Business.findByIdAndUpdate(
-      businessId,
-      { status, updated_at: new Date() },
-      { new: true }
+    const db = req.app.locals.db;  // ✅ Use app.locals.db
+    const result = await db.collection('businesses').findOneAndUpdate(
+      { _id: new ObjectId(businessId) },
+      { $set: { status, updated_at: new Date() } },
+      { returnDocument: 'after' }
     );
     
-    if (!business) {
+    if (!result.value) {
       return res.status(404).json({ success: false, message: 'Business not found' });
     }
     
-    res.json({ success: true, business });
+    res.json({ success: true, business: result.value });
     
   } catch (error) {
     console.error('Error updating business status:', error);
@@ -303,9 +312,10 @@ app.delete('/api/business/:businessId', async (req, res) => {
   try {
     const { businessId } = req.params;
     
-    const business = await Business.findByIdAndDelete(businessId);
+    const db = req.app.locals.db;  // ✅ Use app.locals.db
+    const result = await db.collection('businesses').deleteOne({ _id: new ObjectId(businessId) });
     
-    if (!business) {
+    if (result.deletedCount === 0) {
       return res.status(404).json({ success: false, message: 'Business not found' });
     }
     
@@ -316,7 +326,6 @@ app.delete('/api/business/:businessId', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-
 
 // Add this where you have other route registrations
 const businessWebhookConfig = require('./api/business-webhook-config');
@@ -344,10 +353,6 @@ app.get("/dashboard/", (req, res) => {
     res.status(500).send("Error loading dashboard");
   }
 });
-
-
-
-
 
 // -------------------------
 // 404 and Error Handling (MUST BE LAST)
@@ -379,5 +384,5 @@ app.use((err, req, res, next) => {
 // Start Server
 // -------------------------
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });

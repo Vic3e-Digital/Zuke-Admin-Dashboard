@@ -217,7 +217,7 @@ router.post('/deduct', async (req, res) => {
       success: true,
       transaction_id: transaction.transaction_id,
       new_balance: newBalance,
-      formatted_balance: `R${(newBalance / 100).toFixed(2)}`
+      formatted_balance: `R${(newBalance * 1).toFixed(2)}`
     });
 
   } catch (error) {
@@ -275,7 +275,7 @@ router.post('/credit', async (req, res) => {
         success: true,
         message: 'Wallet created and credited',
         new_balance: amount,
-        formatted_balance: `R${(amount / 100).toFixed(2)}`
+        formatted_balance: `R${(amount * 1).toFixed(2)}`
       });
     }
 
@@ -315,7 +315,7 @@ router.post('/credit', async (req, res) => {
       success: true,
       transaction_id: transaction.transaction_id,
       new_balance: newBalance,
-      formatted_balance: `R${(newBalance / 100).toFixed(2)}`
+      formatted_balance: `R${(newBalance * 1).toFixed(2)}`
     });
 
   } catch (error) {

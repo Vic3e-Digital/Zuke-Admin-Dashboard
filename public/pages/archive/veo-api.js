@@ -1,7 +1,7 @@
 // api/veo-api.js
 const express = require('express');
 const router = express.Router();
-const { getDatabase } = require('../lib/mongodb');
+const { getDatabase } = require('../../../lib/mongodb');
 const { ObjectId } = require('mongodb');
 const axios = require('axios');
 const { GoogleGenAI } = require('@google/genai');

@@ -602,33 +602,8 @@
 </head>
 <body>
   <div class="container">
+
     <!-- 1️⃣ Model Selection -->
-    <!-- <div class="section">
-      <div class="section-title">
-        <span>🎬</span> 1. Choose Veo Model
-      </div>
-      <div class="model-selector">
-        <div class="model-option">
-          <input type="radio" id="modelVeo31" name="veoModel" value="veo-3.1-generate-preview" checked>
-          <label for="modelVeo31" class="model-label">
-            <div class="model-icon">⚡</div>
-            <div class="model-name">Veo 3.1</div>
-            <div class="model-desc">Latest & Best</div>
-            <span class="model-badge">Recommended</span>
-          </label>
-        </div>
-        <div class="model-option">
-          <input type="radio" id="modelVeo31Fast" name="veoModel" value="veo-3.1-fast-generate-preview">
-          <label for="modelVeo31Fast" class="model-label">
-            <div class="model-icon">🚀</div>
-            <div class="model-name">Veo 3.1 Fast</div>
-            <div class="model-desc">Faster Generation</div>
-            <span class="model-badge">Quick</span>
-          </label>
-        </div>
-      </div>
-    </div> -->
-<!-- 1️⃣ Model Selection -->
 <div class="section">
   <div class="section-title">
     <span>🎬</span> 1. Choose Veo Model
@@ -1031,20 +1006,6 @@
           }
         }
     
-        // // ========== FETCH GEMINI API KEY ==========
-        // async function getGeminiConfig() {
-        //   if (geminiConfig) return geminiConfig;
-          
-        //   try {
-        //     const response = await fetch('/api/get-gemini-config');
-        //     if (!response.ok) throw new Error('Failed to get Gemini config');
-        //     geminiConfig = await response.json();
-        //     return geminiConfig;
-        //   } catch (error) {
-        //     console.error('Error fetching Gemini config:', error);
-        //     return null;
-        //   }
-        // }
     
         // ========== CALL AZURE OPENAI FOR SUGGESTIONS ==========
         async function callAzureOpenAI(prompt) {
@@ -1087,65 +1048,7 @@
           return data.choices[0].message.content;
         }
     
-        // In your HTML file - Replace the Veo functions
-
-// ========== GENERATE VIDEO WITH VEO ==========
-// async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageFile = null) {
-//   const requestBody = {
-//     businessId: businessId,
-//     userEmail: userEmail,
-//     model: model,
-//     prompt: prompt,
-//     config: {
-//       aspectRatio: document.getElementById('aspectRatio').value,
-//       resolution: document.getElementById('resolution').value,
-//       durationSeconds: selectedDuration.toString(),
-//       numberOfVideos: 1
-//     }
-//   };
-
-//   if (negativePrompt && negativePrompt.trim()) {
-//     requestBody.negativePrompt = negativePrompt.trim();
-//   }
-
-//   if (imageFile) {
-//     const imageBase64 = await fileToBase64(imageFile);
-//     requestBody.image = {
-//       imageBytes: imageBase64.split(',')[1],
-//       mimeType: imageFile.type 
-//     };
-//   }
-
-//   console.log('🎬 Generating video with Veo:', model);
-//   console.log('📦 Request body:', requestBody);
-
-//   // ✅ Call YOUR backend API
-//   const response = await fetch('/api/veo/generate', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify(requestBody)
-//   });
-
-//   if (!response.ok) {
-//     const errorData = await response.json();
-    
-//     if (response.status === 402) {
-//       throw new Error(
-//         `Insufficient funds!\n\n` +
-//         `Required: ${errorData.formatted_required}\n` +
-//         `Balance: ${errorData.formatted_balance}\n\n` +
-//         `Please add credits to continue.`
-//       );
-//     }
-    
-//     throw new Error(errorData.error || 'Video generation failed');
-//   }
-
-//   const data = await response.json();
-//   console.log('✅ Backend response:', data);
-//   return data.operationName;
-// }
-
+      
 
 // ========== GENERATE VIDEO WITH VERTEX AI OR GEMINI ==========
 async function generateVideoWithVeo(prompt, model, negativePrompt = null, imageFile = null) {
