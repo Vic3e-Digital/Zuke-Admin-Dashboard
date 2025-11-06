@@ -262,4 +262,3 @@ export async function initAfaaPage() {
     console.error("Error in initAfaaPage:", error);
   }
 }
-

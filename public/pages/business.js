@@ -124,7 +124,7 @@ export async function initTestPage() {
       {
         btn: document.getElementById("openModalBtn"),
         title: "Business Case Assistant",
-        url: `https://aigents.southafricanorth.azurecontainer.io/form/4a4b49d8-45a5-4710-9b84-52587ce88cb6?Business%20Name=${encodeURIComponent(businessName)}&Business%20Description=${encodeURIComponent(businessDescription)}&Email=${encodeURIComponent(userEmail)}&Address=${encodeURIComponent(businessAddress)}&Categories=${encodeURIComponent(businessCategories)}&Questions%20to%20Answer=${encodeURIComponent(businessCase)}&ID=${encodeURIComponent(mongoID)}`
+        url: `/pages/business-tools/business-case.html?Business%20Name=${encodeURIComponent(businessName)}&Business%20Description=${encodeURIComponent(businessDescription)}&Email=${encodeURIComponent(userEmail)}&Address=${encodeURIComponent(businessAddress)}&Categories=${encodeURIComponent(businessCategories)}&Questions%20to%20Answer=${encodeURIComponent(businessCase)}&ID=${encodeURIComponent(mongoID)}`
       },
       {
         btn: document.getElementById("openModalBtn2"),
