@@ -600,7 +600,7 @@ if (switchDropdownBtn) {
           content = await loadMarketplacePage();
           break;
         case "business":
-          content = await loadTestPage();
+          content = await loadBusinessPage();
           break;
            case "afaa":  
         content = await loadAfaaPage();
@@ -818,12 +818,12 @@ if (switchDropdownBtn) {
     return loadMarketplacePage.cache;
   }
 
-  async function loadTestPage() {
-    if (!loadTestPage.cache) {
-      loadTestPage.cache = await fetch('pages/business.html').then(r => r.text());
-    }
-    return loadTestPage.cache;
-  }
+  // async function loadTestPage() {
+  //   if (!loadTestPage.cache) {
+  //     loadTestPage.cache = await fetch('pages/business.html').then(r => r.text());
+  //   }
+  //   return loadTestPage.cache;
+  // }
   async function loadAfaaPage() {
   if (!loadAfaaPage.cache) {
     loadAfaaPage.cache = await fetch('pages/afaa.html').then(r => r.text());
@@ -859,6 +859,14 @@ if (switchDropdownBtn) {
     return loadPricingPage.cache;
   }
 
+  async function loadBusinessPage() {
+    if (!loadBusinessPage.cache) {
+      loadBusinessPage.cache = await fetch('pages/business/business.html').then(r => r.text());
+    }
+    return loadBusinessPage.cache;
+  }
+  
+
   async function initializePageFunctionality(page) {
     switch (page) {
     case "dashboard":
@@ -893,20 +901,22 @@ if (switchDropdownBtn) {
         }
         break;
 
-      case "business":
-        if (!window.__testLoaded) {
-          try {
-            const mod = await import("../pages/business.js");
-            mod.initTestPage();
-            window.__testLoaded = true;
-          } catch (error) {
-            console.error("Error loading business page:", error);
+        case "business":
+          if (!window.__businessPageLoaded) {
+            try {
+              const mod = await import("../pages/business/business.js");
+              mod.initBusinessPage();
+              window.__businessPageLoaded = true;
+            } catch (error) {
+              console.error("Error loading business page:", error);
+            }
+          } else {
+            import("../pages/business/business.js").then(mod => mod.initBusinessPage());
           }
-        } else {
-          import("../pages/business.js").then(mod => mod.initTestPage());
-        }
-        break;
-         case "afaa":  // ADD THIS CASE
+          break;
+
+
+      case "afaa":  // ADD THIS CASE
       if (!window.__afaaLoaded) {
         try {
           const mod = await import("../pages/afaa.js");
