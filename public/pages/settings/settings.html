@@ -2,6 +2,14 @@
 <link rel="stylesheet" href="css/simStyle.css">
 <link rel="stylesheet" href="css/settings.css">
 
+<!-- Module loader - Add at top of body or end of head -->
+<script type="module">
+  import { initSettingsPage } from './pages/settings/settings.js';
+  
+  // Make init function globally available
+  window.initSettingsPage = initSettingsPage;
+</script>
+
 <div class="page-container">
   <div class="page-header">
     <h1 class="page-title">Business Settings</h1>
@@ -207,6 +215,7 @@
       <button class="btn-primary" id="connectYouTubeBtn">Connect</button>
     </div>
   </div>
+
   
   <!-- Connected Details -->
   <div id="ytConnectedInfo" class="connected-details" style="display: none;">
@@ -235,6 +244,70 @@
       <button class="btn-secondary btn-sm" onclick="changeYouTubeChannel()">Change Channel</button>
       <button class="btn-secondary btn-sm" onclick="refreshToken('youtube')">Refresh Token</button>
       <button class="btn-danger btn-sm" onclick="disconnectPlatform('youtube')">Disconnect</button>
+    </div>
+  </div>
+</div>
+
+<!-- TikTok Connection -->
+<div class="connection-card" id="tiktokCard">
+  <div class="connection-header">
+    <div class="connection-icon tiktok">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+      </svg>
+    </div>
+    <div class="connection-info">
+      <h3>TikTok</h3>
+      <p class="connection-status" id="ttStatus">Not Connected</p>
+      <span class="status-badge" id="ttBadge">Disconnected</span>
+    </div>
+    <div class="connection-actions">
+      <!-- ✅ ADD onclick="connectPlatform('tiktok')" -->
+      <button class="btn-primary" id="connectTikTokBtn" onclick="connectPlatform('tiktok')">
+        Connect
+      </button>
+    </div>
+  </div>
+  
+  <!-- Connected Details -->
+  <div id="ttConnectedInfo" class="connected-details" style="display: none;">
+    <div class="detail-row">
+      <span class="detail-label">Display Name:</span>
+      <span class="detail-value" id="ttDisplayName">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Username:</span>
+      <span class="detail-value" id="ttUsername">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Open ID:</span>
+      <span class="detail-value" id="ttOpenId">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Followers:</span>
+      <span class="detail-value" id="ttFollowers">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Videos:</span>
+      <span class="detail-value" id="ttVideos">—</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Token Expires:</span>
+      <span class="detail-value" id="ttExpiry">—</span>
+    </div>
+    <div class="detail-actions">
+      <button class="btn-secondary btn-sm" onclick="testConnection('tiktok')">
+        Test Connection
+      </button>
+      <button class="btn-secondary btn-sm" onclick="changeTikTokAccount()">
+        Change Account
+      </button>
+      <button class="btn-secondary btn-sm" onclick="refreshToken('tiktok')">
+        Refresh Token
+      </button>
+      <button class="btn-danger btn-sm" onclick="disconnectPlatform('tiktok')">
+        Disconnect
+      </button>
     </div>
   </div>
 </div>
@@ -715,6 +788,12 @@
 </div>
 
 <style>
+/* TikTok Icon Styling */
+.connection-icon.tiktok { 
+  background: linear-gradient(135deg, #00f2ea 0%, #ff0050 50%, #000000 100%);
+  color: white;
+}
+
 .business-info-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;

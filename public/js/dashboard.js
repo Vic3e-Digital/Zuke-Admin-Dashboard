@@ -847,7 +847,7 @@ if (switchDropdownBtn) {
 
   async function loadSettingsPage() {
     if (!loadSettingsPage.cache) {
-      loadSettingsPage.cache = await fetch('pages/settings.html').then(r => r.text());
+      loadSettingsPage.cache = await fetch('pages/settings/settings.html').then(r => r.text());
     }
     return loadSettingsPage.cache;
   }
@@ -948,14 +948,14 @@ if (switchDropdownBtn) {
       case "settings":
         if (!window.__settingsLoaded) {
           try {
-            const mod = await import("../pages/settings.js");
+            const mod = await import("../pages/settings/settings.js");
             mod.initSettingsPage();
             window.__settingsLoaded = true;
           } catch (error) {
             console.error("Error loading settings page:", error);
           }
         } else {
-          import("../pages/settings.js").then(mod => mod.initSettingsPage());
+          import("../pages/settings/settings.js").then(mod => mod.initSettingsPage());
         }
         break;
       case "pricing":

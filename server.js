@@ -89,7 +89,7 @@ app.use("/api", (req, res, next) => {
 // API Routes
 // -------------------------
 app.use('/api/businesses', require('./api/businesses'));
-app.use('/api/business-settings', require('./api/business-settings'));
+app.use('/api/business-settings', require('./api/routes/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/send-email', sendEmailRoutes);
