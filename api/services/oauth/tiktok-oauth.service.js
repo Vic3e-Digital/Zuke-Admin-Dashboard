@@ -61,7 +61,8 @@ class TikTokOAuthService extends OAuthService {
       `&code_challenge_method=S256`;         // ✅ ADD THIS
   }
 
- /**
+
+  /**
  * Exchange authorization code for access token (with PKCE)
  */
 async exchangeCodeForToken(code, redirectUri, businessId) {
@@ -71,7 +72,6 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
       
       if (!codeVerifier) {
         console.error('[TikTok] Code verifier not found for businessId:', businessId);
-        console.error('[TikTok] Available verifiers:', Array.from(this.codeVerifiers.keys()));
         throw new Error('Code verifier not found. Please try connecting again.');
       }
   
@@ -118,25 +118,27 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
       // Clean up the used code_verifier
       this.codeVerifiers.delete(businessId);
   
-      if (data.error || !data.data?.access_token) {
-        console.error('[TikTok] Token exchange error response:', JSON.stringify(data, null, 2));
-        
-        // More detailed error message
-        const errorMessage = data.error?.message 
-          || data.error_description 
-          || data.message
-          || JSON.stringify(data.error)
-          || 'Failed to get access token';
-        
+      // ✅ FIXED: TikTok returns data at root level, not nested under "data"
+      if (data.error) {
+        console.error('[TikTok] Token exchange error:', data.error);
+        const errorMessage = data.error.message || data.error_description || 'Token exchange failed';
         throw new Error(errorMessage);
+      }
+  
+      // ✅ Check for access_token at root level
+      if (!data.access_token) {
+        console.error('[TikTok] No access_token in response:', data);
+        throw new Error('No access token received from TikTok');
       }
   
       console.log('[TikTok] Token exchange successful');
   
+      // ✅ Return data from root level
       return {
-        access_token: data.data.access_token,
-        refresh_token: data.data.refresh_token,
-        expires_in: data.data.expires_in || 86400
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_in: data.expires_in || 86400,
+        open_id: data.open_id  // Also return open_id for reference
       };
     } catch (error) {
       console.error('[TikTok] exchangeCodeForToken error:', error);
@@ -144,10 +146,11 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
     }
   }
 
+  
   /**
-   * Refresh access token
-   */
-  async refreshToken(refreshToken) {
+ * Refresh access token
+ */
+async refreshToken(refreshToken) {
     const response = await fetch(`${this.apiBaseUrl}/oauth/token/`, {
       method: 'POST',
       headers: { 
@@ -161,17 +164,23 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
         refresh_token: refreshToken
       })
     });
-
+  
     const data = await response.json();
-
-    if (data.error || !data.data?.access_token) {
-      throw new Error(data.error?.message || 'Failed to refresh token');
+  
+    // ✅ FIXED: Check at root level
+    if (data.error) {
+      throw new Error(data.error.message || data.error_description || 'Failed to refresh token');
     }
-
+  
+    if (!data.access_token) {
+      throw new Error('No access token received from TikTok');
+    }
+  
+    // ✅ Return from root level
     return {
-      access_token: data.data.access_token,
-      refresh_token: data.data.refresh_token,
-      expires_in: data.data.expires_in
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_in: data.expires_in || 86400
     };
   }
 
