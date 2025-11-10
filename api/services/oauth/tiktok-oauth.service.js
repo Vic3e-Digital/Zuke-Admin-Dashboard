@@ -61,48 +61,87 @@ class TikTokOAuthService extends OAuthService {
       `&code_challenge_method=S256`;         // ✅ ADD THIS
   }
 
-  /**
-   * Exchange authorization code for access token (with PKCE)
-   */
-  async exchangeCodeForToken(code, redirectUri, businessId) {
-    // Retrieve the stored code_verifier
-    const codeVerifier = this.codeVerifiers.get(businessId);
-    
-    if (!codeVerifier) {
-      throw new Error('Code verifier not found. Please try connecting again.');
-    }
-
-    const response = await fetch(`${this.apiBaseUrl}/oauth/token/`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cache-Control': 'no-cache'
-      },
-      body: new URLSearchParams({
+ /**
+ * Exchange authorization code for access token (with PKCE)
+ */
+async exchangeCodeForToken(code, redirectUri, businessId) {
+    try {
+      // Retrieve the stored code_verifier
+      const codeVerifier = this.codeVerifiers.get(businessId);
+      
+      if (!codeVerifier) {
+        console.error('[TikTok] Code verifier not found for businessId:', businessId);
+        console.error('[TikTok] Available verifiers:', Array.from(this.codeVerifiers.keys()));
+        throw new Error('Code verifier not found. Please try connecting again.');
+      }
+  
+      console.log('[TikTok] Token exchange request:', {
+        businessId,
+        hasCode: !!code,
+        hasVerifier: !!codeVerifier,
+        redirectUri
+      });
+  
+      const requestBody = new URLSearchParams({
         client_key: this.clientKey,
         client_secret: this.clientSecret,
         code: code,
         grant_type: 'authorization_code',
         redirect_uri: redirectUri,
-        code_verifier: codeVerifier  // ✅ ADD THIS
-      })
-    });
-
-    const data = await response.json();
-
-    // Clean up the used code_verifier
-    this.codeVerifiers.delete(businessId);
-
-    if (data.error || !data.data?.access_token) {
-      console.error('[TikTok] Token exchange error:', data);
-      throw new Error(data.error?.message || data.error_description || 'Failed to get access token');
+        code_verifier: codeVerifier
+      });
+  
+      console.log('[TikTok] Request body:', requestBody.toString());
+  
+      const response = await fetch(`${this.apiBaseUrl}/oauth/token/`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cache-Control': 'no-cache'
+        },
+        body: requestBody
+      });
+  
+      console.log('[TikTok] Response status:', response.status);
+      
+      const responseText = await response.text();
+      console.log('[TikTok] Response body:', responseText);
+  
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('[TikTok] Failed to parse response:', parseError);
+        throw new Error(`Invalid response from TikTok: ${responseText.substring(0, 200)}`);
+      }
+  
+      // Clean up the used code_verifier
+      this.codeVerifiers.delete(businessId);
+  
+      if (data.error || !data.data?.access_token) {
+        console.error('[TikTok] Token exchange error response:', JSON.stringify(data, null, 2));
+        
+        // More detailed error message
+        const errorMessage = data.error?.message 
+          || data.error_description 
+          || data.message
+          || JSON.stringify(data.error)
+          || 'Failed to get access token';
+        
+        throw new Error(errorMessage);
+      }
+  
+      console.log('[TikTok] Token exchange successful');
+  
+      return {
+        access_token: data.data.access_token,
+        refresh_token: data.data.refresh_token,
+        expires_in: data.data.expires_in || 86400
+      };
+    } catch (error) {
+      console.error('[TikTok] exchangeCodeForToken error:', error);
+      throw error;
     }
-
-    return {
-      access_token: data.data.access_token,
-      refresh_token: data.data.refresh_token,
-      expires_in: data.data.expires_in || 86400 // 24 hours
-    };
   }
 
   /**
