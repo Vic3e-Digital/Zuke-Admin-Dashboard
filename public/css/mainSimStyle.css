@@ -1,243 +1,318 @@
-/* Main Category Card Styles - Minimal Design with Gradient */
+/* Main Category Card Styles - White Card with Custom Layout */
 .main-sim-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-    margin: 40px 0 30px 0;
-    padding: 0 20px;
-  }
-  
-  /* Base Main Card - Square-ish, Minimal Style with Gradient */
-  .main-sim-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 12px;
-    padding: 32px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    aspect-ratio: 1 / 1; /* Makes it square */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* Push content to bottom */
-    /* Only bottom shadow - minimal */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: visible;
-  }
-  
-  .main-sim-card:hover {
-    transform: translateY(-4px);
-    /* Deeper bottom shadow on hover */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Accent Gradients */
-  .main-sim-card.accent-orange {
-    background: linear-gradient(135deg, #FF6B35 0%, #FF8C61 100%);
-    box-shadow: 0 4px 6px -1px rgba(255, 107, 53, 0.3);
-  }
-  
-  .main-sim-card.accent-orange:hover {
-    box-shadow: 0 10px 15px -3px rgba(255, 107, 53, 0.4);
-  }
-  
-  .main-sim-card.accent-blue {
-    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
-  }
-  
-  .main-sim-card.accent-blue:hover {
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
-  }
-  
-  .main-sim-card.accent-green {
-    background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
-    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
-  }
-  
-  .main-sim-card.accent-green:hover {
-    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
-  }
-  
-  .main-sim-card.accent-purple {
-    background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
-    box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
-  }
-  
-  .main-sim-card.accent-purple:hover {
-    box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
-  }
-  
-  /* Info Icon (top right) with Tooltip */
-  .main-sim-info-icon {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    width: 24px;
-    height: 24px;
-    color: rgba(255, 255, 255, 0.7);
-    transition: all 0.3s ease;
-    cursor: help;
-    z-index: 10;
-  }
-  
-  .main-sim-card:hover .main-sim-info-icon {
-    color: rgba(255, 255, 255, 1);
-  }
-  
-  /* Tooltip for description */
-  .main-sim-info-tooltip {
-    position: absolute;
-    top: 60px;
-    right: 24px;
-    background: rgba(17, 24, 39, 0.95);
-    color: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.5;
-    max-width: 250px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin: 40px 0 30px 0;
+  padding: 0 20px;
+}
+
+/* Base Main Card - White with colored bottom border */
+.main-sim-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  aspect-ratio: 1 / 1; /* Makes it square */
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr auto;
+  /* Only bottom shadow - minimal */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.main-sim-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+}
+
+/* Accent Colors - Bottom Border */
+.main-sim-card.accent-orange {
+  border-bottom: 4px solid #FF6B35;
+}
+
+.main-sim-card.accent-orange:hover {
+  box-shadow: 0 10px 15px -3px rgba(255, 107, 53, 0.2);
+}
+
+.main-sim-card.accent-orange .main-sim-arrow svg {
+  stroke: #FF6B35;
+}
+
+.main-sim-card.accent-blue {
+  border-bottom: 4px solid #3B82F6;
+}
+
+.main-sim-card.accent-blue:hover {
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+}
+
+.main-sim-card.accent-blue .main-sim-arrow svg {
+  stroke: #3B82F6;
+}
+
+.main-sim-card.accent-green {
+  border-bottom: 4px solid #10B981;
+}
+
+.main-sim-card.accent-green:hover {
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+}
+
+.main-sim-card.accent-green .main-sim-arrow svg {
+  stroke: #10B981;
+}
+
+.main-sim-card.accent-purple {
+  border-bottom: 4px solid #8B5CF6;
+}
+
+.main-sim-card.accent-purple:hover {
+  box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.2);
+}
+
+.main-sim-card.accent-purple .main-sim-arrow svg {
+  stroke: #8B5CF6;
+}
+
+/* Card Title - Top Left */
+.main-sim-content {
+  grid-column: 1;
+  grid-row: 1;
+  text-align: left;
+  align-self: start;
+}
+
+.main-sim-content h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.3;
+  max-width: 200px;
+}
+
+/* Arrow Icon - Top Right */
+.main-sim-arrow {
+  grid-column: 2;
+  grid-row: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  transition: transform 0.3s ease;
+}
+
+.main-sim-card:hover .main-sim-arrow {
+  transform: translate(4px, -4px);
+}
+
+.main-sim-arrow svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+  transition: all 0.3s ease;
+}
+
+/* Info Icon - Bottom Left with Tooltip */
+.main-sim-info-icon {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: 24px;
+  height: 24px;
+  color: #9CA3AF;
+  transition: all 0.3s ease;
+  cursor: help;
+  z-index: 10;
+}
+
+.main-sim-card:hover .main-sim-info-icon {
+  color: #FF6B35;
+}
+
+.main-sim-card.accent-orange:hover .main-sim-info-icon {
+  color: #FF6B35;
+}
+
+.main-sim-card.accent-blue:hover .main-sim-info-icon {
+  color: #3B82F6;
+}
+
+.main-sim-card.accent-green:hover .main-sim-info-icon {
+  color: #10B981;
+}
+
+.main-sim-card.accent-purple:hover .main-sim-info-icon {
+  color: #8B5CF6;
+}
+
+/* Tooltip for description */
+.main-sim-info-tooltip {
+  position: absolute;
+  bottom: 60px;
+  left: 24px;
+  background: rgba(17, 24, 39, 0.95);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+/* Arrow for tooltip */
+.main-sim-info-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 16px;
+  width: 12px;
+  height: 12px;
+  background: rgba(17, 24, 39, 0.95);
+  transform: rotate(45deg);
+}
+
+/* Show tooltip on info icon hover */
+.main-sim-info-icon:hover + .main-sim-info-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Image - Bottom Right */
+.main-sim-image {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  overflow: hidden;
+  border-top-left-radius: 60%;
+  transition: all 0.3s ease;
+}
+
+.main-sim-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.main-sim-card:hover .main-sim-image img {
+  transform: scale(1.05);
+}
+
+/* Subcategory Container */
+.subcategory-container {
+  display: none;
+  margin: 24px 20px 30px 20px;
+  padding: 30px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  border-left: 4px solid #FF6B35;
+  animation: slideDown 0.3s ease;
+}
+
+.subcategory-container.active {
+  display: block;
+}
+
+.subcategory-container h2 {
+  margin: 0 0 24px 0;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+@keyframes slideDown {
+  from {
     opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    pointer-events: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 100;
+    transform: translateY(-20px);
   }
-  
-  /* Arrow for tooltip */
-  .main-sim-info-tooltip::before {
-    content: '';
-    position: absolute;
-    top: -6px;
-    right: 16px;
-    width: 12px;
-    height: 12px;
-    background: rgba(17, 24, 39, 0.95);
-    transform: rotate(45deg);
-  }
-  
-  /* Show tooltip on info icon hover */
-  .main-sim-info-icon:hover + .main-sim-info-tooltip {
+  to {
     opacity: 1;
-    visibility: visible;
     transform: translateY(0);
   }
+}
+
+/* Page header spacing */
+.page-header {
+  padding: 0 20px;
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .main-sim-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .main-sim-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 16px;
+    margin: 30px 0 20px 0;
+  }
   
-  /* Card Content - Left aligned, bottom positioned */
-  .main-sim-content {
-    text-align: left;
-    width: 100%;
-    color: white;
+  .main-sim-card {
+    aspect-ratio: 4 / 3; /* Less square on mobile */
+    padding: 20px;
   }
   
   .main-sim-content h3 {
-    font-size: 22px;
-    font-weight: 600;
-    color: white;
-    margin: 0;
-    line-height: 1.3;
+    font-size: 18px;
+    max-width: 160px;
   }
   
-  /* Hide the description paragraph from main content */
-  .main-sim-content p {
-    display: none;
+  .main-sim-image {
+    width: 120px;
+    height: 120px;
   }
   
-  /* Subcategory Container */
+  .main-sim-info-tooltip {
+    max-width: 180px;
+    font-size: 12px;
+  }
+  
   .subcategory-container {
-    display: none;
-    margin: 24px 20px 30px 20px;
-    padding: 30px;
-    background: #F9FAFB;
-    border-radius: 12px;
-    border-left: 4px solid #ff8b00;
-    animation: slideDown 0.3s ease;
+    margin: 16px;
+    padding: 20px;
   }
   
-  .subcategory-container.active {
-    display: block;
-  }
-  
-  .subcategory-container h2 {
-    margin: 0 0 24px 0;
-    color: #111827;
-    font-size: 24px;
-    font-weight: 600;
-  }
-  
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Page header spacing */
   .page-header {
-    padding: 0 20px;
-    margin-bottom: 0;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-sim-card {
+    aspect-ratio: 1 / 1;
   }
   
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .main-sim-cards-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
+  .main-sim-image {
+    width: 100px;
+    height: 100px;
   }
   
-  @media (max-width: 768px) {
-    .main-sim-cards-grid {
-      grid-template-columns: 1fr;
-      gap: 16px;
-      padding: 0 16px;
-      margin: 30px 0 20px 0;
-    }
-    
-    .main-sim-card {
-      aspect-ratio: 4 / 3; /* Less square on mobile */
-      padding: 24px;
-    }
-    
-    .main-sim-content h3 {
-      font-size: 18px;
-    }
-    
-    .main-sim-info-tooltip {
-      right: 16px;
-      max-width: 100px;
-      font-size: 12px;
-    }
-    
-    .subcategory-container {
-      margin: 16px;
-      padding: 20px;
-    }
-    
-    .page-header {
-      padding: 0 16px;
-    }
+  .main-sim-content h3 {
+    font-size: 16px;
+    max-width: 140px;
   }
-  
-  @media (max-width: 480px) {
-    .main-sim-card {
-      aspect-ratio: 1 / 1; /* Square on very small screens */
-    }
-    
-    .main-sim-info-tooltip {
-      left: 24px;
-      right: 24px;
-      max-width: none;
-    }
-    
-    .main-sim-info-tooltip::before {
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%) rotate(45deg);
-    }
-  }
+}
