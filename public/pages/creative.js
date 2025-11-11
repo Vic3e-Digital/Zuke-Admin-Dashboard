@@ -42,6 +42,10 @@ export async function initCreativePage() {
   const modalTitle = document.getElementById("modalTitle");
   const iframe = document.getElementById("modalIframe");
   const closeBtn = document.getElementsByClassName("close")[0];
+  
+  // Get main card and sim cards container
+  const mainStoreCard = document.getElementById("mainStoreCard");
+  const simCardsContainer = document.getElementById("simCardsContainer");
 
   try {
     // Check authentication
@@ -59,6 +63,30 @@ export async function initCreativePage() {
     const userName = user.name;
     console.log("User email:", userEmail);
     console.log("User name:", userName);
+
+    // Toggle sim cards when main card is clicked
+    if (mainStoreCard && simCardsContainer) {
+      mainStoreCard.addEventListener('click', function(e) {
+        // Don't toggle if clicking on info icon or its tooltip
+        if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
+          return;
+        }
+        
+        // Toggle display
+        if (simCardsContainer.style.display === 'none' || simCardsContainer.style.display === '') {
+          simCardsContainer.style.display = 'grid';
+          // Smooth scroll to sim cards
+          setTimeout(() => {
+            simCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          simCardsContainer.style.display = 'none';
+        }
+      });
+      
+      // Add cursor pointer to indicate it's clickable
+      mainStoreCard.style.cursor = 'pointer';
+    }
 
     // Function to show Coming Soon modal
     function showComingSoon(featureName) {

@@ -1101,6 +1101,25 @@ export async function initMarketingPage() {
     const userEmail = user.email || user.name || 'unknown';
     const userName = user.name || 'User';
 
+    // Handle main card click - FIXED: Added click handler for the main card
+    const mainCard = document.querySelector('.main-sim-card[data-category="store-management"]');
+    if (mainCard) {
+      mainCard.addEventListener('click', async function(e) {
+        // Don't trigger if clicking the info icon
+        if (e.target.closest('.main-sim-info-icon')) {
+          return;
+        }
+        
+        document.getElementById("marketingMainContent").style.display = "none";
+        document.getElementById("socialMediaSubContent").style.display = "block";
+        
+        const socialMediaCardsDiv = document.getElementById("socialMediaCards");
+        socialMediaCardsDiv.innerHTML = await loadSocialMediaCards(userEmail, userName);
+        
+        setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe);
+      });
+    }
+
     const mainPageButtons = document.querySelectorAll('#marketingMainContent .sim-action-btn[data-action]');
     mainPageButtons.forEach(button => {
       button.addEventListener('click', async function(e) {
