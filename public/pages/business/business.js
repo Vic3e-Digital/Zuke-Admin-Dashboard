@@ -45,6 +45,7 @@ export async function initBusinessPage() {
 
     const user = await auth0Client.getUser();
     const userEmail = user.email || 'unknown';
+    const userName = user.name || 'User';
     
     // Get business data
     currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
@@ -61,6 +62,7 @@ export async function initBusinessPage() {
     const businessCategories = currentBusiness?.store_info?.category?.join(', ') || '';
     const businessCase = currentBusiness?.initial_business_case?.more_details_needed;
     const businessCaseString = Array.isArray(businessCase) ? businessCase.join('\n') : businessCase || '';
+    const businessCaseJSON = JSON.stringify(currentBusiness?.initial_business_case || {});
     const mongoID = currentBusiness?._id;
 
     // Setup category card click handlers
@@ -109,6 +111,18 @@ export async function initBusinessPage() {
         e.stopPropagation();
         modalTitle.textContent = "Add Services";
         iframe.src = `https://marketplace.zuke.co.za/my-account/add-product/`;
+        modal.style.display = "block";
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    // Find Business Partners button
+    const afaaTool1Btn = document.getElementById("afaaTool1Btn");
+    if (afaaTool1Btn) {
+      afaaTool1Btn.onclick = function(e) {
+        e.stopPropagation();
+        modalTitle.textContent = "Find Partners from LinkedIn";
+        iframe.src = `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCaseJSON}`;
         modal.style.display = "block";
         document.body.style.overflow = 'hidden';
       }
