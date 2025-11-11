@@ -7,89 +7,159 @@
     <!-- Primary Meta Tags -->
     <title>ZukeX - AI-Powered Business Management Platform | Login</title>
     <meta name="title" content="ZukeX - AI-Powered Business Management Platform | Login">
-    <meta name="description" content="Access your ZukeX dashboard - the comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions. Secure login to manage your business operations.">
-    <meta name="keywords" content="ZukeX, business management, AI platform, dashboard, login, business automation, creative tools, marketing, marketplace">
-    <meta name="author" content="ZukeX">
-    <meta name="robots" content="index, follow">
-    <meta name="language" content="English">
-    <meta name="revisit-after" content="7 days">
+    <meta name="description" content="Access your ZukeX dashboard - the comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions.">
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://zuke.co.za/">
-    <meta property="og:title" content="ZukeX - AI-Powered Business Management Platform">
-    <meta property="og:description" content="Comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions. Transform your business operations with intelligent automation.">
-    <meta property="og:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
-    <meta property="og:site_name" content="ZukeX">
-    <meta property="og:locale" content="en_ZA">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://zuke.co.za/">
-    <meta property="twitter:title" content="ZukeX - AI-Powered Business Management Platform">
-    <meta property="twitter:description" content="Comprehensive AI-powered platform for business management, creative tools, marketing automation, and marketplace solutions.">
-    <meta property="twitter:image" content="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg">
-    
-    <!-- Favicon and Icons -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="css/faviconV2.png">
     <link rel="apple-touch-icon" href="css/faviconV2.png">
     
-    <!-- Preconnect for Performance
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.auth0.com">
-     -->
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="loginStyle.css">
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Structured Data -->
-    <!-- <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "ZukeX",
-        "description": "AI-powered business management platform with creative tools, marketing automation, and marketplace solutions",
-        "url": "https://zuke.co.za",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "ZAR"
-        },
-        "creator": {
-            "@type": "Organization",
-            "name": "ZukeX"
-        }
-    }
-    </script> -->
-    
-    <!-- Analytics will be loaded lazily after page load -->
+    <!-- Font Awesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="animated-background"></div>
+    
+        <!-- Optional: Video Background -->
+    
+    <!-- <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://res.cloudinary.com/vic-3e/video/upload/v1762112101/IMG_9129_lvsmu0.webm" type="video/mp4">
+        </video>
+    </div>
+    -->
+    
+    <!-- Floating Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    
+    <!-- Particles Container -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Main Content -->
     <main class="login-container" role="main">
         <section class="login-card" aria-labelledby="login-title">
-            <header class="card-header">
-                <h1 id="login-title" class="card-title">Login to ZukeX</h1>
-            </header>
-            <div class="card-content">
-                <form class="login-form" role="form" aria-label="User authentication">
-                    <div class="button-group" style="text-align:center; margin-bottom: 1.5rem;">
-                        <button id="btn-login" class="submit-button" disabled="true" onclick="console.log('Login button clicked'); login();" style="width: 100%; margin-bottom: 1rem;" aria-label="Sign in to your ZukeX account">
-                            Log in
-                        </button>
-                        <button id="btn-logout" class="submit-button" disabled="true" onclick="console.log('Logout button clicked'); logout();" style="width: 100%; background: #eee; color: #333;" aria-label="Sign out of your ZukeX account">
-                            Log out
-                        </button>
+            
+            <!-- LEFT SIDE - Content -->
+            <div class="card-content-wrapper">
+                <!-- Main Content (Logo, Header, Button) -->
+                <div class="card-main-content">
+                    <!-- Logo -->
+                    <div class="logo-container">
+                        <img src="https://res.cloudinary.com/vic-3e/image/upload/v1758796933/Zuke_Logo_-_White_yimnnc.svg" 
+                            alt="ZukeX Logo" 
+                            class="logo"
+                            style="filter: brightness(0);">
                     </div>
-                </form>
+                    
+                    <!-- Header -->
+                    <header class="card-header">
+                        <h1 id="login-title" class="card-title">Welcome to ZukeX</h1>
+                        <p class="card-subtitle">AI-Powered Business Management</p>
+                        <p class="card-description">
+                            Transform your business operations with our comprehensive platform. 
+                            Access creative tools, marketing automation, and marketplace solutions all in one place.
+                        </p>
+                    </header>
+                    
+                    <!-- Content -->
+                    <div class="card-content">
+                        <form class="login-form" role="form" aria-label="User authentication">
+                            <div class="button-group">
+                                <button id="btn-login" 
+                                        class="submit-button" 
+                                        disabled="true" 
+                                        type="button"
+                                        onclick="login();" 
+                                        aria-label="Sign in to your ZukeX account">
+                                    <span>Get Started</span>
+                                </button>
+                                
+                                <button id="btn-logout" 
+                                        class="submit-button logout-button" 
+                                        disabled="true" 
+                                        type="button"
+                                        onclick="logout();" 
+                                        style="display: none;"
+                                        aria-label="Sign out of your ZukeX account">
+                                    <span>Log out</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Social Icons - Now at Bottom -->
+                <div class="social-icons">
+                    <a href="https://www.linkedin.com/company/zuke-marketplace/" 
+                    class="social-icon" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn" 
+                    title="Follow us on LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://www.facebook.com/zuke.marketplace" 
+                    class="social-icon" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook" 
+                    title="Like us on Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://instagram.com/zuke.marketplace/" 
+                    class="social-icon" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram" 
+                    title="Follow us on Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.tiktok.com/@zuke.marketplace" 
+                    class="social-icon" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TikTok" 
+                    title="Follow us on TikTok">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@Zuke.Marketplace/" 
+                    class="social-icon" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube" 
+                    title="Subscribe on YouTube">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
             </div>
+            
+            <!-- RIGHT SIDE - Image -->
+            <div class="card-image-wrapper">
+                <img src="https://res.cloudinary.com/vic-3e/image/upload/v1762864168/zuke-header-image_g5f7di.avif" 
+                     alt="ZukeX Platform Preview" 
+                     class="card-image"
+                     loading="lazy">
+                <!-- You can replace with your Cloudinary image URL -->
+                <!-- Example: https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1234567/your-image.jpg -->
+            </div>
+            
         </section>
     </main>
     
-    <!-- <script src="js/analytics.js"></script> -->
+    <!-- Scripts -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <script src="js/animations.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
