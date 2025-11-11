@@ -92,6 +92,16 @@ export async function initBusinessPage() {
       }
     }
 
+    // Pitch Deck button (Coming Soon - disabled)
+    const pitchDeckBtn = document.getElementById("pitchDeckBtn");
+    if (pitchDeckBtn) {
+      pitchDeckBtn.onclick = function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        // Could add a toast notification here: "Pitch Deck tool coming soon!"
+      }
+    }
+
     // Add Products button
     const addProductsBtn = document.getElementById("addProductsBtn");
     if (addProductsBtn) {

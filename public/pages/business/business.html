@@ -2,7 +2,6 @@
 <link rel="stylesheet" href="../../css/simStyle.css">
 
 
-
 <div class="page-container">
   <div class="page-header">
     <h1 class="page-title">Business Management</h1>
@@ -84,6 +83,42 @@
       
     </div>
 
+    <!-- Business Network and Customer Management Card -->
+    <div class="main-sim-card accent-orange" data-category="network-management">
+      
+      <!-- Title - Top Left -->
+      <div class="main-sim-content">
+        <h3>Business Network and Customer Management</h3>
+      </div>
+      
+      <!-- Arrow - Top Right -->
+      <div class="main-sim-arrow">
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(180deg);">
+    <path opacity="0.4" d="M5.47445 6.53277C5.18157 6.23988 5.18157 5.76512 5.47445 5.47222C5.76735 5.17934 6.24211 5.17934 6.535 5.47222L18.5311 17.4683C18.824 17.7612 18.824 18.236 18.5311 18.5289C18.2382 18.8217 17.7634 18.8218 17.4705 18.5289L5.47445 6.53277Z" fill="currentColor"/>
+    <path d="M14.9936 5.25223C15.4078 5.25213 15.7435 5.58804 15.7436 6.00223C15.7435 6.41613 15.4084 6.75183 14.9946 6.75223L5.25223 6.75223ZM5.25238 6.00423L5.25629 5.92803C5.29477 5.54993 5.61422 5.25523 6.00238 5.25513L14.9936 5.25223V6.00223L14.9946 6.75223L6.7514 6.75513L6.74945 15.0002L6.74554 15.0774C6.70692 15.4554 6.38759 15.7503 5.99945 15.7502C5.58532 15.7501 5.24945 15.4143 5.24945 15.0002L5.25238 6.00423Z" fill="currentColor"/>
+  </svg>
+      </div>
+      
+      <!-- Info Icon - Bottom Left -->
+      <svg class="main-sim-info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      
+      <!-- Tooltip (appears on info icon hover) -->
+      <div class="main-sim-info-tooltip">
+       Tools and resources to build and manage your business network, connect with strategic partners, onboard customers, and gather feedback to grow your business.
+      </div>
+      
+      <!-- Image - Bottom Right -->
+      <div class="main-sim-image">
+        <img src="https://res.cloudinary.com/vic-3e/image/upload/v1762777667/zuke_image_test_udjdi3.webp" 
+             alt="Network Management" 
+             loading="lazy">
+      </div>
+      
+    </div>
+
   </div>
 
   <!-- Subcategory: Business Profile Management -->
@@ -105,6 +140,31 @@
               <p class="sim-description">Build a comprehensive business case for funding</p>
             </div>
             <button class="sim-action-btn" id="businessCaseBtn" aria-label="Open Business Case">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="sim-card coming-soon">
+        <div class="coming-soon-badge">Coming Soon</div>
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="4" width="18" height="14" rx="2" stroke="#323544" stroke-width="2"/>
+            <path d="M8 9L12 11.5L16 9" stroke="#323544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 13L12 15.5L16 13" stroke="#323544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Create a Simple Pitch Deck</h3>
+              <p class="sim-description">Produce a concise, compelling deck to tell your business story.</p>
+            </div>
+            <button class="sim-action-btn" id="pitchDeckBtn" aria-label="Create Pitch Deck" disabled>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
               </svg>
@@ -165,29 +225,90 @@
           </div>
         </div>
       </div>
+
+    </div>
+  </div>
+
+  <!-- Subcategory: Business Network and Customer Management -->
+  <div class="subcategory-container" id="network-management">
+    <h2>Business Network and Customer Management</h2>
+    <div class="sim-cards-grid">
+
+      <!-- Find Business Partners -->
       <div class="sim-card" id="card1">
-      <div class="sim-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="8" cy="8" r="3" stroke="#323544" stroke-width="2"/>
-          <circle cx="16" cy="8" r="3" stroke="#323544" stroke-width="2"/>
-          <path d="M8 14c-2.21 0-4 1.79-4 4v2h8v-2c0-2.21-1.79-4-4-4z" stroke="#323544" stroke-width="2"/>
-          <path d="M16 14c-2.21 0-4 1.79-4 4v2h8v-2c0-2.21-1.79-4-4-4z" stroke="#323544" stroke-width="2" opacity="0.4"/>
-        </svg>
-      </div>
-      <div class="sim-content">
-        <div class="sim-body">
-          <div class="sim-info">
-            <h3 class="sim-name">Find Business Partners (LinkedIn)</h3>
-            <p class="sim-description">Discover potential collaborators, clients, or organizations aligned with your business goals directly from LinkedIn.</p>
-          </div>
-            <button class="sim-action-btn" id="addProductsBtn" aria-label="Add Products">
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="3" stroke="#323544" stroke-width="2"/>
+            <circle cx="16" cy="8" r="3" stroke="#323544" stroke-width="2"/>
+            <path d="M8 14c-2.21 0-4 1.79-4 4v2h8v-2c0-2.21-1.79-4-4-4z" stroke="#323544" stroke-width="2"/>
+            <path d="M16 14c-2.21 0-4 1.79-4 4v2h8v-2c0-2.21-1.79-4-4-4z" stroke="#323544" stroke-width="2" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Find Business Partners (LinkedIn)</h3>
+              <p class="sim-description">Discover potential collaborators, clients, or organizations aligned with your business goals directly from LinkedIn.</p>
+            </div>
+            <button class="sim-action-btn" id="afaaTool1Btn" aria-label="Find Business Partners">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
               </svg>
             </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- Add Customer -->
+      <div class="sim-card coming-soon">
+        <div class="coming-soon-badge">Coming Soon</div>
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="#323544" stroke-width="2"/>
+            <path d="M6 21v-2c0-2.21 2.69-4 6-4s6 1.79 6 4v2" stroke="#323544" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 12V15M12 15L10 13M12 15L14 13" stroke="#323544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Add Customer</h3>
+              <p class="sim-description">Add a new customer to your database for follow-ups and marketing.</p>
+            </div>
+            <button class="sim-action-btn" id="addCustomerBtn" aria-label="Add Customer" disabled>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Request Customer Feedback -->
+      <div class="sim-card coming-soon">
+        <div class="coming-soon-badge">Coming Soon</div>
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 11.5C21 16.75 16.75 21 11.5 21C6.25 21 2 16.75 2 11.5C2 6.25 6.25 2 11.5 2C16.75 2 21 6.25 21 11.5Z" stroke="#323544" stroke-width="2"/>
+            <path d="M22 22L20 20" stroke="#323544" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8.5 10.5H8.51M14.5 10.5H14.51" stroke="#323544" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8.5 14.5C8.5 14.5 9.5 16 11.5 16C13.5 16 14.5 14.5 14.5 14.5" stroke="#323544" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Request Customer Feedback</h3>
+              <p class="sim-description">Ask your customers for reviews or testimonials to boost credibility.</p>
+            </div>
+            <button class="sim-action-btn" id="requestFeedbackBtn" aria-label="Request Feedback" disabled>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.4357 13.9174C20.8659 13.0392 20.8659 10.9608 19.4357 10.0826L9.55234 4.01389C8.05317 3.09335 6.125 4.17205 6.125 5.93128L6.125 18.0688C6.125 19.828 8.05317 20.9067 9.55234 19.9861L19.4357 13.9174Z" fill="white"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
