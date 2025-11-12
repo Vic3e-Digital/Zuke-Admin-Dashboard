@@ -15,8 +15,12 @@ const veoVertexApiRouter = require('./api/veo-vertex-api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const getOpenAIConfig = require('./api/get-openai-config');
-
 const businessCaseApi = require('./api/business-case-api');
+
+const tokenRefreshService = require('./api/services/token-refresh.service');
+
+tokenRefreshService.startAutoRefresh();
+
 
 // Add these at the top with other imports
 const { ManagementClient } = require('auth0');

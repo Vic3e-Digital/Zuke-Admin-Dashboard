@@ -600,11 +600,12 @@ router.get('/auth/tiktok/connect', (req, res) => {
 
 router.get('/auth/tiktok/callback', async (req, res) => {
   try {
+    // ✅ Extract stateToken (NOT businessId)
     const { code, state: stateToken, error, error_description } = req.query;
     
     console.log('[OAuth] TikTok callback received:', {
       hasCode: !!code,
-      stateToken,
+      stateToken: stateToken?.substring(0, 16) + '...',
       error,
       error_description
     });
@@ -620,16 +621,23 @@ router.get('/auth/tiktok/callback', async (req, res) => {
     const redirectUri = `${process.env.APP_URL}/api/business-settings/auth/tiktok/callback`;
 
     console.log('[OAuth] Attempting token exchange...');
-    // ✅ Pass stateToken instead of businessId
+    
+    // ✅ Pass stateToken - service will return businessId
     const tokenData = await tiktokOAuth.exchangeCodeForToken(code, redirectUri, stateToken);
     console.log('[OAuth] Token exchange successful');
 
-    // ✅ Get businessId from tokenData (returned by exchangeCodeForToken)
+    // ✅ Get businessId from returned token data
     const businessId = tokenData.businessId;
+    
+    if (!businessId) {
+      throw new Error('Business ID not found in token response');
+    }
+
+    console.log('[OAuth] Business ID from state:', businessId.substring(0, 8) + '...');
 
     console.log('[OAuth] Fetching user info...');
     const userInfo = await tiktokOAuth.getUserInfo(tokenData.access_token);
-    console.log('[OAuth] User info retrieved:', userInfo.username);
+    console.log('[OAuth] User info retrieved:', userInfo.username || userInfo.display_name);
 
     // Format data for storage
     const connectionData = tiktokOAuth.formatUserData(
@@ -639,20 +647,23 @@ router.get('/auth/tiktok/callback', async (req, res) => {
       tokenData.expires_in
     );
 
-    // Save to database
+    // ✅ Save to database using businessId
+    console.log('[OAuth] Saving TikTok connection...');
     await businessSettingsService.updatePlatformConnection(
       businessId,
       'tiktok',
       connectionData
     );
 
-    console.log(`[OAuth] TikTok connected - Business: ${businessId}, User: @${userInfo.username}`);
+    console.log(`[OAuth] ✅ TikTok connected successfully`);
+    console.log(`[OAuth] Business: ${businessId.substring(0, 8)}...`);
+    console.log(`[OAuth] User: @${userInfo.username || userInfo.display_name}`);
 
     // Success page
     res.send(OAuthTemplates.success('tiktok', {
       display_name: userInfo.display_name,
-      username: userInfo.username,
-      follower_count: userInfo.follower_count
+      username: userInfo.username || userInfo.display_name,
+      follower_count: userInfo.follower_count || 0
     }));
 
   } catch (error) {
@@ -662,6 +673,7 @@ router.get('/auth/tiktok/callback', async (req, res) => {
     res.send(OAuthTemplates.error('tiktok', error.message));
   }
 });
+
 
 // TikTok Disconnect
 router.post('/auth/tiktok/disconnect', async (req, res) => {

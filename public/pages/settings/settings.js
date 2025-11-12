@@ -355,6 +355,11 @@ class SettingsController {
       this.socialConnections.connectPlatform('tiktok', currentBusiness);
     };
 
+    // In settings.js - exposeGlobalFunctions method
+    window.changeTikTokAccount = () => {
+      this.socialConnections.changePlatformAccount('tiktok', this.currentBusiness);
+    };
+
     // Automation
     window.saveAutomationSettings = () => {
       this.automationPanel.saveSettings(currentBusiness);

@@ -1,82 +1,88 @@
 class OAuthTemplates {
-    static pageSelector(pages, platform, userToken) {
-      const platformConfig = {
-        facebook: {
-          title: 'Select Facebook Page',
-          color: '#1877F2',
-          description: 'Choose which page you want to connect'
-        },
-        instagram: {
-          title: 'Select Instagram Account',
-          color: '#E1306C',
-          description: 'Choose which Instagram Business account you want to connect'
-        },
-        linkedin: {
-          title: 'Select LinkedIn Organization',
-          color: '#0A66C2',
-          description: 'Choose which company page you want to connect'
-        },
-        youtube: {
-          title: 'Select YouTube Channel',
-          color: '#FF0000',
-          description: 'Choose which channel you want to connect for posting videos'
-        }
-      };
-  
-      const config = platformConfig[platform];
-  
-      return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${config.title}</title>
-          ${this.getBaseStyles()}
-          <style>
-            .selector:hover { border-color: ${config.color}; }
-            .select-btn { background: ${config.color}; }
-          </style>
-        </head>
-        <body>
-          <div class="selector-container">
-            <h2>${config.title}</h2>
-            <p class="subtitle">${config.description}</p>
-            ${pages.map(page => this.renderPageOption(page, platform)).join('')}
-          </div>
-          <script>
-            function selectItem(id) {
-              const url = new URL(window.location.href);
-              url.searchParams.delete('code');
-              url.searchParams.set('${platform}_id', id);
-              url.searchParams.set('user_token', '${userToken}');
-              window.location.href = url.toString();
-            }
-          </script>
-        </body>
-        </html>
-      `;
-    }
-  
-    static success(platform, data) {
-      const platformConfig = {
-        facebook: { color: '#1877F2', icon: '✓' },
-        instagram: { color: '#E1306C', icon: '✓' },
-        linkedin: { color: '#0A66C2', icon: '✓' },
-        youtube: { color: '#FF0000', icon: '✓' }
-      };
-  
-      const config = platformConfig[platform];
-  
-      return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Connected</title>
-          ${this.getBaseStyles()}
-        </head>
-        <body>
-          <div class="success-card">
-            <div class="icon" style="background: ${config.color};">${config.icon}</div>
-                      <h2>Connected Successfully</h2>
+  static pageSelector(pages, platform, userToken) {
+    const platformConfig = {
+      facebook: {
+        title: 'Select Facebook Page',
+        color: '#1877F2',
+        description: 'Choose which page you want to connect'
+      },
+      instagram: {
+        title: 'Select Instagram Account',
+        color: '#E1306C',
+        description: 'Choose which Instagram Business account you want to connect'
+      },
+      linkedin: {
+        title: 'Select LinkedIn Organization',
+        color: '#0A66C2',
+        description: 'Choose which company page you want to connect'
+      },
+      youtube: {
+        title: 'Select YouTube Channel',
+        color: '#FF0000',
+        description: 'Choose which channel you want to connect for posting videos'
+      },
+      tiktok: {
+        title: 'Select TikTok Account',
+        color: '#000000',
+        description: 'Choose which TikTok account you want to connect'
+      }
+    };
+
+    const config = platformConfig[platform];
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${config.title}</title>
+        ${this.getBaseStyles()}
+        <style>
+          .selector:hover { border-color: ${config.color}; }
+          .select-btn { background: ${config.color}; }
+        </style>
+      </head>
+      <body>
+        <div class="selector-container">
+          <h2>${config.title}</h2>
+          <p class="subtitle">${config.description}</p>
+          ${pages.map(page => this.renderPageOption(page, platform)).join('')}
+        </div>
+        <script>
+          function selectItem(id) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('code');
+            url.searchParams.set('${platform}_id', id);
+            url.searchParams.set('user_token', '${userToken}');
+            window.location.href = url.toString();
+          }
+        </script>
+      </body>
+      </html>
+    `;
+  }
+
+  static success(platform, data) {
+    const platformConfig = {
+      facebook: { color: '#1877F2', icon: '✓' },
+      instagram: { color: '#E1306C', icon: '✓' },
+      linkedin: { color: '#0A66C2', icon: '✓' },
+      youtube: { color: '#FF0000', icon: '✓' },
+      tiktok: { color: '#000000', icon: '✓' }
+    };
+
+    const config = platformConfig[platform];
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Connected</title>
+        ${this.getBaseStyles()}
+      </head>
+      <body>
+        <div class="success-card">
+          <div class="icon" style="background: ${config.color};">${config.icon}</div>
+          <h2>Connected Successfully</h2>
           <div class="info-card">
             ${this.renderSuccessInfo(platform, data)}
           </div>
@@ -273,6 +279,11 @@ class OAuthTemplates {
         name = page.name;
         meta = page.customUrl ? `youtube.com/${page.customUrl}` : `${this.formatNumber(page.subscriberCount)} subscribers`;
         break;
+      case 'tiktok':
+        thumbnail = page.avatar_url || '';
+        name = page.display_name || page.username;
+        meta = page.username ? `@${page.username}` : 'TikTok Account';
+        break;
     }
 
     return `
@@ -308,6 +319,11 @@ class OAuthTemplates {
         return `
           <div class="name">${data.channel_name}</div>
           <div class="meta">${data.custom_url ? `youtube.com/${data.custom_url}` : ''}</div>
+        `;
+      case 'tiktok':
+        return `
+          <div class="name">${data.display_name}</div>
+          <div class="meta">${data.username ? `@${data.username}` : 'TikTok Account'}</div>
         `;
       default:
         return '';
