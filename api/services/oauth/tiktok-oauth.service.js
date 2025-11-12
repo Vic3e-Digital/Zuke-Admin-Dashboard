@@ -8,18 +8,15 @@ class TikTokOAuthService extends OAuthService {
     this.clientSecret = process.env.TIKTOK_CLIENT_SECRET;
     this.apiBaseUrl = 'https://open.tiktokapis.com/v2';
     
-    // Store code verifiers temporarily (in production, use Redis or session storage)
-    this.codeVerifiers = new Map();
+    // Store PKCE state (in production, use Redis)
+    this.authStates = new Map(); // { stateToken: { businessId, codeVerifier, timestamp } }
   }
 
   /**
    * Generate PKCE code verifier and challenge
    */
   generatePKCE() {
-    // Generate code_verifier (43-128 characters)
     const codeVerifier = crypto.randomBytes(32).toString('base64url');
-    
-    // Generate code_challenge (SHA256 hash of verifier, base64url encoded)
     const codeChallenge = crypto
       .createHash('sha256')
       .update(codeVerifier)
@@ -41,47 +38,53 @@ class TikTokOAuthService extends OAuthService {
     // Generate PKCE parameters
     const { codeVerifier, codeChallenge } = this.generatePKCE();
     
-    // Store code_verifier for later use (keyed by businessId)
-    this.codeVerifiers.set(businessId, codeVerifier);
+    // Generate random state token
+    const stateToken = crypto.randomBytes(32).toString('base64url');
     
-    // Clean up old verifiers after 10 minutes
+    // Store state data
+    this.authStates.set(stateToken, {
+      businessId,
+      codeVerifier,
+      timestamp: Date.now()
+    });
+    
+    // Clean up after 10 minutes
     setTimeout(() => {
-      this.codeVerifiers.delete(businessId);
+      this.authStates.delete(stateToken);
     }, 10 * 60 * 1000);
 
-    const state = encodeURIComponent(businessId);
+    console.log('[TikTok] Generated auth URL with state:', stateToken);
 
     return `https://www.tiktok.com/v2/auth/authorize/?` +
       `client_key=${this.clientKey}` +
       `&scope=${scopes.join(',')}` +
       `&response_type=code` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&state=${state}` +
-      `&code_challenge=${codeChallenge}` +  // ✅ ADD THIS
-      `&code_challenge_method=S256`;         // ✅ ADD THIS
+      `&state=${stateToken}` +
+      `&code_challenge=${codeChallenge}` +
+      `&code_challenge_method=S256`;
   }
 
-
   /**
- * Exchange authorization code for access token (with PKCE)
- */
-async exchangeCodeForToken(code, redirectUri, businessId) {
+   * Exchange authorization code for access token (with PKCE)
+   */
+  async exchangeCodeForToken(code, redirectUri, stateToken) {
     try {
-      // Retrieve the stored code_verifier
-      const codeVerifier = this.codeVerifiers.get(businessId);
+      console.log('[TikTok] Exchanging code, state token:', stateToken);
       
-      if (!codeVerifier) {
-        console.error('[TikTok] Code verifier not found for businessId:', businessId);
-        throw new Error('Code verifier not found. Please try connecting again.');
+      // Retrieve stored state data
+      const stateData = this.authStates.get(stateToken);
+      
+      if (!stateData) {
+        console.error('[TikTok] State not found for token:', stateToken);
+        console.log('[TikTok] Available states:', Array.from(this.authStates.keys()));
+        throw new Error('Invalid state token. Please try connecting again.');
       }
-  
-      console.log('[TikTok] Token exchange request:', {
-        businessId,
-        hasCode: !!code,
-        hasVerifier: !!codeVerifier,
-        redirectUri
-      });
-  
+
+      const { businessId, codeVerifier } = stateData;
+      
+      console.log('[TikTok] Retrieved state data:', { businessId, hasVerifier: !!codeVerifier });
+
       const requestBody = new URLSearchParams({
         client_key: this.clientKey,
         client_secret: this.clientSecret,
@@ -90,9 +93,9 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
         redirect_uri: redirectUri,
         code_verifier: codeVerifier
       });
-  
-      console.log('[TikTok] Request body:', requestBody.toString());
-  
+
+      console.log('[TikTok] Making token request...');
+
       const response = await fetch(`${this.apiBaseUrl}/oauth/token/`, {
         method: 'POST',
         headers: { 
@@ -101,12 +104,12 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
         },
         body: requestBody
       });
-  
+
       console.log('[TikTok] Response status:', response.status);
       
       const responseText = await response.text();
       console.log('[TikTok] Response body:', responseText);
-  
+
       let data;
       try {
         data = JSON.parse(responseText);
@@ -114,31 +117,30 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
         console.error('[TikTok] Failed to parse response:', parseError);
         throw new Error(`Invalid response from TikTok: ${responseText.substring(0, 200)}`);
       }
-  
-      // Clean up the used code_verifier
-      this.codeVerifiers.delete(businessId);
-  
-      // ✅ FIXED: TikTok returns data at root level, not nested under "data"
+
+      // Clean up the used state
+      this.authStates.delete(stateToken);
+
+      // Handle errors
       if (data.error) {
         console.error('[TikTok] Token exchange error:', data.error);
         const errorMessage = data.error.message || data.error_description || 'Token exchange failed';
         throw new Error(errorMessage);
       }
-  
-      // ✅ Check for access_token at root level
+
       if (!data.access_token) {
         console.error('[TikTok] No access_token in response:', data);
         throw new Error('No access token received from TikTok');
       }
-  
+
       console.log('[TikTok] Token exchange successful');
-  
-      // ✅ Return data from root level
+
       return {
         access_token: data.access_token,
         refresh_token: data.refresh_token,
         expires_in: data.expires_in || 86400,
-        open_id: data.open_id  // Also return open_id for reference
+        open_id: data.open_id,
+        businessId // Return businessId for callback handler
       };
     } catch (error) {
       console.error('[TikTok] exchangeCodeForToken error:', error);
@@ -146,11 +148,10 @@ async exchangeCodeForToken(code, redirectUri, businessId) {
     }
   }
 
-  
   /**
- * Refresh access token
- */
-async refreshToken(refreshToken) {
+   * Refresh access token
+   */
+  async refreshToken(refreshToken) {
     const response = await fetch(`${this.apiBaseUrl}/oauth/token/`, {
       method: 'POST',
       headers: { 
@@ -164,19 +165,17 @@ async refreshToken(refreshToken) {
         refresh_token: refreshToken
       })
     });
-  
+
     const data = await response.json();
-  
-    // ✅ FIXED: Check at root level
+
     if (data.error) {
       throw new Error(data.error.message || data.error_description || 'Failed to refresh token');
     }
-  
+
     if (!data.access_token) {
       throw new Error('No access token received from TikTok');
     }
-  
-    // ✅ Return from root level
+
     return {
       access_token: data.access_token,
       refresh_token: data.refresh_token,
