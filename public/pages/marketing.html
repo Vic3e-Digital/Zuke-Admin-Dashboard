@@ -10,25 +10,97 @@
       <p class="page-subtitle">All your marketing tools in one place</p>
     </div>
 
-    <!-- Marketing SIM Cards Grid -->
-    <div class="sim-cards-grid">
+    <!-- Main Marketing Cards Grid -->
+    <div class="main-sim-cards-grid">
       
-      <!-- Social Media Management Card -->
-      <div class="sim-card" id="socialMediaCard">
+      <!-- Social Media Management Main Card -->
+      <div class="main-sim-card accent-blue" data-category="social-media" id="mainSocialMediaCard">
+        <!-- Title - Top Left -->
+        <div class="main-sim-content">
+          <h3>Social Media Management</h3>
+        </div>
+        
+        <!-- Arrow - Top Right -->
+        <div class="main-sim-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(180deg);">
+            <path opacity="0.4" d="M5.47445 6.53277C5.18157 6.23988 5.18157 5.76512 5.47445 5.47222C5.76735 5.17934 6.24211 5.17934 6.535 5.47222L18.5311 17.4683C18.824 17.7612 18.824 18.236 18.5311 18.5289C18.2382 18.8217 17.7634 18.8218 17.4705 18.5289L5.47445 6.53277Z" fill="currentColor"/>
+            <path d="M14.9936 5.25223C15.4078 5.25213 15.7435 5.58804 15.7436 6.00223C15.7435 6.41613 15.4084 6.75183 14.9946 6.75223L5.25223 6.75223ZM5.25238 6.00423L5.25629 5.92803C5.29477 5.54993 5.61422 5.25523 6.00238 5.25513L14.9936 5.25223V6.00223L14.9946 6.75223L6.7514 6.75513L6.74945 15.0002L6.74554 15.0774C6.70692 15.4554 6.38759 15.7503 5.99945 15.7502C5.58532 15.7501 5.24945 15.4143 5.24945 15.0002L5.25238 6.00423Z" fill="currentColor"/>
+          </svg>
+        </div>
+        
+        <!-- Info Icon - Bottom Left -->
+        <svg class="main-sim-info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        
+        <!-- Tooltip -->
+        <div class="main-sim-info-tooltip">
+          Create, schedule, and manage all your social media content. Click to view tools.
+        </div>
+        
+        <!-- Image - Bottom Right -->
+        <div class="main-sim-image">
+          <img src="https://res.cloudinary.com/vic-3e/image/upload/v1762777667/zuke_image_test_udjdi3.webp" 
+               alt="Social Media Management" 
+               loading="lazy">
+        </div>
+      </div>
+
+      <!-- Marketing Tools Main Card -->
+      <div class="main-sim-card accent-orange" data-category="marketing-tools" id="mainMarketingToolsCard">
+        <!-- Title - Top Left -->
+        <div class="main-sim-content">
+          <h3>Marketing Tools</h3>
+        </div>
+        
+        <!-- Arrow - Top Right -->
+        <div class="main-sim-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(180deg);">
+            <path opacity="0.4" d="M5.47445 6.53277C5.18157 6.23988 5.18157 5.76512 5.47445 5.47222C5.76735 5.17934 6.24211 5.17934 6.535 5.47222L18.5311 17.4683C18.824 17.7612 18.824 18.236 18.5311 18.5289C18.2382 18.8217 17.7634 18.8218 17.4705 18.5289L5.47445 6.53277Z" fill="currentColor"/>
+            <path d="M14.9936 5.25223C15.4078 5.25213 15.7435 5.58804 15.7436 6.00223C15.7435 6.41613 15.4084 6.75183 14.9946 6.75223L5.25223 6.75223ZM5.25238 6.00423L5.25629 5.92803C5.29477 5.54993 5.61422 5.25523 6.00238 5.25513L14.9936 5.25223V6.00223L14.9946 6.75223L6.7514 6.75513L6.74945 15.0002L6.74554 15.0774C6.70692 15.4554 6.38759 15.7503 5.99945 15.7502C5.58532 15.7501 5.24945 15.4143 5.24945 15.0002L5.25238 6.00423Z" fill="currentColor"/>
+          </svg>
+        </div>
+        
+        <!-- Info Icon - Bottom Left -->
+        <svg class="main-sim-info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        
+        <!-- Tooltip -->
+        <div class="main-sim-info-tooltip">
+          Email marketing, analytics, and automation tools. Click to view tools.
+        </div>
+        
+        <!-- Image - Bottom Right -->
+        <div class="main-sim-image">
+          <img src="https://res.cloudinary.com/vic-3e/image/upload/v1762777667/zuke_image_test_udjdi3.webp" 
+               alt="Marketing Tools" 
+               loading="lazy">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Social Media SIM Cards (Initially Hidden) -->
+    <div class="sim-cards-grid" id="socialMediaCards" style="display: none;">
+      
+      <!-- Post Video Card -->
+      <div class="sim-card" id="postVideoCard">
         <div class="sim-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2H15C13.6739 2 12.4021 2.52678 11.4645 3.46447C10.5268 4.40215 10 5.67392 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73478 14.1054 6.48043 14.2929 6.29289C14.4804 6.10536 14.7348 6 15 6H18V2Z" stroke="#323544" stroke-width="2"/>
-            <circle cx="6" cy="18" r="3" stroke="#323544" stroke-width="2" opacity="0.4"/>
-            <circle cx="18" cy="6" r="3" stroke="#323544" stroke-width="2" opacity="0.4"/>
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke="#323544" stroke-width="2"/>
+            <path d="M10 8.5V15.5L16 12L10 8.5Z" fill="#323544" opacity="0.4"/>
           </svg>
         </div>
         <div class="sim-content">
           <div class="sim-body">
             <div class="sim-info">
-              <h3 class="sim-name">Social Media Management</h3>
-              <p class="sim-description">Create, schedule, and manage all your social media content from one place.</p>
+              <h3 class="sim-name">Post Video</h3>
+              <p class="sim-description">Create and share engaging video content across all your social media platforms.</p>
             </div>
-            <button class="sim-action-btn" data-action="social-media" aria-label="Open Social Media Management">
+            <button class="sim-action-btn" data-action="postVideo" aria-label="Open Video Upload">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
                 <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
@@ -38,6 +110,113 @@
         </div>
       </div>
 
+      <!-- AI Agents Card -->
+      <div class="sim-card" id="aiAgentsCard">
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" stroke="#323544" stroke-width="2"/>
+            <path d="M12 2V6M12 18V22M22 12H18M6 12H2" stroke="#323544" stroke-width="2" opacity="0.4"/>
+            <path d="M20.5 7.5L17.5 10.5M6.5 16.5L3.5 19.5M20.5 16.5L17.5 13.5M6.5 7.5L3.5 4.5" stroke="#323544" stroke-width="2" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">AI Agents</h3>
+              <p class="sim-description">Deploy AI-powered agents to automate your social media engagement and responses.</p>
+            </div>
+            <button class="sim-action-btn" data-action="aiAgents" aria-label="Open AI Agents">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post Image Card -->
+      <div class="sim-card" id="postImageCard">
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="#323544" stroke-width="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5" fill="#323544"/>
+            <path d="M21 15L16 10L5 21" stroke="#323544" stroke-width="2" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Post Image</h3>
+              <p class="sim-description">Share stunning images and graphics to boost your social media presence.</p>
+            </div>
+            <button class="sim-action-btn" data-action="postImage" aria-label="Open Image Upload">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text + AI Image Card -->
+      <div class="sim-card" id="textAIImageCard">
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6C5 2 4 3 4 4V20C4 21 5 22 6 22H18C19 22 20 21 20 20V8L14 2Z" stroke="#323544" stroke-width="2"/>
+            <polyline points="14,2 14,8 20,8" stroke="#323544" stroke-width="2"/>
+            <line x1="8" y1="13" x2="16" y2="13" stroke="#323544" stroke-width="2" opacity="0.4"/>
+            <line x1="8" y1="17" x2="13" y2="17" stroke="#323544" stroke-width="2" opacity="0.4"/>
+            <rect x="14" y="16" width="4" height="4" rx="1" fill="#323544" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Text + AI Image</h3>
+              <p class="sim-description">Combine compelling text with AI-generated images for unique social media posts.</p>
+            </div>
+            <button class="sim-action-btn" data-action="textAIImage" aria-label="Open Text + AI Image Creator">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Article Card -->
+      <div class="sim-card" id="createArticleCard">
+        <div class="sim-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4H20C20.5 4 21 4.5 21 5V19C21 19.5 20.5 20 20 20H4C3.5 20 3 19.5 3 19V5C3 4.5 3.5 4 4 4Z" stroke="#323544" stroke-width="2"/>
+            <line x1="7" y1="9" x2="17" y2="9" stroke="#323544" stroke-width="2"/>
+            <line x1="7" y1="13" x2="17" y2="13" stroke="#323544" stroke-width="2" opacity="0.4"/>
+            <line x1="7" y1="17" x2="13" y2="17" stroke="#323544" stroke-width="2" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="sim-content">
+          <div class="sim-body">
+            <div class="sim-info">
+              <h3 class="sim-name">Create Article</h3>
+              <p class="sim-description">Write and publish long-form content articles for LinkedIn and blog platforms.</p>
+            </div>
+            <button class="sim-action-btn" data-action="createArticle" aria-label="Open Article Creator">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
+                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Marketing Tools SIM Cards (Initially Hidden) -->
+    <div class="sim-cards-grid" id="marketingToolsCards" style="display: none;">
+      
       <!-- Email Marketing Card -->
       <div class="sim-card" id="emailMarketingCard">
         <div class="sim-icon">
@@ -90,30 +269,6 @@
     </div>
   </div>
 
-  <!-- Social Media Sub-Page Content (Initially Hidden) -->
-  <div id="socialMediaSubContent" style="display: none;">
-    <!-- Back button and header -->
-    <div class="page-header">
-      <button class="btn-back" onclick="window.backToMarketing()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15,18 9,12 15,6"/>
-        </svg>
-        Back to Marketing
-      </button>
-      <h1 class="page-title">Social Media Management</h1>
-    </div>
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-      <span>Marketing</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="9,6 15,12 9,18"/>
-      </svg>
-      <span>Social Media Management</span>
-    </div>
-    <!-- Social Media SIM Cards will be loaded here -->
-    <div id="socialMediaCards"></div>
-  </div>
-
   <!-- Modal -->
   <div id="marketingModal" class="modal">
     <div class="modal-content">
@@ -123,3 +278,4 @@
     </div>
   </div>
 </div>
+    </div>
