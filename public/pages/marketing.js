@@ -13,7 +13,7 @@ async function getAuth0Client() {
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
-      cacheLocation: 'memory', // Changed from 'localstorage'
+      cacheLocation: 'memory',
       useRefreshTokens: true
     });
     
@@ -23,140 +23,6 @@ async function getAuth0Client() {
     console.error("Error configuring Auth0:", error);
     return null;
   }
-}
-
-// Function to load social media cards
-async function loadSocialMediaCards(userEmail, userName) {
-  return `
-    <div class="sim-cards-grid">
-      <!-- Post Video Card -->
-      <div class="sim-card" id="postVideoCard">
-        <div class="sim-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="4" width="20" height="16" rx="2" stroke="#323544" stroke-width="2"/>
-            <path d="M10 8.5V15.5L16 12L10 8.5Z" fill="#323544" opacity="0.4"/>
-          </svg>
-        </div>
-        <div class="sim-content">
-          <div class="sim-body">
-            <div class="sim-info">
-              <h3 class="sim-name">Post Video</h3>
-              <p class="sim-description">Create and share engaging video content across all your social media platforms.</p>
-            </div>
-            <button class="sim-action-btn" data-action="postVideo" aria-label="Open Video Upload">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
-                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- AI Agents Card -->
-      <div class="sim-card" id="aiAgentsCard">
-        <div class="sim-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="3" stroke="#323544" stroke-width="2"/>
-            <path d="M12 2V6M12 18V22M22 12H18M6 12H2" stroke="#323544" stroke-width="2" opacity="0.4"/>
-            <path d="M20.5 7.5L17.5 10.5M6.5 16.5L3.5 19.5M20.5 16.5L17.5 13.5M6.5 7.5L3.5 4.5" stroke="#323544" stroke-width="2" opacity="0.4"/>
-          </svg>
-        </div>
-        <div class="sim-content">
-          <div class="sim-body">
-            <div class="sim-info">
-              <h3 class="sim-name">AI Agents</h3>
-              <p class="sim-description">Deploy AI-powered agents to automate your social media engagement and responses.</p>
-            </div>
-            <button class="sim-action-btn" data-action="aiAgents" aria-label="Open AI Agents">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
-                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Post Image Card -->
-      <div class="sim-card" id="postImageCard">
-        <div class="sim-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3" y="3" width="18" height="18" rx="2" stroke="#323544" stroke-width="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5" fill="#323544"/>
-            <path d="M21 15L16 10L5 21" stroke="#323544" stroke-width="2" opacity="0.4"/>
-          </svg>
-        </div>
-        <div class="sim-content">
-          <div class="sim-body">
-            <div class="sim-info">
-              <h3 class="sim-name">Post Image</h3>
-              <p class="sim-description">Share stunning images and graphics to boost your social media presence.</p>
-            </div>
-            <button class="sim-action-btn" data-action="postImage" aria-label="Open Image Upload">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
-                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Text + AI Image Card -->
-      <div class="sim-card" id="textAIImageCard">
-        <div class="sim-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 2H6C5 2 4 3 4 4V20C4 21 5 22 6 22H18C19 22 20 21 20 20V8L14 2Z" stroke="#323544" stroke-width="2"/>
-            <polyline points="14,2 14,8 20,8" stroke="#323544" stroke-width="2"/>
-            <line x1="8" y1="13" x2="16" y2="13" stroke="#323544" stroke-width="2" opacity="0.4"/>
-            <line x1="8" y1="17" x2="13" y2="17" stroke="#323544" stroke-width="2" opacity="0.4"/>
-            <rect x="14" y="16" width="4" height="4" rx="1" fill="#323544" opacity="0.4"/>
-          </svg>
-        </div>
-        <div class="sim-content">
-          <div class="sim-body">
-            <div class="sim-info">
-              <h3 class="sim-name">Text + AI Image</h3>
-              <p class="sim-description">Combine compelling text with AI-generated images for unique social media posts.</p>
-            </div>
-            <button class="sim-action-btn" data-action="textAIImage" aria-label="Open Text + AI Image Creator">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
-                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Create Article Card -->
-      <div class="sim-card" id="createArticleCard">
-        <div class="sim-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 4H20C20.5 4 21 4.5 21 5V19C21 19.5 20.5 20 20 20H4C3.5 20 3 19.5 3 19V5C3 4.5 3.5 4 4 4Z" stroke="#323544" stroke-width="2"/>
-            <line x1="7" y1="9" x2="17" y2="9" stroke="#323544" stroke-width="2"/>
-            <line x1="7" y1="13" x2="17" y2="13" stroke="#323544" stroke-width="2" opacity="0.4"/>
-            <line x1="7" y1="17" x2="13" y2="17" stroke="#323544" stroke-width="2" opacity="0.4"/>
-          </svg>
-        </div>
-        <div class="sim-content">
-          <div class="sim-body">
-            <div class="sim-info">
-              <h3 class="sim-name">Create Article</h3>
-              <p class="sim-description">Write and publish long-form content articles for LinkedIn and blog platforms.</p>
-            </div>
-            <button class="sim-action-btn" data-action="createArticle" aria-label="Open Article Creator">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path opacity="0.4" d="M17.4672 5.47445C17.7601 5.18157 18.2349 5.18157 18.5278 5.47445C18.8207 5.76735 18.8207 6.24211 18.5278 6.535L6.53168 18.5311C6.23878 18.824 5.76402 18.824 5.47113 18.5311C5.17825 18.2382 5.17824 17.7634 5.47113 17.4705L17.4672 5.47445Z" fill="#323544"/>
-                <path d="M18.7478 14.9936C18.7479 15.4078 18.412 15.7435 17.9978 15.7436C17.5839 15.7435 17.2482 15.4084 17.2478 14.9946L18.7478 14.9936ZM17.9958 5.25238L18.072 5.25629C18.4501 5.29477 18.7448 5.61422 18.7449 6.00238L18.7478 14.9936H17.9978L17.2478 14.9946L17.2449 6.7514L8.99976 6.74945L8.92261 6.74554C8.54461 6.70692 8.24975 6.38759 8.24976 5.99945C8.2499 5.58532 8.58566 5.24945 8.99976 5.24945L17.9958 5.25238Z" fill="#323544"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
 }
 
 // Function to render AI Image Editor
@@ -957,7 +823,7 @@ function initAIImageEditor() {
       `;
     } else {
       content = `
-        <p><strong>Response:</strong></p>
+        <p><strong>Response:</strong></p
         <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto;">
 ${JSON.stringify(result, null, 2)}
         </pre>
@@ -1195,6 +1061,37 @@ export async function initMarketingPage() {
     const user = await auth0Client.getUser();
     const userEmail = user.email || user.name || 'unknown';
     const userName = user.name || 'User';
+    // Add click handlers for main category cards
+const socialMediaCard = document.getElementById('mainSocialMediaCard');
+const marketingToolsCard = document.getElementById('mainMarketingToolsCard');
+
+if (socialMediaCard) {
+  socialMediaCard.addEventListener('click', function(e) {
+    // Show social media cards
+    document.getElementById('socialMediaCards').style.display = 'grid';
+    document.getElementById('marketingToolsCards').style.display = 'none';
+    
+    // Scroll to the cards
+    document.getElementById('socialMediaCards').scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'nearest' 
+    });
+  });
+}
+
+if (marketingToolsCard) {
+  marketingToolsCard.addEventListener('click', function(e) {
+    // Show marketing tools cards
+    document.getElementById('marketingToolsCards').style.display = 'grid';
+    document.getElementById('socialMediaCards').style.display = 'none';
+    
+    // Scroll to the cards
+    document.getElementById('marketingToolsCards').scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'nearest' 
+    });
+  });
+}
 
     const mainPageButtons = document.querySelectorAll('#marketingMainContent .sim-action-btn[data-action]');
     mainPageButtons.forEach(button => {
