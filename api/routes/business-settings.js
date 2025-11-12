@@ -457,27 +457,23 @@ router.post('/auth/:platform/test',
         case 'youtube':
           oauthService = youtubeOAuth;
           break;
+        case 'tiktok':
+          oauthService = tiktokOAuth;
+          break;
+        default:
+          return res.json({ success: false, error: 'Unsupported platform' });
       }
 
       const isValid = await oauthService.testConnection(tokenData.token, tokenData);
 
       if (isValid) {
-        res.json({ 
-          success: true, 
-          message: 'Connection is working' 
-        });
+        res.json({ success: true, message: 'Connection is working' });
       } else {
-        res.json({ 
-          success: false, 
-          error: 'Token is invalid or expired' 
-        });
+        res.json({ success: false, error: 'Token is invalid or expired' });
       }
     } catch (error) {
       console.error(`[Settings] Error testing connection:`, error);
-      res.json({ 
-        success: false, 
-        error: error.message 
-      });
+      res.json({ success: false, error: error.message });
     }
   }
 );
@@ -604,11 +600,11 @@ router.get('/auth/tiktok/connect', (req, res) => {
 
 router.get('/auth/tiktok/callback', async (req, res) => {
   try {
-    const { code, state: businessId, error, error_description } = req.query;
+    const { code, state: stateToken, error, error_description } = req.query;
     
     console.log('[OAuth] TikTok callback received:', {
       hasCode: !!code,
-      businessId,
+      stateToken,
       error,
       error_description
     });
@@ -617,15 +613,19 @@ router.get('/auth/tiktok/callback', async (req, res) => {
       throw new Error(error_description || `TikTok error: ${error}`);
     }
     
-    if (!code) {
-      throw new Error('No authorization code received');
+    if (!code || !stateToken) {
+      throw new Error('Missing authorization code or state token');
     }
 
     const redirectUri = `${process.env.APP_URL}/api/business-settings/auth/tiktok/callback`;
 
     console.log('[OAuth] Attempting token exchange...');
-    const tokenData = await tiktokOAuth.exchangeCodeForToken(code, redirectUri, businessId);
+    // ✅ Pass stateToken instead of businessId
+    const tokenData = await tiktokOAuth.exchangeCodeForToken(code, redirectUri, stateToken);
     console.log('[OAuth] Token exchange successful');
+
+    // ✅ Get businessId from tokenData (returned by exchangeCodeForToken)
+    const businessId = tokenData.businessId;
 
     console.log('[OAuth] Fetching user info...');
     const userInfo = await tiktokOAuth.getUserInfo(tokenData.access_token);
@@ -648,118 +648,84 @@ router.get('/auth/tiktok/callback', async (req, res) => {
 
     console.log(`[OAuth] TikTok connected - Business: ${businessId}, User: @${userInfo.username}`);
 
-    // Success page...
-    res.send(`...success HTML...`);
+    // Success page
+    res.send(OAuthTemplates.success('tiktok', {
+      display_name: userInfo.display_name,
+      username: userInfo.username,
+      follower_count: userInfo.follower_count
+    }));
 
   } catch (error) {
     console.error('[OAuth] TikTok callback error:', error);
     console.error('[OAuth] Error stack:', error.stack);
     
-    // More detailed error message
-    const errorMessage = error.message || 'Unknown error occurred';
+    res.send(OAuthTemplates.error('tiktok', error.message));
+  }
+});
+
+// TikTok Disconnect
+router.post('/auth/tiktok/disconnect', async (req, res) => {
+  try {
+    const { businessId } = req.body;
+    await businessSettingsService.disconnectPlatform(businessId, 'tiktok');
+    res.json({ success: true, message: 'TikTok disconnected' });
+  } catch (error) {
+    console.error('[OAuth] TikTok disconnect error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// TikTok Test Connection
+router.post('/auth/tiktok/test', async (req, res) => {
+  try {
+    const { businessId } = req.body;
+    const tokenData = await businessSettingsService.getPlatformToken(businessId, 'tiktok');
     
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Connection Failed</title>
-        <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <style>
-          body {
-            font-family: 'Hanken Grotesk', sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-          }
-          .error-card {
-            background: white;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            max-width: 500px;
-          }
-          .error-icon {
-            width: 64px;
-            height: 64px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 32px;
-            color: white;
-          }
-          h2 {
-            color: #2c3e50;
-            margin: 0 0 12px 0;
-            font-size: 20px;
-            font-weight: 600;
-          }
-          .error-message {
-            background: #fef2f2;
-            padding: 16px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 3px solid #ef4444;
-            color: #666;
-            font-size: 14px;
-            text-align: left;
-            word-break: break-word;
-          }
-          .error-details {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 12px;
-            font-family: monospace;
-            font-size: 12px;
-            text-align: left;
-            color: #666;
-            max-height: 200px;
-            overflow-y: auto;
-          }
-          p { color: #999; font-size: 13px; }
-          .btn-retry {
-            margin-top: 20px;
-            padding: 10px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="error-card">
-          <div class="error-icon">✗</div>
-          <h2>Connection Failed</h2>
-          <div class="error-message">
-            ${errorMessage}
-            <div class="error-details">
-              Check server console for detailed logs
-            </div>
-          </div>
-          <p>This window will close automatically...</p>
-          <button class="btn-retry" onclick="window.close()">Close Window</button>
-        </div>
-        <script>
-          window.opener.postMessage({ 
-            type: 'oauth-error', 
-            platform: 'tiktok',
-            error: '${errorMessage.replace(/'/g, "\\'")}'
-          }, '*');
-          setTimeout(() => window.close(), 5000);
-        </script>
-      </body>
-      </html>
-    `);
+    if (!tokenData || !tokenData.token) {
+      return res.json({ success: false, error: 'TikTok not connected' });
+    }
+
+    const isValid = await tiktokOAuth.testConnection(tokenData.token, tokenData);
+    
+    if (isValid) {
+      res.json({ success: true, message: 'Connection is working' });
+    } else {
+      res.json({ success: false, error: 'Token is invalid or expired' });
+    }
+  } catch (error) {
+    console.error('[OAuth] TikTok test error:', error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+// TikTok Refresh Token
+router.post('/auth/tiktok/refresh', async (req, res) => {
+  try {
+    const { businessId } = req.body;
+    const tokenData = await businessSettingsService.getPlatformToken(businessId, 'tiktok');
+    
+    if (!tokenData || !tokenData.refresh_token) {
+      return res.json({ 
+        success: false, 
+        error: 'No refresh token available. Please reconnect your account.' 
+      });
+    }
+
+    const newTokenData = await tiktokOAuth.refreshToken(tokenData.refresh_token);
+
+    await businessSettingsService.updatePlatformConnection(businessId, 'tiktok', {
+      access_token: newTokenData.access_token,
+      refresh_token: newTokenData.refresh_token,
+      expires_at: tiktokOAuth.calculateExpiry(newTokenData.expires_in)
+    });
+
+    res.json({ success: true, message: 'Token refreshed successfully' });
+  } catch (error) {
+    console.error('[OAuth] TikTok refresh error:', error);
+    res.json({ 
+      success: false, 
+      error: 'Failed to refresh token. You may need to reconnect your account.' 
+    });
   }
 });
 
