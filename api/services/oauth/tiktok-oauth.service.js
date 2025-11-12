@@ -6,10 +6,21 @@ class TikTokOAuthService extends OAuthService {
     super('tiktok');
     this.clientKey = process.env.TIKTOK_CLIENT_KEY;
     this.clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-    this.apiBaseUrl = 'https://open.tiktokapis.com/v2';
+    
+    // Use sandbox for testing
+    this.apiBaseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://open.tiktokapis.com/v2'
+      : 'https://open-sandbox.tiktokapis.com/v2';
     
     // Store PKCE state (in production, use Redis)
-    this.authStates = new Map(); // { stateToken: { businessId, codeVerifier, timestamp } }
+    this.authStates = new Map();
+    
+    console.log('[TikTok] Service initialized:', {
+      environment: process.env.NODE_ENV || 'development',
+      apiBaseUrl: this.apiBaseUrl,
+      hasClientKey: !!this.clientKey,
+      hasClientSecret: !!this.clientSecret
+    });
   }
 
   /**
@@ -29,6 +40,11 @@ class TikTokOAuthService extends OAuthService {
    * Generate TikTok OAuth authorization URL with PKCE
    */
   getAuthUrl(businessId, redirectUri) {
+    // Validate credentials
+    if (!this.clientKey || !this.clientSecret) {
+      throw new Error('TikTok credentials not configured. Check TIKTOK_CLIENT_KEY and TIKTOK_CLIENT_SECRET in .env');
+    }
+
     const scopes = [
       'user.info.basic',
       'video.list',
@@ -53,9 +69,19 @@ class TikTokOAuthService extends OAuthService {
       this.authStates.delete(stateToken);
     }, 10 * 60 * 1000);
 
-    console.log('[TikTok] Generated auth URL with state:', stateToken);
+    console.log('[TikTok] Generated auth URL:', {
+      stateToken: stateToken.substring(0, 10) + '...',
+      businessId: businessId.substring(0, 10) + '...',
+      redirectUri,
+      environment: process.env.NODE_ENV || 'development'
+    });
 
-    return `https://www.tiktok.com/v2/auth/authorize/?` +
+    // Use sandbox authorization URL for development
+    const authBaseUrl = process.env.NODE_ENV === 'production'
+      ? 'https://www.tiktok.com/v2/auth/authorize/'
+      : 'https://www.tiktok.com/v2/auth/authorize/'; // Same for both, but keeping for clarity
+
+    return `${authBaseUrl}?` +
       `client_key=${this.clientKey}` +
       `&scope=${scopes.join(',')}` +
       `&response_type=code` +
@@ -70,20 +96,23 @@ class TikTokOAuthService extends OAuthService {
    */
   async exchangeCodeForToken(code, redirectUri, stateToken) {
     try {
-      console.log('[TikTok] Exchanging code, state token:', stateToken);
+      console.log('[TikTok] Exchanging code, state token:', stateToken.substring(0, 10) + '...');
       
       // Retrieve stored state data
       const stateData = this.authStates.get(stateToken);
       
       if (!stateData) {
-        console.error('[TikTok] State not found for token:', stateToken);
-        console.log('[TikTok] Available states:', Array.from(this.authStates.keys()));
+        console.error('[TikTok] State not found for token:', stateToken.substring(0, 10) + '...');
+        console.log('[TikTok] Available states:', Array.from(this.authStates.keys()).map(k => k.substring(0, 10) + '...'));
         throw new Error('Invalid state token. Please try connecting again.');
       }
 
       const { businessId, codeVerifier } = stateData;
       
-      console.log('[TikTok] Retrieved state data:', { businessId, hasVerifier: !!codeVerifier });
+      console.log('[TikTok] Retrieved state data:', { 
+        businessId: businessId.substring(0, 10) + '...', 
+        hasVerifier: !!codeVerifier 
+      });
 
       const requestBody = new URLSearchParams({
         client_key: this.clientKey,
@@ -94,7 +123,7 @@ class TikTokOAuthService extends OAuthService {
         code_verifier: codeVerifier
       });
 
-      console.log('[TikTok] Making token request...');
+      console.log('[TikTok] Making token request to:', `${this.apiBaseUrl}/oauth/token/`);
 
       const response = await fetch(`${this.apiBaseUrl}/oauth/token/`, {
         method: 'POST',
@@ -201,6 +230,8 @@ class TikTokOAuthService extends OAuthService {
 
     const url = `${this.apiBaseUrl}/user/info/?fields=${fields.join(',')}`;
 
+    console.log('[TikTok] Fetching user info from:', url);
+
     const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -209,6 +240,8 @@ class TikTokOAuthService extends OAuthService {
     });
 
     const data = await response.json();
+
+    console.log('[TikTok] User info response:', JSON.stringify(data, null, 2));
 
     if (data.error || !data.data?.user) {
       throw new Error(data.error?.message || 'Failed to get user info');
