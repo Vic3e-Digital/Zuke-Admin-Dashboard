@@ -994,6 +994,77 @@ body {
   padding: 0;
 }
 
+
+/* Hot banner container */
+.nav-item-hot {
+  position: relative;
+}
+
+/* Hot badge - Main style */
+.hot-badge {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 12px rgba(255, 107, 53, 0.6);
+  animation: pulseGlow 2s ease-in-out infinite;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* Pulse glow animation - More prominent */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 2px 12px rgba(255, 107, 53, 0.6);
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 1);
+    transform: translateY(-50%) scale(1.08);
+  }
+}
+
+/* Add subtle highlight to the nav link */
+.nav-item-hot .nav-link {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.05) 50%, transparent 100%);
+  position: relative;
+  overflow: visible;
+  padding-right: 90px;
+}
+
+/* Shimmer effect on hover */
+.nav-item-hot .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.nav-item-hot .nav-link:hover::before {
+  left: 100%;
+}
+
+/* Border glow on hover */
+.nav-item-hot .nav-link {
+  border-left: 3px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.nav-item-hot .nav-link:hover {
+  border-left-color: #ff6b35;
+}
 .page-container .page-header {
   display: flex;
   justify-content: space-between;

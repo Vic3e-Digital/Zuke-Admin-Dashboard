@@ -132,6 +132,10 @@ export async function initCreativePage() {
       {
         btn: document.getElementById("openFlyerBtn"),
         name: "Design Flyers"
+      },
+      {
+        btn: document.getElementById("improveImage"),
+        name: "Improve an Image"
       }
     ];
 
