@@ -100,26 +100,13 @@ export class SocialConnectionsComponent {
         break;
 
         case 'tiktok':
-      this.setTextContent(`${prefix}Username`, 
-        settings.username ? `@${settings.username}` : '—'
-      );
-      this.setTextContent(`${prefix}DisplayName`, settings.display_name || '—');
-      this.setTextContent(`${prefix}OpenId`, settings.open_id || '—');
-      this.setTextContent(`${prefix}Followers`, 
-        settings.follower_count !== undefined 
-          ? Formatters.formatNumber(settings.follower_count) 
-          : '—'
-      );
-      this.setTextContent(`${prefix}Videos`, 
-        settings.video_count !== undefined 
-          ? Formatters.formatNumber(settings.video_count) 
-          : '—'
-      );
-      this.setTextContent(`${prefix}Expiry`, 
-        Formatters.formatDateShort(settings.expires_at)
-      );
-      break;
-
+          this.setTextContent('ttDisplayName', settings.display_name);
+          this.setTextContent('ttUsername', settings.username ? `@${settings.username}` : '—');
+          this.setTextContent('ttOpenId', settings.open_id);
+          this.setTextContent('ttFollowers', Formatters.formatNumber(settings.follower_count || 0));
+          this.setTextContent('ttVideos', Formatters.formatNumber(settings.video_count || 0));
+          this.setTextContent('ttExpiry', Formatters.formatDateShort(settings.expires_at));
+          break;
     }
   }
 
@@ -239,8 +226,20 @@ export class SocialConnectionsComponent {
     }
   
     async changePlatformAccount(platform, currentBusiness) {
+      if (!currentBusiness || !currentBusiness._id) {
+        this.notifications.show('No business selected', 'error');
+        return;
+      }
+    
+      if (!confirm(`Disconnect and reconnect ${Formatters.capitalize(platform)}?`)) {
+        return;
+      }
+    
       try {
+        // Disconnect first
         await this.disconnectPlatform(platform, currentBusiness);
+        
+        // Wait a moment then reconnect
         setTimeout(() => {
           this.connectPlatform(platform, currentBusiness);
         }, 500);
