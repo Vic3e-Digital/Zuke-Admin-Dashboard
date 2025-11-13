@@ -7,34 +7,19 @@ require("dotenv").config();
 const { connectToDatabase, getDatabase } = require("./lib/mongodb");
 const { ObjectId } = require('mongodb');
 
-
-
 const sendEmailRoutes = require('./api/send-email-api');
 const veoVertexApiRouter = require('./api/veo-vertex-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 const getOpenAIConfig = require('./api/get-openai-config');
 const businessCaseApi = require('./api/business-case-api');
-
 const tokenRefreshService = require('./api/services/token-refresh.service');
-
-tokenRefreshService.startAutoRefresh();
-
-
-// Add these at the top with other imports
-const { ManagementClient } = require('auth0');
-
-// Initialize Auth0 Management Client
-const management = new ManagementClient({
-  domain: process.env.AUTH0_DOMAIN,
-  clientId: process.env.AUTH0_CLIENT_ID,
-  clientSecret: process.env.AUTH0_CLIENT_SECRET,
-  scope: 'read:users update:users'
-});
+const wordpressConfig = require('./api/get-wordpress-config');
 
 // -------------------------
-// Middleware
+// ✅ MIDDLEWARE FIRST (BEFORE ROUTES!)
 // -------------------------
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '50mb' }));  
@@ -48,6 +33,28 @@ app.use((req, res, next) => {
   next();
 });
 
+// -------------------------
+// ✅ NOW REGISTER ROUTES (AFTER MIDDLEWARE!)
+// -------------------------
+
+// Product management
+const productLog = require('./api/products/log');
+const productWebhook = require('./api/webhook/product-created');
+
+app.use('/api/products', productLog);
+app.use('/api/webhook', productWebhook);
+app.use('/api', wordpressConfig);
+
+// Auth0 Management Client
+const { ManagementClient } = require('auth0');
+const management = new ManagementClient({
+  domain: process.env.AUTH0_DOMAIN,
+  clientId: process.env.AUTH0_CLIENT_ID,
+  clientSecret: process.env.AUTH0_CLIENT_SECRET,
+  scope: 'read:users update:users'
+});
+
+// Initialize database
 async function initializeDatabase() {
   try {
     const { db } = await connectToDatabase();
@@ -55,11 +62,9 @@ async function initializeDatabase() {
     
     console.log('✅ Database connected to:', db.databaseName);
     
-    // ✅ Changed from 'businesses' to 'store_submissions'
     const businessCount = await db.collection('store_submissions').countDocuments();
     console.log(`✅ Found ${businessCount} store submissions in database`);
     
-    // ✅ Changed from 'businesses' to 'store_submissions'
     const testBusiness = await db.collection('store_submissions').findOne({
       _id: new ObjectId('689f2187374ee7475a5f64d2')
     });
@@ -79,6 +84,7 @@ async function initializeDatabase() {
 // Connect to database before setting up routes
 initializeDatabase().then(() => {
   console.log('✅ Database initialized, starting server...');
+  tokenRefreshService.startAutoRefresh();
 });
 
 // -------------------------
@@ -98,7 +104,7 @@ app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/veo-vertex', veoVertexApiRouter);
-app.use('/api/business-case', businessCaseApi);  // ✅ Now it will have access to app.locals.db
+app.use('/api/business-case', businessCaseApi);
 
 // Paystack key route
 app.get("/api/paystack-key", (req, res) => {
@@ -106,6 +112,7 @@ app.get("/api/paystack-key", (req, res) => {
     key: process.env.PAYSTACK_TEST_KEY || process.env.PAYSTACK_PUBLIC_KEY 
   });
 });
+
 
 // -------------------------
 // Product Routes

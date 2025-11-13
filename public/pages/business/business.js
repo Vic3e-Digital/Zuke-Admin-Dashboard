@@ -108,7 +108,7 @@ export async function initBusinessPage() {
       addProductsBtn.onclick = function(e) {
         e.stopPropagation();
         modalTitle.textContent = "Add Products";
-        iframe.src = `https://marketplace.zuke.co.za/my-account/add-product/`;
+        iframe.src = `/pages/business/add-product.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}&businessCase=${businessCaseJSON}`;
         modal.style.display = "block";
         document.body.style.overflow = 'hidden';
       }
