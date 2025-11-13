@@ -1035,6 +1035,7 @@ function renderVideoUploadForm(container, userEmail, userName) {
     }, 3000);
   }
 }
+// Add this function to your marketing.js file to fix the SIM card toggling
 
 export async function initMarketingPage() {
   const auth0Client = await getAuth0Client();
@@ -1061,73 +1062,75 @@ export async function initMarketingPage() {
     const user = await auth0Client.getUser();
     const userEmail = user.email || user.name || 'unknown';
     const userName = user.name || 'User';
-    // Add click handlers for main category cards
-const socialMediaCard = document.getElementById('mainSocialMediaCard');
-const marketingToolsCard = document.getElementById('mainMarketingToolsCard');
 
-if (socialMediaCard) {
-  socialMediaCard.addEventListener('click', function(e) {
-    // Show social media cards
-    document.getElementById('socialMediaCards').style.display = 'grid';
-    document.getElementById('marketingToolsCards').style.display = 'none';
-    
-    // Scroll to the cards
-    document.getElementById('socialMediaCards').scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'nearest' 
-    });
-  });
-}
+    // Fix for main category cards - properly toggle SIM cards
+    const socialMediaCard = document.getElementById('mainSocialMediaCard');
+    const marketingToolsCard = document.getElementById('mainMarketingToolsCard');
+    const socialMediaCards = document.getElementById('socialMediaCards');
+    const marketingToolsCards = document.getElementById('marketingToolsCards');
 
-if (marketingToolsCard) {
-  marketingToolsCard.addEventListener('click', function(e) {
-    // Show marketing tools cards
-    document.getElementById('marketingToolsCards').style.display = 'grid';
-    document.getElementById('socialMediaCards').style.display = 'none';
-    
-    // Scroll to the cards
-    document.getElementById('marketingToolsCards').scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'nearest' 
-    });
-  });
-}
-
-    const mainPageButtons = document.querySelectorAll('#marketingMainContent .sim-action-btn[data-action]');
-    mainPageButtons.forEach(button => {
-      button.addEventListener('click', async function(e) {
-        e.stopPropagation();
-        const action = this.getAttribute('data-action');
+    if (socialMediaCard) {
+      socialMediaCard.addEventListener('click', function(e) {
+        // Prevent clicks on child elements from bubbling
+        if (e.target.closest('.main-sim-info-icon')) {
+          return; // Let tooltip handle this
+        }
         
-        if (action === 'social-media') {
-          document.getElementById("marketingMainContent").style.display = "none";
-          document.getElementById("socialMediaSubContent").style.display = "block";
+        // Toggle social media cards
+        const isCurrentlyVisible = socialMediaCards.style.display === 'grid';
+        
+        if (isCurrentlyVisible) {
+          // Hide if already visible
+          socialMediaCards.style.display = 'none';
+        } else {
+          // Show social media cards, hide marketing tools cards
+          socialMediaCards.style.display = 'grid';
+          marketingToolsCards.style.display = 'none';
           
-          const socialMediaCardsDiv = document.getElementById("socialMediaCards");
-          socialMediaCardsDiv.innerHTML = await loadSocialMediaCards(userEmail, userName);
-          
-          setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe);
-        } else if (action === 'email-marketing') {
-          modalTitle.textContent = "Email Marketing";
-          iframe.style.display = "block";
-          iframe.src = `https://aigents.southafricanorth.azurecontainer.io/email-marketing?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
-          modal.style.display = "block";
-          document.body.style.overflow = 'hidden';
-        } else if (action === 'analytics') {
-          modalTitle.textContent = "Marketing Analytics";
-          iframe.style.display = "block";
-          iframe.src = `https://aigents.southafricanorth.azurecontainer.io/marketing-analytics?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`;
-          modal.style.display = "block";
-          document.body.style.overflow = 'hidden';
+          // Scroll to the cards after a brief delay to ensure they're rendered
+          setTimeout(() => {
+            socialMediaCards.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest' 
+            });
+          }, 100);
         }
       });
-    });
-
-    window.backToMarketing = function() {
-      document.getElementById("marketingMainContent").style.display = "block";
-      document.getElementById("socialMediaSubContent").style.display = "none";
     }
 
+    if (marketingToolsCard) {
+      marketingToolsCard.addEventListener('click', function(e) {
+        // Prevent clicks on child elements from bubbling
+        if (e.target.closest('.main-sim-info-icon')) {
+          return; // Let tooltip handle this
+        }
+        
+        // Toggle marketing tools cards
+        const isCurrentlyVisible = marketingToolsCards.style.display === 'grid';
+        
+        if (isCurrentlyVisible) {
+          // Hide if already visible
+          marketingToolsCards.style.display = 'none';
+        } else {
+          // Show marketing tools cards, hide social media cards
+          marketingToolsCards.style.display = 'grid';
+          socialMediaCards.style.display = 'none';
+          
+          // Scroll to the cards after a brief delay to ensure they're rendered
+          setTimeout(() => {
+            marketingToolsCards.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest' 
+            });
+          }, 100);
+        }
+      });
+    }
+
+    // Setup handlers for SIM card action buttons
+    setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe);
+
+    // Close modal handlers
     if (closeBtn) {
       closeBtn.onclick = function() {
         modal.style.display = "none";
@@ -1155,30 +1158,45 @@ if (marketingToolsCard) {
   }
 }
 
-function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe) {
+function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
+  // Get current business info
+  const currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
+  const businessName = currentBusiness?.store_info?.name || 'No Business';
+  const businessId = currentBusiness?._id || '';
+  const businessCase = JSON.stringify(currentBusiness?.initial_business_case || {});
+
+  // Social Media SIM cards
   const socialMediaActions = {
     postVideo: {
       title: "Post Video - Social Media Manager",
       renderContent: true
     },
-    aiAgents: {
-      title: "AI Agents - Social Media Automation",
-      url: `https://aigents.southafricanorth.azurecontainer.io/social-agents?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`
+     postVideo: {
+      title: "Post Video to Socials",
+      url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
     },
     postImage: {
-      title: "Post Image - Visual Content Creator",
-      url: `https://aigents.southafricanorth.azurecontainer.io/image-post?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`
+      title: "Post Image to Socials",
+      url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
     },
+    
     textAIImage: {
       title: "AI Image Editor",
       renderAIEditor: true
     },
-    createArticle: {
-      title: "Article Creator - Long-form Content",
-      url: `https://aigents.southafricanorth.azurecontainer.io/article-creator?Email=${encodeURIComponent(userEmail)}&Name=${encodeURIComponent(userName)}`
+    
+
+  };
+
+  // Marketing Tools SIM cards - Updated with email outreach
+  const marketingToolsActions = {
+    'email-outreach': {
+      title: "Send Smart Outreach Emails",
+      url: `/tools/send-email.html`
     }
   };
 
+  // Handle Social Media SIM card buttons
   const socialMediaButtons = document.querySelectorAll('#socialMediaCards .sim-action-btn[data-action]');
   socialMediaButtons.forEach(btn => {
     btn.addEventListener('click', function(e) {
@@ -1187,42 +1205,60 @@ function setupSocialMediaHandlers(userEmail, userName, modal, modalTitle, iframe
       const config = socialMediaActions[action];
       
       if (config) {
-        modalTitle.textContent = config.title;
-        
-        if (config.renderAIEditor) {
-          iframe.style.display = 'none';
-          let contentDiv = document.getElementById('modalContentDiv');
-          if (!contentDiv) {
-            contentDiv = document.createElement('div');
-            contentDiv.id = 'modalContentDiv';
-            contentDiv.style.cssText = 'width: 100%; height: 600px; overflow: auto;';
-            iframe.parentNode.insertBefore(contentDiv, iframe);
-          }
-          contentDiv.style.display = 'block';
-          
-          renderAIImageEditor(contentDiv, userEmail, userName);
-        } else if (config.renderContent) {
-          iframe.style.display = 'none';
-          let contentDiv = document.getElementById('modalContentDiv');
-          if (!contentDiv) {
-            contentDiv = document.createElement('div');
-            contentDiv.id = 'modalContentDiv';
-            contentDiv.style.cssText = 'width: 100%; height: 500px; overflow: auto;';
-            iframe.parentNode.insertBefore(contentDiv, iframe);
-          }
-          contentDiv.style.display = 'block';
-          
-          renderVideoUploadForm(contentDiv, userEmail, userName);
-        } else {
-          iframe.style.display = 'block';
-          const contentDiv = document.getElementById('modalContentDiv');
-          if (contentDiv) contentDiv.style.display = 'none';
-          iframe.src = config.url;
-        }
-        
-        modal.style.display = "block";
-        document.body.style.overflow = 'hidden';
+        openModalWithConfig(config, modal, modalTitle, iframe, userEmail, userName);
       }
     });
   });
+
+  // Handle Marketing Tools SIM card buttons
+  const marketingToolsButtons = document.querySelectorAll('#marketingToolsCards .sim-action-btn[data-action]');
+  marketingToolsButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const action = this.getAttribute('data-action');
+      const config = marketingToolsActions[action];
+      
+      if (config) {
+        openModalWithConfig(config, modal, modalTitle, iframe, userEmail, userName);
+      }
+    });
+  });
+}
+// Helper function to open modal with appropriate content
+function openModalWithConfig(config, modal, modalTitle, iframe, userEmail, userName) {
+  modalTitle.textContent = config.title;
+  
+  if (config.renderAIEditor) {
+    iframe.style.display = 'none';
+    let contentDiv = document.getElementById('modalContentDiv');
+    if (!contentDiv) {
+      contentDiv = document.createElement('div');
+      contentDiv.id = 'modalContentDiv';
+      contentDiv.style.cssText = 'width: 100%; height: 600px; overflow: auto;';
+      iframe.parentNode.insertBefore(contentDiv, iframe);
+    }
+    contentDiv.style.display = 'block';
+    
+    renderAIImageEditor(contentDiv, userEmail, userName);
+  } else if (config.renderContent) {
+    iframe.style.display = 'none';
+    let contentDiv = document.getElementById('modalContentDiv');
+    if (!contentDiv) {
+      contentDiv = document.createElement('div');
+      contentDiv.id = 'modalContentDiv';
+      contentDiv.style.cssText = 'width: 100%; height: 500px; overflow: auto;';
+      iframe.parentNode.insertBefore(contentDiv, iframe);
+    }
+    contentDiv.style.display = 'block';
+    
+    renderVideoUploadForm(contentDiv, userEmail, userName);
+  } else {
+    iframe.style.display = 'block';
+    const contentDiv = document.getElementById('modalContentDiv');
+    if (contentDiv) contentDiv.style.display = 'none';
+    iframe.src = config.url;
+  }
+  
+  modal.style.display = "block";
+  document.body.style.overflow = 'hidden';
 }
