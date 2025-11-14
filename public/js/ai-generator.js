@@ -3,6 +3,21 @@
  * Handles image variants, video generation, and AI suggestions
  */
 
+// In ai-generator.js
+function shortenPrompt(promptText) {
+  if (!promptText) return 'Product photo';
+  
+  // Remove line breaks
+  let clean = promptText.replace(/\s+/g, ' ').trim();
+  
+  // Truncate to first ~1000 characters
+  if (clean.length > 1000) {
+    clean = clean.slice(0, 1000);
+    console.warn('⚠️ Long prompt truncated for Azure Image API');
+  }
+  return clean;
+}
+
 class AIGenerator {
     constructor(openAIConfig) {
       this.config = openAIConfig;
@@ -113,36 +128,51 @@ class AIGenerator {
      * Generate single image with AI (FLUX or DALL-E)
      */
     async generateImage(prompt, model = 'flux') {
+      const safePrompt = shortenPrompt(prompt);
+    
       const deployment = model === 'flux' ? 'FLUX.1-Kontext-pro' : 'gpt-image-1';
       const url = `${this.config.endpoint}openai/deployments/${deployment}/images/generations?api-version=2025-04-01-preview`;
-  
+    
+      console.log(`🖼️ Generating image with ${deployment}`);
+      console.log('Prompt length:', safePrompt.length);
+      console.log('Prompt preview:', safePrompt.slice(0, 300));
+    
+      const body = {
+        prompt: safePrompt,
+        n: 1,
+        size: "1024x1024",
+        output_format: "png"
+      };
+    
+      // ✅ Only add quality if using a model that supports it
+      // For now, omit it entirely to avoid 400 errors
+      // if (model === 'dalle') {
+      //   body.quality = "hd";
+      // }
+    
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'api-key': this.config.apiKey,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          prompt: prompt,
-          n: 1,
-          size: "1024x1024",
-          quality: model === 'dalle' ? "hd" : "standard",
-          output_format: "png"
-        })
+        body: JSON.stringify(body)
       });
-  
+    
       if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        console.error('❌ Image generation failed:', response.status, errText);
         throw new Error(`Image generation failed: ${response.status}`);
       }
-  
+    
       const data = await response.json();
-      
+    
       if (data.data && data.data[0] && data.data[0].b64_json) {
         return data.data[0].b64_json;
       } else if (data.data && data.data[0] && data.data[0].url) {
         return data.data[0].url;
       }
-      
+    
       throw new Error('No image data in response');
     }
   
@@ -150,15 +180,21 @@ class AIGenerator {
      * Improve existing image with AI
      */
     async generateImageWithEdit(baseImageFile, improvementPrompt) {
+      // ✅ shorten here, too
+      const safePrompt = shortenPrompt(improvementPrompt);
+    
       const deployment = 'FLUX.1-Kontext-pro';
       const url = `${this.config.endpoint}openai/deployments/${deployment}/images/edits?api-version=2025-04-01-preview`;
-  
+    
+      console.log(`🛠️ Editing image with ${deployment}`);
+      console.log('Prompt length:', safePrompt.length);
+    
       const formData = new FormData();
-      formData.append("prompt", improvementPrompt);
+      formData.append("prompt", safePrompt);
       formData.append("n", "1");
       formData.append("size", "1024x1024");
       formData.append("image", baseImageFile);
-  
+    
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -166,19 +202,21 @@ class AIGenerator {
         },
         body: formData
       });
-  
+    
       if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        console.error('❌ Image edit failed:', response.status, errText);
         throw new Error(`Image edit failed: ${response.status}`);
       }
-  
+    
       const data = await response.json();
-      
+    
       if (data.data && data.data[0] && data.data[0].b64_json) {
         return data.data[0].b64_json;
       } else if (data.data && data.data[0] && data.data[0].url) {
         return data.data[0].url;
       }
-      
+    
       throw new Error('No image data in response');
     }
   
@@ -195,6 +233,8 @@ class AIGenerator {
       const blob = new Blob([byteArray], { type: 'image/png' });
       return new File([blob], filename, { type: 'image/png' });
     }
+
+    
   }
   
   window.AIGenerator = AIGenerator;
