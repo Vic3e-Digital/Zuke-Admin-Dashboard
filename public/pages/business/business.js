@@ -103,28 +103,30 @@ export async function initBusinessPage() {
     }
 
     // Add Products button
-    const addProductsBtn = document.getElementById("addProductsBtn");
-    if (addProductsBtn) {
-      addProductsBtn.onclick = function(e) {
-        e.stopPropagation();
-        modalTitle.textContent = "Add Products";
-        iframe.src = `/pages/business/add-product.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}&businessCase=${businessCaseJSON}`;
-        modal.style.display = "block";
-        document.body.style.overflow = 'hidden';
-      }
-    }
+const addProductsBtn = document.getElementById("addProductsBtn");
+if (addProductsBtn) {
+  addProductsBtn.onclick = function(e) {
+    e.stopPropagation();
+    modalTitle.textContent = "Add Products";
+    // ✅ Only pass essential IDs
+    iframe.src = `/pages/business/add-product.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`;
+    modal.style.display = "block";
+    document.body.style.overflow = 'hidden';
+  }
+}
 
-    // Add Services button
-    const addServicesBtn = document.getElementById("addServicesBtn");
-    if (addServicesBtn) {
-      addServicesBtn.onclick = function(e) {
-        e.stopPropagation();
-        modalTitle.textContent = "Add Services";
-        iframe.src = `https://marketplace.zuke.co.za/my-account/add-product/`;
-        modal.style.display = "block";
-        document.body.style.overflow = 'hidden';
-      }
-    }
+// Add Services button
+const addServicesBtn = document.getElementById("addServicesBtn");
+if (addServicesBtn) {
+  addServicesBtn.onclick = function(e) {
+    e.stopPropagation();
+    modalTitle.textContent = "Add Services";
+    // ✅ Only pass essential IDs
+    iframe.src = `/pages/business/add-service.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`;
+    modal.style.display = "block";
+    document.body.style.overflow = 'hidden';
+  }
+}
 
     // Find Business Partners button
     const afaaTool1Btn = document.getElementById("afaaTool1Btn");

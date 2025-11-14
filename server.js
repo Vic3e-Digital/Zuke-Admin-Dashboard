@@ -40,9 +40,12 @@ app.use((req, res, next) => {
 // Product management
 const productLog = require('./api/products/log');
 const productWebhook = require('./api/webhook/product-created');
+const serviceWebhook = require('./api/webhook/service-created');
+
 
 app.use('/api/products', productLog);
 app.use('/api/webhook', productWebhook);
+app.use('/api/webhook', serviceWebhook);
 app.use('/api', wordpressConfig);
 
 // Auth0 Management Client
