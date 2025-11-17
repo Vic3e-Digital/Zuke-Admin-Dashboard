@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
       // Get user info
       const user = await auth0Client.getUser();
-      console.log("User logged in:", user);
+      // console.log("User logged in:", user);
       
       // Set user information for analytics tracking
       if (window.analytics) {
