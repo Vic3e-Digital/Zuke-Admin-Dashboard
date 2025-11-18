@@ -13,12 +13,12 @@ const fetchAuthConfig = () => fetch("/auth_config.json");
 
 const configureClient = async () => {
   try {
-    console.log("Starting Auth0 configuration...");
+    // console.log("Starting Auth0 configuration...");
     
     const response = await fetchAuthConfig();
     const config = await response.json();
     
-    console.log("Auth0 config loaded:", config);
+    // console.log("Auth0 config loaded:", config);
 
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
