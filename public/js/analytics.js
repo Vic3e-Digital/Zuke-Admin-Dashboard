@@ -61,7 +61,7 @@ class AnalyticsTracker {
         if (this.isLoading || this.isInitialized) return;
         
         this.isLoading = true;
-        console.log('Loading analytics scripts...');
+        // console.log('Loading analytics scripts...');
 
         try {
             // Load Google Analytics
@@ -183,7 +183,7 @@ class AnalyticsTracker {
      */
     queueEvent(event) {
         this.pendingEvents.push(event);
-        console.log(`Event queued: ${event.type}`);
+        // console.log(`Event queued: ${event.type}`);
     }
 
     /**

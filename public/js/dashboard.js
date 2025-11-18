@@ -38,11 +38,11 @@ async function fetchBusinessesByEmail() {
     // Check cache first
     const cachedBusinesses = window.dataManager.getBusinesses();
     if (cachedBusinesses) {
-      console.log('Using cached businesses data');
+      // console.log('Using cached businesses data');
       return cachedBusinesses;
     }
 
-    console.log('Fetching fresh businesses data from server');
+    // console.log('Fetching fresh businesses data from server');
     const user = await auth0Client.getUser();
     
     if (!user || !user.email) {
@@ -206,7 +206,7 @@ if (!isAdmin) {
         return;
       }
   
-      console.log('Loading wallet for email:', user.email);
+      // console.log('Loading wallet for email:', user.email);
       
       const response = await fetch(`/api/wallet?email=${encodeURIComponent(user.email)}`);
       
@@ -216,7 +216,7 @@ if (!isAdmin) {
       
       const data = await response.json();
       
-      console.log('Wallet API response:', data);
+      // console.log('Wallet API response:', data);
       
       if (data.success && data.wallet) {
         const balance = data.wallet.balance || 0;
@@ -227,8 +227,8 @@ if (!isAdmin) {
           tokensButton.classList.remove('wallet-loading');
         }
         
-        console.log('Wallet balance loaded:', balanceInRands);
-        console.log('Active plan:', data.hasActivePlan ? data.wallet.current_plan : 'none');
+        // console.log('Wallet balance loaded:', balanceInRands);
+        // console.log('Active plan:', data.hasActivePlan ? data.wallet.current_plan : 'none');
         
         // Show warning if balance is less than R30
         if (balance < 30) {

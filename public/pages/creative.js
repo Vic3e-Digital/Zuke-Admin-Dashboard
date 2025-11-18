@@ -204,7 +204,7 @@ export async function initCreativePage() {
       }
     ];
 
-    // Setup coming soon buttons
+    // Setup coming soon buttons (now includes Improve an Image)
     const comingSoonButtons = [
       {
         btn: document.getElementById("openLogoBtn"),
@@ -213,10 +213,14 @@ export async function initCreativePage() {
       {
         btn: document.getElementById("openFlyerBtn"),
         name: "Design Flyers"
+      },
+      {
+        btn: document.getElementById("improveImage"),
+        name: "Improve an Image"
       }
     ];
 
-    // Setup beta buttons - NOW WITH BETA WARNING
+    // Setup beta buttons (removed Improve an Image from here)
     const betaButtons = [
       {
         btn: document.getElementById("card8"),
@@ -227,11 +231,6 @@ export async function initCreativePage() {
         btn: document.getElementById("card7"),
         title: "Create Images with AI",
         url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
-      },
-      {
-        btn: document.getElementById("improveImage"),
-        title: "Improve an Image",
-        url: `/tools/improve-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       }
     ];
 
