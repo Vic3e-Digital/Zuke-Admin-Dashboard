@@ -1,29 +1,954 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcribe Audio</title>
-    <link rel="stylesheet" href="../css/simStyle.css">
-    <link rel="stylesheet" href="../css/MainSimStyle.css">
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Transcriber with Diarization | Zuke</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Additional Audio Transcriber Styles */
+    .audio-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .audio-upload-section, .transcription-section {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .audio-upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .audio-upload-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .audio-upload-box.has-audio {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .audio-upload-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+
+    .audio-player {
+      width: 100%;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    .remove-audio-btn {
+      background: #DC3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .remove-audio-btn:hover {
+      background: #c82333;
+    }
+
+    .transcription-preview {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .preview-header {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .speaker-segment {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .speaker-segment:last-child {
+      border-bottom: none;
+    }
+
+    .speaker-label {
+      font-weight: 600;
+      color: var(--primary-orange);
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .segment-text {
+      color: #555;
+      margin-left: 10px;
+    }
+
+    .progress-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--light-bg);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .progress-bar-container {
+      background: #e0e0e0;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      background: var(--primary-orange);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+
+    .email-delivery-section {
+      background: #f9f9f9;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .email-delivery-section.show {
+      display: block;
+    }
+
+    .email-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .email-checkbox-label input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    .email-input-section {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .email-input-section.show {
+      display: block;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-button {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .transcribe-btn {
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    .transcribe-btn:hover:not(:disabled) {
+      background: #ff9500;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .transcribe-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .copy-btn:hover {
+      background: #5a6268;
+    }
+
+    .download-btn {
+      background: #28a745;
+      color: white;
+      position: relative;
+    }
+
+    .download-btn:hover {
+      background: #218838;
+    }
+
+    .download-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      min-width: 150px;
+      margin-top: 5px;
+    }
+
+    .download-dropdown.show {
+      display: block;
+    }
+
+    .download-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      transition: background 0.2s;
+    }
+
+    .download-dropdown button:hover {
+      background: #f5f5f5;
+    }
+
+    .download-dropdown button:first-child {
+      border-radius: 4px 4px 0 0;
+    }
+
+    .download-dropdown button:last-child {
+      border-radius: 0 0 4px 4px;
+    }
+
+    .clear-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .clear-btn:hover {
+      background: #5a6268;
+    }
+
+    .status {
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .cost-display {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .cost-highlight {
+      font-weight: 600;
+      color: var(--primary-orange);
+    }
+
+    @media (max-width: 768px) {
+      .audio-container {
+        flex-direction: column;
+      }
+
+      .audio-upload-section, .transcription-section {
+        flex: none;
+        width: 100%;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .action-button {
+        min-width: auto;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="transcribe-container">
-        <div class="transcribe-header">
-            <h1>🎙️ Audio Transcription</h1>
-            <p>Convert your audio files to text with AI-powered transcription</p>
-        </div>
+    <div class="container">
+      
+      <!-- Header -->
+      <div class="header">
+        <h1>Audio Transcriber</h1>
+        <p>Convert audio to text with speaker identification (diarization)</p>
+      </div>
 
+      <!-- Info Alert -->
+      <div class="info-box" style="background: #e3f2fd; border: 1px solid #90caf9; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; color: #1565c0;">
+        <strong>How it works:</strong> Upload an audio file (MP3, WAV, M4A). Our Azure OpenAI Whisper model will transcribe it with speaker identification. You can watch the preview as it processes and choose to receive the complete transcription via email.
+      </div>
+
+      <!-- Main Content -->
+      <div class="audio-container">
         
+        <!-- Upload Section -->
+        <div class="audio-upload-section">
+          <div class="section-title">Upload Audio</div>
 
-           
+          <div class="audio-upload-box" id="audioUploadBox">
+            <div class="audio-upload-icon">🎙️</div>
+            <div style="font-weight: 500; color: var(--text-primary);">Drag & drop your audio file</div>
+            <div style="font-size: 12px; color: #666; margin-top: 8px;">or click to select</div>
+            <div style="font-size: 11px; color: #999; margin-top: 8px;">Supported: MP3, WAV, M4A, OGG (Max 25MB)</div>
+          </div>
 
-        <div class="cta-section">
-            <h2>Audio Transcription Tool</h2>
-            <p>Transform your audio content into searchable, editable text</p>
-            <div class="coming-soon-badge-large">🚧 Coming Soon</div>
+          <audio id="audioPlayer" class="audio-player" controls style="display: none;"></audio>
+          <button id="removeAudioBtn" class="remove-audio-btn">Remove Audio</button>
+
+          <div class="form-group" style="margin-top: 20px;">
+            <label for="diarizationToggle" class="checkbox-option">
+              <input type="checkbox" id="diarizationToggle" checked>
+              <div class="checkbox-label">
+                <div class="checkbox-title">Enable Speaker Identification</div>
+                <div class="checkbox-desc">Identify different speakers (diarization)</div>
+              </div>
+            </label>
+            <p class="field-note">Helps identify who is speaking when multiple speakers are detected</p>
+          </div>
+
+          <div class="cost-display">
+            Base cost: <span class="cost-highlight">R15.00</span><br>
+            <span id="costNote"></span>
+          </div>
         </div>
+
+        <!-- Transcription Section -->
+        <div class="transcription-section">
+          <div class="section-title">Transcription Preview</div>
+
+          <div class="transcription-preview" id="transcriptionPreview">
+            <div style="color: #999; text-align: center; padding: 20px;">
+              Upload an audio file and click transcribe to see the preview here
+            </div>
+          </div>
+
+          <!-- Progress Section -->
+          <div class="progress-section" id="progressSection">
+            <div class="progress-bar-container">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Initializing transcription...</div>
+          </div>
+
+          <!-- Email Delivery Section -->
+          <div class="email-delivery-section" id="emailDeliverySection">
+            <div style="font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Complete Transcription</div>
+            
+            <label class="email-checkbox-label">
+              <input type="checkbox" id="sendEmailCheckbox">
+              Send complete transcript via email when done
+            </label>
+
+            <div class="email-input-section" id="emailInputSection">
+              <div class="form-group">
+                <label for="emailRecipient">Email Address *</label>
+                <input 
+                  type="email" 
+                  id="emailRecipient" 
+                  placeholder="recipient@example.com"
+                  style="width: 100%;"
+                >
+              </div>
+              <div class="form-group">
+                <label for="emailSubject">Email Subject *</label>
+                <input 
+                  type="text" 
+                  id="emailSubject" 
+                  placeholder="e.g., Meeting Transcription"
+                  style="width: 100%;"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="button-group" id="actionButtons">
+            <button id="transcribeBtn" class="action-button transcribe-btn" disabled>
+              Transcribe Audio
+            </button>
+            <button id="copyBtn" class="action-button copy-btn" style="display: none;">
+              Copy to Clipboard
+            </button>
+            <div style="position: relative; display: none;" id="downloadContainer">
+              <button id="downloadBtn" class="action-button download-btn">
+                📥 Download
+              </button>
+              <div id="downloadDropdown" class="download-dropdown">
+                <button data-format="txt">📄 Plain Text (.txt)</button>
+                <button data-format="docx">📘 Word Document (.docx)</button>
+                <button data-format="json">📋 JSON (.json)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Messages -->
+          <div id="transcriptionStatus" class="status"></div>
+        </div>
+      </div>
+
+      <input type="file" id="fileInput" class="file-input" accept="audio/*">
     </div>
+
+    <script>
+      // ========== CONFIGURATION & STATE ==========
+      const COSTS = {
+        BASIC: 15.00,
+        WITH_DIARIZATION: 15.00
+      };
+
+      // Get URL parameters first (most reliable for iframe context)
+      const urlParams = new URLSearchParams(window.location.search);
+      let userEmail = urlParams.get('email');
+      let businessId = urlParams.get('businessId');
+      let businessName = urlParams.get('businessName') || 'My Business';
+      
+      let auth0Client = null;
+      let currentBusiness = null;
+      let businessCase = {};
+      
+      let uploadedAudio = null;
+      let currentTranscription = null;
+      let isTranscribing = false;
+
+      // ========== ELEMENT REFERENCES ==========
+      const audioUploadBox = document.getElementById('audioUploadBox');
+      const audioPlayer = document.getElementById('audioPlayer');
+      const removeAudioBtn = document.getElementById('removeAudioBtn');
+      const fileInput = document.getElementById('fileInput');
+      const diarizationToggle = document.getElementById('diarizationToggle');
+      const transcribeBtn = document.getElementById('transcribeBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const downloadContainer = document.getElementById('downloadContainer');
+      const downloadDropdown = document.getElementById('downloadDropdown');
+      const downloadFormatBtns = document.querySelectorAll('#downloadDropdown button');
+      const sendEmailCheckbox = document.getElementById('sendEmailCheckbox');
+      const emailInputSection = document.getElementById('emailInputSection');
+      const emailRecipient = document.getElementById('emailRecipient');
+      const emailSubject = document.getElementById('emailSubject');
+      const transcriptionPreview = document.getElementById('transcriptionPreview');
+      const progressSection = document.getElementById('progressSection');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const transcriptionStatus = document.getElementById('transcriptionStatus');
+      const emailDeliverySection = document.getElementById('emailDeliverySection');
+      const costNote = document.getElementById('costNote');
+
+      // ========== AUTH0 INITIALIZATION ==========
+      async function getAuth0Client() {
+        if (window.auth0Client) {
+          console.log('✅ Using global Auth0 client from app.js');
+          return window.auth0Client;
+        }
+        
+        if (window.parent && window.parent.auth0Client) {
+          console.log('✅ Using parent Auth0 client from app.js');
+          return window.parent.auth0Client;
+        }
+        
+        console.warn('⚠️ Global Auth0 client not available. Will use URL parameters for email.');
+        return null;
+      }
+
+      // ========== LOAD BUSINESS INFO ==========
+      async function loadBusinessInfo() {
+        try {
+          // Try to get from parent window (if in iframe)
+          if (!businessId && window.parent && window.parent.dataManager) {
+            try {
+              currentBusiness = window.parent.dataManager.getSelectedBusinessOrFirst();
+              if (currentBusiness) {
+                businessId = currentBusiness._id;
+                businessCase = currentBusiness.initial_business_case || {};
+                console.log('✅ Loaded business data from parent dataManager');
+              }
+            } catch (e) {
+              console.warn('Could not access parent dataManager:', e);
+            }
+          }
+
+          // Fallback: Try own window's dataManager
+          if (!businessId && window.dataManager) {
+            try {
+              currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+              if (currentBusiness) {
+                businessId = currentBusiness._id;
+                businessCase = currentBusiness.initial_business_case || {};
+                console.log('✅ Loaded business data from own dataManager');
+              }
+            } catch (e) {
+              console.warn('Could not access own dataManager:', e);
+            }
+          }
+
+          // If still no business info, try to get from Auth0
+          if (!userEmail) {
+            const auth0 = await getAuth0Client();
+            if (auth0) {
+              try {
+                const isAuthenticated = await auth0.isAuthenticated();
+                if (isAuthenticated) {
+                  const user = await auth0.getUser();
+                  if (user && user.email) {
+                    userEmail = user.email;
+                    console.log('✅ Got user email from Auth0:', userEmail);
+                  }
+                } else {
+                  console.warn('⚠️ User not authenticated in Auth0');
+                }
+              } catch (error) {
+                console.error('❌ Error getting user from Auth0:', error);
+              }
+            }
+          }
+
+          // Verify we have both required fields
+          if (!userEmail || !businessId) {
+            console.error('❌ Missing required info:', { 
+              userEmail: !!userEmail, 
+              businessId: !!businessId,
+              fromUrl: { email: urlParams.get('email'), businessId: urlParams.get('businessId') }
+            });
+            showStatus('Missing user or business information. Please ensure you are logged in and have selected a business.', 'error');
+            return;
+          }
+
+          console.log('✅ Business info loaded successfully:', { userEmail, businessId });
+
+        } catch (error) {
+          console.error('❌ Error loading business info:', error);
+          showStatus(`Error loading business information: ${error.message}`, 'error');
+        }
+      }
+
+      // ========== FILE UPLOAD HANDLERS ==========
+      audioUploadBox.addEventListener('click', () => {
+        if (!uploadedAudio) {
+          fileInput.click();
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        handleAudioUpload(e.target.files[0]);
+      });
+
+      audioUploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        audioUploadBox.style.borderColor = 'var(--primary-orange)';
+        audioUploadBox.style.background = '#FFF8F0';
+      });
+
+      audioUploadBox.addEventListener('dragleave', () => {
+        audioUploadBox.style.borderColor = 'var(--border-color)';
+        audioUploadBox.style.background = 'var(--light-bg)';
+      });
+
+      audioUploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        audioUploadBox.style.borderColor = 'var(--border-color)';
+        audioUploadBox.style.background = 'var(--light-bg)';
+        handleAudioUpload(e.dataTransfer.files[0]);
+      });
+
+      function handleAudioUpload(file) {
+        if (!file) return;
+
+        const validTypes = ['audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/mp4'];
+        if (!validTypes.includes(file.type)) {
+          showStatus('Please select a valid audio file (MP3, WAV, M4A, OGG)', 'error');
+          return;
+        }
+
+        const maxSize = 25 * 1024 * 1024;
+        if (file.size > maxSize) {
+          showStatus('Audio file is too large. Maximum size is 25MB.', 'error');
+          return;
+        }
+
+        uploadedAudio = file;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          audioPlayer.src = e.target.result;
+          audioPlayer.style.display = 'block';
+          removeAudioBtn.style.display = 'block';
+          audioUploadBox.classList.add('has-audio');
+          transcribeBtn.disabled = false;
+          transcriptionPreview.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Ready to transcribe. Click the button to start.</div>';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      removeAudioBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        uploadedAudio = null;
+        currentTranscription = null;
+        audioPlayer.src = '';
+        audioPlayer.style.display = 'none';
+        removeAudioBtn.style.display = 'none';
+        audioUploadBox.classList.remove('has-audio');
+        fileInput.value = '';
+        transcribeBtn.disabled = true;
+        copyBtn.style.display = 'none';
+        downloadContainer.style.display = 'none';
+        transcriptionPreview.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Upload an audio file and click transcribe to see the preview here</div>';
+        progressSection.style.display = 'none';
+        emailDeliverySection.classList.remove('show');
+        transcriptionStatus.style.display = 'none';
+      });
+
+      // ========== EMAIL CHECKBOX HANDLER ==========
+      sendEmailCheckbox.addEventListener('change', () => {
+        if (sendEmailCheckbox.checked) {
+          emailInputSection.classList.add('show');
+          emailRecipient.focus();
+        } else {
+          emailInputSection.classList.remove('show');
+        }
+      });
+
+      // ========== TRANSCRIBE AUDIO ==========
+      transcribeBtn.addEventListener('click', async () => {
+        await transcribeAudio();
+      });
+
+      async function transcribeAudio() {
+        if (!uploadedAudio || !userEmail || !businessId) {
+          showStatus('Missing required information. Please upload an audio file and ensure you are logged in.', 'error');
+          return;
+        }
+
+        if (!validateForm()) {
+          showStatus('Please fill in all required fields.', 'error');
+          return;
+        }
+
+        transcribeBtn.disabled = true;
+        isTranscribing = true;
+        progressSection.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Initializing transcription...';
+        emailDeliverySection.classList.add('show');
+
+        try {
+          // Create FormData for audio upload
+          const formData = new FormData();
+          formData.append('audio', uploadedAudio);
+          formData.append('businessId', businessId);
+          formData.append('userEmail', userEmail);
+          formData.append('enableDiarization', diarizationToggle.checked);
+          formData.append('sendEmail', sendEmailCheckbox.checked);
+          
+          if (sendEmailCheckbox.checked) {
+            formData.append('emailRecipient', emailRecipient.value);
+            formData.append('emailSubject', emailSubject.value);
+          }
+
+          progressText.textContent = 'Uploading audio file...';
+          progressFill.style.width = '10%';
+
+          // Send to transcription API
+          const response = await fetch('/api/audio-transcribe/transcribe', {
+            method: 'POST',
+            body: formData
+          });
+
+          progressFill.style.width = '30%';
+
+          if (!response.ok) {
+            const error = await response.json();
+            if (response.status === 402) {
+              throw new Error(`Insufficient funds!\n\nRequired: R${error.required?.toFixed(2) || COSTS.BASIC}\nBalance: ${error.formatted_balance}\n\nPlease add credits to continue.`);
+            }
+            throw new Error(error.error || 'Transcription failed');
+          }
+
+          const result = await response.json();
+
+          progressFill.style.width = '50%';
+          progressText.textContent = 'Processing transcription...';
+
+          // Update preview with transcription
+          if (result.preview) {
+            displayTranscriptionPreview(result.preview);
+          }
+
+          // Handle email delivery option
+          if (result.emailSent) {
+            progressText.textContent = 'Sending to email...';
+            progressFill.style.width = '90%';
+          }
+
+          currentTranscription = result.fullTranscription || result.preview;
+
+          progressFill.style.width = '100%';
+          progressText.textContent = 'Complete!';
+
+          setTimeout(() => {
+            progressSection.style.display = 'none';
+          }, 1500);
+
+          // Show success message
+          let successMsg = '✅ Transcription complete!';
+          if (result.emailSent) {
+            successMsg += `\n\n📧 Email sent to: ${emailRecipient.value}`;
+          }
+          successMsg += `\n💰 Cost deducted: R${COSTS.BASIC.toFixed(2)}`;
+
+          showStatus(successMsg, 'success');
+
+          // Show action buttons
+          copyBtn.style.display = 'inline-block';
+          downloadContainer.style.display = 'inline-block';
+
+        } catch (error) {
+          console.error('Transcription error:', error);
+          progressSection.style.display = 'none';
+          showStatus(error.message, 'error');
+        } finally {
+          transcribeBtn.disabled = false;
+          isTranscribing = false;
+        }
+      }
+
+      function displayTranscriptionPreview(preview) {
+        if (typeof preview === 'string') {
+          // Plain text preview
+          transcriptionPreview.innerHTML = `<div class="preview-header">Transcription Preview</div><div>${preview}</div>`;
+        } else if (typeof preview === 'object') {
+          // Structured preview with speakers
+          let html = '<div class="preview-header">Transcription Preview (with Speaker Identification)</div>';
+          
+          if (preview.segments && Array.isArray(preview.segments)) {
+            preview.segments.forEach(segment => {
+              html += `
+                <div class="speaker-segment">
+                  <div class="speaker-label">Speaker ${segment.speaker || 'Unknown'}</div>
+                  <div class="segment-text">${segment.text}</div>
+                </div>
+              `;
+            });
+          } else if (preview.text) {
+            html += `<div>${preview.text}</div>`;
+          }
+
+          transcriptionPreview.innerHTML = html;
+        }
+      }
+
+      // ========== COPY TO CLIPBOARD ==========
+      copyBtn.addEventListener('click', async () => {
+        try {
+          const textToCopy = typeof currentTranscription === 'string' 
+            ? currentTranscription 
+            : JSON.stringify(currentTranscription, null, 2);
+
+          await navigator.clipboard.writeText(textToCopy);
+          showStatus('✅ Copied to clipboard!', 'success');
+        } catch (error) {
+          showStatus('Failed to copy to clipboard', 'error');
+        }
+      });
+
+      // ========== DOWNLOAD MANAGER ==========
+      // Toggle dropdown when main button is clicked
+      downloadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadDropdown.classList.toggle('show');
+      });
+
+      // Handle format selection
+      downloadFormatBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const format = btn.dataset.format;
+          await downloadTranscription(format);
+          downloadDropdown.classList.remove('show');
+        });
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', () => {
+        downloadDropdown.classList.remove('show');
+      });
+
+      async function downloadTranscription(format) {
+        try {
+          showStatus(`⏳ Generating ${format.toUpperCase()} file...`, 'info');
+
+          // Prepare the data for the backend
+          const downloadData = {
+            format: format,
+            transcription: currentTranscription,
+            businessName: businessName || 'Transcription',
+            userEmail: userEmail || 'user@example.com',
+            fileName: `transcription_${Date.now()}`
+          };
+
+          const response = await fetch('/api/audio-transcribe/download', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(downloadData)
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Download failed');
+          }
+
+          const result = await response.json();
+
+          // Check if we got a Cloudinary URL
+          if (result.success && result.download && result.download.url) {
+            console.log('☁️ Downloading from Cloudinary:', result.download.url);
+            
+            // Download from Cloudinary URL
+            const link = document.createElement('a');
+            link.href = result.download.url;
+            link.download = result.file.name || `transcription_${Date.now()}.${format}`;
+            link.target = '_blank'; // Open in new tab for better compatibility
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showStatus(`✅ ${format.toUpperCase()} file downloaded from Cloudinary!`, 'success');
+          } else {
+            // Fallback for direct blob download (shouldn't happen with new implementation)
+            throw new Error('Invalid response format from server');
+          }
+        } catch (error) {
+          console.error('Download error:', error);
+          showStatus(`Failed to download ${format}: ${error.message}`, 'error');
+        }
+      }
+
+      // ========== FORM VALIDATION ==========
+      function validateForm() {
+        if (sendEmailCheckbox.checked) {
+          if (!emailRecipient.value.trim()) {
+            showStatus('Please enter an email address', 'error');
+            return false;
+          }
+          if (!emailSubject.value.trim()) {
+            showStatus('Please enter an email subject', 'error');
+            return false;
+          }
+        }
+        return true;
+      }
+
+      // ========== SHOW STATUS ==========
+      function showStatus(message, type) {
+        transcriptionStatus.textContent = message;
+        transcriptionStatus.className = `status ${type}`;
+        transcriptionStatus.style.display = 'block';
+      }
+
+      // ========== UPDATE COST DISPLAY ==========
+      function updateCostDisplay() {
+        if (diarizationToggle.checked) {
+          costNote.textContent = `+ Diarization: R${COSTS.WITH_DIARIZATION.toFixed(2)}`;
+        } else {
+          costNote.textContent = '';
+        }
+      }
+
+      diarizationToggle.addEventListener('change', updateCostDisplay);
+
+      // ========== INITIALIZE ON PAGE LOAD ==========
+      document.addEventListener('DOMContentLoaded', async () => {
+        await loadBusinessInfo();
+        updateCostDisplay();
+      });
+    </script>
 </body>
 </html>

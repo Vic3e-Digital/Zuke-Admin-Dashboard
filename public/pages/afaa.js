@@ -169,6 +169,11 @@ export async function initAfaaPage() {
         url: `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-rediscoverme-coaching?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
       },
       {
+        btn: document.getElementById("shiftOutreach"),
+        title: "Shift Outreach",
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/find-shift-leads?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+      },
+      {
         btn: document.getElementById("afaaTool2Btn"),
         title: "Find Partner Emails",
         url: `https://aigents.southafricanorth.azurecontainer.io/form/dineo-enrichment?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
