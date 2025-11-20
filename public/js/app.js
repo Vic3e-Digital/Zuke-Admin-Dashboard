@@ -30,6 +30,9 @@ const configureClient = async () => {
       }
     });
     
+    // Expose auth0Client globally for other pages to use
+    window.auth0Client = auth0Client;
+    
     console.log("Auth0 client created successfully");
     return true;
   } catch (error) {
