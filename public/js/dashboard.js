@@ -833,7 +833,7 @@ if (switchDropdownBtn) {
 
   async function loadCreativePage() {
     if (!loadCreativePage.cache) {
-      loadCreativePage.cache = await fetch('pages/creative.html').then(r => r.text());
+      loadCreativePage.cache = await fetch('pages/creative/creative.html').then(r => r.text());
     }
     return loadCreativePage.cache;
   }
@@ -932,14 +932,14 @@ if (switchDropdownBtn) {
       case "creative":
         if (!window.__creativeLoaded) {
           try {
-            const mod = await import("../pages/creative.js");
+            const mod = await import("../pages/creative/creative.js");
             mod.initCreativePage();
             window.__creativeLoaded = true;
           } catch (error) {
             console.error("Error loading creative page:", error);
           }
         } else {
-          import("../pages/creative.js").then(mod => mod.initCreativePage());
+          import("../pages/creative/creative.js").then(mod => mod.initCreativePage());
         }
         break;
       case "test":

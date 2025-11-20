@@ -145,9 +145,11 @@ export async function initCreativePage() {
   const iframe = document.getElementById("modalIframe");
   const closeBtn = document.getElementsByClassName("close")[0];
   
-  // Get main card and sim cards container
+  // Get main cards and sim cards containers
   const mainStoreCard = document.getElementById("mainStoreCard");
+  const mainAudioCard = document.getElementById("mainAudioCard");
   const simCardsContainer = document.getElementById("simCardsContainer");
+  const audioCardsContainer = document.getElementById("audioCardsContainer");
 
   try {
     // Check authentication
@@ -171,12 +173,17 @@ export async function initCreativePage() {
     const businessName = currentBusiness?.store_info?.name || 'No Business';
     const businessId = currentBusiness?._id || '';
 
-    // Toggle sim cards when main card is clicked
+    // Toggle sim cards when main Branding card is clicked
     if (mainStoreCard && simCardsContainer) {
       mainStoreCard.addEventListener('click', function(e) {
         // Don't toggle if clicking on info icon or its tooltip
         if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
           return;
+        }
+        
+        // Hide audio cards
+        if (audioCardsContainer) {
+          audioCardsContainer.style.display = 'none';
         }
         
         // Toggle display
@@ -195,6 +202,35 @@ export async function initCreativePage() {
       mainStoreCard.style.cursor = 'pointer';
     }
 
+    // Toggle audio cards when main Audio card is clicked
+    if (mainAudioCard && audioCardsContainer) {
+      mainAudioCard.addEventListener('click', function(e) {
+        // Don't toggle if clicking on info icon or its tooltip
+        if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
+          return;
+        }
+        
+        // Hide branding cards
+        if (simCardsContainer) {
+          simCardsContainer.style.display = 'none';
+        }
+        
+        // Toggle display
+        if (audioCardsContainer.style.display === 'none' || audioCardsContainer.style.display === '') {
+          audioCardsContainer.style.display = 'grid';
+          // Smooth scroll to audio cards
+          setTimeout(() => {
+            audioCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          audioCardsContainer.style.display = 'none';
+        }
+      });
+      
+      // Add cursor pointer to indicate it's clickable
+      mainAudioCard.style.cursor = 'pointer';
+    }
+
     // Setup buttons with dynamic URLs
     const buttons = [
       {
@@ -204,7 +240,7 @@ export async function initCreativePage() {
       }
     ];
 
-    // Setup coming soon buttons (now includes Improve an Image)
+    // Setup coming soon buttons
     const comingSoonButtons = [
       {
         btn: document.getElementById("openLogoBtn"),
@@ -213,14 +249,10 @@ export async function initCreativePage() {
       {
         btn: document.getElementById("openFlyerBtn"),
         name: "Design Flyers"
-      },
-      {
-        btn: document.getElementById("improveImage"),
-        name: "Improve an Image"
       }
     ];
 
-    // Setup beta buttons (removed Improve an Image from here)
+    // Setup beta buttons - NOW WITH BETA WARNING
     const betaButtons = [
       {
         btn: document.getElementById("card8"),
@@ -231,6 +263,16 @@ export async function initCreativePage() {
         btn: document.getElementById("card7"),
         title: "Create Images with AI",
         url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("improveImage"),
+        title: "Improve an Image",
+        url: `/tools/improve-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("transcribeAudioBtn"),
+        title: "Transcribe Audio",
+        url: `/tools/transcribe-audio.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       }
     ];
 
@@ -261,8 +303,8 @@ export async function initCreativePage() {
     // Add click handlers for beta features
     betaButtons.forEach(({btn, title, url}) => {
       if (btn) {
-        // Find the action button within the card
-        const actionBtn = btn.querySelector('.sim-action-btn');
+        // Check if btn is the card itself or has an action button
+        const actionBtn = btn.classList.contains('sim-action-btn') ? btn : btn.querySelector('.sim-action-btn');
         if (actionBtn) {
           actionBtn.onclick = function(e) {
             e.stopPropagation();
