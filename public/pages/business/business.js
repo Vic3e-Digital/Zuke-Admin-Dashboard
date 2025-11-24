@@ -86,7 +86,7 @@ export async function initBusinessPage() {
       businessCaseBtn.onclick = function(e) {
         e.stopPropagation();
         modalTitle.textContent = "Business Case Assistant";
-        iframe.src = `/pages/business-tools/business-case.html?Business%20Name=${encodeURIComponent(businessName)}&Business%20Description=${encodeURIComponent(businessDescription)}&Email=${encodeURIComponent(userEmail)}&Address=${encodeURIComponent(businessAddress)}&Categories=${encodeURIComponent(businessCategories)}&Questions%20to%20Answer=${encodeURIComponent(businessCaseString)}&ID=${encodeURIComponent(mongoID)}`;
+        iframe.src = `/pages/business-tools/business-case.html`;
         modal.style.display = "block";
         document.body.style.overflow = 'hidden';
       }

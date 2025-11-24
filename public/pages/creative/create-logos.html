@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Ideas Generator | Zuke</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  
+  <style>
+    /* Logo-specific styles */
+    .business-info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .info-toggle-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary-orange);
+      font-size: 20px;
+      padding: 4px 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .info-toggle-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .info-toggle-btn.collapsed {
+      transform: rotate(0deg);
+    }
+
+    .business-info-content {
+      max-height: 500px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .business-info-content.collapsed {
+      max-height: 0;
+    }
+
+    .style-selection {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .style-option {
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: white;
+      position: relative;
+    }
+
+    .style-option:hover {
+      border-color: var(--primary-orange);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .style-option.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .style-option.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .style-option input[type="checkbox"] {
+      display: none;
+    }
+
+    .style-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .style-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--dark-neutral);
+    }
+
+    .style-limit-note {
+      background: #FFF8F0;
+      border: 1px solid #FFE0B2;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #E65100;
+    }
+
+    .color-palette {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .color-swatch {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+      border-color: var(--primary-orange);
+    }
+
+    .color-swatch.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      text-shadow: 0 0 3px rgba(0,0,0,0.5);
+    }
+
+    .add-color-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      border: 2px dashed var(--border-color);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .add-color-btn:hover {
+      border-color: var(--primary-orange);
+      color: var(--primary-orange);
+    }
+
+    /* ✅ HORIZONTAL SCROLL for logos */
+    .logo-grid {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .logo-grid::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .logo-grid::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .logo-grid::-webkit-scrollbar-thumb {
+      background: var(--primary-orange);
+      border-radius: 4px;
+    }
+
+    .logo-card {
+      min-width: 280px;
+      max-width: 280px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      background: white;
+      position: relative;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .logo-card.generating {
+      background: linear-gradient(90deg, #f5f5f5 25%, #e0e0e0 50%, #f5f5f5 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .logo-card.selected {
+      border-color: var(--primary-orange);
+      box-shadow: 0 4px 16px rgba(255, 102, 0, 0.2);
+    }
+
+    .logo-checkbox-container {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+    }
+
+    .logo-checkbox {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      accent-color: var(--primary-orange);
+    }
+
+    .logo-image-container {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .logo-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e0e0e0;
+      border-top-color: var(--primary-orange);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .logo-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .logo-label {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--dark-neutral);
+      margin-bottom: 4px;
+    }
+
+    .logo-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .format-options {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .format-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .format-btn:hover {
+      border-color: var(--primary-orange);
+    }
+
+    .format-btn.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+    }
+
+    /* Update this CSS section: */
+    .info-toggle-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--primary-orange);
+        font-size: 20px;
+        padding: 4px 8px;
+        transition: transform 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .info-toggle-btn svg {
+        transition: transform 0.3s ease;
+    }
+
+    .info-toggle-btn:hover {
+     transform: scale(1.1);
+    }
+
+    .info-toggle-btn:hover svg {
+        stroke: #ff8533; /* Lighter orange on hover */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>Logo Ideas Generator</h1>
+      <p>Create professional logo concepts with AI in multiple styles</p>
+    </div>
+
+    <!-- 1. Business Information (Collapsible) -->
+    <div class="section">
+      <div class="business-info-header">
+        <div class="section-title" style="margin: 0;">Business Information</div>
+        <button type="button" class="info-toggle-btn" id="infoToggleBtn" title="Toggle business info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        </button>
+      </div>
+
+      <div class="business-info-content collapsed" id="businessInfoContent">
+        <div class="form-group">
+          <label for="businessName">Business Name *</label>
+          <input type="text" id="businessName" placeholder="Enter your business name" required>
+          <p class="field-note">This will appear in or near your logo</p>
+        </div>
+
+        <div class="form-group">
+          <label for="tagline">Tagline (Optional)</label>
+          <input type="text" id="tagline" placeholder="e.g., 'Crafting Quality Since 2020'">
+          <p class="field-note">Optional text that can be included below the logo</p>
+        </div>
+
+        <div class="form-group">
+          <label for="industry">Industry Category *</label>
+          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+            <input type="text" id="industry" placeholder="e.g., 'Technology', 'Retail', 'Food & Beverage'" required>
+            <button type="button" id="generateIndustryBtn" class="btn-secondary" style="white-space: nowrap;">
+              ✨ AI Suggest
+            </button>
+          </div>
+          <div id="industrySuggestions" style="display: none; margin-top: 8px;">
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">AI Suggestions (click to select):</p>
+            <div id="suggestionsList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+          </div>
+          <p class="field-note">Enter your industry or use AI to generate suggestions</p>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Business Description *</label>
+          <textarea 
+            id="description" 
+            placeholder="Describe what your business does and its core values..."
+            rows="4"
+            required
+          ></textarea>
+          <p class="field-note">This helps AI understand your brand personality</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Logo Style Selection (MAX 2) -->
+    <div class="section">
+        <div class="section-title">Logo Styles</div>
+        <p class="field-note" style="margin-bottom: 12px;">
+            Select up to 2 styles. Each style generates 4 concepts (2 from FLUX Pro, 2 from DALL-E 3)
+        </p>
+            
+      <div class="style-selection" id="styleSelection">
+        <label class="style-option">
+          <input type="checkbox" value="minimalist">
+          <div class="style-icon">◯</div>
+          <div class="style-name">Minimalist</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="modern">
+          <div class="style-icon">▲</div>
+          <div class="style-name">Modern</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="classic">
+          <div class="style-icon">◆</div>
+          <div class="style-name">Classic</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="playful">
+          <div class="style-icon">★</div>
+          <div class="style-name">Playful</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="elegant">
+          <div class="style-icon">✦</div>
+          <div class="style-name">Elegant</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="bold">
+          <div class="style-icon">■</div>
+          <div class="style-name">Bold</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="geometric">
+          <div class="style-icon">⬡</div>
+          <div class="style-name">Geometric</div>
+        </label>
+
+        <label class="style-option">
+          <input type="checkbox" value="handdrawn">
+          <div class="style-icon">✏</div>
+          <div class="style-name">Hand-Drawn</div>
+        </label>
+      </div>
+
+      <div class="style-limit-note" id="styleLimitNote" style="display: none;">
+        ⚠️ Maximum 2 styles can be selected. Deselect one to choose another.
+      </div>
+    </div>
+
+    <!-- 3. Color Preferences -->
+    <div class="section">
+      <div class="section-title">Color Preferences</div>
+      <p class="field-note" style="margin-bottom: 12px;">Select up to 3 colors for your logo (optional - leave blank for AI suggestions)</p>
+      
+      <div class="color-palette" id="colorPalette">
+        <div class="color-swatch" style="background: #FF6600;" data-color="#FF6600"></div>
+        <div class="color-swatch" style="background: #2196F3;" data-color="#2196F3"></div>
+        <div class="color-swatch" style="background: #4CAF50;" data-color="#4CAF50"></div>
+        <div class="color-swatch" style="background: #9C27B0;" data-color="#9C27B0"></div>
+        <div class="color-swatch" style="background: #F44336;" data-color="#F44336"></div>
+        <div class="color-swatch" style="background: #000000;" data-color="#000000"></div>
+        <div class="color-swatch" style="background: #FFFFFF; border-color: #ccc;" data-color="#FFFFFF"></div>
+        <div class="color-swatch" style="background: #FFD700;" data-color="#FFD700"></div>
+        <button class="add-color-btn" id="addColorBtn" title="Add custom color">+</button>
+      </div>
+      <input type="color" id="customColorPicker" style="display: none;">
+
+      <div class="form-group" style="margin-top: 16px;">
+        <label>
+          <input type="checkbox" id="includeBlackWhite" checked style="margin-right: 8px;">
+          Also generate black & white versions
+        </label>
+      </div>
+    </div>
+
+    <!-- 4. Additional Preferences -->
+    <div class="section">
+      <div class="section-title">Additional Preferences</div>
+
+      <div class="form-group">
+        <label for="keywords">Keywords (Optional)</label>
+        <input 
+          type="text" 
+          id="keywords" 
+          placeholder="e.g., mountain, leaf, circle, abstract"
+        >
+        <p class="field-note">Specific elements or concepts you want in your logo</p>
+      </div>
+
+      <div class="form-group">
+        <label for="avoidKeywords">Avoid (Optional)</label>
+        <input 
+          type="text" 
+          id="avoidKeywords" 
+          placeholder="e.g., animals, people, crowns"
+        >
+        <p class="field-note">Elements you don't want in your logo</p>
+      </div>
+
+      <div class="form-group">
+        <label>Output Format</label>
+        <div class="format-options">
+          <button type="button" class="format-btn selected" data-format="square">
+            Square<br><small>(1:1)</small>
+          </button>
+          <button type="button" class="format-btn" data-format="horizontal">
+            Horizontal<br><small>(16:9)</small>
+          </button>
+          <button type="button" class="format-btn" data-format="vertical">
+            Vertical<br><small>(9:16)</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Generate Logos -->
+    <div class="section">
+    <div class="section-title">Generate Logo Concepts</div>
+
+    <div class="cost-summary" style="margin-bottom: 16px;">
+        <div style="font-weight: 600; margin-bottom: 8px; color: var(--dark-neutral);">Generation Cost</div>
+        <div class="cost-line">
+        <span>AI Models</span>
+        <span style="font-size: 12px; color: var(--text-secondary);">FLUX Pro + DALL-E 3</span>
+        </div>
+        <div class="cost-line">
+        <span>Logo concepts</span>
+        <span id="costLogos">R0.00</span>
+        </div>
+        <div class="cost-line">
+        <span id="variantCount">0 styles × 2 variants × 2 models</span>
+        <span style="font-size: 12px; color: var(--text-secondary);">R15.00 per concept</span>
+        </div>
+        <hr class="cost-divider">
+        <div class="cost-line">
+        <strong>Total</strong>
+        <span class="cost-total" id="costTotal">R0.00</span>
+        </div>
+    </div>
+
+    <button class="btn" id="generateLogosBtn" disabled>
+        Generate Logo Ideas
+    </button>
+
+      <!-- Progress -->
+      <div class="progress" id="logoProgress">
+        <p class="progress-text" id="logoProgressText">Generating logos...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="logoProgressFill"></div>
+        </div>
+      </div>
+
+      <div class="status" id="logoStatus"></div>
+
+      <!-- Generated Logos Section -->
+      <div id="logosSection" class="hidden" style="margin-top: 24px;">
+        
+        <!-- Header with Download Button -->
+        <div class="variants-header">
+          <label style="margin: 0; font-weight: 600;">Generated Logo Concepts</label>
+          <button class="download-all-btn" id="downloadSelectedBtn" type="button">
+            <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+            Download Selected
+          </button>
+        </div>
+
+        <!-- Select Controls -->
+        <div class="variants-controls" id="logoControls" style="display: none;">
+          <div class="select-controls">
+            <button class="select-btn" id="selectAllLogosBtn" type="button">Select All</button>
+            <button class="select-btn" id="deselectAllLogosBtn" type="button">Deselect All</button>
+          </div>
+          <div class="selected-count">
+            <span id="selectedLogoCount">0</span> of <span id="totalLogoCount">0</span> logos selected
+          </div>
+        </div>
+
+        <!-- Logos Grid (Horizontal Scroll) -->
+        <div class="logo-grid" id="logosGrid">
+          <!-- Logo cards will be added here dynamically -->
+        </div>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/dataManager.js"></script>
+  <script src="/js/ai-generator.js"></script>
+  
+  <script>
+    // ========== GLOBAL VARIABLES ==========
+    let auth0Client = null;
+    let currentBusiness = null;
+    let openAIConfig = null;
+    let aiGenerator = null;
+    
+    let generatedLogos = [];
+    let selectedColors = [];
+    let selectedFormat = 'square';
+    
+    let userEmail = null;
+    let businessId = null;
+    let businessCase = {};
+    let storeInfo = {};
+    let businessName = '';
+
+    const MAX_STYLES = 2;
+    const COST_PER_LOGO = 15.00;
+    const VARIANTS_PER_STYLE = 2;
+
+    // ========== DOM ELEMENTS ==========
+    const businessNameInput = document.getElementById('businessName');
+    const taglineInput = document.getElementById('tagline');
+    const industrySelect = document.getElementById('industry');
+    const descriptionInput = document.getElementById('description');
+    const keywordsInput = document.getElementById('keywords');
+    const avoidKeywordsInput = document.getElementById('avoidKeywords');
+    const includeBlackWhiteCheckbox = document.getElementById('includeBlackWhite');
+    
+    const generateLogosBtn = document.getElementById('generateLogosBtn');
+    const logosSection = document.getElementById('logosSection');
+    const logosGrid = document.getElementById('logosGrid');
+    const downloadSelectedBtn = document.getElementById('downloadSelectedBtn');
+
+    const infoToggleBtn = document.getElementById('infoToggleBtn');
+    const businessInfoContent = document.getElementById('businessInfoContent');
+    const styleLimitNote = document.getElementById('styleLimitNote');
+
+    // ========== TOGGLE BUSINESS INFO ==========
+    infoToggleBtn.addEventListener('click', () => {
+      const isCollapsed = businessInfoContent.classList.contains('collapsed');
+      
+      if (isCollapsed) {
+        businessInfoContent.classList.remove('collapsed');
+        infoToggleBtn.style.transform = 'rotate(180deg)';
+      } else {
+        businessInfoContent.classList.add('collapsed');
+        infoToggleBtn.style.transform = 'rotate(0deg)';
+      }
+    });
+
+    // ========== AUTH0 & LOAD FROM LOCALSTORAGE ==========
+    async function getAuth0Client() {
+      if (window.auth0Client) return window.auth0Client;
+      
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error configuring Auth0:", error);
+        return null;
+      }
+    }
+
+    async function getOpenAIConfig() {
+      if (openAIConfig) return openAIConfig;
+      
+      try {
+        const response = await fetch('/api/get-openai-config');
+        if (!response.ok) throw new Error('Failed to get OpenAI config');
+        openAIConfig = await response.json();
+        return openAIConfig;
+      } catch (error) {
+        console.error('Error fetching OpenAI config:', error);
+        return null;
+      }
+    }
+
+    async function loadBusinessInfo() {
+  const auth0 = await getAuth0Client();
+  if (!auth0) return;
+
+  try {
+    const isAuthenticated = await auth0.isAuthenticated();
+    if (!isAuthenticated) {
+      showStatus('Please log in to continue', 'error');
+      return;
+    }
+
+    const user = await auth0.getUser();
+    userEmail = user.email;
+    console.log('✅ Authenticated user:', userEmail);
+
+    const cachedBusinessId = localStorage.getItem('selectedBusinessId');
+    const cachedBusinessData = localStorage.getItem('selectedBusiness');
+    
+    if (cachedBusinessId && cachedBusinessData) {
+      try {
+        currentBusiness = JSON.parse(cachedBusinessData);
+        businessId = cachedBusinessId;
+        
+        // ✅ Safely extract data with fallbacks
+        businessCase = currentBusiness.initial_business_case || {};
+        storeInfo = currentBusiness.store_info || {};
+        
+        // ✅ Get business name from multiple possible locations
+        businessName = storeInfo.name || 
+                      businessCase.business_name || 
+                      currentBusiness.marketplace_info?.store_name ||
+                      currentBusiness.marketplace_info?.business_name || 
+                      '';
+        
+        console.log('✅ Loaded business from localStorage');
+        console.log('📊 Available data:', {
+          businessCase: Object.keys(businessCase),
+          storeInfo: Object.keys(storeInfo),
+          businessName: businessName
+        });
+        
+        // ✅ Add complete structure debug
+        console.log('🔍 Complete structure:', JSON.stringify({
+          store_info: storeInfo,
+          initial_business_case: businessCase
+        }, null, 2));
+        
+        prefillBusinessInfo();
+
+        // Add this right after the prefillBusinessInfo() call in loadBusinessInfo()
+        console.log('🔍 Complete business data structure:', {
+        currentBusiness: currentBusiness ? {
+            _id: currentBusiness._id,
+            store_info_keys: Object.keys(currentBusiness.store_info || {}),
+            business_case_keys: Object.keys(currentBusiness.initial_business_case || {}),
+            marketplace_info_keys: Object.keys(currentBusiness.marketplace_info || {})
+        } : null,
+        extracted: {
+            businessName,
+            businessCaseKeys: Object.keys(businessCase),
+            storeInfoKeys: Object.keys(storeInfo),
+            industryType: typeof (businessCase.industry || storeInfo.industry || storeInfo.category),
+            industryValue: businessCase.industry || storeInfo.industry || storeInfo.category
+        }
+        });
+
+        return;
+        
+      } catch (e) {
+        console.error('Error parsing cached business data:', e);
+      }
+    }
+
+    // ✅ FALLBACK: Try dataManager
+    if (!businessName) {
+      console.log('🔍 Trying dataManager...');
+      
+      try {
+        if (window.parent && window.parent.dataManager) {
+          currentBusiness = window.parent.dataManager.getSelectedBusinessOrFirst();
+        } else if (window.dataManager) {
+          currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+        }
+        
+        if (currentBusiness) {
+          businessCase = currentBusiness.initial_business_case || {};
+          storeInfo = currentBusiness.store_info || {};
+          businessName = storeInfo.name || 
+                        businessCase.business_name || 
+                        '';
+          businessId = currentBusiness._id;
+          
+          console.log('✅ Loaded business from dataManager:', businessName);
+          prefillBusinessInfo();
+        }
+      } catch (e) {
+        console.warn('Could not access dataManager:', e);
+      }
+    }
+
+    // ✅ FALLBACK: Check URL params
+    if (!businessName) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlBusinessId = urlParams.get('businessId') || urlParams.get('ID');
+      
+      if (urlBusinessId) {
+        businessId = urlBusinessId;
+        console.log('⚠️ Using businessId from URL, fetching data...');
+        await fetchBusinessDataFromBackend();
+      }
+    }
+
+    // Initialize AI Generator
+    const config = await getOpenAIConfig();
+    if (config) {
+      aiGenerator = new AIGenerator(config);
+      console.log('✅ AI Generator initialized');
+    }
+
+  } catch (error) {
+    console.error('❌ Error loading business:', error);
+    console.error('Error stack:', error.stack);
+    showStatus('Failed to load business information', 'error');
+  }
+}
+
+    // ========== PREFILL FORM WITH BUSINESS DATA ==========
+function prefillBusinessInfo() {
+  // ✅ Business Name
+  if (businessName) {
+    businessNameInput.value = businessName;
+  }
+  
+  // ✅ Description - check multiple possible fields
+  const descriptionSources = [
+    businessCase.business_overview,
+    businessCase.what_you_do,
+    storeInfo.description,
+    currentBusiness?.marketplace_info?.marketplace_description
+  ];
+  
+  const description = descriptionSources.find(d => d && d.length > 0);
+  if (description) {
+    descriptionInput.value = description;
+  }
+  
+  // ✅ Tagline - check if stored separately
+  if (businessCase.tagline) {
+    taglineInput.value = businessCase.tagline;
+  } else if (storeInfo.tagline) {
+    taglineInput.value = storeInfo.tagline;
+  }
+  
+  // Log available fields for debugging
+  console.log('📊 MongoDB Data Available:', {
+    'businessCase.tagline': businessCase.tagline,
+    'storeInfo.tagline': storeInfo.tagline,
+    'businessCase.industry': businessCase.industry,
+    'storeInfo.industry': storeInfo.industry,
+    'storeInfo.category': storeInfo.category
+  });
+  
+  // ✅ Industry - check multiple possible locations
+  const industryValue = businessCase.industry || 
+                       storeInfo.industry || 
+                       storeInfo.category;
+  
+  if (industryValue) {
+    industrySelect.value = String(industryValue);
+  }
+  
+  validateForm();
+  
+  console.log('📝 Form pre-filled with:', {
+    name: businessNameInput.value,
+    description: descriptionInput.value?.substring(0, 50) + '...',
+    tagline: taglineInput.value,
+    industry: industrySelect.value,
+    source: {
+      businessCase: Object.keys(businessCase),
+      storeInfo: Object.keys(storeInfo)
+    }
+  });
+}
+
+    // ✅ FETCH FROM BACKEND IF NEEDED
+    async function fetchBusinessDataFromBackend() {
+      try {
+        const response = await fetch(`/api/businesses/${businessId}?userEmail=${encodeURIComponent(userEmail)}`);
+        if (response.ok) {
+          const data = await response.json();
+          currentBusiness = data.business;
+          businessCase = currentBusiness.initial_business_case || {};
+          storeInfo = currentBusiness.store_info || {};
+          businessName = storeInfo.name || businessCase.business_name || '';
+          
+          console.log('✅ Loaded business from backend:', businessName);
+          prefillBusinessInfo();
+        }
+      } catch (error) {
+        console.error('Error fetching business data:', error);
+      }
+    }
+
+    // ========== STYLE SELECTION (MAX 2) ==========
+    document.querySelectorAll('.style-option').forEach(option => {
+      const checkbox = option.querySelector('input[type="checkbox"]');
+      
+      checkbox.addEventListener('change', () => {
+        const selectedCount = document.querySelectorAll('.style-option input:checked').length;
+        
+        if (checkbox.checked) {
+          if (selectedCount <= MAX_STYLES) {
+            option.classList.add('selected');
+            styleLimitNote.style.display = 'none';
+          } else {
+            // Prevent selection
+            checkbox.checked = false;
+            styleLimitNote.style.display = 'block';
+            setTimeout(() => {
+              styleLimitNote.style.display = 'none';
+            }, 3000);
+            return;
+          }
+        } else {
+          option.classList.remove('selected');
+          styleLimitNote.style.display = 'none';
+        }
+        
+        // Update disabled state for unselected options
+        updateStyleOptions();
+        updateCostSummary();
+        validateForm();
+      });
+    });
+
+    function updateStyleOptions() {
+      const selectedCount = document.querySelectorAll('.style-option input:checked').length;
+      
+      document.querySelectorAll('.style-option').forEach(option => {
+        const checkbox = option.querySelector('input[type="checkbox"]');
+        
+        if (!checkbox.checked && selectedCount >= MAX_STYLES) {
+          option.classList.add('disabled');
+        } else {
+          option.classList.remove('disabled');
+        }
+      });
+    }
+
+    // ========== COLOR SELECTION ==========
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        const color = swatch.dataset.color;
+        
+        if (swatch.classList.contains('selected')) {
+          swatch.classList.remove('selected');
+          selectedColors = selectedColors.filter(c => c !== color);
+        } else {
+          if (selectedColors.length < 3) {
+            swatch.classList.add('selected');
+            selectedColors.push(color);
+          } else {
+            showStatus('Maximum 3 colors allowed', 'info');
+          }
+        }
+      });
+    });
+
+    // Add custom color
+    document.getElementById('addColorBtn').addEventListener('click', () => {
+      document.getElementById('customColorPicker').click();
+    });
+
+    document.getElementById('customColorPicker').addEventListener('change', (e) => {
+      const color = e.target.value;
+      
+      if (selectedColors.length >= 3) {
+        showStatus('Maximum 3 colors allowed', 'info');
+        return;
+      }
+      
+      const existingSwatch = Array.from(document.querySelectorAll('.color-swatch'))
+        .find(s => s.dataset.color?.toLowerCase() === color.toLowerCase());
+      
+      if (existingSwatch) {
+        existingSwatch.click();
+        return;
+      }
+      
+      const newSwatch = document.createElement('div');
+      newSwatch.className = 'color-swatch selected';
+      newSwatch.style.background = color;
+      newSwatch.dataset.color = color;
+      
+      newSwatch.addEventListener('click', () => {
+        if (newSwatch.classList.contains('selected')) {
+          newSwatch.classList.remove('selected');
+          selectedColors = selectedColors.filter(c => c !== color);
+        } else {
+          if (selectedColors.length < 3) {
+            newSwatch.classList.add('selected');
+            selectedColors.push(color);
+          }
+        }
+      });
+      
+      document.getElementById('colorPalette').insertBefore(
+        newSwatch, 
+        document.getElementById('addColorBtn')
+      );
+      
+      selectedColors.push(color);
+    });
+
+    // ========== FORMAT SELECTION ==========
+    document.querySelectorAll('.format-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedFormat = btn.dataset.format;
+      });
+    });
+
+    // ========== UPDATE COST SUMMARY ==========
+function updateCostSummary() {
+  const selectedStyles = Array.from(document.querySelectorAll('.style-option input:checked'));
+  const styleCount = selectedStyles.length;
+  
+  // ✅ 2 variants per style × 2 models (FLUX + DALL-E)
+  const MODELS_COUNT = 2;
+  const totalVariants = styleCount * VARIANTS_PER_STYLE * MODELS_COUNT;
+  const totalCost = totalVariants * COST_PER_LOGO;
+  
+  document.getElementById('variantCount').textContent = 
+    `${styleCount} styles × ${VARIANTS_PER_STYLE} variants × ${MODELS_COUNT} models = ${totalVariants} concepts`;
+  document.getElementById('costLogos').textContent = `R${totalCost.toFixed(2)}`;
+  document.getElementById('costTotal').textContent = `R${totalCost.toFixed(2)}`;
+}
+    
+    
+    // ========== VALIDATE FORM ==========
+    function validateForm() {
+      const hasName = businessNameInput.value.trim().length > 0;
+      const hasIndustry = industrySelect.value.trim().length > 0;
+      const hasDescription = descriptionInput.value.trim().length > 10;
+      const hasStyles = document.querySelectorAll('.style-option input:checked').length > 0;
+      
+      const isValid = hasName && hasIndustry && hasDescription && hasStyles;
+      generateLogosBtn.disabled = !isValid;
+      
+      return isValid;
+    }
+
+    [businessNameInput, industrySelect, descriptionInput].forEach(input => {
+      input.addEventListener('input', validateForm);
+      input.addEventListener('change', validateForm);
+    });
+
+    // ========== AI GENERATE INDUSTRY SUGGESTIONS ==========
+    const generateIndustryBtn = document.getElementById('generateIndustryBtn');
+    const industrySuggestions = document.getElementById('industrySuggestions');
+    const suggestionsList = document.getElementById('suggestionsList');
+
+    generateIndustryBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      if (!businessNameInput.value.trim() || !descriptionInput.value.trim()) {
+        showStatus('Please fill in Business Name and Description first', 'warning');
+        return;
+      }
+
+      generateIndustryBtn.disabled = true;
+      generateIndustryBtn.textContent = '⏳ Generating...';
+      suggestionsList.innerHTML = '';
+
+      try {
+        if (!aiGenerator) {
+          showStatus('AI Generator not initialized', 'error');
+          return;
+        }
+
+        const prompt = `Based on the following business information, suggest up to 3 specific industry categories or niches. Return ONLY the categories as a comma-separated list, no numbering or extra text.\n\nBusiness Name: ${businessNameInput.value}\nDescription: ${descriptionInput.value}\n\nExample output: "SaaS Development, Cloud Infrastructure, DevOps Tools"`;
+
+        const response = await aiGenerator.generateContent(prompt);
+        
+        if (response) {
+          const suggestions = response
+            .split(/[,\n]|^\d+\.\s*/)
+            .map(s => s.trim())
+            .filter(s => s.length > 0 && s.length < 100)
+            .slice(0, 3);
+
+          if (suggestions.length > 0) {
+            suggestionsList.innerHTML = suggestions
+              .map(suggestion => `<button type="button" class="suggestion-tag" data-suggestion="${suggestion}" style="padding: 8px 12px; background: #FFF8F0; border: 2px solid #FF8533; border-radius: 6px; cursor: pointer; font-size: 13px; color: #FF8533; font-weight: 500; transition: all 0.2s ease;">${suggestion}</button>`)
+              .join('');
+
+            suggestionsList.querySelectorAll('.suggestion-tag').forEach(tag => {
+              tag.addEventListener('click', (e) => {
+                e.preventDefault();
+                industrySelect.value = tag.dataset.suggestion;
+                industrySuggestions.style.display = 'none';
+                validateForm();
+              });
+              tag.addEventListener('mouseenter', () => {
+                tag.style.background = '#FF8533';
+                tag.style.color = 'white';
+              });
+              tag.addEventListener('mouseleave', () => {
+                tag.style.background = '#FFF8F0';
+                tag.style.color = '#FF8533';
+              });
+            });
+
+            industrySuggestions.style.display = 'block';
+            showStatus('Industry suggestions generated!', 'success');
+          }
+        }
+      } catch (error) {
+        console.error('Error generating industry suggestions:', error);
+        showStatus('Failed to generate suggestions', 'error');
+      } finally {
+        generateIndustryBtn.disabled = false;
+        generateIndustryBtn.textContent = '✨ AI Suggest';
+      }
+    });
+
+    // ========== GENERATE LOGOS (WITH FLUX + DALL-E & PARALLEL LOADING) ==========
+generateLogosBtn.addEventListener('click', async () => {
+  await generateLogos();
+});
+
+async function generateLogos() {
+  if (!validateForm() || !aiGenerator) return;
+
+  generateLogosBtn.disabled = true;
+  document.getElementById('logoProgress').style.display = 'block';
+  document.getElementById('logoStatus').style.display = 'none';
+  logosSection.classList.remove('hidden');
+  
+  logosGrid.innerHTML = '';
+  generatedLogos = [];
+
+  try {
+    const selectedStyles = Array.from(document.querySelectorAll('.style-option input:checked'))
+      .map(input => input.value);
+    
+    // ✅ 2 variants per style × 2 models (FLUX + DALL-E) = 4 logos per style
+    const MODELS = ['flux', 'dalle'];
+    const totalVariants = selectedStyles.length * VARIANTS_PER_STYLE * MODELS.length;
+    const totalCost = totalVariants * COST_PER_LOGO;
+
+    // Deduct cost
+    await deductCost(totalCost, 'Logo generation');
+
+    document.getElementById('logoProgressText').textContent = 'Generating logo concepts with AI...';
+    document.getElementById('logoProgressFill').style.width = '10%';
+
+    // Build base prompt data
+    const businessNameText = businessNameInput.value;
+    const taglineText = taglineInput.value;
+    const industryText = industrySelect.value;
+    const descriptionText = descriptionInput.value;
+    const keywordsText = keywordsInput.value;
+    const avoidText = avoidKeywordsInput.value;
+    
+    let colorInstruction = '';
+    if (selectedColors.length > 0) {
+      colorInstruction = `Use these specific colors: ${selectedColors.join(', ')}. `;
+    } else {
+      colorInstruction = `Choose colors that match ${industryText} industry best practices. `;
+    }
+    
+    const formatDimensions = {
+      square: '1024x1024',
+      horizontal: '1792x1024',
+      vertical: '1024x1792'
+    };
+    const dimensions = formatDimensions[selectedFormat];
+
+    const styleInstructions = {
+      minimalist: 'clean, simple, lots of negative space, modern sans-serif typography',
+      modern: 'contemporary, sleek, geometric shapes, trendy design',
+      classic: 'timeless, traditional, serif fonts, established feel',
+      playful: 'fun, energetic, rounded shapes, vibrant personality',
+      elegant: 'sophisticated, refined, luxury aesthetic, premium feel',
+      bold: 'strong, impactful, high contrast, memorable',
+      geometric: 'precise shapes, mathematical, structured, technical',
+      handdrawn: 'organic, handcrafted, artistic, authentic feel'
+    };
+
+    let completedVariants = 0;
+    let variantIndex = 0;
+
+    // ✅ CREATE ALL GENERATION TASKS (for parallel execution)
+    const generationTasks = [];
+
+    for (const style of selectedStyles) {
+      const styleDesc = styleInstructions[style] || style;
+
+      for (const model of MODELS) {
+        for (let i = 0; i < VARIANTS_PER_STYLE; i++) {
+          const variantLabel = `${model.toUpperCase()}-${String.fromCharCode(65 + i)}`; // FLUX-A, FLUX-B, DALLE-A, DALLE-B
+          
+          // Create card immediately
+          const cardId = `logo_${style}_${model}_${i}_${Date.now()}_${variantIndex}`;
+          const card = createLogoCard(cardId, style, variantLabel, 'generating');
+          card.dataset.variantIndex = variantIndex;
+          logosGrid.appendChild(card);
+
+          // Build prompt
+          const prompt = `Professional logo design for "${businessNameText}". 
+${taglineText ? `Tagline: "${taglineText}". ` : ''}
+Industry: ${industryText}. 
+Business description: ${descriptionText}
+
+Style: ${styleDesc}
+${colorInstruction}
+${keywordsText ? `Include elements: ${keywordsText}. ` : ''}
+${avoidText ? `Do NOT include: ${avoidText}. ` : ''}
+
+Requirements:
+- ${selectedFormat === 'square' ? 'Centered square composition' : selectedFormat === 'horizontal' ? 'Horizontal layout' : 'Vertical layout'}
+- Clean, professional design
+- Scalable and recognizable
+- Suitable for print and digital use
+- High contrast and clarity
+${taglineText ? '- Include tagline below main logo' : ''}
+
+Output: Professional ${style} logo design, vector-style, clean background, brand identity, corporate`;
+
+          // Add generation task
+          generationTasks.push({
+            cardId,
+            style,
+            model,
+            variant: variantLabel,
+            prompt,
+            dimensions,
+            variantIndex
+          });
+
+          variantIndex++;
+        }
+      }
+    }
+
+    console.log(`🚀 Starting parallel generation of ${generationTasks.length} logos...`);
+
+    // ✅ GENERATE ALL IN PARALLEL (with controlled concurrency)
+    const MAX_CONCURRENT = 3; // Generate 3 at a time to avoid rate limits
+    
+    for (let i = 0; i < generationTasks.length; i += MAX_CONCURRENT) {
+      const batch = generationTasks.slice(i, i + MAX_CONCURRENT);
+      
+      // Generate this batch in parallel
+      const batchPromises = batch.map(async (task) => {
+        try {
+          document.getElementById('logoProgressText').textContent = 
+            `Generating ${capitalizeFirst(task.style)} (${task.model.toUpperCase()})... (${completedVariants + 1}/${totalVariants})`;
+
+          const imageData = await aiGenerator.generateImage(task.prompt, task.model, task.dimensions);
+          
+          // Update card
+          updateLogoCard(task.cardId, imageData, 'generated');
+          
+          generatedLogos.push({
+            style: task.style,
+            model: task.model,
+            variant: task.variant,
+            imageData: imageData,
+            prompt: task.prompt
+          });
+          
+          completedVariants++;
+          const progress = 10 + (completedVariants / totalVariants) * 85;
+          document.getElementById('logoProgressFill').style.width = `${progress}%`;
+          
+          updateSelectedLogoCount();
+          
+          console.log(`✅ Generated: ${task.style} ${task.variant}`);
+          
+        } catch (error) {
+          console.error(`❌ Failed: ${task.style} ${task.variant}:`, error);
+          updateLogoCard(task.cardId, null, 'failed');
+        }
+      });
+
+      // Wait for this batch to complete before starting next batch
+      await Promise.all(batchPromises);
+    }
+
+    // ✅ Generate black & white versions if requested
+    if (includeBlackWhiteCheckbox.checked && generatedLogos.length > 0) {
+      document.getElementById('logoProgressText').textContent = 'Generating black & white versions...';
+      
+      // Pick top 2 logos (first 2 generated)
+      const topLogos = generatedLogos.slice(0, 2);
+      
+      const bwTasks = topLogos.map((original, i) => {
+        const cardId = `logo_bw_${i}_${Date.now()}`;
+        const card = createLogoCard(cardId, 'B&W', i + 1, 'generating');
+        card.dataset.variantIndex = variantIndex + i;
+        logosGrid.appendChild(card);
+        
+        return {
+          cardId,
+          original,
+          index: i,
+          variantIndex: variantIndex + i
+        };
+      });
+
+      variantIndex += bwTasks.length;
+
+      // Generate B&W in parallel
+      const bwPromises = bwTasks.map(async (task) => {
+        try {
+          const bwPrompt = `Convert this logo to professional black and white version. Maintain all design elements, just remove color. High contrast, clean, professional monochrome logo design.
+
+Original style: ${task.original.style}
+Business: ${businessNameText}`;
+
+          const bwImage = await aiGenerator.generateImage(bwPrompt, 'dalle', dimensions);
+          
+          updateLogoCard(task.cardId, bwImage, 'generated');
+          
+          generatedLogos.push({
+            style: 'blackwhite',
+            variant: task.index + 1,
+            imageData: bwImage,
+            prompt: bwPrompt
+          });
+          
+          updateSelectedLogoCount();
+          
+        } catch (error) {
+          console.error(`Failed to generate B&W ${task.index + 1}:`, error);
+          updateLogoCard(task.cardId, null, 'failed');
+        }
+      });
+
+      await Promise.all(bwPromises);
+    }
+
+    document.getElementById('logoProgressFill').style.width = '100%';
+    
+    showStatus(
+      `Logo concepts generated!\n${generatedLogos.length} concepts created\nCost: R${totalCost.toFixed(2)}`,
+      'success'
+    );
+
+  } catch (error) {
+    console.error('Error generating logos:', error);
+    showStatus(error.message, 'error');
+  } finally {
+    document.getElementById('logoProgress').style.display = 'none';
+    generateLogosBtn.disabled = false;
+  }
+}
+
+    // ========== CREATE LOGO CARD ==========
+    function createLogoCard(cardId, style, variant, state = 'generating') {
+      const card = document.createElement('div');
+      card.className = `logo-card ${state}`;
+      card.id = cardId;
+      card.dataset.selected = 'true';
+      
+      card.innerHTML = `
+        <div class="logo-checkbox-container">
+          <input 
+            type="checkbox" 
+            class="logo-checkbox" 
+            checked
+            ${state === 'generating' ? 'disabled' : ''}
+          >
+        </div>
+        <div class="logo-image-container">
+          ${state === 'generating' ? '<div class="logo-spinner"></div>' : ''}
+          <img class="logo-image" alt="${style} ${variant}">
+        </div>
+        <div class="logo-label">${capitalizeFirst(style)} ${variant}</div>
+        <div class="logo-status">${state === 'generating' ? 'Generating...' : 'Ready'}</div>
+      `;
+      
+      const checkbox = card.querySelector('.logo-checkbox');
+      checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        toggleLogoSelection(cardId, checkbox.checked);
+      });
+      
+      card.addEventListener('click', () => {
+        if (state !== 'generating') {
+          checkbox.checked = !checkbox.checked;
+          toggleLogoSelection(cardId, checkbox.checked);
+        }
+      });
+      
+      return card;
+    }
+
+    // ========== UPDATE LOGO CARD ==========
+    function updateLogoCard(cardId, imageData, state) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      
+      const img = card.querySelector('.logo-image');
+      const status = card.querySelector('.logo-status');
+      const spinner = card.querySelector('.logo-spinner');
+      const checkbox = card.querySelector('.logo-checkbox');
+      
+      if (spinner) spinner.remove();
+      
+      card.className = `logo-card ${state}`;
+      
+      if (state === 'generated' && imageData) {
+        const imageDataUrl = imageData.startsWith('http') 
+          ? imageData 
+          : `data:image/png;base64,${imageData}`;
+        
+        img.src = imageDataUrl;
+        img.style.display = 'block';
+        status.textContent = '✓ Ready';
+        
+        checkbox.disabled = false;
+        
+        if (checkbox.checked) {
+          card.classList.add('selected');
+        }
+        
+      } else if (state === 'failed') {
+        status.textContent = '✗ Failed';
+        card.style.borderColor = '#DC3545';
+        checkbox.disabled = true;
+        checkbox.checked = false;
+        card.dataset.selected = 'false';
+      }
+    }
+
+    // ========== TOGGLE LOGO SELECTION ==========
+    function toggleLogoSelection(cardId, isSelected) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      
+      card.dataset.selected = isSelected.toString();
+      
+      if (isSelected) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+      
+      updateSelectedLogoCount();
+    }
+
+    // ========== UPDATE SELECTED COUNT ==========
+    function updateSelectedLogoCount() {
+      const allCards = document.querySelectorAll('.logo-card[data-selected]');
+      const selectedCards = document.querySelectorAll('.logo-card[data-selected="true"]');
+      
+      document.getElementById('selectedLogoCount').textContent = selectedCards.length;
+      document.getElementById('totalLogoCount').textContent = allCards.length;
+      
+      const controls = document.getElementById('logoControls');
+      if (allCards.length > 0) {
+        controls.style.display = 'flex';
+      }
+    }
+
+    // ========== SELECT/DESELECT ALL ==========
+    document.getElementById('selectAllLogosBtn')?.addEventListener('click', () => {
+      document.querySelectorAll('.logo-checkbox').forEach(checkbox => {
+        if (!checkbox.disabled) {
+          checkbox.checked = true;
+          const card = checkbox.closest('.logo-card');
+          toggleLogoSelection(card.id, true);
+        }
+      });
+    });
+
+    document.getElementById('deselectAllLogosBtn')?.addEventListener('click', () => {
+      document.querySelectorAll('.logo-checkbox').forEach(checkbox => {
+        if (!checkbox.disabled) {
+          checkbox.checked = false;
+          const card = checkbox.closest('.logo-card');
+          toggleLogoSelection(card.id, false);
+        }
+      });
+    });
+
+    // ========== DOWNLOAD SELECTED LOGOS ==========
+    downloadSelectedBtn.addEventListener('click', async () => {
+      try {
+        const selectedCards = document.querySelectorAll('.logo-card[data-selected="true"]');
+        
+        if (selectedCards.length === 0) {
+          showStatus('No logos selected', 'error');
+          return;
+        }
+        
+        showStatus(`Downloading ${selectedCards.length} selected logos...`, 'info');
+        
+        for (let i = 0; i < selectedCards.length; i++) {
+          const card = selectedCards[i];
+          const variantIndex = parseInt(card.dataset.variantIndex);
+          const logo = generatedLogos[variantIndex];
+          
+          if (logo && logo.imageData) {
+            const imageDataUrl = logo.imageData.startsWith('http') 
+              ? logo.imageData 
+              : `data:image/png;base64,${logo.imageData}`;
+            
+            const response = await fetch(imageDataUrl);
+            const blob = await response.blob();
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${businessNameInput.value.replace(/\s+/g, '_')}_logo_${logo.style}_${logo.variant}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+        }
+        
+        showStatus(`${selectedCards.length} logos downloaded!`, 'success');
+        
+      } catch (error) {
+        console.error('Error downloading logos:', error);
+        showStatus('Failed to download logos', 'error');
+      }
+    });
+
+    // ========== DEDUCT COST FROM WALLET ==========
+    async function deductCost(amount, description) {
+      try {
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: businessId,
+            userEmail: userEmail,
+            platforms: [],
+            postContent: { text: description },
+            totalCost: amount,
+            skipPosting: true
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          
+          if (response.status === 402) {
+            throw new Error(
+              `Insufficient funds!\n\nRequired: R${amount.toFixed(2)}\nBalance: ${error.formatted_balance}\n\nPlease add credits to continue.`
+            );
+          }
+          
+          throw new Error(error.error || 'Payment failed');
+        }
+
+        const result = await response.json();
+        console.log(`✅ ${description} cost deducted: R${amount.toFixed(2)}`);
+        return result;
+
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // ========== SHOW STATUS ==========
+    function showStatus(message, type) {
+      const statusElement = document.getElementById('logoStatus');
+      statusElement.textContent = message;
+      statusElement.className = `status ${type}`;
+      statusElement.style.display = 'block';
+    }
+
+    // ========== HELPER: CAPITALIZE ==========
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // ========== INITIALIZE ==========
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🎨 Logo Generator initializing...');
+      
+      // Load business info from localStorage/Auth0
+      await loadBusinessInfo();
+      
+      // Initialize form state
+      validateForm();
+      updateCostSummary();
+      
+      console.log('✅ Logo Generator initialized');
+      console.log('📊 User:', userEmail);
+      console.log('📊 Business:', businessName);
+    });
+  </script>
+</body>
+</html>

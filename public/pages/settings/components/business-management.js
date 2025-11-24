@@ -20,6 +20,12 @@ export class BusinessManagementComponent {
       statusBtn.onclick = () => this.toggleBusinessStatus(currentBusiness);
     }
 
+    // Regenerate business case
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn) {
+      regenerateBtn.onclick = () => this.regenerateBusinessCase(currentBusiness);
+    }
+
     // Delete business
     const deleteBtn = document.querySelector('[onclick="confirmDeleteBusiness()"]');
     if (deleteBtn) {
@@ -151,6 +157,55 @@ export class BusinessManagementComponent {
 
       const statusToggle = document.getElementById('businessActiveToggle');
       statusToggle.checked = !statusToggle.checked;
+    }
+  }
+
+  async regenerateBusinessCase(currentBusiness) {
+    try {
+      const confirmed = confirm(
+        `🤖 REGENERATE BUSINESS CASE?\n\n` +
+        `This will use AI to analyze "${currentBusiness.store_info?.name}" and create a fresh business case.\n\n` +
+        `This may take a few moments. Continue?`
+      );
+
+      if (!confirmed) return;
+
+      this.notifications.show('🤖 Regenerating business case with AI...', 'info');
+
+      const response = await fetch('/api/business-case/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessId: currentBusiness._id,
+          businessName: currentBusiness.store_info?.name,
+          businessDescription: currentBusiness.store_info?.description,
+          email: currentBusiness.personal_info?.email
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to regenerate business case');
+      }
+
+      const result = await response.json();
+
+      this.notifications.show('✅ Business case regenerated successfully!', 'success');
+
+      // Update cache with new business case
+      if (window.dataManager) {
+        window.dataManager.updateBusiness({
+          ...currentBusiness,
+          initial_business_case: result.businessCase
+        });
+      }
+
+      // Trigger reload to refresh the data
+      window.dispatchEvent(new CustomEvent('settings-reload'));
+
+    } catch (error) {
+      console.error('Error regenerating business case:', error);
+      this.notifications.show(`Failed to regenerate: ${error.message}`, 'error');
     }
   }
 

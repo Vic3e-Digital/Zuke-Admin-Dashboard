@@ -6,7 +6,11 @@ class DataManager {
         businessesTimestamp: null,
         cacheExpiry: 5 * 60 * 1000, // 5 minutes
         selectedBusiness: null,
-        businessChangeCallbacks: [] // Initialize this array
+        businessChangeCallbacks: [], // Initialize this array
+        userEmail: null,
+        userEmailTimestamp: null,
+        businessCase: null,
+        businessCaseTimestamp: null
       };
     }
   
@@ -87,10 +91,16 @@ class DataManager {
         businessesTimestamp: null,
         cacheExpiry: 5 * 60 * 1000,
         selectedBusiness: null,
-        businessChangeCallbacks: []
+        businessChangeCallbacks: [],
+        userEmail: null,
+        userEmailTimestamp: null,
+        businessCase: null,
+        businessCaseTimestamp: null
       };
       sessionStorage.removeItem('cachedBusinesses');
       sessionStorage.removeItem('selectedBusiness');
+      sessionStorage.removeItem('cachedUserEmail');
+      sessionStorage.removeItem('cachedBusinessCase');
     }
   
     // Register a callback for business changes
@@ -136,6 +146,93 @@ class DataManager {
       if (this.cache.selectedBusiness && this.cache.selectedBusiness._id === updatedBusiness._id) {
         this.setSelectedBusiness(updatedBusiness);
       }
+    }
+
+    // Cache user email
+    setUserEmail(email) {
+      this.cache.userEmail = email;
+      this.cache.userEmailTimestamp = Date.now();
+      sessionStorage.setItem('cachedUserEmail', JSON.stringify({
+        data: email,
+        timestamp: this.cache.userEmailTimestamp
+      }));
+    }
+
+    // Get cached user email
+    getUserEmail() {
+      // Check memory cache first
+      if (this.cache.userEmail && this.isCacheValid(this.cache.userEmailTimestamp)) {
+        return this.cache.userEmail;
+      }
+
+      // Check sessionStorage
+      const stored = sessionStorage.getItem('cachedUserEmail');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() - parsed.timestamp < this.cache.cacheExpiry) {
+          this.cache.userEmail = parsed.data;
+          this.cache.userEmailTimestamp = parsed.timestamp;
+          return parsed.data;
+        }
+      }
+
+      return null;
+    }
+
+    // Cache business case
+    setBusinessCase(businessCase) {
+      this.cache.businessCase = businessCase;
+      this.cache.businessCaseTimestamp = Date.now();
+      sessionStorage.setItem('cachedBusinessCase', JSON.stringify({
+        data: businessCase,
+        timestamp: this.cache.businessCaseTimestamp
+      }));
+    }
+
+    // Get cached business case
+    getBusinessCase() {
+      // Check memory cache first
+      if (this.cache.businessCase && this.isCacheValid(this.cache.businessCaseTimestamp)) {
+        return this.cache.businessCase;
+      }
+
+      // Check sessionStorage
+      const stored = sessionStorage.getItem('cachedBusinessCase');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() - parsed.timestamp < this.cache.cacheExpiry) {
+          this.cache.businessCase = parsed.data;
+          this.cache.businessCaseTimestamp = parsed.timestamp;
+          return parsed.data;
+        }
+      }
+
+      return null;
+    }
+
+    // Check cache validity with custom timestamp
+    isCacheValid(timestamp) {
+      if (!timestamp) return false;
+      return Date.now() - timestamp < this.cache.cacheExpiry;
+    }
+
+    // Cache user name
+    setUserName(name) {
+      this.cache.userName = name;
+      sessionStorage.setItem('cachedUserName', name);
+    }
+
+    // Get cached user name
+    getUserName() {
+      if (this.cache.userName) {
+        return this.cache.userName;
+      }
+      const stored = sessionStorage.getItem('cachedUserName');
+      if (stored) {
+        this.cache.userName = stored;
+        return stored;
+      }
+      return null;
     }
   }
 

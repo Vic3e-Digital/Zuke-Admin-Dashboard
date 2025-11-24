@@ -152,19 +152,36 @@ export async function initCreativePage() {
   const audioCardsContainer = document.getElementById("audioCardsContainer");
 
   try {
-    // Check authentication
-    const isAuthenticated = await auth0Client.isAuthenticated();
-    
-    if (!isAuthenticated) {
-      console.error("User not authenticated");
-      window.location.href = '/';
-      return;
+    // Check dataManager cache FIRST
+    let userEmail = window.dataManager?.getUserEmail();
+    let userName = window.dataManager?.getUserName();
+
+    // If not in cache, get from Auth0
+    if (!userEmail || !userName) {
+      console.log("Getting user from Auth0...");
+      let user = null;
+      
+      try {
+        user = await auth0Client.getUser();
+      } catch (error) {
+        console.warn("Error getting user from Auth0Client");
+      }
+      
+      if (!user) {
+        console.error("User not found - not authenticated");
+        return;
+      }
+
+      userEmail = user.email || user.name || 'unknown';
+      userName = user.name;
+      
+      // Cache it for next time
+      if (window.dataManager) {
+        window.dataManager.setUserEmail(userEmail);
+        window.dataManager.setUserName(userName);
+      }
     }
 
-    // Get user info
-    const user = await auth0Client.getUser();
-    const userEmail = user.email || user.name || 'unknown';
-    const userName = user.name;
     console.log("User email:", userEmail);
     console.log("User name:", userName);
 
@@ -243,10 +260,6 @@ export async function initCreativePage() {
     // Setup coming soon buttons
     const comingSoonButtons = [
       {
-        btn: document.getElementById("openLogoBtn"),
-        name: "Design Logo Concepts"
-      },
-      {
         btn: document.getElementById("openFlyerBtn"),
         name: "Design Flyers"
       }
@@ -258,6 +271,11 @@ export async function initCreativePage() {
         btn: document.getElementById("card8"),
         title: "Create Videos with VEO AI (Advanced)",
         url: `/tools/veo-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("openLogoBtn"),
+        title: "Design Logo Concepts",
+        url: `/pages/creative/create-logos.html`
       },
       {
         btn: document.getElementById("card7"),
@@ -303,13 +321,9 @@ export async function initCreativePage() {
     // Add click handlers for beta features
     betaButtons.forEach(({btn, title, url}) => {
       if (btn) {
-        // Check if btn is the card itself or has an action button
-        const actionBtn = btn.classList.contains('sim-action-btn') ? btn : btn.querySelector('.sim-action-btn');
-        if (actionBtn) {
-          actionBtn.onclick = function(e) {
-            e.stopPropagation();
-            showBetaWarning(title, url, modal, modalTitle, iframe);
-          }
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          showBetaWarning(title, url, modal, modalTitle, iframe);
         }
       }
     });
