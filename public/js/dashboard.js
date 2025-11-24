@@ -147,6 +147,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Store admin status globally
       window.isUserAdmin = isAdmin;
       
+      // Cache user email and name in dataManager for use in other pages
+      window.dataManager.setUserEmail(user.email);
+      window.dataManager.setUserName(user.name);
 
       const marketplaceNav = document.querySelector('[data-page="marketplace"]');
 const creativeNav = document.querySelector('[data-page="creative"]');
@@ -178,10 +181,29 @@ if (!isAdmin) {
       await initializeSwitchDropdown();
       loadPage("dashboard");
       setupEventListeners();
+      
+      // Preload critical pages in background
+      if (isAdmin) {
+        preloadAdminPages();
+      }
   
     } catch (error) {
       console.error("Auth check error:", error);
       window.location.href = '/';
+    }
+  }
+  
+  // Preload admin pages in background for faster loading
+  async function preloadAdminPages() {
+    try {
+      // Preload creative page resources
+      if (!loadCreativePage.cache) {
+        loadCreativePage.cache = await fetch('pages/creative/creative.html').then(r => r.text());
+      }
+      // Preload the creative.js module
+      await import("../pages/creative/creative.js");
+    } catch (error) {
+      console.warn("Error preloading creative page:", error);
     }
   }
 
@@ -457,14 +479,18 @@ if (!isAdmin) {
   // Initialize switch dropdown in sidebar
   async function initializeSwitchDropdown() {
     const businesses = await fetchBusinessesByEmail();
-    const switchBusinessSelector = document.getElementById('switchBusinessSelector');
     const switchDropdownBtn = document.getElementById('switchDropdownBtn');
     const switchDropdownMenu = document.getElementById('switchDropdownMenu');
+    const dropdownBusinessesList = document.getElementById('dropdownBusinessesList');
+    const businessCount = document.getElementById('businessCount');
+    const dropdownAddBusiness = document.getElementById('dropdownAddBusiness');
+    const switchBtnText = document.getElementById('switchBtnText');
+    const switchBtnLogo = document.getElementById('switchBtnLogo');
     
     if (!businesses || businesses.length === 0) {
       // Hide the switch button if no businesses
       if (switchDropdownBtn) {
-        switchDropdownBtn.style.display = 'none';
+        switchDropdownBtn.closest('.sidebar-business-switcher').style.display = 'none';
       }
       return;
     }
@@ -472,47 +498,76 @@ if (!isAdmin) {
     // Get current selection or use first
     const currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
     
-    // Populate dropdown options
-    if (switchBusinessSelector) {
-      switchBusinessSelector.innerHTML = '<option value="">Select a business...</option>' + 
-        businesses.map(b => `
-          <option value="${b._id}" ${currentBusiness?._id === b._id ? 'selected' : ''}>
-            ${b.store_info?.name || 'Unnamed Business'}
-          </option>
-        `).join('');
+    // Update business count
+    if (businessCount) {
+      businessCount.textContent = `(${businesses.length})`;
     }
     
-    // // Toggle dropdown
-    // if (switchDropdownBtn) {
-    //   switchDropdownBtn.addEventListener('click', function(e) {
-    //     e.stopPropagation();
-    //     switchDropdownMenu.classList.toggle('active');
-    //   });
-    // }
-    // Update the toggle dropdown section in your setupEventListeners function
-if (switchDropdownBtn) {
-  switchDropdownBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    
-    const isActive = switchDropdownMenu.classList.contains('active');
-    
-    if (!isActive) {
-      // Position the dropdown relative to the button
-      const buttonRect = switchDropdownBtn.getBoundingClientRect();
+    // Populate dropdown with business items
+    if (dropdownBusinessesList) {
+      dropdownBusinessesList.innerHTML = businesses.map((business, index) => {
+        const isActive = currentBusiness?._id === business._id;
+        const businessName = business.store_info?.name || 'Unnamed Business';
+        const businessLogo = business.media_files?.store_logo;
+        const initials = businessName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+        
+        return `
+          <div class="dropdown-business-item ${isActive ? 'active' : ''}" data-business-id="${business._id}">
+            <div class="business-item-logo">
+              ${businessLogo ? `<img src="${businessLogo}" alt="${businessName}" />` : initials}
+            </div>
+            <div class="business-item-content">
+              <div class="business-item-name">${businessName}</div>
+              <div class="business-item-status">${business.processing_status?.status || 'Inactive'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
       
-      // Position above the button
-      switchDropdownMenu.style.bottom = `${window.innerHeight - buttonRect.top + 8}px`;
-      switchDropdownMenu.style.left = `${buttonRect.left}px`;
-      
-      // Alternative: Position to the right of button (if you prefer)
-      // switchDropdownMenu.style.top = `${buttonRect.top}px`;
-      // switchDropdownMenu.style.left = `${buttonRect.right + 8}px`;
+      // Add click handlers to business items
+      const businessItems = dropdownBusinessesList.querySelectorAll('.dropdown-business-item');
+      businessItems.forEach(item => {
+        item.addEventListener('click', async function() {
+          const selectedId = this.getAttribute('data-business-id');
+          const selectedBusiness = businesses.find(b => b._id === selectedId);
+          
+          if (selectedBusiness) {
+            // Update global selection
+            window.dataManager.setSelectedBusiness(selectedBusiness);
+            
+            // Update button display
+            updateSwitchButtonDisplay(selectedBusiness, switchBtnText, switchBtnLogo);
+            
+            // Update active state in dropdown
+            businessItems.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Reload current page with new business context
+            if (currentPage) {
+              await loadPage(currentPage);
+            }
+            
+            // Close dropdown
+            switchDropdownMenu.classList.remove('active');
+            
+            console.log('Switched to business:', selectedBusiness.store_info?.name);
+          }
+        });
+      });
     }
     
-    switchDropdownMenu.classList.toggle('active');
-  });
-}
+    // Update button text and logo to show current business
+    if (currentBusiness) {
+      updateSwitchButtonDisplay(currentBusiness, switchBtnText, switchBtnLogo);
+    }
 
+    // Toggle dropdown
+    if (switchDropdownBtn) {
+      switchDropdownBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        switchDropdownMenu.classList.toggle('active');
+      });
+    }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
@@ -522,33 +577,45 @@ if (switchDropdownBtn) {
       }
     });
     
-    // Handle business selection
-    if (switchBusinessSelector) {
-      switchBusinessSelector.addEventListener('change', async function() {
-        const selectedId = this.value;
-        const selectedBusiness = businesses.find(b => b._id === selectedId);
-        
-        if (selectedBusiness) {
-          // Update global selection
-          window.dataManager.setSelectedBusiness(selectedBusiness);
-          
-          // Reload current page with new business context
-          if (currentPage) {
-            await loadPage(currentPage);
-          }
-          
-          // Close dropdown
-          switchDropdownMenu.classList.remove('active');
-          
-          console.log('Switched to business:', selectedBusiness.store_info?.name);
-        }
+    // Handle add business button
+    if (dropdownAddBusiness) {
+      dropdownAddBusiness.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        switchDropdownMenu.classList.remove('active');
+        await window.handleAddBusiness();
       });
+    }
+  }
+  
+  // Helper function to update switch button display
+  function updateSwitchButtonDisplay(business, textElement, logoElement) {
+    if (textElement) {
+      textElement.textContent = truncateText(business.store_info?.name || 'Select Business', 20);
+    }
+    
+    if (logoElement) {
+      const businessLogo = business.media_files?.store_logo;
+      const businessName = business.store_info?.name || 'Business';
+      const initials = businessName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+      
+      if (businessLogo) {
+        logoElement.innerHTML = `<img src="${businessLogo}" alt="${businessName}" />`;
+      } else {
+        logoElement.innerHTML = initials;
+      }
     }
   }
 
   // Register for business changes on page loads
   window.dataManager.onBusinessChange((business) => {
     console.log('Business changed globally:', business?.store_info?.name);
+    
+    // Update switch button display when business changes
+    const switchBtnText = document.getElementById('switchBtnText');
+    const switchBtnLogo = document.getElementById('switchBtnLogo');
+    if (business) {
+      updateSwitchButtonDisplay(business, switchBtnText, switchBtnLogo);
+    }
   });
 
   function setupPageNavigation() {
@@ -840,7 +907,7 @@ if (switchDropdownBtn) {
 
   async function loadMarketingPage() {
     if (!loadMarketingPage.cache) {
-      loadMarketingPage.cache = await fetch('pages/marketing.html').then(r => r.text());
+      loadMarketingPage.cache = await fetch('pages/marketing/marketing.html').then(r => r.text());
     }
     return loadMarketingPage.cache;
   }
@@ -868,6 +935,14 @@ if (switchDropdownBtn) {
   
 
   async function initializePageFunctionality(page) {
+    // After page loads, enhance any modals on the new page
+    if (window.modalManager && typeof window.modalManager.enhanceAllModals === 'function') {
+      setTimeout(() => {
+        console.log('🔄 Re-scanning for modals on page:', page);
+        window.modalManager.enhanceAllModals();
+      }, 100);
+    }
+
     switch (page) {
     case "dashboard":
   // Initialize business filter dropdown
@@ -945,14 +1020,14 @@ if (switchDropdownBtn) {
       case "test":
         if (!window.__marketingLoaded) {
           try {
-            const mod = await import("../pages/marketing.js");
+            const mod = await import("../pages/marketing/marketing.js");
             mod.initMarketingPage();
             window.__marketingLoaded = true;
           } catch (error) {
             console.error("Error loading marketing page:", error);
           }
         } else {
-          import("../pages/marketing.js").then(mod => mod.initMarketingPage());
+          import("../pages/marketing/marketing.js").then(mod => mod.initMarketingPage());
         }
         break;
       case "settings":

@@ -171,7 +171,7 @@ export async function initAfaaPage() {
       {
         btn: document.getElementById("shiftOutreach"),
         title: "Shift Outreach",
-        url: `https://aigents.southafricanorth.azurecontainer.io/form/find-shift-leads?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+        url: `https://aigents.southafricanorth.azurecontainer.io/form/find-shift-leads-2?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
       },
       {
         btn: document.getElementById("afaaTool2Btn"),

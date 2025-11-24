@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   
     try {
       return res.status(200).json({
-        endpoint: process.env.AZURE_OPENAI_ENDPOINT || "https://zuke-make-automation.openai.azure.com/",
+        endpoint: process.env.AZURE_OPENAI_ENDPOINT || "https://zuke-n8n-videos.cognitiveservices.azure.com/",
         apiKey: process.env.AZURE_OPENAI_API_KEY,
         deployment: process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o-mini"
       });

@@ -2,29 +2,25 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
 const axios = require('axios');
-const FormData = require('form-data');
-const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, PageBreak, Table, TableCell, TableRow, BorderStyle, VerticalAlign } = require('docx');
+const OpenAI = require('openai').default;
 const { getDatabase } = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
 const N8N_WALLET_WEBHOOK = process.env.N8N_WALLET_WEBHOOK_URL;
-const EMAIL_WEBHOOK = 'https://aigents.southafricanorth.azurecontainer.io/webhook/send-smart-email';
-const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
-const CLOUDINARY_UPLOAD_PRESET = process.env.CLOUDINARY_UPLOAD_PRESET;
 
 // Pricing
 const PRICING = {
-  TRANSCRIPTION: 15.00,
-  DIARIZATION_ADDON: 5.00
+  TRANSCRIPTION: 15.00
 };
 
-// Storage config - Use memory storage instead of disk
+// Storage config - Allow up to 4 audio files
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 25 * 1024 * 1024 },
+  limits: { 
+    fileSize: 25 * 1024 * 1024,  // 25MB per file
+    files: 4  // Maximum 4 files
+  },
   fileFilter: (req, file, cb) => {
     const allowedMimes = ['audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/mp4'];
     if (allowedMimes.includes(file.mimetype)) {
@@ -35,188 +31,144 @@ const upload = multer({
   }
 });
 
-// ========== UPLOAD AUDIO TO CLOUDINARY ==========
-async function uploadAudioToCloudinary(fileBuffer, originalFileName) {
-  console.log('☁️ Uploading audio to Cloudinary...');
-  
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-    console.warn('⚠️ Cloudinary credentials not configured, skipping upload');
-    return null;
-  }
-
-  try {
-    const formData = new FormData();
-    formData.append('file', fileBuffer, { filename: originalFileName });
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'zuke/audio-transcriptions');
-    formData.append('resource_type', 'auto');
-
-    const response = await axios.post(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
-      formData,
-      {
-        headers: formData.getHeaders(),
-        timeout: 60000
-      }
-    );
-
-    console.log('✅ Audio uploaded to Cloudinary');
-    console.log('   Public ID:', response.data.public_id);
-    console.log('   URL:', response.data.secure_url);
-
-    return {
-      public_id: response.data.public_id,
-      url: response.data.secure_url,
-      size: response.data.bytes,
-      duration: response.data.duration
-    };
-  } catch (error) {
-    console.error('❌ Cloudinary upload error:', error.message);
-    throw new Error(`Cloudinary upload failed: ${error.message}`);
-  }
-}
-
 // ========== FETCH AZURE OPENAI CONFIG ==========
 async function getAzureOpenAIConfig() {
   return {
-    endpoint: process.env.AZURE_OPENAI_ENDPOINT || 'https://zuke-make-automation.openai.azure.com/',
-    apiKey: process.env.AZURE_OPENAI_API_KEY,
-    deployment: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o-mini',
-    whisperDeployment: process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT || 'whisper',
-    diarizationDeployment: process.env.AZURE_OPENAI_DIARIZATION_DEPLOYMENT || process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o-mini'
+    apiKey: process.env.AZURE_OPENAI_DIARIZATION_DEPLOYMENT,
+    endpoint: process.env.AZURE_OPENAI_ENDPOINT || 'https://zuke-n8n-videos.cognitiveservices.azure.com/',
+    deploymentName: 'gpt-4o-transcribe-diarize'
   };
 }
 
-// ========== TRANSCRIBE AUDIO WITH AZURE OPENAI WHISPER ==========
-async function transcribeAudioWithWhisper(audioBuffer, originalFileName, enableDiarization = false) {
-  console.log('🎙️ Starting transcription with Whisper...');
+// ========== INITIALIZE OPENAI CLIENT ==========
+async function getOpenAIClient() {
+  const config = await getAzureOpenAIConfig();
+  
+  return new OpenAI({
+    apiKey: config.apiKey,
+    baseURL: `${config.endpoint}/openai/deployments/${config.deploymentName}`,
+    defaultQuery: { 'api-version': '2025-03-01-preview' },
+    defaultHeaders: {
+      'api-key': config.apiKey
+    }
+  });
+}
+
+// ========== TRANSCRIBE AUDIO WITH AZURE OPENAI ==========
+async function transcribeAudioWithWhisper(audioBuffer, originalFileName) {
+  console.log('🎙️ Starting transcription...');
   console.log(`📁 Audio file: ${originalFileName}`);
-  console.log(`🎯 Diarization: ${enableDiarization ? 'Enabled' : 'Disabled'}`);
+  console.log(`📦 File size: ${(audioBuffer.length / 1024 / 1024).toFixed(2)} MB`);
 
   try {
+    const client = await getOpenAIClient();
     const config = await getAzureOpenAIConfig();
-    
-    // Create form data for audio file upload
-    const formData = new FormData();
-    formData.append('file', audioBuffer, {
-      filename: originalFileName,
-      contentType: 'audio/wav'
+
+    console.log(`📤 Calling Azure OpenAI: ${config.deploymentName}`);
+    console.log(`🔗 Endpoint: ${config.endpoint}`);
+    console.log(`🔗 API Version: 2025-03-01-preview`);
+
+    // Create a File-like object from the buffer
+    const file = new File([audioBuffer], originalFileName, {
+      type: getAudioMimeType(originalFileName)
     });
 
-    // Prepare Whisper API request
-    const whisperUrl = `${config.endpoint.replace(/\/$/, '')}/openai/deployments/${config.whisperDeployment}/audio/transcriptions?api-version=2024-08-01-preview`;
+    console.log(`⏱️ Starting transcription request...`);
+    const startTime = Date.now();
 
-    console.log(`📤 Calling Azure Whisper API: ${whisperUrl}`);
-
-    const transcriptionResponse = await axios.post(whisperUrl, formData, {
-      headers: {
-        ...formData.getHeaders(),
-        'api-key': config.apiKey
-      },
-      timeout: 120000
+    const transcription = await client.audio.transcriptions.create({
+      file: file,
+      model: 'gpt-4o-transcribe-diarize',
+      response_format: 'diarized_json',
+      chunking_strategy: 'auto',
+      timestamp_granularities: ['segment']
+    }, {
+      timeout: 600000, // 10 minutes timeout for long files
+      maxRetries: 2
     });
 
-    const transcription = transcriptionResponse.data;
-    
-    console.log('✅ Transcription received');
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`✅ Transcription received in ${duration}s`);
     console.log(`📝 Text length: ${transcription.text?.length || 0} characters`);
+    console.log(`🎤 Segments: ${transcription.segments?.length || 0}`);
 
-    // If diarization is enabled, process speaker identification
-    let diarizedSegments = null;
-    if (enableDiarization && transcription.text) {
-      diarizedSegments = await performDiarization(transcription.text, config);
+    // Validate response
+    if (!transcription.text && !transcription.segments) {
+      throw new Error('Empty transcription received from API');
     }
 
-    // Return structured response
-    const result = {
-      text: transcription.text,
-      language: transcription.language || 'en',
-      duration: transcription.duration,
-      segments: diarizedSegments || null
-    };
-
-    console.log('✅ Transcription complete');
-    return result;
+    return transcription;
 
   } catch (error) {
     console.error('❌ Transcription error:', error.message);
+    
+    if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      throw new Error('Audio file is too long or processing timed out. Please try a shorter file or split your audio.');
+    }
+    
+    if (error.response?.data) {
+      console.error('API Response:', JSON.stringify(error.response.data, null, 2));
+    }
+    if (error.response?.status) {
+      console.error('Status Code:', error.response.status);
+    }
+    
     throw new Error(`Transcription failed: ${error.message}`);
   }
 }
 
-// ========== PERFORM DIARIZATION (Speaker Identification) ==========
-async function performDiarization(text, config) {
-  console.log('👥 Processing speaker identification (diarization)...');
-
-  try {
-    // Use Azure OpenAI to identify speakers and segment text
-    const diarizationPrompt = `Analyze the following transcription and identify different speakers. 
-Return a JSON object with an array of segments where each segment contains:
-- speaker: speaker identifier (e.g., "Speaker 1", "Speaker 2")
-- text: the text spoken by that speaker
-- startTime: approximate start time (in seconds, if detectable from context)
-
-Transcription:
-${text}
-
-IMPORTANT: Return ONLY valid JSON in this exact format:
-{
-  "segments": [
-    {
-      "speaker": "Speaker 1",
-      "text": "text content",
-      "startTime": 0
-    }
-  ]
-}`;
-
-    const diarizationUrl = `${config.endpoint.replace(/\/$/, '')}/openai/deployments/${config.diarizationDeployment}/chat/completions?api-version=2024-08-01-preview`;
-
-    const diarizationResponse = await axios.post(diarizationUrl, {
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert transcription analyst. Identify speakers in transcriptions and return valid JSON only."
-        },
-        {
-          role: "user",
-          content: diarizationPrompt
-        }
-      ],
-      max_tokens: 2000,
-      temperature: 0.5,
-      response_format: { type: "json_object" }
-    }, {
-      headers: {
-        'api-key': config.apiKey,
-        'Content-Type': 'application/json'
-      },
-      timeout: 60000
-    });
-
-    const responseContent = diarizationResponse.data.choices[0].message.content;
+// ========== BATCH TRANSCRIBE MULTIPLE FILES ==========
+async function transcribeMultipleFiles(files, userEmail, businessId) {
+  console.log(`🎙️ Starting batch transcription of ${files.length} files...`);
+  
+  const results = [];
+  const errors = [];
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    console.log(`\n📁 Processing file ${i + 1}/${files.length}: ${file.originalname}`);
     
-    let diarizationResult;
     try {
-      diarizationResult = JSON.parse(responseContent);
-    } catch (e) {
-      // Fallback: try to extract JSON from response
-      const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        diarizationResult = JSON.parse(jsonMatch[0]);
-      } else {
-        throw e;
-      }
+      const transcription = await transcribeAudioWithWhisper(file.buffer, file.originalname);
+      
+      results.push({
+        fileName: file.originalname,
+        fileSize: file.size,
+        success: true,
+        transcription: transcription,
+        index: i
+      });
+      
+      console.log(`✅ File ${i + 1} transcribed successfully`);
+      
+    } catch (error) {
+      console.error(`❌ File ${i + 1} failed:`, error.message);
+      
+      errors.push({
+        fileName: file.originalname,
+        fileSize: file.size,
+        success: false,
+        error: error.message,
+        index: i
+      });
     }
-
-    console.log(`✅ Diarization complete: ${diarizationResult.segments?.length || 0} speaker segments identified`);
-    return diarizationResult.segments || null;
-
-  } catch (error) {
-    console.warn('⚠️ Diarization processing failed:', error.message);
-    console.warn('⚠️ Continuing without speaker identification');
-    return null;
   }
+  
+  return { results, errors };
+}
+
+// Helper function to get proper MIME type
+function getAudioMimeType(fileName) {
+  const ext = fileName.toLowerCase().split('.').pop();
+  const mimeTypes = {
+    'mp3': 'audio/mpeg',
+    'wav': 'audio/wav',
+    'm4a': 'audio/m4a',
+    'ogg': 'audio/ogg',
+    'mp4': 'audio/mp4',
+    'webm': 'audio/webm'
+  };
+  return mimeTypes[ext] || 'audio/mpeg';
 }
 
 // ========== DEDUCT COST FROM WALLET ==========
@@ -268,210 +220,63 @@ async function deductCost(userEmail, businessId, cost, description) {
   }
 }
 
-// ========== GENERATE DOCX DOCUMENT ==========
-async function generateDocxDocument(transcriptionResult, businessName, userEmail, fileName) {
-  console.log('📄 Generating DOCX document...');
-  
-  try {
-    const segments = transcriptionResult.segments || [];
-    const docSections = [];
-
-    // Title
-    docSections.push(
-      new Paragraph({
-        text: 'Audio Transcription Report',
-        heading: HeadingLevel.HEADING_1,
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 200 }
-      })
-    );
-
-    // Metadata
-    docSections.push(
-      new Paragraph({
-        text: `Business: ${businessName}`,
-        spacing: { after: 100 }
-      }),
-      new Paragraph({
-        text: `User: ${userEmail}`,
-        spacing: { after: 100 }
-      }),
-      new Paragraph({
-        text: `Generated: ${new Date().toLocaleString()}`,
-        spacing: { after: 100 }
-      }),
-      new Paragraph({
-        text: `Language: ${transcriptionResult.language || 'Detected'}`,
-        spacing: { after: 100 }
-      }),
-      new Paragraph({
-        text: `Duration: ${transcriptionResult.duration || 'N/A'} seconds`,
-        spacing: { after: 300 }
-      })
-    );
-
-    // Full Transcription
-    docSections.push(
-      new Paragraph({
-        text: 'Full Transcription',
-        heading: HeadingLevel.HEADING_2,
-        spacing: { after: 200 }
-      })
-    );
-
-    // If segments with speakers exist, show with speaker labels
-    if (segments && segments.length > 0) {
-      segments.forEach((segment, idx) => {
-        const speakerLabel = segment.speaker ? `Speaker ${segment.speaker}:` : 'Transcription:';
-        docSections.push(
-          new Paragraph({
-            text: speakerLabel,
-            bold: true,
-            spacing: { before: 100, after: 50 }
-          }),
-          new Paragraph({
-            text: segment.text || '',
-            spacing: { after: 100 },
-            indent: { left: 360 }
-          })
-        );
-      });
-    } else if (transcriptionResult.text) {
-      // Plain text transcription
-      docSections.push(
-        new Paragraph({
-          text: transcriptionResult.text,
-          spacing: { after: 100 }
-        })
-      );
-    }
-
-    // Create document
-    const doc = new Document({
-      sections: [
-        {
-          children: docSections
-        }
-      ]
-    });
-
-    // Generate buffer
-    const buffer = await Packer.toBuffer(doc);
-    console.log('✅ DOCX document generated successfully');
-    
-    return buffer;
-  } catch (error) {
-    console.error('❌ DOCX generation error:', error.message);
-    throw new Error(`Document generation failed: ${error.message}`);
-  }
+// ========== ESTIMATE PROCESSING TIME ==========
+function estimateProcessingTime(fileSizeBytes) {
+  // Rough estimate: ~1 minute per MB for transcription + diarization
+  const sizeMB = fileSizeBytes / 1024 / 1024;
+  const estimatedSeconds = Math.ceil(sizeMB * 60);
+  return {
+    seconds: estimatedSeconds,
+    formatted: estimatedSeconds > 60 
+      ? `${Math.ceil(estimatedSeconds / 60)} minutes` 
+      : `${estimatedSeconds} seconds`
+  };
 }
 
-// ========== SEND EMAIL WITH TRANSCRIPTION ==========
-async function sendTranscriptionEmail(emailRecipient, emailSubject, transcriptionText, businessName, userEmail) {
-  console.log(`📧 Sending transcription to ${emailRecipient}...`);
 
-  try {
-    // Format transcription for email
-    let emailBody = `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background: #f55a00; color: white; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
-    .header h2 { margin: 0; }
-    .content { background: #f9f9f9; padding: 20px; border-radius: 4px; border-left: 4px solid #f55a00; }
-    .transcription { background: white; padding: 15px; border-radius: 4px; margin-top: 15px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
-    .footer { margin-top: 20px; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h2>${emailSubject}</h2>
-      <p>Audio Transcription from ${businessName || 'Zuke'}</p>
-    </div>
-    
-    <div class="content">
-      <p>Your audio transcription is ready:</p>
-      
-      <div class="transcription">
-${transcriptionText}
-      </div>
-      
-      <p style="margin-top: 20px; font-size: 12px; color: #666;">
-        This email was generated by Zuke's Audio Transcription tool.<br>
-        Date: ${new Date().toLocaleString()}
-      </p>
-    </div>
-    
-    <div class="footer">
-      <p>Questions? Contact us at support@zuke.co.za</p>
-    </div>
-  </div>
-</body>
-</html>
-    `;
-
-    const emailPayload = {
-      businessId: 'zuke-system',
-      businessName: businessName || 'Zuke',
-      userEmail: userEmail || emailRecipient,
-      emailType: 'individual',
-      recipient: {
-        name: emailRecipient.split('@')[0],
-        email: emailRecipient
-      },
-      subject: emailSubject,
-      message: emailBody,
-      timestamp: new Date().toISOString(),
-      isHtml: true
-    };
-
-    const emailResponse = await axios.post(EMAIL_WEBHOOK, emailPayload, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 30000
-    });
-
-    console.log('✅ Email sent successfully');
-    return true;
-
-  } catch (error) {
-    console.warn('⚠️ Email delivery failed:', error.message);
-    console.warn('⚠️ Transcription completed but email could not be sent');
-    return false;
-  }
-}
-
-// ========== MAIN TRANSCRIPTION ROUTE ==========
-router.post('/transcribe', upload.single('audio'), async (req, res) => {
+// ========== MAIN TRANSCRIPTION ROUTE - SUPPORTS MULTIPLE FILES ==========
+router.post('/transcribe', upload.array('audio', 4), async (req, res) => {
   console.log('\n🎙️ ========== AUDIO TRANSCRIPTION REQUEST ==========');
 
   try {
     const {
       businessId,
-      userEmail,
-      enableDiarization,
-      sendEmail,
-      emailRecipient,
-      emailSubject
+      userEmail
     } = req.body;
+
+    const files = req.files;
 
     console.log('📦 Request Body:');
     console.log('  - businessId:', businessId);
     console.log('  - userEmail:', userEmail);
-    console.log('  - enableDiarization:', enableDiarization);
-    console.log('  - sendEmail:', sendEmail);
-    console.log('  - Audio file:', req.file?.originalname);
-
-    // Validate required fields
-    if (!businessId || !userEmail || !req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: businessId, userEmail, or audio file'
+    console.log('  - Number of files:', files?.length || 0);
+    
+    if (files && files.length > 0) {
+      files.forEach((file, i) => {
+        console.log(`  - File ${i + 1}: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
       });
     }
+
+    // Validate required fields
+    if (!businessId || !userEmail || !files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: businessId, userEmail, or audio files'
+      });
+    }
+
+    // Validate file count
+    if (files.length > 4) {
+      return res.status(400).json({
+        success: false,
+        error: 'Maximum 4 audio files allowed per request'
+      });
+    }
+
+    // Calculate total size
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+    console.log(`📦 Total upload size: ${totalSizeMB} MB`);
 
     // Get business info
     const db = await getDatabase();
@@ -480,20 +285,15 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
     });
 
     const businessName = business?.store_info?.name || 'Your Business';
-
     console.log(`\n✅ Business found: ${businessName}`);
 
-    // Calculate cost
-    const enableDiarizationBool = enableDiarization === 'true' || enableDiarization === true;
-    const baseCost = PRICING.TRANSCRIPTION;
-    const diarizationCost = enableDiarizationBool ? PRICING.DIARIZATION_ADDON : 0;
-    const totalCost = baseCost + diarizationCost;
+    // Calculate cost - charge per file
+    const costPerFile = PRICING.TRANSCRIPTION;
+    const totalCost = costPerFile * files.length;
 
     console.log(`\n💰 Pricing:`);
-    console.log(`  - Base transcription: R${PRICING.TRANSCRIPTION.toFixed(2)}`);
-    if (enableDiarizationBool) {
-      console.log(`  - Speaker diarization addon: R${PRICING.DIARIZATION_ADDON.toFixed(2)}`);
-    }
+    console.log(`  - Cost per file: R${costPerFile.toFixed(2)}`);
+    console.log(`  - Number of files: ${files.length}`);
     console.log(`  - Total cost: R${totalCost.toFixed(2)}`);
 
     // ✅ WALLET CHECK AND DEDUCTION
@@ -502,119 +302,189 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
       userEmail,
       businessId,
       totalCost,
-      `Audio transcription${enableDiarizationBool ? ' with diarization' : ''}`
+      `Audio transcription (${files.length} file${files.length > 1 ? 's' : ''})`
     );
 
-    // ✅ UPLOAD AUDIO TO CLOUDINARY
-    console.log('\n☁️ Uploading audio to Cloudinary...');
-    const cloudinaryResult = await uploadAudioToCloudinary(req.file.buffer, req.file.originalname);
-
-    // ✅ PERFORM TRANSCRIPTION
-    console.log('\n🎙️ Processing audio...');
-    const transcriptionResult = await transcribeAudioWithWhisper(req.file.buffer, req.file.originalname, enableDiarizationBool);
-
-    // Create preview (first 300 chars or first few speaker segments)
-    let preview;
-    if (transcriptionResult.segments && transcriptionResult.segments.length > 0) {
-      // Show first 3 segments in preview
-      preview = {
-        segments: transcriptionResult.segments.slice(0, 3),
-        total_segments: transcriptionResult.segments.length
-      };
-    } else {
-      // Plain text preview
-      preview = transcriptionResult.text.substring(0, 300) + (transcriptionResult.text.length > 300 ? '...' : '');
-    }
-
-    console.log('\n📤 Response prepared');
-
-    // ✅ SEND EMAIL IF REQUESTED
-    let emailSent = false;
-    if (sendEmail === 'true' && emailRecipient && emailSubject) {
-      console.log('\n📧 Email delivery requested');
+    // ✅ PERFORM BATCH TRANSCRIPTION
+    console.log('\n🎙️ Processing audio files...');
+    
+    let batchResult;
+    try {
+      batchResult = await transcribeMultipleFiles(files, userEmail, businessId);
+    } catch (transcriptionError) {
+      console.error('❌ Batch transcription failed:', transcriptionError.message);
       
-      const fullTranscriptionText = transcriptionResult.segments
-        ? transcriptionResult.segments.map(s => `${s.speaker}: ${s.text}`).join('\n\n')
-        : transcriptionResult.text;
-
-      emailSent = await sendTranscriptionEmail(
-        emailRecipient,
-        emailSubject,
-        fullTranscriptionText,
-        businessName,
-        userEmail
-      );
+      // Attempt to refund if all transcriptions failed
+      console.log('💰 Attempting to refund due to transcription failure...');
+      try {
+        await axios.post(N8N_WALLET_WEBHOOK, {
+          userEmail,
+          businessId,
+          cost: -totalCost,
+          requestId: `refund_transcribe_${Date.now()}`,
+          description: 'Refund: Transcription failed'
+        }, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        });
+        console.log('✅ Refund processed');
+      } catch (refundError) {
+        console.error('⚠️ Refund failed:', refundError.message);
+      }
+      
+      throw transcriptionError;
     }
 
-    // ✅ STORE TRANSCRIPTION IN DATABASE
-    console.log('\n💾 Storing transcription...');
-    const transcriptionRecord = {
+    // Process results
+    const processedFiles = [];
+    
+    batchResult.results.forEach((result) => {
+      // Group segments by speaker
+      let fullText = result.transcription.text;
+      let groupedBySpeaker = [];
+      
+      if (result.transcription.segments && Array.isArray(result.transcription.segments)) {
+        fullText = result.transcription.segments
+          .map(seg => seg.text)
+          .join(' ');
+        
+        let currentSpeaker = null;
+        let currentGroup = null;
+        
+        result.transcription.segments.forEach(segment => {
+          const speaker = segment.speaker || 'Unknown';
+          
+          if (speaker !== currentSpeaker) {
+            if (currentGroup) {
+              groupedBySpeaker.push(currentGroup);
+            }
+            currentSpeaker = speaker;
+            currentGroup = {
+              speaker: speaker,
+              text: segment.text.trim(),
+              segments: [segment],
+              start: segment.start,
+              end: segment.end
+            };
+          } else {
+            currentGroup.text += ' ' + segment.text.trim();
+            currentGroup.segments.push(segment);
+            currentGroup.end = segment.end;
+          }
+        });
+        
+        if (currentGroup) {
+          groupedBySpeaker.push(currentGroup);
+        }
+      }
+      
+      processedFiles.push({
+        fileName: result.fileName,
+        fileSize: result.fileSize,
+        success: true,
+        text: fullText,
+        grouped: groupedBySpeaker,
+        metadata: {
+          language: result.transcription.language || 'en',
+          duration: result.transcription.duration || null,
+          segmentCount: result.transcription.segments?.length || 0,
+          speakerGroups: groupedBySpeaker.length
+        },
+        transcription: result.transcription
+      });
+    });
+
+    // Add failed files
+    batchResult.errors.forEach((error) => {
+      processedFiles.push({
+        fileName: error.fileName,
+        fileSize: error.fileSize,
+        success: false,
+        error: error.error
+      });
+    });
+
+    // Sort by original index
+    processedFiles.sort((a, b) => {
+      const aIndex = batchResult.results.find(r => r.fileName === a.fileName)?.index ?? 
+                     batchResult.errors.find(e => e.fileName === a.fileName)?.index ?? 0;
+      const bIndex = batchResult.results.find(r => r.fileName === b.fileName)?.index ?? 
+                     batchResult.errors.find(e => e.fileName === b.fileName)?.index ?? 0;
+      return aIndex - bIndex;
+    });
+
+    // ✅ STORE TRANSCRIPTIONS IN DATABASE
+    console.log('\n💾 Storing transcriptions...');
+    
+    const transcriptionRecords = processedFiles.filter(f => f.success).map(file => ({
       businessId: new ObjectId(businessId),
       userEmail,
       businessName,
-      audioCloudinary: cloudinaryResult ? {
-        public_id: cloudinaryResult.public_id,
-        url: cloudinaryResult.url,
-        size: cloudinaryResult.size
-      } : null,
-      audioFileName: req.file.originalname,
-      audioSize: req.file.size,
-      enableDiarization: enableDiarizationBool,
-      language: transcriptionResult.language,
-      duration: transcriptionResult.duration,
-      transcriptionPreview: typeof preview === 'string' ? preview : JSON.stringify(preview),
-      fullTranscription: JSON.stringify({
-        text: transcriptionResult.text,
-        segments: transcriptionResult.segments
-      }),
-      cost: totalCost,
+      audioFileName: file.fileName,
+      audioSize: file.fileSize,
+      language: file.metadata.language,
+      duration: file.metadata.duration,
+      fullTranscription: JSON.stringify(file.transcription),
+      cost: costPerFile,
       charged: true,
-      emailSent: emailSent,
-      emailRecipient: sendEmail === 'true' ? emailRecipient : null,
       status: 'completed',
+      batchId: `batch_${Date.now()}`,
+      batchSize: files.length,
       created_at: new Date()
-    };
+    }));
 
-    await db.collection('audio_transcriptions').insertOne(transcriptionRecord);
-    console.log('✅ Transcription stored in database');
+    if (transcriptionRecords.length > 0) {
+      await db.collection('audio_transcriptions').insertMany(transcriptionRecords);
+      console.log(`✅ ${transcriptionRecords.length} transcription(s) stored in database`);
+    }
 
-    // ✅ RETURN SUCCESS RESPONSE
+    // Calculate partial refund if some files failed
+    const failedCount = batchResult.errors.length;
+    if (failedCount > 0) {
+      const refundAmount = costPerFile * failedCount;
+      console.log(`⚠️ ${failedCount} file(s) failed. Refunding R${refundAmount.toFixed(2)}`);
+      
+      try {
+        await axios.post(N8N_WALLET_WEBHOOK, {
+          userEmail,
+          businessId,
+          cost: -refundAmount,
+          requestId: `partial_refund_${Date.now()}`,
+          description: `Partial refund: ${failedCount} file(s) failed`
+        }, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        });
+        console.log('✅ Partial refund processed');
+      } catch (refundError) {
+        console.error('⚠️ Partial refund failed:', refundError.message);
+      }
+    }
+
     const responseData = {
       success: true,
-      message: 'Audio transcription completed successfully',
-      preview: preview,
-      fullTranscription: {
-        text: transcriptionResult.text,
-        segments: transcriptionResult.segments
-      },
-      metadata: {
-        language: transcriptionResult.language,
-        duration: transcriptionResult.duration,
-        hasDiarization: enableDiarizationBool && !!transcriptionResult.segments
+      message: `Transcription completed for ${batchResult.results.length} of ${files.length} file(s)`,
+      files: processedFiles,
+      summary: {
+        total: files.length,
+        successful: batchResult.results.length,
+        failed: batchResult.errors.length,
+        totalCost: totalCost,
+        charged: totalCost - (failedCount * costPerFile),
+        refunded: failedCount > 0 ? costPerFile * failedCount : 0
       },
       costs: {
-        transcription: PRICING.TRANSCRIPTION,
-        diarization: enableDiarizationBool ? PRICING.DIARIZATION_ADDON : 0,
+        perFile: costPerFile,
         total: totalCost,
-        formatted: `R${totalCost.toFixed(2)}`,
-        breakdown: enableDiarizationBool 
-          ? `R${PRICING.TRANSCRIPTION.toFixed(2)} + R${PRICING.DIARIZATION_ADDON.toFixed(2)} (diarization)`
-          : `R${PRICING.TRANSCRIPTION.toFixed(2)}`
+        charged: totalCost - (failedCount * costPerFile),
+        formatted: `R${(totalCost - (failedCount * costPerFile)).toFixed(2)}`
       },
-      emailSent: emailSent,
       newBalance: walletResult.new_balance,
       formattedBalance: walletResult.formatted_balance
     };
 
-    console.log('\n✅ SUCCESS - Returning response\n');
-    
-    // Clean up audio file
-    try {
-      fs.unlinkSync(audioFilePath);
-      console.log('🗑️ Temporary audio file cleaned up');
-    } catch (e) {
-      console.warn('⚠️ Could not delete temporary file:', e.message);
-    }
+    console.log('✅ SUCCESS - Returning batch transcription results');
+    console.log(`📊 Stats: ${batchResult.results.length} successful, ${batchResult.errors.length} failed`);
 
     return res.json(responseData);
 
@@ -622,16 +492,6 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
     console.error('\n❌ CRITICAL ERROR:', error.message);
     console.error('❌ Stack:', error.stack);
 
-    // Clean up audio file
-    if (audioFilePath) {
-      try {
-        fs.unlinkSync(audioFilePath);
-      } catch (e) {
-        console.warn('⚠️ Could not delete temporary file:', e.message);
-      }
-    }
-
-    // Handle specific error types
     if (error.status === 402) {
       return res.status(402).json({
         success: false,
@@ -656,183 +516,54 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
   }
 });
 
-// ========== UPLOAD TRANSCRIPTION FILE TO CLOUDINARY ==========
-async function uploadTranscriptionToCloudinary(fileBuffer, fileName, format) {
-  console.log('☁️ Uploading transcription file to Cloudinary...');
-  
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-    console.warn('⚠️ Cloudinary credentials not configured, skipping upload');
-    return null;
-  }
-
+// ========== DOWNLOAD ENDPOINT ==========
+router.post('/download', async (req, res) => {
   try {
-    const formData = new FormData();
-    
-    // Determine MIME type based on format
-    let mimeType = 'text/plain';
-    if (format === 'docx') {
-      mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    } else if (format === 'json') {
-      mimeType = 'application/json';
+    const { format, transcription, fileName } = req.body;
+
+    if (!transcription) {
+      return res.status(400).json({ success: false, error: 'No transcription data provided' });
     }
 
-    formData.append('file', fileBuffer, { 
-      filename: `${fileName}.${format}`,
-      contentType: mimeType
-    });
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'zuke/transcriptions');
-    formData.append('resource_type', 'auto');
+    let fileContent;
+    let mimeType;
+    let extension;
 
-    const response = await axios.post(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
-      formData,
-      {
-        headers: formData.getHeaders(),
-        timeout: 60000
-      }
-    );
-
-    console.log('✅ Transcription file uploaded to Cloudinary');
-    console.log('   Public ID:', response.data.public_id);
-    console.log('   URL:', response.data.secure_url);
-
-    return {
-      public_id: response.data.public_id,
-      url: response.data.secure_url,
-      size: response.data.bytes,
-      type: format
-    };
-  } catch (error) {
-    console.error('❌ Cloudinary upload error:', error.message);
-    throw new Error(`Cloudinary upload failed: ${error.message}`);
-  }
-}
-
-// ========== DOWNLOAD TRANSCRIPTION IN VARIOUS FORMATS ==========
-router.post('/download', express.json({ limit: '50mb' }), async (req, res) => {
-  try {
-    console.log('📥 Download request received');
-    console.log('   Format:', req.body.format);
-    console.log('   Has transcription:', !!req.body.transcription);
-    
-    const { format, transcription, businessName, userEmail, fileName } = req.body;
-
-    if (!format || !transcription) {
-      console.error('❌ Missing required fields:', { format: !!format, transcription: !!transcription });
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: format, transcription'
-      });
-    }
-
-    console.log(`📥 Generating ${format.toUpperCase()} download...`);
-
-    let content, contentType, extension;
-
-    switch (format.toLowerCase()) {
-      case 'docx':
-        try {
-          content = await generateDocxDocument(
-            transcription,
-            businessName || 'Transcription',
-            userEmail || 'user@example.com',
-            fileName || 'transcription'
-          );
-          contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-          extension = 'docx';
-        } catch (error) {
-          return res.status(500).json({
-            success: false,
-            error: `DOCX generation failed: ${error.message}`
-          });
-        }
-        break;
-
+    switch (format) {
       case 'txt':
-        // Plain text format
-        if (Array.isArray(transcription.segments) && transcription.segments.length > 0) {
-          content = transcription.segments
-            .map(seg => `${seg.speaker ? `Speaker ${seg.speaker}: ` : ''}${seg.text}`)
+        // Plain text format with speaker labels
+        if (transcription.grouped && Array.isArray(transcription.grouped)) {
+          fileContent = transcription.grouped
+            .map(group => `[${group.speaker}]: ${group.text}`)
             .join('\n\n');
-        } else if (typeof transcription === 'string') {
-          content = transcription;
         } else if (transcription.text) {
-          content = transcription.text;
+          fileContent = transcription.text;
+        } else {
+          fileContent = JSON.stringify(transcription);
         }
-        contentType = 'text/plain';
+        mimeType = 'text/plain';
         extension = 'txt';
-        content = Buffer.from(content, 'utf-8');
         break;
 
       case 'json':
-        // JSON format
-        content = JSON.stringify(transcription, null, 2);
-        contentType = 'application/json';
+        fileContent = JSON.stringify(transcription, null, 2);
+        mimeType = 'application/json';
         extension = 'json';
-        content = Buffer.from(content, 'utf-8');
         break;
 
       default:
-        return res.status(400).json({
-          success: false,
-          error: `Unsupported format: ${format}. Supported formats: txt, json, docx`
-        });
+        return res.status(400).json({ success: false, error: 'Invalid format. Use txt or json' });
     }
 
-    // Ensure content is a Buffer
-    if (!Buffer.isBuffer(content) && typeof content === 'string') {
-      content = Buffer.from(content, 'utf-8');
-    }
+    const finalFileName = `${fileName || 'transcription'}.${extension}`;
 
-    // ☁️ UPLOAD TO CLOUDINARY
-    const timestamp = Date.now();
-    const fileNameWithoutExt = `transcription_${timestamp}`;
-    
-    console.log('\n☁️ Uploading file to Cloudinary...');
-    const cloudinaryResult = await uploadTranscriptionToCloudinary(
-      content,
-      fileNameWithoutExt,
-      extension
-    );
-
-    if (!cloudinaryResult) {
-      // If Cloudinary fails, fall back to direct download
-      console.warn('⚠️ Cloudinary upload failed, falling back to direct download');
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${fileNameWithoutExt}.${extension}"`);
-      res.send(content);
-      console.log(`✅ ${extension.toUpperCase()} file sent successfully (local fallback)`);
-      return;
-    }
-
-    // ✅ RETURN CLOUDINARY URL AND FILE INFO
-    const responseData = {
-      success: true,
-      message: 'Transcription file ready for download',
-      file: {
-        name: `${fileNameWithoutExt}.${extension}`,
-        format: extension,
-        type: contentType,
-        cloudinaryUrl: cloudinaryResult.url,
-        cloudinaryPublicId: cloudinaryResult.public_id,
-        size: cloudinaryResult.size
-      },
-      download: {
-        url: cloudinaryResult.url,
-        type: 'cloudinary'
-      }
-    };
-
-    console.log(`✅ ${extension.toUpperCase()} file uploaded to Cloudinary and ready for download`);
-    res.json(responseData);
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${finalFileName}"`);
+    res.send(fileContent);
 
   } catch (error) {
-    console.error('❌ Download error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message || 'Download failed'
-    });
+    console.error('Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -844,12 +575,7 @@ router.get('/pricing', (req, res) => {
       transcription: {
         amount: PRICING.TRANSCRIPTION,
         formatted: `R${PRICING.TRANSCRIPTION.toFixed(2)}`,
-        description: 'Audio transcription with Azure OpenAI Whisper'
-      },
-      diarizationAddon: {
-        amount: PRICING.DIARIZATION_ADDON,
-        formatted: `R${PRICING.DIARIZATION_ADDON.toFixed(2)}`,
-        description: 'Speaker identification (diarization)'
+        description: 'Audio transcription with speaker identification (diarization)'
       }
     }
   });
@@ -888,8 +614,6 @@ router.get('/history/:businessId', async (req, res) => {
         language: t.language,
         duration: t.duration,
         cost: t.cost,
-        emailSent: t.emailSent,
-        emailRecipient: t.emailRecipient,
         created_at: t.created_at
       }))
     });

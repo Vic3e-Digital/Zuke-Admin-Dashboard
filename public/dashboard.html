@@ -127,6 +127,45 @@
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
             <div class="sidebar-content">
+                <!-- Business Switcher at Top -->
+                <div class="sidebar-business-switcher">
+                    <div class="switch-dropdown-container">
+                        <button class="switch-dropdown-btn" id="switchDropdownBtn" title="Switch Business">
+                            <div class="switch-btn-content">
+                                <div class="switch-btn-logo" id="switchBtnLogo">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    </svg>
+                                </div>
+                                <span class="nav-text" id="switchBtnText">Select Business</span>
+                            </div>
+                            <svg class="switch-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9.60845 10.2197C9.31556 9.92678 8.84069 9.92678 8.54779 10.2197C8.2549 10.5126 8.2549 10.9874 8.54779 11.2803L11.7978 14.5303C12.0907 14.8232 12.5656 14.8232 12.8585 14.5303L16.1085 11.2803C16.4013 10.9874 16.4013 10.5126 16.1085 10.2197C15.8156 9.92678 15.3407 9.92678 15.0478 10.2197L12.3281 12.9393L9.60845 10.2197Z" fill="currentColor"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12.3281 2C6.80528 2 2.32812 6.47715 2.32812 12C2.32812 17.5228 6.80528 22 12.3281 22C17.851 22 22.3281 17.5228 22.3281 12C22.3281 6.47715 17.851 2 12.3281 2ZM3.82812 12C3.82812 7.30558 7.6337 3.5 12.3281 3.5C17.0225 3.5 20.8281 7.30558 20.8281 12C20.8281 16.6944 17.0225 20.5 12.3281 20.5C7.6337 20.5 3.82812 16.6944 3.82812 12Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="switch-dropdown-menu" id="switchDropdownMenu">
+                            <div class="dropdown-header">
+                                <span>Switch Business</span>
+                                <span class="business-count" id="businessCount">(0)</span>
+                            </div>
+                            <div class="dropdown-businesses-list" id="dropdownBusinessesList">
+                                <!-- Business items will be populated dynamically -->
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-add-business" id="dropdownAddBusiness">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Add New Business
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <ul class="nav-menu" role="menubar">
                     <li class="nav-item">
                         <a href="#" class="nav-link active" data-page="dashboard">
@@ -225,34 +264,8 @@
                                 <circle cx="12" cy="12" r="2" fill="currentColor"/>
                             </svg> -->
                             <span class="nav-text">Switch </span>
-                            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9.60845 10.2197C9.31556 9.92678 8.84069 9.92678 8.54779 10.2197C8.2549 10.5126 8.2549 10.9874 8.54779 11.2803L11.7978 14.5303C12.0907 14.8232 12.5656 14.8232 12.8585 14.5303L16.1085 11.2803C16.4013 10.9874 16.4013 10.5126 16.1085 10.2197C15.8156 9.92678 15.3407 9.92678 15.0478 10.2197L12.3281 12.9393L9.60845 10.2197Z" fill="#323544"/>
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12.3281 2C6.80528 2 2.32812 6.47715 2.32812 12C2.32812 17.5228 6.80528 22 12.3281 22C17.851 22 22.3281 17.5228 22.3281 12C22.3281 6.47715 17.851 2 12.3281 2ZM3.82812 12C3.82812 7.30558 7.6337 3.5 12.3281 3.5C17.0225 3.5 20.8281 7.30558 20.8281 12C20.8281 16.6944 17.0225 20.5 12.3281 20.5C7.6337 20.5 3.82812 16.6944 3.82812 12Z" fill="#323544"/>
-                                </svg>    
-                        </button>
-                        
-                        <!-- Dropdown Menu -->
-                        <div class="switch-dropdown-menu" id="switchDropdownMenu">
-                            <div class="dropdown-header">Switch Business</div>
-                            <select class="switch-business-selector" id="switchBusinessSelector">
-                                <!-- Options will be populated dynamically -->
-                                <option value="">Select a business...</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <button class="settings-icon-btn" id="settingsButton" title="Settings" data-page="settings">
-                        <!-- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 1V6M12 18V23M23 12H18M6 12H1M20.5 3.5L16.5 7.5M7.5 16.5L3.5 20.5M20.5 20.5L16.5 16.5M7.5 7.5L3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg> -->
-
-                        <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                            <path d="M2.5809 8.9224C1.96404 9.99083 2.33012 11.357 3.39854 11.9739C3.88777 12.2563 3.88776 12.9625 3.39856 13.2449C2.33013 13.8618 1.96407 15.2279 2.58092 16.2964L4.09692 18.9222C4.71391 19.9908 6.08044 20.3568 7.14896 19.7399C7.63844 19.4573 8.25011 19.8106 8.25011 20.3754C8.25011 21.6092 9.2503 22.6094 10.4841 22.6094H13.5165C14.7502 22.6094 15.7501 21.6091 15.7501 20.3756C15.7501 19.8108 16.3615 19.458 16.8503 19.7402C17.9185 20.357 19.2845 19.991 19.9012 18.9227L21.4176 16.2963C22.0344 15.2279 21.6684 13.8617 20.6 13.2449C20.1108 12.9624 20.1108 12.2563 20.6 11.9739C21.6684 11.3571 22.0345 9.99089 21.4176 8.92247L19.9012 6.29604C19.2845 5.2278 17.9185 4.86179 16.8503 5.47854C16.3615 5.76076 15.7501 5.40794 15.7501 4.84314C15.7501 3.60961 14.7502 2.60938 13.5165 2.60938H10.4841C9.2503 2.60938 8.25011 3.60957 8.25011 4.84337C8.25011 5.40822 7.63842 5.76152 7.14894 5.47892C6.08042 4.86201 4.71388 5.22797 4.09689 6.29663L2.5809 8.9224ZM4.14854 10.6748C3.79755 10.4722 3.6773 10.0234 3.87994 9.6724L5.39593 7.04663C5.59863 6.69554 6.04772 6.57518 6.39894 6.77796C7.88811 7.63773 9.75011 6.56327 9.75011 4.84337C9.75011 4.43799 10.0787 4.10937 10.4841 4.10937L13.5165 4.10937C13.9216 4.10937 14.2501 4.43788 14.2501 4.84314C14.2501 6.56227 16.1112 7.63733 17.6003 6.77758C17.9511 6.57504 18.3997 6.69524 18.6022 7.04604L20.1186 9.67247C20.3212 10.0234 20.201 10.4722 19.85 10.6749C18.3608 11.5346 18.3608 13.6841 19.85 14.5439C20.2009 14.7465 20.3212 15.1953 20.1186 15.5463L18.6022 18.1727C18.3996 18.5235 17.9511 18.6437 17.6003 18.4412C16.1112 17.5815 14.2501 18.6565 14.2501 20.3756C14.2501 20.7809 13.9216 21.1094 13.5165 21.1094H10.4841C10.0787 21.1094 9.75011 20.7808 9.75011 20.3754C9.75011 18.6555 7.88812 17.5811 6.39896 18.4408C6.04774 18.6436 5.59866 18.5232 5.39596 18.1722L3.87996 15.5464C3.67732 15.1954 3.79757 14.7466 4.14856 14.5439C5.63778 13.6841 5.63775 11.5346 4.14854 10.6748Z" fill="#323544"/>
-                            <path opacity="0.4" d="M11.9993 8.77344C9.8813 8.77344 8.16431 10.4904 8.16431 12.6084C8.16431 14.7264 9.8813 16.4434 11.9993 16.4434C14.1173 16.4434 15.8343 14.7264 15.8343 12.6084C15.8343 10.4904 14.1173 8.77344 11.9993 8.77344ZM9.66431 12.6084C9.66431 11.3189 10.7097 10.2734 11.9993 10.2734C13.2889 10.2734 14.3343 11.3189 14.3343 12.6084C14.3343 13.898 13.2889 14.9434 11.9993 14.9434C10.7097 14.9434 9.66431 13.898 9.66431 12.6084Z" fill="#323544"/>
+                                </svg>
                             </svg>
-                            
                     </button>
                 </div>
         </nav>
@@ -277,6 +290,8 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
     <!-- Paystack Inline JS -->
     <script src="https://js.paystack.co/v2/inline.js"></script>
+    <!-- Universal Modal Manager -->
+    <script src="js/modalManager.js"></script>
     <script src="js/dashboard.js" type="module"></script>
 </body>
 </html>

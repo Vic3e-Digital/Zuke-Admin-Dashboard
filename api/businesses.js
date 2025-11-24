@@ -81,10 +81,15 @@ try {
 
  let businesses = [];
 
+ // Exclude store_info.description to reduce payload size
+ const projection = {
+   'store_info.description': 0
+ };
+
  if (isAdminRequest) {
-   businesses = await collection.find({}).toArray();
+   businesses = await collection.find({}, { projection }).toArray();
  } else if (email) {
-   businesses = await collection.find({ 'personal_info.email': email }).toArray();
+   businesses = await collection.find({ 'personal_info.email': email }, { projection }).toArray();
  }
 
  res.json({

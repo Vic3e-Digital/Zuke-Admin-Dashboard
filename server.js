@@ -10,6 +10,7 @@ const { ObjectId } = require('mongodb');
 const sendEmailRoutes = require('./api/send-email-api');
 const veoVertexApiRouter = require('./api/veo-vertex-api');
 const audioTranscribeRoutes = require('./api/audio-transcribe-api');
+const marketingApiRouter = require('./api/marketing-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,9 @@ const getOpenAIConfig = require('./api/get-openai-config');
 const businessCaseApi = require('./api/business-case-api');
 const tokenRefreshService = require('./api/services/token-refresh.service');
 const wordpressConfig = require('./api/get-wordpress-config');
+
+// Add this with your other route imports
+const regenerateBusinessCaseRouter = require('./api/regenerate-business-case');
 
 // -------------------------
 // ✅ MIDDLEWARE FIRST (BEFORE ROUTES!)
@@ -108,8 +112,10 @@ app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
+app.use('/api/marketing', marketingApiRouter);
 app.use('/api/veo-vertex', veoVertexApiRouter);
 app.use('/api/business-case', businessCaseApi);
+app.use('/api/regenerate-business-case', regenerateBusinessCaseRouter);
 
 // Paystack key route
 app.get("/api/paystack-key", (req, res) => {

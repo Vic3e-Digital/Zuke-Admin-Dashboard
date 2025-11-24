@@ -1193,6 +1193,18 @@ function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
     'email-outreach': {
       title: "Send Smart Outreach Emails",
       url: `/tools/send-email.html`
+    },
+    'find-leads': {
+      title: "Find Leads",
+      url: `/pages/marketing/marketing-tools/find-leads.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`
+    },
+    'enrich-leads': {
+      title: "Enrich Leads",
+      url: `/pages/marketing/marketing-tools/enrich-leads.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`
+    },
+    'email-leads': {
+      title: "Email Leads",
+      url: `/pages/marketing/marketing-tools/email-leads.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`
     }
   };
 

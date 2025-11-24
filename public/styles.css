@@ -339,6 +339,291 @@ body {
   object-fit: cover;
 }
 
+/* Sidebar Business Switcher */
+.sidebar-business-switcher {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn {
+  width: 100%;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f3f5f9 100%);
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 500;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 139, 0, 0.1), transparent);
+  transition: left 0.3s ease;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn:hover::before {
+  left: 100%;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn:hover {
+  background: linear-gradient(135deg, #f0f4f8 0%, #eef2f8 100%);
+  border-color: #FF8B00;
+  box-shadow: 0 4px 12px rgba(255, 139, 0, 0.08);
+}
+
+.switch-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.switch-btn-logo {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #FF8B00 0%, #FF7B00 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.switch-btn-logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn .nav-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn .switch-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-business-switcher .switch-dropdown-btn:hover .switch-chevron {
+  color: #FF8B00;
+}
+
+.sidebar-business-switcher .switch-dropdown-menu.active .switch-chevron {
+  transform: rotate(180deg);
+}
+
+.switch-dropdown-menu {
+  position: absolute;
+  bottom: auto;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  min-width: 100%;
+  max-width: none;
+  padding: 0;
+  margin-top: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.switch-dropdown-menu.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 12px 12px 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #f9fafb;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.business-count {
+  font-weight: 500;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.dropdown-businesses-list {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.dropdown-business-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 6px;
+  margin: 0 0px;
+  position: relative;
+}
+
+.dropdown-business-item:hover {
+  background: #f3f5f9;
+}
+
+.dropdown-business-item.active {
+  background: #FFF8F0;
+  border-left: 3px solid #FF8B00;
+  padding-left: 9px;
+}
+
+.dropdown-business-item.active::after {
+  content: '✓';
+  color: #FF8B00;
+  font-weight: bold;
+  font-size: 16px;
+  margin-left: auto;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.business-item-logo {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #FF8B00 0%, #FF7B00 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.business-item-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.business-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.business-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.business-item-status {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 2px 0 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 0;
+}
+
+.dropdown-add-business {
+  width: calc(100% - 8px);
+  margin: 8px 4px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1.5px dashed #d1d5db;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.dropdown-add-business:hover {
+  background: #FFF8F0;
+  border-color: #FF8B00;
+  color: #FF8B00;
+}
+
+.dropdown-add-business svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Scrollbar styling for dropdown */
+.dropdown-businesses-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-businesses-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown-businesses-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.dropdown-businesses-list::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 /* MAIN CONTENT - DESKTOP */
 .main-content {
   position: fixed;
@@ -383,6 +668,10 @@ body {
 
 .dashboard-container.sidebar-collapsed .switch-dropdown-container,
 .dashboard-container.sidebar-collapsed .settings-icon-btn {
+  display: none;
+}
+
+.dashboard-container.sidebar-collapsed .sidebar-business-switcher {
   display: none;
 }
 
@@ -759,21 +1048,24 @@ body {
 }
 
 .switch-dropdown-menu {
-  position: fixed;
+  position: absolute;
   bottom: auto;
-  left: auto;
+  top: 100%;
+  left: 0;
+  right: 0;
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  min-width: 250px;
-  max-width: 300px;
+  min-width: 100%;
+  max-width: none;
   padding: 8px;
+  margin-top: 8px;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
+  transform: translateY(-10px);
   transition: all 0.3s ease;
-  z-index: 20;
+  z-index: 1000;
   pointer-events: none;
 }
 
