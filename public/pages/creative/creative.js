@@ -7,6 +7,15 @@ async function getAuth0Client() {
     return window.auth0Client;
   }
 
+  // Check DataManager cache
+  if (window.dataManager && window.dataManager.getAuth0Client) {
+    const cachedClient = window.dataManager.getAuth0Client();
+    if (cachedClient) {
+      window.auth0Client = cachedClient;
+      return cachedClient;
+    }
+  }
+
   // Otherwise configure it
   try {
     const response = await fetch("/auth_config.json");
@@ -19,8 +28,11 @@ async function getAuth0Client() {
       useRefreshTokens: true
     });
     
-    // Store it globally
+    // Store it globally and in DataManager
     window.auth0Client = auth0Client;
+    if (window.dataManager && window.dataManager.setAuth0Client) {
+      window.dataManager.setAuth0Client(auth0Client);
+    }
     return auth0Client;
   } catch (error) {
     console.error("Error configuring Auth0:", error);
@@ -116,10 +128,12 @@ function showBetaWarning(title, url, modal, modalTitle, iframe) {
   document.getElementById('proceedBetaBtn').addEventListener('click', function() {
     document.getElementById('betaWarningPopup').remove();
     // Open the actual modal
-    modalTitle.textContent = title;
-    iframe.src = url;
-    modal.style.display = "block";
-    document.body.style.overflow = 'hidden';
+    if (modal && modalTitle && iframe) {
+      modalTitle.textContent = title;
+      iframe.src = url;
+      modal.style.display = "block";
+      document.body.style.overflow = 'hidden';
+    }
   });
   
   // Close on background click
@@ -146,8 +160,10 @@ export async function initCreativePage() {
   const closeBtn = document.getElementsByClassName("close")[0];
   
   // Get main cards and sim cards containers
+  const mainModelsCard = document.getElementById("mainModelsCard");
   const mainStoreCard = document.getElementById("mainStoreCard");
   const mainAudioCard = document.getElementById("mainAudioCard");
+  const modelsCardsContainer = document.getElementById("modelsCardsContainer");
   const simCardsContainer = document.getElementById("simCardsContainer");
   const audioCardsContainer = document.getElementById("audioCardsContainer");
 
@@ -190,7 +206,35 @@ export async function initCreativePage() {
     const businessName = currentBusiness?.store_info?.name || 'No Business';
     const businessId = currentBusiness?._id || '';
 
-    // Toggle sim cards when main Branding card is clicked
+    // ========== PHOTOGRAPHY MODELS NAVIGATION ==========
+    if (mainModelsCard && modelsCardsContainer) {
+      mainModelsCard.addEventListener('click', function(e) {
+        // Don't trigger if clicking the info icon/tooltip or arrow
+        if (e.target.closest('.main-sim-info-icon, .main-sim-info-tooltip, .main-sim-arrow')) {
+          return;
+        }
+        
+        // Hide other containers
+        if (simCardsContainer) simCardsContainer.style.display = 'none';
+        if (audioCardsContainer) audioCardsContainer.style.display = 'none';
+        
+        // Toggle the models cards visibility
+        if (modelsCardsContainer.style.display === 'none' || modelsCardsContainer.style.display === '') {
+          modelsCardsContainer.style.display = 'grid';
+          // Smooth scroll to models cards
+          setTimeout(() => {
+            modelsCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          modelsCardsContainer.style.display = 'none';
+        }
+      });
+      
+      // Add cursor pointer to indicate it's clickable
+      mainModelsCard.style.cursor = 'pointer';
+    }
+
+    // ========== BRANDING (STORE) NAVIGATION ==========
     if (mainStoreCard && simCardsContainer) {
       mainStoreCard.addEventListener('click', function(e) {
         // Don't toggle if clicking on info icon or its tooltip
@@ -198,10 +242,9 @@ export async function initCreativePage() {
           return;
         }
         
-        // Hide audio cards
-        if (audioCardsContainer) {
-          audioCardsContainer.style.display = 'none';
-        }
+        // Hide other containers
+        if (modelsCardsContainer) modelsCardsContainer.style.display = 'none';
+        if (audioCardsContainer) audioCardsContainer.style.display = 'none';
         
         // Toggle display
         if (simCardsContainer.style.display === 'none' || simCardsContainer.style.display === '') {
@@ -219,7 +262,7 @@ export async function initCreativePage() {
       mainStoreCard.style.cursor = 'pointer';
     }
 
-    // Toggle audio cards when main Audio card is clicked
+    // ========== AUDIO NAVIGATION ==========
     if (mainAudioCard && audioCardsContainer) {
       mainAudioCard.addEventListener('click', function(e) {
         // Don't toggle if clicking on info icon or its tooltip
@@ -227,10 +270,11 @@ export async function initCreativePage() {
           return;
         }
         
-        // Hide branding cards
-        if (simCardsContainer) {
-          simCardsContainer.style.display = 'none';
-        }
+                // Hide other containers
+        if (modelsCardsContainer) modelsCardsContainer.style.display = 'none';
+        if (simCardsContainer) simCardsContainer.style.display = 'none';
+        const photoshootsCardsContainer = document.getElementById('photoshootsCardsContainer');
+        if (photoshootsCardsContainer) photoshootsCardsContainer.style.display = 'none';
         
         // Toggle display
         if (audioCardsContainer.style.display === 'none' || audioCardsContainer.style.display === '') {
@@ -248,7 +292,39 @@ export async function initCreativePage() {
       mainAudioCard.style.cursor = 'pointer';
     }
 
-    // Setup buttons with dynamic URLs
+    // ========== PHOTOSHOOTS NAVIGATION ==========
+    const mainPhotoshootsCard = document.getElementById('mainPhotoshootsCard');
+    const photoshootsCardsContainer = document.getElementById('photoshootsCardsContainer');
+    if (mainPhotoshootsCard && photoshootsCardsContainer) {
+      mainPhotoshootsCard.addEventListener('click', function(e) {
+        // Don't toggle if clicking on info icon or its tooltip
+        if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
+          return;
+        }
+        
+        // Hide other containers
+        if (modelsCardsContainer) modelsCardsContainer.style.display = 'none';
+        if (simCardsContainer) simCardsContainer.style.display = 'none';
+        if (audioCardsContainer) audioCardsContainer.style.display = 'none';
+        
+        // Toggle display
+        if (photoshootsCardsContainer.style.display === 'none' || photoshootsCardsContainer.style.display === '') {
+          photoshootsCardsContainer.style.display = 'grid';
+          // Smooth scroll to photoshoots cards
+          setTimeout(() => {
+            photoshootsCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          photoshootsCardsContainer.style.display = 'none';
+        }
+      });
+      
+      // Add cursor pointer to indicate it's clickable
+      mainPhotoshootsCard.style.cursor = 'pointer';
+    }
+
+    // ========== BUTTON CONFIGURATIONS ==========
+    // Setup buttons with dynamic URLs (active features)
     const buttons = [
       {
         btn: document.getElementById("openModalBtn"),
@@ -265,10 +341,10 @@ export async function initCreativePage() {
       }
     ];
 
-    // Setup beta buttons - NOW WITH BETA WARNING
+    // Setup beta buttons - WITH BETA WARNING
     const betaButtons = [
       {
-        btn: document.getElementById("card8"),
+        btn: document.getElementById("afaaTool8Btn"),
         title: "Create Videos with VEO AI (Advanced)",
         url: `/tools/veo-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       },
@@ -278,9 +354,9 @@ export async function initCreativePage() {
         url: `/pages/creative/create-logos.html`
       },
       {
-        btn: document.getElementById("card7"),
+        btn: document.getElementById("afaaTool7Btn"),
         title: "Create Images with AI",
-        url: `/tools/image-editor.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+        url: `/tools/image-editor.html`
       },
       {
         btn: document.getElementById("improveImage"),
@@ -291,9 +367,48 @@ export async function initCreativePage() {
         btn: document.getElementById("transcribeAudioBtn"),
         title: "Transcribe Audio",
         url: `/pages/creative/transcribe-audio.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.querySelector('#textAIImageCard .sim-action-btn'),
+        title: "Text + AI Image",
+        url: `/tools/text-ai-image.html`
       }
     ];
 
+    // Setup Photography Models buttons (using standard modal)
+    const modelsButtons = [
+      {
+        btn: document.getElementById("registerModelBtn"),
+        title: "Join as a Model",
+        url: `/pages/creative/model-registration.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("browseModelsBtn"),
+        title: "Browse Models",
+        url: `/pages/creative/browse-models.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      }
+    ];
+
+    // Setup Photoshoots buttons
+    const photoshootsButtons = [
+      {
+        btn: document.getElementById("photoshootModelRegBtn"),
+        title: "Model Registration",
+        url: `/pages/creative/model-registration.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      }
+    ];
+
+    // Setup Generate Image button (for Branding section)
+    const generateImageButtons = [
+      {
+        btn: document.getElementById("generateImageBtn"),
+        title: "Generate Images",
+        url: `/pages/creative/photoshoot.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+        // url: `/pages/creative/Image-Generation.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      }
+    ];
+
+    // ========== CLICK HANDLERS ==========
     // Add click handlers for active features
     buttons.forEach(({btn, title, url}) => {
       if (btn) {
@@ -328,7 +443,46 @@ export async function initCreativePage() {
       }
     });
 
-    // Close handlers
+    // Add click handlers for Photography Models buttons (using standard modal)
+    modelsButtons.forEach(({btn, title, url}) => {
+      if (btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          modalTitle.textContent = title;
+          iframe.src = url;
+          modal.style.display = "block";
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    });
+
+    // Add click handlers for Photoshoots buttons (using standard modal)
+    photoshootsButtons.forEach(({btn, title, url}) => {
+      if (btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          modalTitle.textContent = title;
+          iframe.src = url;
+          modal.style.display = "block";
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    });
+
+    // Add click handlers for Generate Image button (using standard modal)
+    generateImageButtons.forEach(({btn, title, url}) => {
+      if (btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          modalTitle.textContent = title;
+          iframe.src = url;
+          modal.style.display = "block";
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    });
+
+    // ========== MODAL CLOSE HANDLERS ==========
     if (closeBtn) {
       closeBtn.onclick = function() {
         modal.style.display = "none";

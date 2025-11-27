@@ -41,7 +41,6 @@ export async function initTopupPage() {
     currentUser = await auth0Client.getUser();
     console.log("Top-up page loaded for:", currentUser.email);
 
-    // Load current wallet balance
     await loadTopupBalance();
 
   } catch (error) {
@@ -56,15 +55,13 @@ async function loadTopupBalance() {
     
     if (data.success && data.wallet) {
       const balance = data.wallet.balance || 0;
-      const balanceInRands = balance; // Already in Rands (R1 = 1 Credit)
-      document.getElementById('topupCurrentBalance').textContent = `R${balanceInRands.toLocaleString()}`;
+      document.getElementById('topupCurrentBalance').textContent = `R${balance.toLocaleString()}`;
     }
   } catch (error) {
     console.error("Error loading balance:", error);
   }
 }
 
-// Helper function to get Paystack key from server
 async function getPaystackKey() {
   try {
     const response = await fetch('/api/paystack-key');
@@ -77,7 +74,6 @@ async function getPaystackKey() {
   }
 }
 
-// Update custom amount display
 window.updateCustomAmount = function(amount) {
   const customPrice = document.getElementById('customPrice');
   const customButton = document.getElementById('customBuyButton');
@@ -93,7 +89,6 @@ window.updateCustomAmount = function(amount) {
   }
 };
 
-// Main buy credits function (ONLY ONE VERSION)
 window.buyCredits = async function(bundle, credits, amountInCents) {
   if (!currentUser) {
     alert('Please log in to purchase credits');
@@ -106,13 +101,12 @@ window.buyCredits = async function(bundle, credits, amountInCents) {
     `Purchase ${bundle.toUpperCase()} bundle?\n\n` +
     `Credits: ${credits.toLocaleString()}\n` +
     `Price: R${amountInRands.toLocaleString()}\n\n` +
-    `You'll be redirected to Paystack for payment.`
+    `Click OK to proceed to secure payment.`
   );
   
   if (!confirmed) return;
 
   try {
-    // Get the Paystack key from your server
     const paystackKey = await getPaystackKey();
     
     if (!paystackKey) {
@@ -121,72 +115,124 @@ window.buyCredits = async function(bundle, credits, amountInCents) {
       return;
     }
 
-    console.log('Initializing Paystack payment...');
+    console.log('Initializing Paystack payment for:', {
+      bundle,
+      credits,
+      amountInCents,
+      email: currentUser.email
+    });
+
+    // Check if PaystackPop is available
+    if (typeof PaystackPop === 'undefined') {
+      alert('⚠️ Payment gateway is loading. Please try again in a moment.');
+      console.error('PaystackPop is not loaded');
+      return;
+    }
 
     const handler = PaystackPop.setup({
-      key: paystackKey, // ✅ Dynamic key from server
+      key: paystackKey,
       email: currentUser.email,
       amount: amountInCents,
       currency: 'ZAR',
-      ref: `zuke_topup_${bundle}_${Date.now()}`,
+      ref: `zuke_topup_${bundle}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       metadata: {
-        custom_fields: [
-          {
-            display_name: "User Email",
-            variable_name: "user_email",
-            value: currentUser.email
-          },
-          {
-            display_name: "Bundle Type",
-            variable_name: "bundle_type",
-            value: bundle
-          },
-          {
-            display_name: "Credits",
-            variable_name: "credits",
-            value: credits.toString()
-          },
-          {
-            display_name: "Transaction Type",
-            variable_name: "transaction_type",
-            value: "topup"
-          }
-        ]
+        bundle_type: bundle,
+        credits: credits,
+        transaction_type: "topup",
+        user_email: currentUser.email,
+        user_id: currentUser.sub
       },
       callback: function(response) {
-        console.log('Payment successful:', response);
-        alert(`Payment successful! ${credits.toLocaleString()} credits will be added to your account shortly.`);
-        
-        // Reload balance after 2 seconds
-        setTimeout(() => {
-          loadTopupBalance();
-          
-          // Also reload main dashboard balance if function exists
-          if (window.loadWalletBalance) {
-            window.loadWalletBalance();
-          }
-        }, 2000);
+        console.log('✅ Payment successful:', response);
+        addCreditsToWallet(credits, response.reference, bundle);
       },
       onClose: function() {
         console.log('Payment window closed');
+        alert('Payment was cancelled.');
       }
     });
-    
+
     handler.openIframe();
     
   } catch (error) {
     console.error('Error initiating payment:', error);
-    alert('Error processing payment. Please try again.');
+    alert('❌ Error processing payment. Please try again.');
   }
 };
 
-// Buy custom amount of credits
+async function addCreditsToWallet(credits, reference, bundle) {
+  try {
+    // Show loading
+    const loadingMsg = document.createElement('div');
+    loadingMsg.id = 'loading-msg';
+    loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
+    loadingMsg.innerHTML = `
+      <div class="spinner" style="margin: 0 auto 20px; width: 40px; height: 40px; border: 4px solid #E0E0E0; border-top: 4px solid var(--primary-orange); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+      <p style="margin: 0; font-size: 16px; font-weight: 600; color: var(--dark-neutral);">Processing your purchase...</p>
+    `;
+    document.body.appendChild(loadingMsg);
+
+    const response = await fetch('/api/add-credits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentUser.email,
+        credits: credits,
+        paymentReference: reference,
+        bundle: bundle,
+        amount: credits
+      })
+    });
+    
+    const data = await response.json();
+    
+    // Remove loading
+    loadingMsg.remove();
+    
+    if (data.success) {
+      alert(
+        `✅ Payment successful!\n\n` +
+        `${credits.toLocaleString()} credits have been added to your account.\n\n` +
+        `Reference: ${reference}`
+      );
+      
+      // Reload balance
+      setTimeout(() => {
+        loadTopupBalance();
+        
+                if (window.loadWalletBalance) {
+          window.loadWalletBalance();
+        }
+      }, 1000);
+    } else {
+      alert(
+        `⚠️ Payment received but credits were not added.\n\n` +
+        `Error: ${data.message}\n` +
+        `Reference: ${reference}\n\n` +
+        `Please contact support.`
+      );
+    }
+  } catch (error) {
+    console.error('Error adding credits:', error);
+    
+    // Remove loading message if exists
+    const loadingMsg = document.getElementById('loading-msg');
+    if (loadingMsg) loadingMsg.remove();
+    
+    alert(
+      `⚠️ Error adding credits: ${error.message}\n\n` +
+      `Reference: ${reference}\n\n` +
+      `Please contact support with this reference.`
+    );
+  }
+}
+
 window.buyCustomCredits = function() {
   const customInput = document.getElementById('customAmount');
   const amount = parseInt(customInput.value) || 0;
   
-  if (amount < 100) { // ✅ Fixed: minimum is 100
-    alert('Minimum purchase is 99 credits (R99)');
+  if (amount < 100) {
+    alert('Minimum purchase is 100 credits (R100)');
     return;
   }
   

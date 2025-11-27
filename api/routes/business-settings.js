@@ -36,10 +36,21 @@ router.get('/:businessId',
       console.log(`[Settings] Fetching settings for business: ${businessId}`);
       
       const settings = await businessSettingsService.getSettings(businessId);
+      
+      // Also fetch the full business document to include business_creatives
+      const db = req.app.locals.db;
+      if (!db) {
+        return res.status(500).json({ error: 'Database connection error' });
+      }
+      
+      const business = await db.collection('store_submissions').findOne({
+        _id: new ObjectId(businessId)
+      });
 
       res.json({
         success: true,
-        automation_settings: settings
+        automation_settings: settings,
+        business: business
       });
     } catch (error) {
       console.error('[Settings] Error fetching business settings:', error);
@@ -740,5 +751,75 @@ router.post('/auth/tiktok/refresh', async (req, res) => {
     });
   }
 });
+
+// -------------------------
+// Test Apollo API Connection
+// -------------------------
+router.post('/:businessId/test-apollo',
+  ValidationMiddleware.validateBusinessId,
+  async (req, res) => {
+    try {
+      const { api_key } = req.body;
+
+      if (!api_key) {
+        return res.json({ 
+          success: false, 
+          error: 'API key is required' 
+        });
+      }
+
+      console.log('[Apollo] Testing API connection...');
+
+      // Test Apollo API with a simple request (e.g., get account info)
+      const response = await fetch('https://api.apollo.io/v1/auth/health', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+          'X-Api-Key': api_key
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Invalid API key');
+      }
+
+      const data = await response.json();
+
+      // Optionally get account details
+      let accountName = 'Valid Account';
+      try {
+        const accountResponse = await fetch('https://api.apollo.io/v1/users/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': api_key
+          }
+        });
+        
+        if (accountResponse.ok) {
+          const accountData = await accountResponse.json();
+          accountName = accountData.user?.email || accountData.user?.name || 'Valid Account';
+        }
+      } catch (err) {
+        console.warn('[Apollo] Could not fetch account details:', err.message);
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'Apollo API connected successfully',
+        account_name: accountName
+      });
+
+    } catch (error) {
+      console.error('[Apollo] Test connection error:', error);
+      res.json({ 
+        success: false, 
+        error: error.message || 'Failed to connect to Apollo API'
+      });
+    }
+  }
+);
 
 module.exports = router;

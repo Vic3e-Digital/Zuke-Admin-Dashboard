@@ -9,6 +9,9 @@
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
   
+  <!-- Model Loader Scripts -->
+  <script src="/js/model-loader.js"></script>
+  <script src="/js/model-selector-component.js"></script>
 </head>
 <body>
   <div class="container">
@@ -151,6 +154,21 @@
         ></textarea>
       </div>
 
+      <!-- Creative Model Selector - Optional -->
+      <div class="form-group">
+        <label class="checkbox-option" style="display: flex; align-items: center; gap: 12px;">
+          <input type="checkbox" id="useModelCheckbox" style="width: 18px; height: 18px; cursor: pointer;">
+          <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px;">Use a Model</div>
+            <div style="font-size: 12px; color: #666;">Feature a model in your AI-generated product images</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Model Selection Container (Hidden by default) -->
+      <div id="modelSelectionSection" class="form-group" style="display: none; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; background: #f9f9f9;">
+        <div id="modelSelectorContainer"></div>
+      </div>
 
       <!-- Generate Variants Button -->
 <button class="btn" id="generateVariantsBtn" disabled style="margin-top: 12px;">
@@ -821,23 +839,26 @@ async function generateImageVariants() {
     // Get additional context from user input
     const additionalContext = imageContextInput.value.trim();
     
+    // Get selected model info if available
+    const selectedModelInfo = window.selectedModel ? ` with model ${window.selectedModel.name}` : '';
+    
     // Build context-aware prompts using business data
     const location = storeInfo.address || businessCase.location || 'South Africa';
     const targetCustomers = businessCase.your_customers || '';
     const businessDescription = businessCase.what_you_do || '';
     
     const contextualPrompts = {
-      front: `Professional product photography of ${productName}, front-facing view, clean background, studio lighting, high detail, commercial style, centered composition. ${additionalContext ? `Additional context: ${additionalContext}` : ''}`,
+      front: `Professional product photography of ${productName}, front-facing view, clean background, studio lighting, high detail, commercial style, centered composition${selectedModelInfo}. ${additionalContext ? `Additional context: ${additionalContext}` : ''}`,
       
-      side: `Professional product photography of ${productName}, 45-degree angle side view, clean background, studio lighting, showing depth and dimension, commercial style. ${additionalContext ? `Additional context: ${additionalContext}` : ''}`,
+      side: `Professional product photography of ${productName}, 45-degree angle side view, clean background, studio lighting, showing depth and dimension, commercial style${selectedModelInfo}. ${additionalContext ? `Additional context: ${additionalContext}` : ''}`,
       
-      lifestyle: `Lifestyle product photography of ${productName} in ${location} setting. ${targetCustomers ? `Featuring ${targetCustomers}` : 'Person interacting with product'}. Natural environment, authentic setting, warm natural lighting, relatable scene, professional composition. ${businessDescription ? `Context: ${businessDescription}` : ''}. ${additionalContext ? `Additional: ${additionalContext}` : ''}`
+      lifestyle: `Lifestyle product photography of ${productName} in ${location} setting${selectedModelInfo}. ${targetCustomers ? `Featuring ${targetCustomers}` : 'Person interacting with product'}. Natural environment, authentic setting, warm natural lighting, relatable scene, professional composition. ${businessDescription ? `Context: ${businessDescription}` : ''}. ${additionalContext ? `Additional: ${additionalContext}` : ''}`
     };
     
     document.getElementById('imageProgressText').textContent = 'Generating image variants with AI...';
     document.getElementById('imageProgressFill').style.width = '10%';
 
-    // ✅ Order models: FLUX first (faster), then DALL-E
+    // Models to use
     const modelsToUse = [];
     if (useFlux) modelsToUse.push('flux');
     if (useDalle) modelsToUse.push('dalle');
@@ -845,24 +866,31 @@ async function generateImageVariants() {
     let totalVariants = variantTypes.length * modelsToUse.length;
     let completedVariants = 0;
 
+    // ✅ Create all variant cards immediately
+    const cardMap = new Map();
     let variantIndex = 0;
-
-    // ✅ Generate progressively: show each as it completes
+    
     for (const model of modelsToUse) {
       for (const variantType of variantTypes) {
-        // Create card immediately with loading state
-        const cardId = `variant_${variantType}_${model}_${Date.now()}`;
+        const cardId = `variant_${variantType}_${model}_${Date.now()}_${variantIndex}`;
         const card = createVariantCard(cardId, variantType, model, 'generating');
-
-        card.dataset.variantIndex = variantIndex; // ✅ Now it works!
-
+        card.dataset.variantIndex = variantIndex;
         variantsGrid.appendChild(card);
-        
+        cardMap.set(`${variantType}_${model}`, cardId);
+        variantIndex++;
+      }
+    }
+
+    // ✅ Generate variants in parallel for each model
+    for (const model of modelsToUse) {
+      // For each model, generate all variants in parallel
+      const variantPromises = variantTypes.map(async (variantType) => {
         try {
+          const cardId = cardMap.get(`${variantType}_${model}`);
           const prompt = contextualPrompts[variantType];
           
           document.getElementById('imageProgressText').textContent = 
-            `Generating ${variantType} with ${model.toUpperCase()}... (${completedVariants + 1}/${totalVariants})`;
+            `Generating ${variantType} with ${model.toUpperCase()}...`;
           
           // Generate image
           const imageData = await aiGenerator.generateImageWithEdit(
@@ -871,7 +899,7 @@ async function generateImageVariants() {
             model
           );
           
-          // ✅ Update card immediately when done
+          // ✅ Update card when done
           updateVariantCard(cardId, imageData, 'generated');
           
           generatedVariants.push({
@@ -890,11 +918,16 @@ async function generateImageVariants() {
           
         } catch (error) {
           console.error(`Failed to generate ${variantType} with ${model}:`, error);
+          const cardId = cardMap.get(`${variantType}_${model}`);
           updateVariantCard(cardId, null, 'failed');
+          completedVariants++;
+          const progress = 10 + (completedVariants / totalVariants) * 85;
+          document.getElementById('imageProgressFill').style.width = `${progress}%`;
         }
-        variantIndex++;
+      });
 
-      }
+      // Wait for all variants of this model to complete in parallel
+      await Promise.all(variantPromises);
     }
 
     document.getElementById('imageProgressFill').style.width = '100%';
@@ -1529,6 +1562,318 @@ async function submitProduct() {
     await loadBusinessInfo();
     validateForm();
     updateCostSummary();
+    
+    // ===== INITIALIZE MODEL SELECTOR =====
+    const useModelCheckbox = document.getElementById('useModelCheckbox');
+    const modelSelectionSection = document.getElementById('modelSelectionSection');
+    const modelSelectorContainer = document.getElementById('modelSelectorContainer');
+    const modelLoader = new ModelLoader();
+    let allModels = [];
+    let defaultModel = null;
+    let currentBusinessId = businessId;
+
+    // Fetch all models
+    allModels = await modelLoader.fetchModels();
+    
+    // Try to load default model from store_submissions
+    try {
+      const defaultResponse = await fetch(`/api/creative-models/default?businessId=${currentBusinessId}`);
+      if (defaultResponse.ok) {
+        const defaultData = await defaultResponse.json();
+        if (defaultData.success && defaultData.model) {
+          defaultModel = defaultData.model;
+          console.log('✅ Default model found:', defaultModel.name);
+        }
+      }
+    } catch (error) {
+      console.log('No default model found');
+    }
+
+    // Handle checkbox toggle
+    useModelCheckbox.addEventListener('change', () => {
+      if (useModelCheckbox.checked) {
+        modelSelectionSection.style.display = 'block';
+        
+        if (defaultModel) {
+          renderDefaultModel(defaultModel);
+        } else {
+          renderNoDefaultModel();
+        }
+      } else {
+        modelSelectionSection.style.display = 'none';
+        window.selectedModel = null;
+      }
+    });
+
+    // Render default model with change option
+    function renderDefaultModel(model) {
+      modelSelectorContainer.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <!-- Default Model Card -->
+          <div style="flex: 0 0 140px;">
+            <div style="
+              border: 3px solid #FF8B00;
+              border-radius: 12px;
+              overflow: hidden;
+              background: white;
+            ">
+              <div style="
+                width: 100%;
+                aspect-ratio: 1/1;
+                background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+              ">
+                ${model.imageUrl 
+                  ? `<img src="${model.imageUrl}" alt="${model.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                  : `<div style="font-size: 48px; color: #999;">👤</div>`
+                }
+              </div>
+              <div style="
+                padding: 12px;
+                text-align: center;
+                border-top: 1px solid #f0f0f0;
+              ">
+                <div style="
+                  font-weight: 600;
+                  font-size: 13px;
+                  color: #2f2f2f;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                ">
+                  ${model.name}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Info & Actions -->
+          <div style="flex: 1;">
+            <p style="margin: 0 0 12px 0; color: #666; font-size: 13px;">
+              <strong>Default Model:</strong> ${model.name}
+            </p>
+            <button 
+              type="button"
+              id="changeModelBtn"
+              style="
+                padding: 8px 16px;
+                background: #FF8B00;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+              "
+            >
+              Change Model
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Store selected model
+      window.selectedModel = model;
+
+      // Handle change model button
+      document.getElementById('changeModelBtn').addEventListener('click', () => {
+        showModelModal(allModels, model);
+      });
+    }
+
+    // Render no default model message
+    function renderNoDefaultModel() {
+      modelSelectorContainer.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <p style="color: #666; margin-bottom: 12px;">You don't have a default model selected.</p>
+          <p style="color: #999; font-size: 13px; margin-bottom: 16px;">
+            Set a default model in your creative settings, or select one here.
+          </p>
+          <button 
+            type="button"
+            id="goToSettingsBtn"
+            style="
+              padding: 8px 16px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 600;
+              cursor: pointer;
+              margin-right: 8px;
+            "
+          >
+            Go to Creative Settings
+          </button>
+          <button 
+            type="button"
+            id="selectModelBtn"
+            style="
+              padding: 8px 16px;
+              background: #FF8B00;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 600;
+              cursor: pointer;
+            "
+          >
+            Select Model Now
+          </button>
+        </div>
+      `;
+
+      // Navigate to settings
+      document.getElementById('goToSettingsBtn').addEventListener('click', () => {
+        const email = new URLSearchParams(window.location.search).get('email');
+        const businessId = new URLSearchParams(window.location.search).get('businessId');
+        window.location.href = `/dashboard.html?email=${email}&businessId=${businessId}&tab=settings&section=creative`;
+      });
+
+      // Select model now
+      document.getElementById('selectModelBtn').addEventListener('click', () => {
+        showModelModal(allModels, null);
+      });
+    }
+
+    // Show model selection modal
+    function showModelModal(models, currentModel) {
+      let modal = document.getElementById('modelSelectionModalOverlay');
+      
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modelSelectionModalOverlay';
+        document.body.appendChild(modal);
+      }
+
+      modal.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+        " onclick="if(event.target === this) this.style.display = 'none'">
+          
+          <div style="
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 24px;
+          ">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h2 style="margin: 0; font-size: 20px; color: #2f2f2f;">Select a Model</h2>
+              <button 
+                onclick="document.getElementById('modelSelectionModalOverlay').style.display = 'none'"
+                style="
+                  background: none;
+                  border: none;
+                  font-size: 24px;
+                  cursor: pointer;
+                  color: #999;
+                "
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- Models Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px;">
+              ${models.map((model) => `
+                <div 
+                  class="select-model-card" 
+                  data-model-id="${model.id}"
+                  style="
+                    cursor: pointer;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    border: 3px solid ${currentModel?.id === model.id ? '#FF8B00' : '#e0e0e0'};
+                    transition: all 0.3s ease;
+                    background: white;
+                  "
+                >
+                  <div style="
+                    position: relative;
+                    width: 100%;
+                    aspect-ratio: 1/1;
+                    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                  ">
+                    ${model.imageUrl 
+                      ? `<img src="${model.imageUrl}" alt="${model.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                      : `<div style="font-size: 48px; color: #999;">👤</div>`
+                    }
+                  </div>
+                  <div style="
+                    padding: 12px;
+                    text-align: center;
+                    border-top: 1px solid #f0f0f0;
+                  ">
+                    <div style="
+                      font-weight: 600;
+                      font-size: 13px;
+                      color: #2f2f2f;
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    ">
+                      ${model.name}
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <style>
+          #modelSelectionModalOverlay .select-model-card:hover {
+            border-color: #FF8B00 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+        </style>
+      `;
+
+      modal.style.display = 'flex';
+
+      // Add click handlers
+      const modelCards = modal.querySelectorAll('.select-model-card');
+      modelCards.forEach(card => {
+        card.addEventListener('click', () => {
+          const modelId = card.getAttribute('data-model-id');
+          const selectedModel = models.find(m => m.id === modelId);
+          
+          // Update global selection
+          window.selectedModel = selectedModel;
+          console.log('✅ Model selected:', selectedModel.name);
+          
+          // Update display in form
+          renderDefaultModel(selectedModel);
+          
+          // Close modal
+          modal.style.display = 'none';
+        });
+      });
+    }
     
     // Log business context for debugging
     console.log('📊 Business Context:', {
