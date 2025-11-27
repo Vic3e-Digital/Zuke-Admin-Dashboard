@@ -8,6 +8,7 @@ import { AutomationPanelComponent } from './components/automation-panel.js';
 import { PreferencesPanelComponent } from './components/preferences-panel.js';
 import { ProfilePanelComponent } from './components/profile-panel.js';
 import { BusinessManagementComponent } from './components/business-management.js';
+import { CreativePanelComponent } from './components/creative-panel.js';
 import { SettingsState } from './state/settings-state.js';
 
 // ===== MAIN SETTINGS CONTROLLER =====
@@ -33,6 +34,7 @@ class SettingsController {
       this.notifications
     );
     this.businessManagement = new BusinessManagementComponent(this.api, this.notifications);
+    this.creativePanel = new CreativePanelComponent(this.api, this.notifications);
 
     // Bind methods
     this.init = this.init.bind(this);
@@ -164,6 +166,7 @@ class SettingsController {
     this.socialConnections.render(businessSettings, currentBusiness);
     await this.automationPanel.render(businessSettings, currentBusiness);
     this.preferencesPanel.render(businessSettings, currentBusiness);
+    await this.creativePanel.render(businessSettings, currentBusiness);
     await this.profilePanel.render(currentBusiness);
     this.businessManagement.setupEventListeners(currentBusiness);
   }
@@ -415,6 +418,28 @@ class SettingsController {
 
     window.confirmDeleteBusiness = () => {
       this.businessManagement.confirmDeleteBusiness(currentBusiness);
+    };
+
+    // Creative panel
+    window.openModelPicker = () => {
+      const modal = document.getElementById('modelPickerModal');
+      if (modal) {
+        modal.style.display = 'block';
+        this.creativePanel.renderModelsList();
+      }
+    };
+
+    window.closeModelPicker = () => {
+      this.creativePanel.closeModelPicker();
+    };
+
+    window.confirmModelSelection = () => {
+      this.creativePanel.saveCreativeSettings(currentBusiness);
+    };
+
+    window.searchModels = (event) => {
+      const searchQuery = event.target.value;
+      this.creativePanel.renderModelsList(searchQuery);
     };
   }
 

@@ -41,7 +41,8 @@ class ModalManager {
   watchForVisibleModals() {
     // Use MutationObserver to detect when modals become visible
     const observer = new MutationObserver(() => {
-      const modals = document.querySelectorAll('.modal');
+      // Exclude modals that manage themselves
+      const modals = document.querySelectorAll('.modal:not([data-no-enhance])');
       modals.forEach((modal, index) => {
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent && modal.offsetParent !== null) { // Modal is visible
@@ -99,7 +100,8 @@ class ModalManager {
 
   enhanceAllModals() {
     // Find all modal elements with class 'modal'
-    const modals = document.querySelectorAll('.modal');
+    // Exclude modals that manage themselves (like marketingModal)
+    const modals = document.querySelectorAll('.modal:not([data-no-enhance])');
     
     console.log(`📱 Found ${modals.length} modal(s) to enhance`);
     

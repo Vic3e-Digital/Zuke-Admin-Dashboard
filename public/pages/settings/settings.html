@@ -45,6 +45,7 @@
       <button class="settings-tab active" data-tab="social">Social Media</button>
       <button class="settings-tab" data-tab="automation">Automation</button>
       <button class="settings-tab" data-tab="preferences">Preferences</button>
+      <button class="settings-tab" data-tab="creative">Creative</button>
       <button class="settings-tab" data-tab="profile">Profile</button>
 
     </div>
@@ -371,8 +372,63 @@
     </div>
   </div>
 
+  <!-- ✅ Apollo.io Lead Generation Category (NEW) -->
+  <div class="automation-category">
+    <div class="category-header">
+      <div class="category-icon apollo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </div>
+      <div class="category-info">
+        <h3>Apollo.io Lead Generation</h3>
+        <p>Connect Apollo.io for automated lead generation and prospecting</p>
+      </div>
+      <span class="availability-badge active">Active</span>
+    </div>
+    
+    <div class="automation-links">
+      <div class="settings-section">
+        <div class="form-group">
+          <label>Apollo.io API Key</label>
+          <input type="password" id="apolloApiKey" class="form-input" 
+                 placeholder="Enter your Apollo.io API key" />
+          <span class="field-note">
+            Get your API key from 
+            <a href="https://app.apollo.io/#/settings/integrations/api" target="_blank" style="color: #667eea; text-decoration: underline;">
+              Apollo.io Settings
+            </a>
+          </span>
+        </div>
+
+        <div class="toggle-setting">
+          <div class="toggle-info">
+            <h4>Enable Apollo Integration</h4>
+            <p>Allow automated lead generation via Apollo.io</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="apolloEnabled" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="detail-actions" style="margin-top: 15px;">
+          <button class="btn-secondary btn-sm" onclick="testApolloConnection()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            Test Connection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <!-- Sales Category (Growth & Blaze Plans) -->
-<div class="automation-category">
+<div class="automation-category" style="display: none;">
   <div class="category-header">
     <div class="category-icon sales">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -400,7 +456,7 @@
 </div>
 
 <!-- Marketing Category (Growth & Blaze Plans) -->
-<div class="automation-category">
+<div class="automation-category" style="display: none;">
   <div class="category-header">
     <div class="category-icon marketing">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -429,7 +485,7 @@
 </div>
 
 <!-- Email Category (Growth & Blaze Plans) -->
-<div class="automation-category">
+<div class="automation-category" style="display: none;">
   <div class="category-header">
     <div class="category-icon email">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -457,7 +513,7 @@
 </div>
 
 <!-- AI Assistants Category (Coming Soon) -->
-<div class="automation-category">
+<div class="automation-category" style="display: none;">
   <div class="category-header">
     <div class="category-icon ai">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -525,8 +581,118 @@
         </div>
       </div>
 
+      <!-- AI Model Preferences -->
+      <div class="settings-section">
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 4px;">AI Model Preferences</h3>
+          <p style="font-size: 14px; color: #666;">Choose your default AI models for content generation</p>
+        </div>
+
+        <div class="form-group">
+          <label>Default Text Generation Model</label>
+          <select class="form-select" id="defaultTextModel">
+            <option value="">Select a model...</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo (Recommended)</option>
+            <option value="gpt-4">GPT-4 (Advanced)</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
+            <option value="claude-3-opus">Claude 3 Opus (Thoughtful)</option>
+            <option value="claude-3-sonnet">Claude 3 Sonnet (Balanced)</option>
+          </select>
+          <span class="field-note">Used for content writing, descriptions, and copywriting</span>
+        </div>
+
+        <div class="form-group">
+          <label>Default Image Generation Model</label>
+          <select class="form-select" id="defaultImageModel">
+            <option value="">Select a model...</option>
+            <option value="dall-e-3">DALL-E 3 (Recommended)</option>
+            <option value="flux-pro">FLUX Pro (Creative)</option>
+            <option value="stable-diffusion-3">Stable Diffusion 3 (Fast)</option>
+            <option value="midjourney">Midjourney (Artistic)</option>
+          </select>
+          <span class="field-note">Used for product images, graphics, and illustrations</span>
+        </div>
+
+        <div class="form-group">
+          <label>Default Video Generation Model</label>
+          <select class="form-select" id="defaultVideoModel">
+            <option value="">Select a model...</option>
+            <option value="veo-2">Veo 2 (Recommended)</option>
+            <option value="runway">Runway Gen-3 (Professional)</option>
+            <option value="synthesia">Synthesia (AI Presenters)</option>
+            <option value="loom">Loom (Screen Recording)</option>
+          </select>
+          <span class="field-note">Used for product videos, promotional content, and tutorials</span>
+        </div>
+      </div>
+
       <div class="settings-actions">
         <button class="btn-primary" onclick="savePreferences()">Save Preferences</button>
+      </div>
+    </div>
+
+    <!-- Creative Panel -->
+    <div class="settings-panel" id="creative-panel">
+      <h2>Creative & Photography</h2>
+      <p class="panel-description">Set up your preferred photography models for product shoots</p>
+
+      <div class="creative-tools-grid">
+        <!-- Pick Model Card -->
+        <div class="creative-card accent-purple">
+          <div class="creative-card-header">
+            <div class="creative-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <h3>Default Model</h3>
+          </div>
+          <p class="creative-card-description">Select a photography model for product shoots</p>
+          <div class="creative-card-content">
+            <div class="selected-model-info">
+              <div class="label">Currently Selected</div>
+              <img id="selectedModelImage" src="" alt="Selected Model" style="display: none; width: 80px; height: 80px; object-fit: cover; border-radius: 50%; margin-bottom: 12px;">
+              <div class="value" id="selectedModelName">No model selected</div>
+            </div>
+          </div>
+          <button class="btn-primary creative-card-btn" onclick="openModelPicker()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14"></path>
+              <path d="M5 12h14"></path>
+            </svg>
+            Choose Model
+          </button>
+        </div>
+
+        <!-- Choose Voice Card -->
+        <div class="creative-card accent-orange">
+          <div class="creative-card-header">
+            <div class="creative-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </div>
+            <h3>Choose Voice</h3>
+          </div>
+          <p class="creative-card-description">Select a voice for AI-generated audio (Coming Soon)</p>
+          <div class="creative-card-content">
+            <div class="selected-model-info">
+              <div class="label">Selected Voice</div>
+              <div class="value" id="selectedVoiceName">Not available yet</div>
+            </div>
+          </div>
+          <button class="btn-primary creative-card-btn" onclick="openVoicePicker()" disabled style="opacity: 0.5; cursor: not-allowed;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14"></path>
+              <path d="M5 12h14"></path>
+            </svg>
+            Coming Soon
+          </button>
+        </div>
       </div>
     </div>
 
@@ -686,7 +852,7 @@
 </div>
 
 <!-- Business Management Modal -->
-<div id="businessManagementModal" class="modal">
+<div id="businessManagementModal" class="modal" data-no-enhance>
   <div class="modal-content" style="max-width: 600px;">
     <span class="close" onclick="closeBusinessManagement()">&times;</span>
     
@@ -785,6 +951,43 @@
         </div>
       </div>
 </div>
+
+<!-- Model Picker Modal -->
+<div id="modelPickerModal" class="modal" data-no-enhance>
+  <div class="modal-content" style="max-width: 600px;">
+    <span class="close" onclick="closeModelPicker()">&times;</span>
+    
+    <h2 style="margin-bottom: 10px;">Select Default Photography Model</h2>
+    <p style="color: #666; margin-bottom: 20px;">Choose your preferred model for product photography shoots</p>
+
+    <!-- Search Bar -->
+    <div style="margin-bottom: 20px;">
+      <input 
+        type="text" 
+        id="modelSearchInput" 
+        class="form-input" 
+        placeholder="Search models (e.g., 'amara', 'lifestyle', 'product-only')..."
+        style="padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; width: 100%; font-size: 14px;"
+        oninput="searchModels(event)"
+      />
+    </div>
+
+    <!-- Models List -->
+    <div id="modelsListContainer" style="max-height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+      <!-- Models will be loaded here -->
+      <div style="padding: 20px; text-align: center; color: #666;">
+        <p>Loading available models...</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="btn-secondary" onclick="closeModelPicker()" style="flex: 1;">Cancel</button>
+      <button class="btn-primary" id="selectModelBtn" onclick="confirmModelSelection()" style="flex: 1;" disabled>Select Model</button>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <style>
@@ -1124,6 +1327,7 @@
 .category-icon.marketing { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
 .category-icon.email { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; }
 .category-icon.ai { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+.category-icon.apollo { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; }
 
 .category-info {
   flex: 1;

@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Photoshoot Designer - Outlier Platform</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      background: white;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .header h1 {
+      font-size: 36px;
+      color: #2f2f2f;
+      margin: 0 0 8px 0;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .user-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 8px 16px;
+      background: #FFF8F0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .wallet-badge {
+      background: #28A745;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* Main Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 450px 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f2f2f;
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn:hover {
+      color: #FF8B00;
+    }
+
+    .tab-btn.active {
+      color: #FF8B00;
+      border-bottom-color: #FF8B00;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Instruction Box */
+    .instruction-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .instruction-box h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instruction-box p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.95;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #2f2f2f;
+    }
+
+    .form-label-required::after {
+      content: ' *';
+      color: #DC3545;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #FF8B00;
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fafafa;
+      position: relative;
+    }
+
+    .upload-zone:hover {
+      border-color: #FF8B00;
+      background: #FFF8F0;
+    }
+
+    .upload-zone.dragover {
+      border-color: #FF8B00;
+      background: #FFF8F0;
+      transform: scale(1.02);
+    }
+
+    .upload-zone.has-image {
+      padding: 0;
+      border: 2px solid #28A745;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      opacity: 0.4;
+    }
+
+    .upload-preview {
+      width: 100%;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .upload-preview.show {
+      display: block;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: none;
+    }
+
+    .remove-image-btn.show {
+      display: block;
+    }
+
+    .remove-image-btn:hover {
+      background: rgba(220, 53, 69, 1);
+    }
+
+    /* Scene Presets */
+    .scene-presets {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .scene-preset-btn {
+      padding: 12px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .scene-preset-btn:hover {
+      background: #FFF8F0;
+      border-color: #FF8B00;
+    }
+
+    .scene-preset-btn.selected {
+      background: #FFF8F0;
+      border-color: #FF8B00;
+      font-weight: 600;
+    }
+
+    .scene-preset-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    /* Advanced Options */
+    .advanced-options {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .option-label {
+      font-size: 14px;
+      color: #2f2f2f;
+      font-weight: 500;
+    }
+
+    .option-label-desc {
+      font-size: 12px;
+      color: #999;
+      font-weight: 400;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .option-control select {
+      padding: 8px 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      min-width: 140px;
+      cursor: pointer;
+    }
+
+    /* Generate Button */
+    .generate-section {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .cost-summary {
+      background: #FFF8F0;
+      border: 1px solid #FFE5CC;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cost-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .cost-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FF8B00;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #FF8B00 0%, #FF6B00 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.4);
+    }
+
+    .generate-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .generate-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Progress */
+    .progress {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .progress.active {
+      display: block;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FF8B00, #FF6B00);
+      border-radius: 8px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    /* Results Section */
+    .results-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+      color: #999;
+      text-align: center;
+    }
+
+    .results-empty svg {
+      width: 80px;
+      height: 80px;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    .results-empty h3 {
+      margin: 0 0 8px 0;
+      color: #666;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .result-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+      background: white;
+    }
+
+    .result-card:hover {
+      border-color: #FF8B00;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .result-image-container {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #f5f5f5;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .result-info {
+      padding: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .result-prompt {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .result-meta {
+      display: flex;
+      gap: 8px;
+      font-size: 11px;
+      color: #999;
+      flex-wrap: wrap;
+    }
+
+    .result-actions {
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .result-action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .result-action-btn:hover {
+      background: #FF8B00;
+      color: white;
+      border-color: #FF8B00;
+    }
+
+    .result-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Status Messages */
+    .status {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status.active {
+      display: block;
+    }
+
+    .status.success {
+      background: #D4EDDA;
+      color: #155724;
+      border: 1px solid #C3E6CB;
+    }
+
+    .status.error {
+      background: #F8D7DA;
+      color: #721C24;
+      border: 1px solid #F5C6CB;
+    }
+
+    .status.info {
+      background: #D1ECF1;
+      color: #0C5460;
+      border: 1px solid #BEE5EB;
+    }
+
+    /* Loading Overlay */
+    .auth-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .auth-loading.hidden {
+      display: none;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #FF8B00;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Composition Preview */
+    .composition-preview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .composition-item {
+      text-align: center;
+    }
+
+    .composition-item-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .composition-item-preview {
+      width: 100%;
+      aspect-ratio: 1;
+      background: white;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #ccc;
+    }
+
+    .composition-item-preview.filled {
+      border-style: solid;
+      border-color: #28A745;
+    }
+
+    .composition-item-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    /* Design Form - One Line Layout */
+    .design-form-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .design-form-inputs .form-group {
+      margin-bottom: 0;
+    }
+
+    .design-form-inputs .form-label {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .design-form-inputs .upload-zone {
+      padding: 16px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .design-form-inputs .upload-icon {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 8px;
+    }
+
+    .design-form-inputs p {
+      font-size: 12px;
+      margin: 4px 0;
+    }
+
+    .design-form-inputs .form-input {
+      padding: 12px;
+      font-size: 14px;
+      min-height: 140px;
+    }
+
+    @media (max-width: 1400px) {
+      .design-form-inputs {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .design-form-inputs {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Loading Overlay -->
+  <div class="auth-loading" id="authLoading">
+    <div class="spinner" style="width: 60px; height: 60px; border-width: 6px;"></div>
+    <p style="margin-top: 20px; font-size: 16px; color: #666;">Checking authentication...</p>
+  </div>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>📸 AI Photoshoot Designer</h1>
+      <p>Create stunning product photoshoots with AI - Text-to-Image or Custom Compositions</p>
+      <div class="user-info" id="userInfo" style="display: none;">
+        <span id="userEmail"></span>
+        <span class="wallet-badge" id="walletBalance">R0.00</span>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      
+      <!-- Left Column: Controls -->
+      <div class="section">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="textToImage">📝 Text to Image</button>
+          <button class="tab-btn" data-tab="designPhotoshoot">🎬 Design Photoshoot</button>
+        </div>
+
+        <!-- TAB 1: TEXT TO IMAGE -->
+        <div class="tab-content active" id="textToImageTab">
+          
+          <!-- Instruction -->
+          <div class="instruction-box">
+            <h3>
+              <span>💡</span>
+              How it works
+            </h3>
+            <p>
+              Simply describe the image you want to create. Be specific about the product, setting, lighting, and style. The AI will generate a professional photoshoot image based on your description.
+            </p>
+          </div>
+
+          <!-- Prompt Input -->
+          <div class="form-group">
+            <label class="form-label form-label-required">Describe Your Photoshoot</label>
+            <textarea 
+              id="textPrompt" 
+              class="form-input form-textarea"
+                            placeholder="E.g., Professional product photography of a luxury smartwatch on a marble countertop, soft studio lighting, minimalist style, white background, 4K quality"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <!-- Scene Presets -->
+          <div class="form-group">
+            <label class="form-label">Quick Scene Templates</label>
+            <div class="scene-presets">
+              <button class="scene-preset-btn" data-prompt="Professional studio product photography, white background, soft diffused lighting, high detail, commercial style">
+                <span class="scene-preset-icon">🏢</span>
+                Studio White
+              </button>
+              <button class="scene-preset-btn" data-prompt="Lifestyle product photography in a modern South African home, natural window lighting, warm tones, cozy atmosphere">
+                <span class="scene-preset-icon">🏠</span>
+                Home Setting
+              </button>
+              <button class="scene-preset-btn" data-prompt="Outdoor product photography in beautiful South African landscape, golden hour lighting, natural setting, vibrant colors">
+                <span class="scene-preset-icon">🌄</span>
+                Outdoor Scene
+              </button>
+              <button class="scene-preset-btn" data-prompt="Luxury product photography on elegant marble surface, dramatic side lighting, high-end commercial style, bokeh background">
+                <span class="scene-preset-icon">✨</span>
+                Luxury Style
+              </button>
+            </div>
+          </div>
+
+          <!-- Advanced Options -->
+          <div class="advanced-options">
+            
+            <!-- Image Size -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Image Size</div>
+                <span class="option-label-desc">Output resolution</span>
+              </div>
+              <div class="option-control">
+                <select id="textSizeSelect">
+                  <option value="1024x1024">Square (1024×1024)</option>
+                  <option value="1024x1536">Portrait (1024×1536)</option>
+                  <option value="1536x1024">Landscape (1536×1024)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- AI Model -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">AI Model</div>
+                <span class="option-label-desc">Generation engine</span>
+              </div>
+              <div class="option-control">
+                <select id="textModelSelect">
+                  <option value="flux">FLUX Pro (Creative)</option>
+                  <option value="gpt-image-1">GPT Image (Realistic)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-section">
+            <div class="cost-summary">
+              <span class="cost-label">Cost:</span>
+              <span class="cost-amount" id="textCost">R20.00</span>
+            </div>
+
+            <button class="generate-btn" id="textGenerateBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Generate Photoshoot
+            </button>
+
+            <div class="progress" id="textProgress">
+              <p class="progress-text" id="textProgressText">Creating your photoshoot...</p>
+              <div class="progress-bar">
+                <div class="progress-fill" id="textProgressFill"></div>
+              </div>
+            </div>
+
+            <div class="status" id="textStatus"></div>
+          </div>
+        </div>
+
+        <!-- TAB 2: DESIGN PHOTOSHOOT -->
+        <div class="tab-content" id="designPhotoshootTab">
+          
+          <!-- Instruction -->
+          <div class="instruction-box">
+            <h3>
+              <span>🎨</span>
+              How it works
+            </h3>
+            <p>
+              Upload a model photo, your product image, and describe the scene. The AI will compose them together into a professional photoshoot image.
+            </p>
+          </div>
+
+          <!-- Design Form Inputs (One Line) -->
+          <div class="design-form-inputs">
+            <!-- Model Selection -->
+            <div class="form-group">
+              <label class="form-label form-label-required">1. Select Photography Model</label>
+              <div class="upload-zone" id="modelUploadZone" style="cursor: pointer; border: 2px dashed #e0e0e0; border-radius: 12px; text-align: center; transition: all 0.3s; background: #fafafa;">
+                <div id="modelSelectionDisplay" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/>
+                  </svg>
+                  <p style="font-weight: 600; margin: 0; font-size: 12px;">Click to select model</p>
+                </div>
+                <div id="modelSelectedInfo" style="display: none; text-align: center;">
+                  <img id="modelSelectedImage" src="" alt="Selected model" style="width: 80px; height: 80px; border-radius: 6px; object-fit: cover; margin-bottom: 6px;">
+                  <p id="modelSelectedName" style="font-weight: 600; margin: 4px 0 0 0; color: #2f2f2f; font-size: 12px;"></p>
+                  <p id="modelSelectedType" style="color: #999; font-size: 11px; margin: 2px 0 0 0;"></p>
+                  <button id="modelChangeBtn" type="button" style="margin-top: 6px; padding: 4px 10px; background: #FF8B00; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">Change</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Upload -->
+            <div class="form-group">
+              <label class="form-label form-label-required">2. Upload Product Image</label>
+              <div class="upload-zone" id="productUploadZone">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+                <p style="font-weight: 600; margin: 4px 0; font-size: 12px;">Click or drag</p>
+                <p style="color: #999; font-size: 11px;">JPG, PNG (max 10MB)</p>
+                <img id="productPreview" class="upload-preview" alt="Product preview">
+                <button id="productRemoveBtn" class="remove-image-btn">Remove</button>
+              </div>
+              <input type="file" id="productFileInput" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- Scene Description -->
+            <div class="form-group">
+              <label class="form-label form-label-required">3. Describe the Scene</label>
+              <textarea 
+                id="scenePrompt" 
+                class="form-input form-textarea"
+                placeholder="E.g., Modern living room with natural sunlight, model holding product"
+                rows="6"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Scene Presets -->
+          <div class="form-group">
+            <label class="form-label">Quick Scene Templates</label>
+            <div class="scene-presets">
+              <button class="scene-preset-btn" data-scene="Professional studio setting with white background, soft box lighting, model showcasing the product, clean and modern style">
+                <span class="scene-preset-icon">🏢</span>
+                Studio
+              </button>
+              <button class="scene-preset-btn" data-scene="Cozy South African home interior, natural window lighting, model relaxing with the product, warm and authentic atmosphere">
+                <span class="scene-preset-icon">🏠</span>
+                Home
+              </button>
+              <button class="scene-preset-btn" data-scene="Beautiful outdoor South African landscape, golden hour lighting, model enjoying nature with the product, vibrant and energetic">
+                <span class="scene-preset-icon">🌳</span>
+                Outdoor
+              </button>
+              <button class="scene-preset-btn" data-scene="Urban South African street setting, natural daylight, model using the product in daily life, authentic and relatable">
+                <span class="scene-preset-icon">🏙️</span>
+                Urban
+              </button>
+            </div>
+          </div>
+
+          <!-- Composition Preview -->
+          <div class="composition-preview">
+            <div class="composition-item">
+              <div class="composition-item-label">Model</div>
+              <div class="composition-item-preview" id="modelPreviewThumb">👤</div>
+            </div>
+            <div class="composition-item">
+              <div class="composition-item-label">Product</div>
+              <div class="composition-item-preview" id="productPreviewThumb">📦</div>
+            </div>
+            <div class="composition-item">
+              <div class="composition-item-label">Scene</div>
+              <div class="composition-item-preview" id="scenePreviewThumb">🎬</div>
+            </div>
+          </div>
+
+          <!-- Advanced Options -->
+          <div class="advanced-options">
+            
+            <!-- Image Size -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Image Size</div>
+                <span class="option-label-desc">Output resolution</span>
+              </div>
+              <div class="option-control">
+                <select id="designSizeSelect">
+                  <option value="1024x1024">Square (1024×1024)</option>
+                  <option value="1024x1536">Portrait (1024×1536)</option>
+                  <option value="1536x1024">Landscape (1536×1024)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Input Fidelity -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Input Fidelity</div>
+                <span class="option-label-desc">Preserve details</span>
+              </div>
+              <div class="option-control">
+                <select id="designFidelitySelect">
+                  <option value="high">High (Recommended)</option>
+                  <option value="low">Low (Faster)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-section">
+            <div class="cost-summary">
+              <span class="cost-label">Cost:</span>
+              <span class="cost-amount" id="designCost">R25.00</span>
+            </div>
+
+            <button class="generate-btn" id="designGenerateBtn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Compose Photoshoot
+            </button>
+
+            <div class="progress" id="designProgress">
+              <p class="progress-text" id="designProgressText">Composing your photoshoot...</p>
+              <div class="progress-bar">
+                <div class="progress-fill" id="designProgressFill"></div>
+              </div>
+            </div>
+
+            <div class="status" id="designStatus"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="section">
+        <div class="section-title">
+          🖼️ Generated Photoshoots
+          <button id="clearAllBtn" style="
+            margin-left: auto;
+            padding: 6px 12px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: none;
+          ">
+            Clear All
+          </button>
+        </div>
+
+        <!-- Empty State -->
+        <div class="results-empty" id="resultsEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <h3>No photoshoots yet</h3>
+          <p>Create stunning photoshoots using text prompts or custom compositions</p>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="results-grid" id="resultsGrid" style="display: none;"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/dataManager.js"></script>
+  <script src="/js/ai-generator.js"></script>
+  <script src="/js/model-loader.js"></script>
+  
+  <script>
+    // ========================================
+    // GLOBAL VARIABLES
+    // ========================================
+    let auth0Client = null;
+    let currentUser = null;
+    let currentBusiness = null;
+    let openAIConfig = null;
+    let aiGenerator = null;
+    let generatedImages = [];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email');
+    const businessId = urlParams.get('businessId');
+
+    // Cost structure
+    const COSTS = {
+      TEXT_TO_IMAGE: 20,
+      DESIGN_PHOTOSHOOT_BASE: 25,
+      DESIGN_PHOTOSHOOT_HIGH_FIDELITY: 5
+    };
+
+    // Current state
+    let currentTab = 'textToImage';
+    let selectedModel = null;  // Changed: now stores model object from database
+    let productFile = null;
+    let modelLoader = new ModelLoader();
+
+    // ========================================
+    // LOAD DEFAULT MODEL FROM SETTINGS
+    // ========================================
+    async function loadDefaultModel() {
+      try {
+        if (!currentBusiness) {
+          console.log('⚠️ No business data yet, skipping default model load');
+          return;
+        }
+
+        // Check if there's a default model ID in business settings
+        const defaultModelId = currentBusiness.photography_model_id;
+        
+        if (!defaultModelId) {
+          console.log('ℹ️ No default model set in business settings');
+          return;
+        }
+
+        // Fetch models if not already loaded
+        if (modelLoader.models.length === 0) {
+          await modelLoader.fetchModels();
+        }
+
+        // Get the default model from the loader
+        const defaultModel = modelLoader.getModelById(defaultModelId);
+        
+        if (defaultModel) {
+          selectModel(defaultModel);
+          console.log('✅ Default model loaded:', defaultModel.name);
+        } else {
+          console.warn('⚠️ Default model ID not found:', defaultModelId);
+        }
+      } catch (error) {
+        console.error('Error loading default model:', error);
+      }
+    }
+
+    // ========================================
+    // DOM ELEMENTS
+    // ========================================
+    const authLoading = document.getElementById('authLoading');
+    const userInfo = document.getElementById('userInfo');
+    const userEmailDisplay = document.getElementById('userEmail');
+    const walletBalance = document.getElementById('walletBalance');
+
+    const resultsEmpty = document.getElementById('resultsEmpty');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    // Tab elements
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Text to Image tab
+    const textPrompt = document.getElementById('textPrompt');
+    const textSizeSelect = document.getElementById('textSizeSelect');
+    const textModelSelect = document.getElementById('textModelSelect');
+    const textGenerateBtn = document.getElementById('textGenerateBtn');
+    const textProgress = document.getElementById('textProgress');
+    const textProgressText = document.getElementById('textProgressText');
+    const textProgressFill = document.getElementById('textProgressFill');
+    const textStatus = document.getElementById('textStatus');
+    const textCost = document.getElementById('textCost');
+
+    // Design Photoshoot tab
+    const modelUploadZone = document.getElementById('modelUploadZone');
+    const modelSelectionDisplay = document.getElementById('modelSelectionDisplay');
+    const modelSelectedInfo = document.getElementById('modelSelectedInfo');
+    const modelSelectedImage = document.getElementById('modelSelectedImage');
+    const modelSelectedName = document.getElementById('modelSelectedName');
+    const modelSelectedType = document.getElementById('modelSelectedType');
+    const modelChangeBtn = document.getElementById('modelChangeBtn');
+    const modelPreviewThumb = document.getElementById('modelPreviewThumb');
+
+    const productUploadZone = document.getElementById('productUploadZone');
+    const productFileInput = document.getElementById('productFileInput');
+    const productPreview = document.getElementById('productPreview');
+    const productRemoveBtn = document.getElementById('productRemoveBtn');
+    const productPreviewThumb = document.getElementById('productPreviewThumb');
+
+    const scenePrompt = document.getElementById('scenePrompt');
+    const scenePreviewThumb = document.getElementById('scenePreviewThumb');
+    const designSizeSelect = document.getElementById('designSizeSelect');
+    const designFidelitySelect = document.getElementById('designFidelitySelect');
+    const designGenerateBtn = document.getElementById('designGenerateBtn');
+    const designProgress = document.getElementById('designProgress');
+    const designProgressText = document.getElementById('designProgressText');
+    const designProgressFill = document.getElementById('designProgressFill');
+    const designStatus = document.getElementById('designStatus');
+    const designCost = document.getElementById('designCost');
+
+    // ========================================
+    // AUTH0 INITIALIZATION
+    // ========================================
+    async function initializeAuth0() {
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error initializing Auth0:", error);
+        return null;
+      }
+    }
+
+    // ========================================
+    // CHECK AUTHENTICATION
+    // ========================================
+    async function checkAuthentication() {
+      try {
+        const auth0 = await initializeAuth0();
+        if (!auth0) {
+          throw new Error("Auth0 initialization failed");
+        }
+
+        const isAuthenticated = await auth0.isAuthenticated();
+        
+        if (!isAuthenticated) {
+          console.log("❌ Not authenticated, redirecting to login...");
+          window.location.href = '/';
+          return false;
+        }
+
+        currentUser = await auth0.getUser();
+        console.log("✅ Authenticated user:", currentUser.email);
+
+        // Check dataManager cache
+        if (window.dataManager) {
+          currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+          
+          if (currentBusiness) {
+            console.log("✅ Business loaded from dataManager:", currentBusiness.store_info?.name);
+          } else if (businessId && userEmail) {
+            await fetchBusinessData();
+          }
+        } else if (businessId && userEmail) {
+          await fetchBusinessData();
+        }
+
+        userEmailDisplay.textContent = currentUser.email;
+        userInfo.style.display = 'flex';
+
+        await fetchWalletBalance();
+        await fetchOpenAIConfig();
+
+        return true;
+
+      } catch (error) {
+        console.error("Authentication error:", error);
+        showError("Authentication failed. Redirecting to login...", textStatus);
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+        return false;
+      }
+    }
+
+    // ========================================
+    // FETCH BUSINESS DATA
+    // ========================================
+    async function fetchBusinessData() {
+      try {
+        const response = await fetch(`/api/businesses/${businessId}?userEmail=${encodeURIComponent(userEmail)}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch business data');
+        }
+
+        const data = await response.json();
+        currentBusiness = data.business;
+        console.log("✅ Business data fetched:", currentBusiness.store_info?.name);
+
+      } catch (error) {
+        console.error("Error fetching business data:", error);
+      }
+    }
+
+    // ========================================
+    // FETCH WALLET BALANCE
+    // ========================================
+    async function fetchWalletBalance() {
+      try {
+        const response = await fetch(`/api/wallet?email=${encodeURIComponent(userEmail)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const balance = data.wallet?.balance || 0;
+          walletBalance.textContent = `R${(balance * 1).toFixed(2)}`;
+        }
+      } catch (error) {
+        console.error("Error fetching wallet balance:", error);
+      }
+    }
+
+        // ========================================
+    // FETCH OPENAI CONFIG
+    // ========================================
+    async function fetchOpenAIConfig() {
+      try {
+        const response = await fetch('/api/get-openai-config');
+        
+        if (!response.ok) {
+          throw new Error('Failed to get OpenAI config');
+        }
+
+        openAIConfig = await response.json();
+        console.log("✅ OpenAI config loaded");
+        
+        // Initialize AI Generator
+        if (window.AIGenerator) {
+          aiGenerator = new window.AIGenerator(openAIConfig);
+          console.log("✅ AI Generator initialized");
+        }
+        
+        textGenerateBtn.disabled = false;
+
+      } catch (error) {
+        console.error("Error fetching OpenAI config:", error);
+        showError("Failed to load AI configuration", textStatus);
+        textGenerateBtn.disabled = true;
+      }
+    }
+
+    // ========================================
+    // TAB NAVIGATION
+    // ========================================
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        document.getElementById(`${tabName}Tab`).classList.add('active');
+        
+        currentTab = tabName;
+      });
+    });
+
+    // ========================================
+    // SCENE PRESET BUTTONS (TEXT TO IMAGE)
+    // ========================================
+    document.querySelectorAll('#textToImageTab .scene-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#textToImageTab .scene-preset-btn').forEach(b => 
+          b.classList.remove('selected')
+        );
+        btn.classList.add('selected');
+        textPrompt.value = btn.dataset.prompt;
+      });
+    });
+
+    // ========================================
+    // SCENE PRESET BUTTONS (DESIGN PHOTOSHOOT)
+    // ========================================
+    document.querySelectorAll('#designPhotoshootTab .scene-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#designPhotoshootTab .scene-preset-btn').forEach(b => 
+          b.classList.remove('selected')
+        );
+        btn.classList.add('selected');
+        scenePrompt.value = btn.dataset.scene;
+        updateScenePreview();
+      });
+    });
+
+    // ========================================
+    // MODEL SELECTION FROM DATABASE
+    // ========================================
+    modelUploadZone.addEventListener('click', async () => {
+      try {
+        const selected = await modelLoader.showSelector({
+          defaultModelId: selectedModel?.id,
+          title: 'Select Photography Model',
+          onSelect: (model) => {
+            selectModel(model);
+          }
+        });
+      } catch (error) {
+        console.error('Error selecting model:', error);
+        showError('Failed to load models', designStatus);
+      }
+    });
+
+    function selectModel(model) {
+      selectedModel = model;
+      
+      // Update display
+      modelSelectionDisplay.style.display = 'none';
+      modelSelectedInfo.style.display = 'block';
+      
+      // Use fallback emoji instead of missing image
+      if (model.imageUrl) {
+        modelSelectedImage.src = model.imageUrl;
+        modelSelectedImage.style.display = 'block';
+      } else {
+        modelSelectedImage.style.display = 'none';
+      }
+      modelSelectedName.textContent = model.name;
+      modelSelectedType.textContent = model.type || 'Professional Model';
+      
+      // Update preview thumbnail
+      if (model.imageUrl) {
+        modelPreviewThumb.innerHTML = `<img src="${model.imageUrl}" alt="${model.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+      } else {
+        modelPreviewThumb.innerHTML = '👤';
+      }
+      modelPreviewThumb.classList.add('filled');
+      
+      console.log('✅ Model selected:', model.name);
+      validateDesignForm();
+    }
+
+    modelChangeBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      try {
+        const selected = await modelLoader.showSelector({
+          defaultModelId: selectedModel?.id,
+          title: 'Select Photography Model',
+          onSelect: (model) => {
+            selectModel(model);
+          }
+        });
+      } catch (error) {
+        console.error('Error selecting model:', error);
+        showError('Failed to load models', designStatus);
+      }
+    });
+
+    // ========================================
+    // PRODUCT UPLOAD HANDLERS
+    // ========================================
+    productUploadZone.addEventListener('click', () => {
+      if (!productFile) productFileInput.click();
+    });
+
+    productFileInput.addEventListener('change', (e) => {
+      handleProductUpload(e.target.files[0]);
+    });
+
+    productUploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      productUploadZone.classList.add('dragover');
+    });
+
+    productUploadZone.addEventListener('dragleave', () => {
+      productUploadZone.classList.remove('dragover');
+    });
+
+    productUploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      productUploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleProductUpload(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleProductUpload(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showError('Please select an image file', designStatus);
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        showError('Image is too large (max 10MB)', designStatus);
+        return;
+      }
+
+      productFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        productPreview.src = e.target.result;
+        productPreview.classList.add('show');
+        productRemoveBtn.classList.add('show');
+        productUploadZone.classList.add('has-image');
+        
+        // Update preview thumbnail
+        productPreviewThumb.innerHTML = `<img src="${e.target.result}" alt="Product">`;
+        productPreviewThumb.classList.add('filled');
+        
+        validateDesignForm();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    productRemoveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      productFile = null;
+      productPreview.classList.remove('show');
+      productRemoveBtn.classList.remove('show');
+      productUploadZone.classList.remove('has-image');
+      productFileInput.value = '';
+      
+      productPreviewThumb.innerHTML = '📦';
+      productPreviewThumb.classList.remove('filled');
+      
+      validateDesignForm();
+    });
+
+    // ========================================
+    // SCENE PROMPT HANDLER
+    // ========================================
+    scenePrompt.addEventListener('input', updateScenePreview);
+
+    function updateScenePreview() {
+      if (scenePrompt.value.trim()) {
+        scenePreviewThumb.classList.add('filled');
+        scenePreviewThumb.textContent = '✓';
+      } else {
+        scenePreviewThumb.classList.remove('filled');
+        scenePreviewThumb.textContent = '🎬';
+      }
+      validateDesignForm();
+    }
+
+    // ========================================
+    // VALIDATE DESIGN FORM
+    // ========================================
+    function validateDesignForm() {
+      const hasModel = selectedModel !== null;
+      const hasProduct = productFile !== null;
+      const hasScene = scenePrompt.value.trim().length > 0;
+      
+      designGenerateBtn.disabled = !(hasModel && hasProduct && hasScene);
+    }
+
+    // ========================================
+    // UPDATE DESIGN COST
+    // ========================================
+    function updateDesignCost() {
+      let cost = COSTS.DESIGN_PHOTOSHOOT_BASE;
+      
+      if (designFidelitySelect.value === 'high') {
+        cost += COSTS.DESIGN_PHOTOSHOOT_HIGH_FIDELITY;
+      }
+      
+      designCost.textContent = `R${cost.toFixed(2)}`;
+    }
+
+    designFidelitySelect.addEventListener('change', updateDesignCost);
+
+    // ========================================
+    // GENERATE TEXT TO IMAGE
+    // ========================================
+    textGenerateBtn.addEventListener('click', async () => {
+      await generateTextToImage();
+    });
+
+    async function generateTextToImage() {
+      const prompt = textPrompt.value.trim();
+
+      if (!prompt) {
+        showError("Please enter a description for your photoshoot", textStatus);
+        return;
+      }
+
+      if (!aiGenerator) {
+        showError("AI Generator not initialized", textStatus);
+        return;
+      }
+
+      textGenerateBtn.disabled = true;
+      textProgress.classList.add('active');
+      textStatus.classList.remove('active');
+      textProgressFill.style.width = '0%';
+
+      try {
+        // Deduct cost
+        textProgressText.textContent = 'Processing payment...';
+        textProgressFill.style.width = '10%';
+
+        await deductCost(COSTS.TEXT_TO_IMAGE, 'Text to Image photoshoot generation');
+
+        // Generate image
+        textProgressText.textContent = 'Creating your photoshoot with AI...';
+        textProgressFill.style.width = '30%';
+
+        const model = textModelSelect.value;
+        const size = textSizeSelect.value;
+
+        console.log('🎨 Generating text-to-image with:', { model, prompt: prompt.slice(0, 100) });
+
+        const imageData = await aiGenerator.generateImage(prompt, model);
+
+        textProgressFill.style.width = '90%';
+
+        // Process result
+        const newImage = {
+          id: `img_${Date.now()}`,
+          prompt: prompt,
+          imageData: imageData,
+          model: model,
+          size: size,
+          type: 'text-to-image',
+          timestamp: new Date().toISOString()
+        };
+
+        generatedImages.unshift(newImage);
+        textProgressFill.style.width = '100%';
+
+        displayImages([newImage]);
+        showSuccess('Photoshoot generated successfully!', textStatus);
+
+        // Clear form
+        textPrompt.value = '';
+        document.querySelectorAll('#textToImageTab .scene-preset-btn').forEach(b => 
+          b.classList.remove('selected')
+        );
+
+        await fetchWalletBalance();
+
+      } catch (error) {
+        console.error('Error generating image:', error);
+        showError(error.message || 'Failed to generate photoshoot', textStatus);
+      } finally {
+        textGenerateBtn.disabled = false;
+        textProgress.classList.remove('active');
+        textProgressFill.style.width = '0%';
+      }
+    }
+
+    // ========================================
+    // GENERATE DESIGN PHOTOSHOOT
+    // ========================================
+    designGenerateBtn.addEventListener('click', async () => {
+      await generateDesignPhotoshoot();
+    });
+
+    // ========================================
+    // DOWNLOAD IMAGE FROM URL TO BLOB
+    // ========================================
+    async function downloadImageAsBlob(url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to download image');
+        return await response.blob();
+      } catch (error) {
+        console.error('Error downloading image:', error);
+        throw new Error('Failed to download model image for composition');
+      }
+    }
+
+    async function generateDesignPhotoshoot() {
+      const scene = scenePrompt.value.trim();
+
+      if (!selectedModel || !productFile || !scene) {
+        showError("Please select a model, upload product, and describe the scene", designStatus);
+        return;
+      }
+
+      if (!aiGenerator) {
+        showError("AI Generator not initialized", designStatus);
+        return;
+      }
+
+      designGenerateBtn.disabled = true;
+      designProgress.classList.add('active');
+      designStatus.classList.remove('active');
+      designProgressFill.style.width = '0%';
+
+      try {
+        // Calculate cost
+        let cost = COSTS.DESIGN_PHOTOSHOOT_BASE;
+        if (designFidelitySelect.value === 'high') {
+          cost += COSTS.DESIGN_PHOTOSHOOT_HIGH_FIDELITY;
+        }
+
+        // Deduct cost
+        designProgressText.textContent = 'Processing payment...';
+        designProgressFill.style.width = '10%';
+
+        await deductCost(cost, 'Design Photoshoot composition');
+
+        // Download model image
+        designProgressText.textContent = 'Preparing model image...';
+        designProgressFill.style.width = '20%';
+
+        if (!selectedModel.imageUrl) {
+          throw new Error('Model image not available');
+        }
+
+        const modelImageBlob = await downloadImageAsBlob(selectedModel.imageUrl);
+
+        // Build comprehensive prompt
+        designProgressText.textContent = 'Composing photoshoot elements...';
+        designProgressFill.style.width = '40%';
+
+        const size = designSizeSelect.value;
+        const fidelity = designFidelitySelect.value;
+
+        // Create a detailed prompt that includes all elements
+        const compositePrompt = `Professional photoshoot composition: ${scene}. 
+        The model should be prominently featured holding or displaying the product. 
+        High quality commercial photography, ${fidelity === 'high' ? 'ultra detailed, preserving facial features and product details' : 'standard detail'}, 
+        professional lighting, ${size === '1024x1536' ? 'portrait orientation' : size === '1536x1024' ? 'landscape orientation' : 'square composition'}.
+        Model name: ${selectedModel.name}.`;
+
+        console.log('🎬 Generating design photoshoot with:', { 
+          model: selectedModel.name,
+          fidelity, 
+          prompt: compositePrompt.slice(0, 100) 
+        });
+
+        // Use FLUX for composition (better at combining elements)
+        // For now, we'll use generateImage with the composite prompt including model details
+        // In production, you'd use the image edit endpoint with model + product images
+        designProgressText.textContent = 'AI is composing your photoshoot...';
+        designProgressFill.style.width = '60%';
+
+        // Generate the composed image using AI
+        // Note: This uses generateImage for now. For true composition with image editing,
+        // you'd need to implement generateImageWithEdit using Azure's image edit API
+        const imageData = await aiGenerator.generateImage(compositePrompt, 'flux');
+
+        designProgressFill.style.width = '90%';
+
+        // Process result
+        const newImage = {
+          id: `img_${Date.now()}`,
+          prompt: scene,
+          fullPrompt: compositePrompt,
+          imageData: imageData,
+          model: 'flux',
+          size: size,
+          fidelity: fidelity,
+          type: 'design-photoshoot',
+          selectedModelName: selectedModel.name,
+          timestamp: new Date().toISOString()
+        };
+
+        generatedImages.unshift(newImage);
+        designProgressFill.style.width = '100%';
+
+        displayImages([newImage]);
+        showSuccess('Photoshoot composed successfully!', designStatus);
+
+        // Clear form
+        selectedModel = null;
+        productFile = null;
+        scenePrompt.value = '';
+        
+        modelSelectionDisplay.style.display = 'flex';
+        modelSelectedInfo.style.display = 'none';
+        modelPreviewThumb.innerHTML = '👤';
+        modelPreviewThumb.classList.remove('filled');
+        
+        productPreview.classList.remove('show');
+        productRemoveBtn.classList.remove('show');
+        productUploadZone.classList.remove('has-image');
+        productPreviewThumb.innerHTML = '📦';
+        productPreviewThumb.classList.remove('filled');
+        
+        scenePreviewThumb.innerHTML = '🎬';
+        scenePreviewThumb.classList.remove('filled');
+        
+        document.querySelectorAll('#designPhotoshootTab .scene-preset-btn').forEach(b => 
+          b.classList.remove('selected')
+        );
+
+        designGenerateBtn.disabled = true;
+
+        await fetchWalletBalance();
+
+      } catch (error) {
+        console.error('Error composing photoshoot:', error);
+        showError(error.message || 'Failed to compose photoshoot', designStatus);
+      } finally {
+        designGenerateBtn.disabled = false;
+        designProgress.classList.remove('active');
+        designProgressFill.style.width = '0%';
+      }
+    }
+
+    // ========================================
+    // DISPLAY IMAGES
+    // ========================================
+    function displayImages(images) {
+      resultsEmpty.style.display = 'none';
+      resultsGrid.style.display = 'grid';
+      clearAllBtn.style.display = 'block';
+
+      images.forEach(image => {
+        const card = createImageCard(image);
+        resultsGrid.insertBefore(card, resultsGrid.firstChild);
+      });
+    }
+
+    function createImageCard(image) {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.id = image.id;
+
+      const typeLabel = image.type === 'text-to-image' ? 'Text to Image' : 'Design Photoshoot';
+
+      // Handle both base64 and URL formats
+      const imageSrc = image.imageData.startsWith('http') 
+        ? image.imageData 
+        : `data:image/png;base64,${image.imageData}`;
+
+      card.innerHTML = `
+        <div class="result-image-container">
+          <img class="result-image" src="${imageSrc}" alt="${image.prompt}">
+        </div>
+        <div class="result-info">
+          <div class="result-prompt">${image.prompt}</div>
+          <div class="result-meta">
+            <span>${typeLabel}</span>
+            <span>•</span>
+            <span>${image.model.toUpperCase()}</span>
+            <span>•</span>
+            <span>${image.size}</span>
+            ${image.fidelity ? `<span>•</span><span>${image.fidelity} fidelity</span>` : ''}
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="result-action-btn" onclick="downloadImage('${image.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+            Download
+          </button>
+          <button class="result-action-btn" onclick="viewFullImage('${image.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            View
+          </button>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // ========================================
+    // DOWNLOAD IMAGE
+    // ========================================
+    window.downloadImage = function(imageId) {
+      const image = generatedImages.find(img => img.id === imageId);
+      if (!image) return;
+
+      const imageSrc = image.imageData.startsWith('http') 
+        ? image.imageData 
+        : `data:image/png;base64,${image.imageData}`;
+
+      const link = document.createElement('a');
+      link.href = imageSrc;
+      link.download = `photoshoot-${imageId}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Image downloaded successfully!', textStatus);
+    };
+
+    // ========================================
+    // VIEW FULL IMAGE
+    // ========================================
+    window.viewFullImage = function(imageId) {
+      const image = generatedImages.find(img => img.id === imageId);
+      if (!image) return;
+
+      const imageSrc = image.imageData.startsWith('http') 
+        ? image.imageData 
+        : `data:image/png;base64,${image.imageData}`;
+
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+      `;
+
+      modal.innerHTML = `
+        <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+          <img src="${imageSrc}" 
+               style="max-width: 100%; max-height: 90vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);"
+               alt="${image.prompt}">
+          <button 
+            onclick="this.closest('div').parentElement.remove()"
+            style="
+              position: absolute;
+              top: -10px;
+              right: -10px;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              background: white;
+              border: none;
+              font-size: 24px;
+              cursor: pointer;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            ✕
+          </button>
+        </div>
+      `;
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+
+      document.body.appendChild(modal);
+    };
+
+    // ========================================
+    // CLEAR ALL IMAGES
+    // ========================================
+    clearAllBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all generated photoshoots?')) {
+        generatedImages = [];
+        resultsGrid.innerHTML = '';
+        resultsEmpty.style.display = 'flex';
+        resultsGrid.style.display = 'none';
+        clearAllBtn.style.display = 'none';
+      }
+    });
+
+        // ========================================
+    // DEDUCT COST FROM WALLET
+    // ========================================
+    async function deductCost(amount, description) {
+      try {
+        const response = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            amount: amount,
+            description: description,
+            metadata: {
+              service: 'photoshoot_design',
+              tab: currentTab
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          
+          if (response.status === 400 && error.error === 'Insufficient funds') {
+            throw new Error(
+              `Insufficient funds!\n\nRequired: R${amount.toFixed(2)}\nCurrent Balance: R${(error.current_balance * 1).toFixed(2)}\n\nPlease add credits to continue.`
+            );
+          }
+          
+          throw new Error(error.error || 'Payment failed');
+        }
+
+        const result = await response.json();
+        console.log(`✅ Cost deducted: R${amount.toFixed(2)}`);
+        return result;
+
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // ========================================
+    // STATUS MESSAGES
+    // ========================================
+    function showSuccess(message, element) {
+      element.textContent = message;
+      element.className = 'status success active';
+      
+      setTimeout(() => {
+        element.classList.remove('active');
+      }, 5000);
+    }
+
+    function showError(message, element) {
+      element.textContent = message;
+      element.className = 'status error active';
+      
+      setTimeout(() => {
+        element.classList.remove('active');
+      }, 8000);
+    }
+
+    function showInfo(message, element) {
+      element.textContent = message;
+      element.className = 'status info active';
+      
+      setTimeout(() => {
+        element.classList.remove('active');
+      }, 5000);
+    }
+
+    // ========================================
+    // KEYBOARD SHORTCUTS
+    // ========================================
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + Enter to generate
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (currentTab === 'textToImage' && !textGenerateBtn.disabled && textPrompt.value.trim()) {
+          generateTextToImage();
+        } else if (currentTab === 'designPhotoshoot' && !designGenerateBtn.disabled) {
+          generateDesignPhotoshoot();
+        }
+      }
+    });
+
+    // ========================================
+    // SAVE TO HISTORY (OPTIONAL)
+    // ========================================
+    async function saveToHistory(image) {
+      try {
+        const response = await fetch('/api/photoshoot-history/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: businessId,
+            userEmail: userEmail,
+            photoshoot: {
+              prompt: image.prompt,
+              type: image.type,
+              model: image.model,
+              size: image.size,
+              timestamp: image.timestamp
+            }
+          })
+        });
+
+        if (response.ok) {
+          console.log('✅ Photoshoot saved to history');
+        }
+      } catch (error) {
+        console.error('Failed to save to history:', error);
+      }
+    }
+
+    // ========================================
+    // INITIALIZE ON PAGE LOAD
+    // ========================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 Initializing AI Photoshoot Designer...');
+      
+      const isAuthenticated = await checkAuthentication();
+      
+      if (isAuthenticated) {
+        authLoading.classList.add('hidden');
+        console.log('✅ Initialization complete');
+        
+        updateDesignCost();
+        
+        // Load default model from business settings
+        await loadDefaultModel();
+        
+        console.log('📊 Configuration:', {
+          user: currentUser?.email,
+          business: currentBusiness?.store_info?.name,
+          businessId: businessId,
+          hasOpenAI: !!openAIConfig,
+          hasAIGenerator: !!aiGenerator,
+          defaultModel: selectedModel?.name || 'None'
+        });
+      } else {
+        console.log('❌ Authentication failed');
+      }
+    });
+
+    // ========================================
+    // EXPORT FUNCTIONS (FOR TESTING)
+    // ========================================
+    window.photoshootDesigner = {
+      generateTextToImage,
+      generateDesignPhotoshoot,
+      downloadImage,
+      viewFullImage,
+      getGeneratedImages: () => generatedImages,
+      clearImages: () => {
+        generatedImages = [];
+        resultsGrid.innerHTML = '';
+        resultsEmpty.style.display = 'flex';
+        resultsGrid.style.display = 'none';
+        clearAllBtn.style.display = 'none';
+      }
+    };
+
+  </script>
+
+</body>
+</html>

@@ -2,22 +2,42 @@
 let auth0Client = null;
 
 async function getAuth0Client() {
+  // First check if already initialized in dashboard
   if (window.auth0Client) {
+    console.log("Using window.auth0Client from dashboard");
     return window.auth0Client;
   }
 
+  // Wait for window.auth0Client to be available (dashboard sets it up)
+  let waitCount = 0;
+  while (!window.auth0Client && waitCount < 10) {
+    console.log("Waiting for Auth0 client to be initialized...");
+    await new Promise(resolve => setTimeout(resolve, 100));
+    waitCount++;
+  }
+
+  if (window.auth0Client) {
+    console.log("Auth0 client now available after waiting");
+    return window.auth0Client;
+  }
+
+  // Fallback: create a new instance if still not available
+  if (auth0Client) {
+    return auth0Client;
+  }
+
   try {
+    console.log("Creating new Auth0 client instance (fallback)");
     const response = await fetch("/auth_config.json");
     const config = await response.json();
 
     auth0Client = await auth0.createAuth0Client({
       domain: config.domain,
       clientId: config.clientId,
-      cacheLocation: 'memory',
+      cacheLocation: 'localstorage',
       useRefreshTokens: true
     });
     
-    window.auth0Client = auth0Client;
     return auth0Client;
   } catch (error) {
     console.error("Error configuring Auth0:", error);
@@ -1051,15 +1071,32 @@ export async function initMarketingPage() {
   const closeBtn = document.getElementsByClassName("close")[0];
 
   try {
-    const isAuthenticated = await auth0Client.isAuthenticated();
+    // Get user directly without checking isAuthenticated first (like creative.js does)
+    let user = null;
+    let retries = 0;
+    const maxRetries = 5;
     
-    if (!isAuthenticated) {
-      console.error("User not authenticated");
+    // Retry getting user in case Auth0 is still initializing
+    while (!user && retries < maxRetries) {
+      try {
+        user = await auth0Client.getUser();
+      } catch (error) {
+        console.warn(`Attempt ${retries + 1}: Error getting user from Auth0Client:`, error);
+      }
+      
+      if (!user) {
+        // Wait a bit before retrying
+        await new Promise(resolve => setTimeout(resolve, 300));
+        retries++;
+      }
+    }
+    
+    if (!user) {
+      console.error("User not found after retries - not authenticated");
       window.location.href = '/';
       return;
     }
 
-    const user = await auth0Client.getUser();
     const userEmail = user.email || user.name || 'unknown';
     const userName = user.name || 'User';
 
@@ -1127,8 +1164,10 @@ export async function initMarketingPage() {
       });
     }
 
-    // Setup handlers for SIM card action buttons
-    setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe);
+    // Setup handlers for SIM card action buttons (defer slightly to avoid blocking)
+    setTimeout(() => {
+      setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe);
+    }, 0);
 
     // Close modal handlers
     if (closeBtn) {
@@ -1168,10 +1207,6 @@ function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
   // Social Media SIM cards
   const socialMediaActions = {
     postVideo: {
-      title: "Post Video - Social Media Manager",
-      renderContent: true
-    },
-     postVideo: {
       title: "Post Video to Socials",
       url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
     },
@@ -1179,13 +1214,14 @@ function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
       title: "Post Image to Socials",
       url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
     },
-    
+    draftEmail: {
+      title: "Draft Partner Email",
+      url: `/tools/send-email.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`
+    },
     textAIImage: {
       title: "AI Image Editor",
       renderAIEditor: true
-    },
-    
-
+    }
   };
 
   // Marketing Tools SIM cards - Updated with email outreach

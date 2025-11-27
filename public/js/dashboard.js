@@ -867,7 +867,7 @@ if (!isAdmin) {
       </div>
   
       <!-- Modal for business details -->
-      <div id="businessModal" class="modal">
+      <div id="businessModal" class="modal" data-no-enhance>
         <div class="modal-content">
           <span class="close" onclick="closeBusinessModal()">&times;</span>
           <div id="businessModalContent">
@@ -1111,74 +1111,105 @@ if (!isAdmin) {
   }
 
   window.viewBusinessDetails = async function(businessId) {
-    const businesses = await fetchBusinessesByEmail();
+    console.log('viewBusinessDetails called with ID:', businessId);
+    
+    // Check cache first, then fetch if needed
+    let businesses = window.dataManager.getBusinesses();
+    console.log('Cached businesses:', businesses);
+    
+    if (!businesses || businesses.length === 0) {
+      console.log('No cached businesses, fetching fresh data...');
+      businesses = await fetchBusinessesByEmail();
+      console.log('Fetched businesses:', businesses);
+    }
+    
     const business = businesses.find(b => b._id === businessId);
-    if (!business) return;
+    console.log('Found business:', business);
+    
+    if (!business) {
+      console.error('Business not found:', businessId);
+      return;
+    }
   
-    const modal = document.getElementById('businessModal');
+    // Ensure modal exists, create if it doesn't
+    let modal = document.getElementById('businessModal');
+    
+    if (!modal) {
+      const modalHTML = `
+        <div id="businessModal" class="modal" data-no-enhance>
+          <div class="modal-content">
+            <span class="close" onclick="closeBusinessModal()">&times;</span>
+            <div id="businessModalContent">
+              <!-- Business details will be loaded here -->
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      modal = document.getElementById('businessModal');
+    }
+    
+    // Always re-query for modalContent to ensure we have the latest reference
     const modalContent = document.getElementById('businessModalContent');
   
     // Extract the specific links, with fallbacks
     const manageMarketplaceProfileLink = business.marketplace_business?.user_info?.user_link || 'https://marketplace.zuke.co.za/my-account/';
     const viewMarketplacePageLink = business.marketplace_business?.marketplace_info?.store_link || '#';
   
-    modalContent.innerHTML = `
-      <div class="business-detail-view">
-        ${business.media_files?.store_banner ? `
-          <div style="width: 100%; height: 200px; background-image: url('${business.media_files.store_banner}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 20px;"></div>
-        ` : ''}
-        
-        <div style="display: flex; align-items: start; gap: 20px; margin-bottom: 30px;">
-          ${business.media_files?.store_logo ? `
-            <img src="${business.media_files.store_logo}" alt="${business.store_info?.name}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">
-          ` : ''}
-          <div>
-            <h2 style="margin: 0 0 10px 0;">${business.store_info?.name || 'Business Details'}</h2>
-            <p style="color: #666; margin: 0;">${business.initial_business_case?.what_you_do || 'No description available'}</p>
-          </div>
-        </div>
+    if (modalContent) {
+      console.log('Loading business modal for:', business.store_info?.name, business);
+      modalContent.innerHTML = `<div class="business-detail-view">
+  ${business.media_files?.store_banner ? `<div style="width: 100%; height: 200px; background-image: url('${business.media_files.store_banner}'); background-size: cover; background-position: center; border-radius: 8px; margin-bottom: 20px;"></div>` : ''}
   
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-          <div class="detail-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-            <h3 style="margin-top: 0;">Business Information</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <div><strong>Categories:</strong> ${business.store_info?.category?.join(', ') || 'N/A'}</div>
-              <div><strong>Address:</strong> ${business.store_info?.address || 'N/A'}</div>
-              <div><strong>Status:</strong> <span style="padding: 4px 12px; background: ${business.processing_status?.status === 'active' ? '#2ecc71' : '#f39c12'}; color: white; border-radius: 20px; font-size: 12px;">${business.processing_status?.status || 'N/A'}</span></div>
-              <div><strong>Plan:</strong> ${business.processing_status?.plan || 'Free'}</div>
-            </div>
-          </div>
-  
-          <div class="detail-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-            <h3 style="margin-top: 0;">Contact Information</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <div><strong>Owner:</strong> ${business.personal_info?.first_name} ${business.personal_info?.last_name}</div>
-              <div><strong>Email:</strong> ${business.personal_info?.email || 'N/A'}</div>
-              <div><strong>Phone:</strong> ${business.personal_info?.phone || 'N/A'}</div>
-              ${business.social_media ? `
-                <div><strong>Social Media:</strong></div>
-                ${business.social_media.instagram ? `<div style="margin-left: 20px;">Instagram: ${business.social_media.instagram}</div>` : ''}
-                ${business.social_media.twitter ? `<div style="margin-left: 20px;">Twitter: ${business.social_media.twitter}</div>` : ''}
-              ` : ''}
-            </div>
-          </div>
-        </div>
-  
-        <div style="margin-top: 30px; display: flex; gap: 15px;">
-          <button class="btn-primary" onclick="window.open('${manageMarketplaceProfileLink}', '_blank')">
-            Manage Marketplace Profile
-          </button>
-          <button class="btn-secondary" onclick="window.open('${viewMarketplacePageLink}', '_blank')" ${viewMarketplacePageLink === '#' ? 'disabled' : ''}>
-            View Marketplace Page
-          </button>
-          <button class="btn-secondary" onclick="closeBusinessModal()">
-            Close
-          </button>
-        </div>
+  <div style="display: flex; align-items: start; gap: 20px; margin-bottom: 30px;">
+    ${business.media_files?.store_logo ? `<img src="${business.media_files.store_logo}" alt="${business.store_info?.name}" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover;">` : ''}
+    <div>
+      <h2 style="margin: 0 0 10px 0;">${business.store_info?.name || 'Business Details'}</h2>
+      <p style="color: #666; margin: 0;">${business.initial_business_case?.what_you_do || 'No description available'}</p>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="detail-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+      <h3 style="margin-top: 0;">Business Information</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div><strong>Categories:</strong> ${business.store_info?.category?.join(', ') || 'N/A'}</div>
+        <div><strong>Address:</strong> ${business.store_info?.address || 'N/A'}</div>
+        <div><strong>Status:</strong> <span style="padding: 4px 12px; background: ${business.processing_status?.status === 'active' ? '#2ecc71' : '#f39c12'}; color: white; border-radius: 20px; font-size: 12px;">${business.processing_status?.status || 'N/A'}</span></div>
+        <div><strong>Plan:</strong> ${business.processing_status?.plan || 'Free'}</div>
       </div>
-    `;
+    </div>
+
+    <div class="detail-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+      <h3 style="margin-top: 0;">Contact Information</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div><strong>Owner:</strong> ${business.personal_info?.first_name} ${business.personal_info?.last_name}</div>
+        <div><strong>Email:</strong> ${business.personal_info?.email || 'N/A'}</div>
+        <div><strong>Phone:</strong> ${business.personal_info?.phone || 'N/A'}</div>
+        ${business.social_media ? `<div><strong>Social Media:</strong></div>
+${business.social_media.instagram ? `<div style="margin-left: 20px;">Instagram: ${business.social_media.instagram}</div>` : ''}
+${business.social_media.twitter ? `<div style="margin-left: 20px;">Twitter: ${business.social_media.twitter}</div>` : ''}` : ''}
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 30px; display: flex; gap: 15px;">
+    <button class="btn-primary" onclick="window.open('${manageMarketplaceProfileLink}', '_blank')">
+      Manage Marketplace Profile
+    </button>
+    <button class="btn-secondary" onclick="window.open('${viewMarketplacePageLink}', '_blank')" ${viewMarketplacePageLink === '#' ? 'disabled' : ''}>
+      View Marketplace Page
+    </button>
+    <button class="btn-secondary" onclick="closeBusinessModal()">
+      Close
+    </button>
+  </div>
+</div>`;
+    }
     
-    modal.style.display = 'block';
+    if (modal) {
+      modal.style.display = 'block';
+    }
   };
   
   window.closeBusinessModal = function() {

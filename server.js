@@ -17,11 +17,18 @@ const PORT = process.env.PORT || 3000;
 
 const getOpenAIConfig = require('./api/get-openai-config');
 const businessCaseApi = require('./api/business-case-api');
+const creativeModelsApi = require('./api/creative-models-api');
+const businessCreativesApi = require('./api/business-creatives-api');
+const configApi = require('./api/config');
 const tokenRefreshService = require('./api/services/token-refresh.service');
 const wordpressConfig = require('./api/get-wordpress-config');
+const mailgunApi = require('./api/mailgun');
 
 // Add this with your other route imports
 const regenerateBusinessCaseRouter = require('./api/regenerate-business-case');
+const subscriptionActivationRouter = require('./api/routes/subscription-activation');
+const cancelSubscriptionRouter = require('./api/cancel-subscription');
+const addCreditsRouter = require('./api/add-credits');
 
 // -------------------------
 // ✅ MIDDLEWARE FIRST (BEFORE ROUTES!)
@@ -109,12 +116,19 @@ app.use("/api", (req, res, next) => {
 app.use('/api/businesses', require('./api/businesses'));
 app.use('/api/business-settings', require('./api/routes/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
+app.use('/api/activate-subscription', subscriptionActivationRouter);
+app.use('/api/cancel-subscription', cancelSubscriptionRouter);
+app.use('/api/add-credits', addCreditsRouter);
 app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
 app.use('/api/marketing', marketingApiRouter);
 app.use('/api/veo-vertex', veoVertexApiRouter);
 app.use('/api/business-case', businessCaseApi);
+app.use('/api/creative-models', creativeModelsApi);
+app.use('/api/business-creatives', businessCreativesApi);
+app.use('/api/config', configApi);
+app.use('/api/mailgun', mailgunApi);
 app.use('/api/regenerate-business-case', regenerateBusinessCaseRouter);
 
 // Paystack key route

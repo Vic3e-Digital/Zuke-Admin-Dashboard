@@ -1,0 +1,2987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Image Generator - Outlier Platform</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      background: white;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .header h1 {
+      font-size: 36px;
+      color: #2f2f2f;
+      margin: 0 0 8px 0;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .user-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 8px 16px;
+      background: #FFF8F0;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .wallet-badge {
+      background: #28A745;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* Main Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2f2f2f;
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn:hover {
+      color: #FF8B00;
+    }
+
+    .tab-btn.active {
+      color: #FF8B00;
+      border-bottom-color: #FF8B00;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Prompt Input */
+    .prompt-area {
+      margin-bottom: 20px;
+    }
+
+    .prompt-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.3s;
+    }
+
+    .prompt-textarea:focus {
+      outline: none;
+      border-color: #FF8B00;
+    }
+
+    .quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-prompt-btn {
+      padding: 6px 12px;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-prompt-btn:hover {
+      background: #FF8B00;
+      color: white;
+      border-color: #FF8B00;
+    }
+
+    /* Image Upload Area */
+    .upload-area {
+      margin-bottom: 20px;
+    }
+
+    .upload-zone {
+      border: 2px dashed #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+
+    .upload-zone:hover {
+      border-color: #FF8B00;
+      background: #FFF8F0;
+    }
+
+    .upload-zone.dragover {
+      border-color: #FF8B00;
+      background: #FFF8F0;
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      opacity: 0.4;
+    }
+
+    .uploaded-images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .uploaded-image-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #e0e0e0;
+    }
+
+    .uploaded-image-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-upload-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .remove-upload-btn:hover {
+      background: rgba(255, 0, 0, 1);
+    }
+
+    .upload-order-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #FF8B00;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Model Selection */
+    .model-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .model-option {
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+      position: relative;
+    }
+
+    .model-option:hover {
+      border-color: #FF8B00;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 139, 0, 0.15);
+    }
+
+    .model-option.selected {
+      border-color: #FF8B00;
+      background: #FFF8F0;
+    }
+
+    .model-option input[type="radio"] {
+      display: none;
+    }
+
+    .model-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .model-radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ccc;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .model-option.selected .model-radio {
+      border-color: #FF8B00;
+    }
+
+    .model-option.selected .model-radio::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: #FF8B00;
+      border-radius: 50%;
+    }
+
+    /* Model Checkbox Styling (for multi-select) */
+    .model-checkbox {
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+      display: block;
+      position: relative;
+    }
+
+    .model-checkbox:hover {
+      border-color: #FF8B00;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 139, 0, 0.15);
+    }
+
+    .model-checkbox.checked {
+      border-color: #FF8B00;
+      background: #FFF8F0;
+    }
+
+    .model-checkbox input[type="checkbox"] {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .model-checkbox input[type="checkbox"]:hover {
+      border-color: #FF8B00;
+    }
+
+    .model-checkbox input[type="checkbox"]:checked {
+      background: #FF8B00;
+      border-color: #FF8B00;
+    }
+
+    .model-checkbox input[type="checkbox"]:checked::after {
+      content: '✓';
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .model-checkbox .model-header {
+      margin-left: 24px;
+    }
+
+    .model-info {
+      flex: 1;
+    }
+
+    .model-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #2f2f2f;
+      margin-bottom: 4px;
+    }
+
+    .model-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .model-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #28A745;
+      color: white;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .model-badge.recommended {
+      background: #FF8B00;
+    }
+
+    .model-badge.new {
+      background: #667eea;
+    }
+
+    /* Advanced Options */
+    .advanced-options {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .option-label {
+      font-size: 14px;
+      color: #2f2f2f;
+      font-weight: 500;
+    }
+
+    .option-label-desc {
+      font-size: 12px;
+      color: #999;
+      font-weight: 400;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .option-control select {
+      padding: 8px 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      min-width: 140px;
+      cursor: pointer;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: #FF8B00;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(24px);
+    }
+
+    /* Number of Images */
+    .image-count-selector {
+      display: flex;
+      gap: 8px;
+    }
+
+    .count-btn {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .count-btn:hover {
+      border-color: #FF8B00;
+    }
+
+    .count-btn.selected {
+      border-color: #FF8B00;
+      background: #FF8B00;
+      color: white;
+    }
+
+    /* Generate Button */
+    .generate-section {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+
+    .cost-summary {
+      background: #FFF8F0;
+      border: 1px solid #FFE5CC;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .cost-row:last-child {
+      margin-bottom: 0;
+      padding-top: 8px;
+      border-top: 1px solid #FFE5CC;
+      font-weight: 600;
+      color: #2f2f2f;
+    }
+
+    .cost-amount {
+      font-weight: 600;
+      color: #FF8B00;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #FF8B00 0%, #FF6B00 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.4);
+    }
+
+    .generate-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .generate-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Progress */
+    .progress {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .progress.active {
+      display: block;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FF8B00, #FF6B00);
+      border-radius: 8px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    /* Results Section */
+    .results-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      color: #999;
+      text-align: center;
+    }
+
+    .results-empty svg {
+      width: 80px;
+      height: 80px;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    .results-empty h3 {
+      margin: 0 0 8px 0;
+      color: #666;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .result-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+      background: white;
+    }
+
+    .result-card:hover {
+      border-color: #FF8B00;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .result-image-container {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #f5f5f5;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .result-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.95);
+      gap: 12px;
+    }
+
+    .result-streaming {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #FF8B00;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .result-info {
+      padding: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .result-prompt {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .result-meta {
+      display: flex;
+      gap: 8px;
+      font-size: 11px;
+      color: #999;
+      flex-wrap: wrap;
+    }
+
+    .result-actions {
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .result-action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .result-action-btn:hover {
+      background: #FF8B00;
+      color: white;
+      border-color: #FF8B00;
+    }
+
+    .result-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Variant Card Styling (for multi-select) */
+    .variant-card {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .variant-card.selected {
+      border-color: #FF8B00 !important;
+      box-shadow: 0 0 0 3px rgba(255, 139, 0, 0.15);
+    }
+
+    .variant-card.unselected {
+      opacity: 0.6;
+      border-color: #e0e0e0 !important;
+    }
+
+    .variant-checkbox-container {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 10;
+    }
+
+    .variant-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .variant-checkbox:hover {
+      border-color: #FF8B00;
+    }
+
+    .variant-checkbox:checked {
+      background: #FF8B00;
+      border-color: #FF8B00;
+    }
+
+    .variant-checkbox:checked::after {
+      content: '✓';
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .variant-label {
+      display: none;
+    }
+
+    .variant-image-container {
+      position: relative;
+    }
+
+    /* Status Messages */
+    .status {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status.active {
+      display: block;
+    }
+
+    .status.success {
+      background: #D4EDDA;
+      color: #155724;
+      border: 1px solid #C3E6CB;
+    }
+
+    .status.error {
+      background: #F8D7DA;
+      color: #721C24;
+      border: 1px solid #F5C6CB;
+    }
+
+    .status.info {
+      background: #D1ECF1;
+      color: #0C5460;
+      border: 1px solid #BEE5EB;
+    }
+
+        /* Loading Overlay */
+    .auth-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+
+    .auth-loading.hidden {
+      display: none;
+    }
+
+    /* Info Badge */
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: #E3F2FD;
+      color: #1976D2;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: help;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .cost-amount {
+      font-weight: 700;
+      color: #2563eb;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Loading Overlay -->
+  <div class="auth-loading" id="authLoading">
+    <div class="spinner" style="width: 60px; height: 60px; border-width: 6px;"></div>
+    <p style="margin-top: 20px; font-size: 16px; color: #666;">Checking authentication...</p>
+  </div>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>🎨 AI Image Generator</h1>
+      <p>Powered by Azure OpenAI - Flux & GPT Image</p>
+      <div class="user-info" id="userInfo" style="display: none;">
+        <span id="userEmail"></span>
+        <span class="wallet-badge" id="walletBalance">R0.00</span>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      
+      <!-- Left Column: Controls -->
+      <div class="section">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="generate">Generate</button>
+          <button class="tab-btn" data-tab="edit">Edit/Compose</button>
+          <button class="tab-btn" data-tab="variations">Variations</button>
+        </div>
+
+        <!-- TAB 1: GENERATE FROM SCRATCH -->
+        <div class="tab-content active" id="generateTab">
+          <div class="section-title">✨ Generate Images</div>
+
+          <!-- Prompt Input -->
+          <div class="prompt-area">
+            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #2f2f2f;">
+              Describe your image *
+            </label>
+            <textarea 
+              id="generatePrompt" 
+              class="prompt-textarea" 
+              placeholder="E.g., A professional product photo of a luxury watch on a marble surface with dramatic lighting and soft shadows"
+            ></textarea>
+            
+            <!-- Quick Prompts -->
+            <div class="quick-prompts">
+              <button class="quick-prompt-btn" data-prompt="Professional product photography, white background, studio lighting, high detail, commercial style">
+                📦 Product
+              </button>
+              <button class="quick-prompt-btn" data-prompt="Lifestyle photography in South Africa, natural lighting, authentic setting, warm tones">
+                🌄 Lifestyle
+              </button>
+              <button class="quick-prompt-btn" data-prompt="Abstract art, vibrant African colors, geometric patterns, modern design">
+                🎨 Abstract
+              </button>
+              <button class="quick-prompt-btn" data-prompt="Professional portrait, soft lighting, blurred background, business attire">
+                👤 Portrait
+              </button>
+            </div>
+          </div>
+
+          <!-- Model Selection -->
+          <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <!-- Flux -->
+            <label class="model-checkbox" id="fluxCheckbox" style="flex: 1;">
+              <input type="checkbox" id="useFlux" checked>
+              <div class="model-header">
+                <div class="model-info">
+                  <div class="model-name">Flux <span class="model-badge new">FAST</span></div>
+                  <div class="model-desc">Ultra-fast, exceptional quality. Photo-realistic.</div>
+                </div>
+              </div>
+            </label>
+
+            <!-- GPT Image 1 -->
+            <label class="model-checkbox selected" id="gptImageCheckbox" style="flex: 1;">
+              <input type="checkbox" id="useGptImage" checked>
+              <div class="model-header">
+                <div class="model-info">
+                  <div class="model-name">GPT Image 1 <span class="model-badge recommended">BEST</span></div>
+                  <div class="model-desc">Superior text, editing, complex compositions.</div>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Advanced Options -->
+          <details style="margin-bottom: 20px;">
+            <summary style="cursor: pointer; font-weight: 600; color: #2f2f2f; padding: 8px 0; user-select: none; font-size: 15px;">⚙️ Advanced Settings</summary>
+            <div class="advanced-options" style="margin-top: 16px;">
+            
+            <!-- Image Size -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Image Size</div>
+                <span class="option-label-desc">Resolution and aspect ratio</span>
+              </div>
+              <div class="option-control">
+                <select id="generateSizeSelect">
+                  <option value="1024x1024">Square (1024×1024)</option>
+                  <option value="1024x1536">Portrait (1024×1536)</option>
+                  <option value="1536x1024">Landscape (1536×1024)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quality -->
+            <div class="option-row" id="generateQualityOption">
+              <div>
+                <div class="option-label">Quality</div>
+                <span class="option-label-desc">Rendering quality</span>
+              </div>
+              <div class="option-control">
+                <select id="generateQualitySelect">
+                  <option value="auto">Auto (Recommended)</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Style (GPT Image & DALL-E 3) -->
+            <div class="option-row" id="generateStyleOption">
+              <div>
+                <div class="option-label">Style</div>
+                <span class="option-label-desc">Color and tone</span>
+              </div>
+              <div class="option-control">
+                <select id="generateStyleSelect">
+                  <option value="natural">Natural</option>
+                  <option value="vivid">Vivid</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Transparent Background -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Transparent Background</div>
+                <span class="option-label-desc">PNG/WebP only</span>
+              </div>
+              <div class="toggle-switch" id="generateTransparentToggle"></div>
+            </div>
+
+            <!-- Output Format -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Output Format</div>
+                <span class="option-label-desc">File format</span>
+              </div>
+              <div class="option-control">
+                <select id="generateFormatSelect">
+                  <option value="png">PNG</option>
+                  <option value="jpeg">JPEG (Faster)</option>
+                  <option value="webp">WebP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Number of Images -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Number of Images</div>
+                <span class="option-label-desc">Generate multiple variants</span>
+              </div>
+              <div class="image-count-selector">
+                <button class="count-btn selected" data-count="1">1</button>
+                <button class="count-btn" data-count="2">2</button>
+                <button class="count-btn" data-count="3">3</button>
+                <button class="count-btn" data-count="4">4</button>
+              </div>
+            </div>
+
+            <!-- Streaming (GPT Image only) -->
+            <div class="option-row" id="generateStreamingOption" style="display: none;">
+              <div>
+                <div class="option-label">
+                  Enable Streaming
+                  <span class="info-badge tooltip">
+                    ℹ️
+                    <span class="tooltiptext">See partial images as they generate</span>
+                  </span>
+                </div>
+                <span class="option-label-desc">Preview during generation</span>
+              </div>
+              <div class="toggle-switch" id="generateStreamingToggle"></div>
+            </div>
+
+          </details>
+
+          <!-- Generate Button -->
+          <div class="generate-section">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600;">
+              <span>Total Cost:</span>
+              <span class="cost-amount" id="generateTotalCost">R15.00</span>
+              <div class="tooltip" style="display: inline-block;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; color: #666; cursor: help;">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <span class="tooltiptext" id="costBreakdown" style="width: 250px; bottom: 130%; left: 50%; margin-left: -125px;">
+                  <div style="text-align: left;">
+                    <div style="margin-bottom: 8px;">Base cost: <span id="tooltipBaseCost">R15.00</span></div>
+                    <div style="margin-bottom: 8px;">Images: <span id="tooltipImageCount">1</span></div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 8px;">Total: <strong id="tooltipTotal">R15.00</strong></div>
+                  </div>
+                </span>
+              </div>
+            </div>
+
+            <button class="generate-btn" id="generateBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Generate Images
+            </button>
+
+            <div class="progress" id="generateProgress">
+              <p class="progress-text" id="generateProgressText">Generating images...</p>
+              <div class="progress-bar">
+                <div class="progress-fill" id="generateProgressFill"></div>
+              </div>
+            </div>
+
+            <div class="status" id="generateStatus"></div>
+          </div>
+        </div>
+
+        <!-- TAB 2: EDIT/COMPOSE WITH REFERENCE IMAGES -->
+        <div class="tab-content" id="editTab">
+          <div class="section-title">✏️ Edit or Compose Images</div>
+
+          <!-- Upload Reference Images -->
+          <div class="upload-area">
+            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #2f2f2f;">
+              Upload Reference Images *
+              <span class="info-badge tooltip">
+                ℹ️
+                <span class="tooltiptext">Upload 1-4 images to use as reference. First image has highest fidelity.</span>
+              </span>
+            </label>
+            
+            <div class="upload-zone" id="editUploadZone">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+              <p style="font-weight: 600; margin-bottom: 5px; font-size: 14px;">Click or drag images here</p>
+              <p style="color: #999; font-size: 12px;">JPG, PNG (max 10MB each, up to 4 images)</p>
+            </div>
+            <input type="file" id="editFileInput" accept="image/*" multiple style="display: none;">
+
+            <div class="uploaded-images" id="editUploadedImages"></div>
+          </div>
+
+          <!-- Prompt Input -->
+          <div class="prompt-area">
+                        <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #2f2f2f;">
+              Describe what you want to create *
+            </label>
+            <textarea 
+              id="editPrompt" 
+              class="prompt-textarea" 
+              placeholder="E.g., Generate a photorealistic image of a gift basket on a white background labeled 'Relax & Unwind' containing all the items in the reference pictures"
+            ></textarea>
+            
+            <!-- Quick Prompts for Editing -->
+            <div class="quick-prompts">
+              <button class="quick-prompt-btn" data-prompt="Combine all items into a professional product photo on white background">
+                🎁 Combine Items
+              </button>
+              <button class="quick-prompt-btn" data-prompt="Create a lifestyle scene featuring these products in a South African home setting">
+                🏠 Lifestyle Scene
+              </button>
+              <button class="quick-prompt-btn" data-prompt="Arrange these items in an elegant flat lay composition">
+                📸 Flat Lay
+              </button>
+            </div>
+          </div>
+
+          <!-- Advanced Options -->
+          <div class="advanced-options">
+            
+            <!-- Input Fidelity -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">
+                  Input Fidelity
+                  <span class="info-badge tooltip">
+                    ℹ️
+                    <span class="tooltiptext">High fidelity preserves faces, logos, and details better</span>
+                  </span>
+                </div>
+                <span class="option-label-desc">Preserve input details</span>
+              </div>
+              <div class="option-control">
+                <select id="editFidelitySelect">
+                  <option value="low">Low (Faster)</option>
+                  <option value="high">High (More Detail)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Image Size -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Image Size</div>
+                <span class="option-label-desc">Output resolution</span>
+              </div>
+              <div class="option-control">
+                <select id="editSizeSelect">
+                  <option value="1024x1024">Square (1024×1024)</option>
+                  <option value="1024x1536">Portrait (1024×1536)</option>
+                  <option value="1536x1024">Landscape (1536×1024)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quality -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Quality</div>
+                <span class="option-label-desc">Rendering quality</span>
+              </div>
+              <div class="option-control">
+                <select id="editQualitySelect">
+                  <option value="auto">Auto (Recommended)</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Transparent Background -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Transparent Background</div>
+                <span class="option-label-desc">PNG/WebP only</span>
+              </div>
+              <div class="toggle-switch" id="editTransparentToggle"></div>
+            </div>
+
+            <!-- Output Format -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Output Format</div>
+                <span class="option-label-desc">File format</span>
+              </div>
+              <div class="option-control">
+                <select id="editFormatSelect">
+                  <option value="png">PNG</option>
+                  <option value="jpeg">JPEG (Faster)</option>
+                  <option value="webp">WebP</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-section">
+            <div class="cost-summary">
+              <div class="cost-row">
+                <span>Base cost:</span>
+                <span class="cost-amount">R20.00</span>
+              </div>
+              <div class="cost-row" id="editFidelityCostRow" style="display: none;">
+                <span>High fidelity (extra tokens):</span>
+                <span class="cost-amount" id="editFidelityCost">R5.00</span>
+              </div>
+              <div class="cost-row">
+                <strong>Total Cost:</strong>
+                <span class="cost-amount" id="editTotalCost">R20.00</span>
+              </div>
+            </div>
+
+            <button class="generate-btn" id="editGenerateBtn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Generate Composed Image
+            </button>
+
+            <div class="progress" id="editProgress">
+              <p class="progress-text" id="editProgressText">Composing image...</p>
+              <div class="progress-bar">
+                <div class="progress-fill" id="editProgressFill"></div>
+              </div>
+            </div>
+
+            <div class="status" id="editStatus"></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: VARIATIONS (DALL-E 2 only) -->
+        <div class="tab-content" id="variationsTab">
+          <div class="section-title">🔄 Create Variations</div>
+
+          <div style="background: #FFF8F0; border: 1px solid #FFE5CC; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+            <p style="margin: 0; font-size: 13px; color: #666;">
+              <strong>Note:</strong> Image variations are only available with DALL-E 2 model.
+            </p>
+          </div>
+
+          <!-- Upload Single Image -->
+          <div class="upload-area">
+            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #2f2f2f;">
+              Upload Base Image *
+            </label>
+            
+            <div class="upload-zone" id="variationsUploadZone">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+              <p style="font-weight: 600; margin-bottom: 5px; font-size: 14px;">Click or drag image here</p>
+              <p style="color: #999; font-size: 12px;">JPG, PNG (max 10MB)</p>
+            </div>
+            <input type="file" id="variationsFileInput" accept="image/*" style="display: none;">
+
+            <div class="uploaded-images" id="variationsUploadedImages"></div>
+          </div>
+
+          <!-- Advanced Options -->
+          <div class="advanced-options">
+            
+            <!-- Number of Variations -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Number of Variations</div>
+                <span class="option-label-desc">How many to generate</span>
+              </div>
+              <div class="image-count-selector">
+                <button class="count-btn selected" data-count="1">1</button>
+                <button class="count-btn" data-count="2">2</button>
+                <button class="count-btn" data-count="3">3</button>
+                <button class="count-btn" data-count="4">4</button>
+              </div>
+            </div>
+
+            <!-- Image Size (DALL-E 2 sizes only) -->
+            <div class="option-row">
+              <div>
+                <div class="option-label">Image Size</div>
+                <span class="option-label-desc">Output resolution</span>
+              </div>
+              <div class="option-control">
+                <select id="variationsSizeSelect">
+                  <option value="1024x1024">Large (1024×1024)</option>
+                  <option value="512x512">Medium (512×512)</option>
+                  <option value="256x256">Small (256×256)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-section">
+            <div class="cost-summary">
+              <div class="cost-row">
+                <span>Cost per variation:</span>
+                <span class="cost-amount">R8.00</span>
+              </div>
+              <div class="cost-row">
+                <span>Number of variations:</span>
+                <span id="variationsCount">1</span>
+              </div>
+              <div class="cost-row">
+                <strong>Total Cost:</strong>
+                <span class="cost-amount" id="variationsTotalCost">R8.00</span>
+              </div>
+            </div>
+
+            <button class="generate-btn" id="variationsGenerateBtn" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Generate Variations
+            </button>
+
+            <div class="progress" id="variationsProgress">
+              <p class="progress-text" id="variationsProgressText">Creating variations...</p>
+              <div class="progress-bar">
+                <div class="progress-fill" id="variationsProgressFill"></div>
+              </div>
+            </div>
+
+            <div class="status" id="variationsStatus"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="section">
+        <!-- Empty State -->
+        <div class="results-empty" id="resultsEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <h3>No images yet</h3>
+          <p>Generate, edit, or create variations to see results here</p>
+        </div>
+
+        <!-- GPT Images Section -->
+        <div id="gptImagesSection" style="display: none;">
+          <div class="section-title" style="margin-top: 0;">
+            🖼️ GPT Images
+            <button id="downloadAllGptBtn" style="
+              margin-left: auto;
+              padding: 8px 16px;
+              background: #FF8B00;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 500;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            ">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+              Download All (ZIP)
+            </button>
+          </div>
+          <div class="results-grid" id="gptGrid" style="display: grid;"></div>
+        </div>
+
+        <!-- Flux Images Section -->
+        <div id="fluxImagesSection" style="display: none; margin-top: 32px;">
+          <div class="section-title" style="margin-top: 0;">
+            🖼️ Flux Images
+            <button id="downloadAllFluxBtn" style="
+              margin-left: auto;
+              padding: 8px 16px;
+              background: #FF8B00;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 500;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            ">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+              </svg>
+              Download All (ZIP)
+            </button>
+          </div>
+          <div class="results-grid" id="fluxGrid" style="display: grid;"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/dataManager.js"></script>
+  
+  <script>
+    // ========================================
+    // GLOBAL VARIABLES
+    // ========================================
+    let auth0Client = null;
+    let currentUser = null;
+    let currentBusiness = null;
+    let openAIConfig = null;
+    let generatedImages = [];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email');
+    const businessId = urlParams.get('businessId');
+
+    // Cost structure (in Rands) - Adjust based on your pricing
+    const COSTS = {
+      GPT_IMAGE_BASE: 20,
+      GPT_IMAGE_HIGH_FIDELITY: 5,
+      DALLE_3_STANDARD: 15,
+      DALLE_3_HD: 30,
+      DALLE_2: 8
+    };
+
+    // Current selections
+    let currentTab = 'generate';
+    let generateModel = 'gpt-image-1';
+    let generateImageCount = 1;
+    let editUploadedFiles = [];
+    let variationsUploadedFile = null;
+    let variationsCount = 1;
+
+    // ========================================
+    // DOM ELEMENTS
+    // ========================================
+    const authLoading = document.getElementById('authLoading');
+    const userInfo = document.getElementById('userInfo');
+    const userEmailDisplay = document.getElementById('userEmail');
+    const walletBalance = document.getElementById('walletBalance');
+
+    const resultsEmpty = document.getElementById('resultsEmpty');
+    const gptGrid = document.getElementById('gptGrid');
+    const fluxGrid = document.getElementById('fluxGrid');
+    const gptImagesSection = document.getElementById('gptImagesSection');
+    const fluxImagesSection = document.getElementById('fluxImagesSection');
+    const downloadAllGptBtn = document.getElementById('downloadAllGptBtn');
+    const downloadAllFluxBtn = document.getElementById('downloadAllFluxBtn');
+
+    // Tab buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Generate tab elements
+    const generatePrompt = document.getElementById('generatePrompt');
+    const generateBtn = document.getElementById('generateBtn');
+    const generateProgress = document.getElementById('generateProgress');
+    const generateProgressText = document.getElementById('generateProgressText');
+    const generateProgressFill = document.getElementById('generateProgressFill');
+    const generateStatus = document.getElementById('generateStatus');
+    const generateSizeSelect = document.getElementById('generateSizeSelect');
+    const generateQualitySelect = document.getElementById('generateQualitySelect');
+    const generateStyleSelect = document.getElementById('generateStyleSelect');
+    const generateFormatSelect = document.getElementById('generateFormatSelect');
+    const generateTransparentToggle = document.getElementById('generateTransparentToggle');
+    const generateStreamingToggle = document.getElementById('generateStreamingToggle');
+    const generateBaseCost = document.getElementById('generateBaseCost');
+    const generateImageCountDisplay = document.getElementById('generateImageCount');
+    const generateTotalCost = document.getElementById('generateTotalCost');
+
+    // Edit tab elements
+    const editUploadZone = document.getElementById('editUploadZone');
+        const editFileInput = document.getElementById('editFileInput');
+    const editUploadedImages = document.getElementById('editUploadedImages');
+    const editPrompt = document.getElementById('editPrompt');
+    const editGenerateBtn = document.getElementById('editGenerateBtn');
+    const editProgress = document.getElementById('editProgress');
+    const editProgressText = document.getElementById('editProgressText');
+    const editProgressFill = document.getElementById('editProgressFill');
+    const editStatus = document.getElementById('editStatus');
+    const editFidelitySelect = document.getElementById('editFidelitySelect');
+    const editSizeSelect = document.getElementById('editSizeSelect');
+    const editQualitySelect = document.getElementById('editQualitySelect');
+    const editFormatSelect = document.getElementById('editFormatSelect');
+    const editTransparentToggle = document.getElementById('editTransparentToggle');
+    const editFidelityCostRow = document.getElementById('editFidelityCostRow');
+    const editFidelityCost = document.getElementById('editFidelityCost');
+    const editTotalCost = document.getElementById('editTotalCost');
+
+    // Variations tab elements
+    const variationsUploadZone = document.getElementById('variationsUploadZone');
+    const variationsFileInput = document.getElementById('variationsFileInput');
+    const variationsUploadedImages = document.getElementById('variationsUploadedImages');
+    const variationsGenerateBtn = document.getElementById('variationsGenerateBtn');
+    const variationsProgress = document.getElementById('variationsProgress');
+    const variationsProgressText = document.getElementById('variationsProgressText');
+    const variationsProgressFill = document.getElementById('variationsProgressFill');
+    const variationsStatus = document.getElementById('variationsStatus');
+    const variationsSizeSelect = document.getElementById('variationsSizeSelect');
+    const variationsCountDisplay = document.getElementById('variationsCount');
+    const variationsTotalCost = document.getElementById('variationsTotalCost');
+
+    // ========================================
+    // AUTH0 INITIALIZATION
+    // ========================================
+    async function initializeAuth0() {
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error initializing Auth0:", error);
+        showError("Failed to initialize authentication", generateStatus);
+        return null;
+      }
+    }
+
+    // ========================================
+    // CHECK AUTHENTICATION
+    // ========================================
+    async function checkAuthentication() {
+      try {
+        // 1. CHECK DATAMANAGER CACHE FIRST (fastest)
+        if (window.dataManager) {
+          const cachedEmail = window.dataManager.getUserEmail();
+          if (cachedEmail) {
+            console.log("✅ User email loaded from dataManager cache:", cachedEmail);
+            currentUser = { email: cachedEmail };
+            // Update the module-level userEmail variable
+            window.generatorUserEmail = cachedEmail;
+            userEmailDisplay.textContent = cachedEmail;
+            userInfo.style.display = 'flex';
+
+            // Try to get business from cache
+            currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+            if (currentBusiness) {
+              console.log("✅ Business loaded from dataManager:", currentBusiness.store_info?.name);
+            } else if (businessId && cachedEmail) {
+              console.log("⚠️ Fetching business data from API...");
+              await fetchBusinessData();
+            }
+
+            // Fetch wallet balance and config
+            await Promise.all([fetchWalletBalance(), fetchOpenAIConfig()]);
+            return true;
+          }
+        }
+
+        // 2. FALL BACK TO AUTH0 AUTHENTICATION
+        console.log("⚠️ Cache miss, initializing Auth0...");
+        const auth0 = await initializeAuth0();
+        if (!auth0) {
+          throw new Error("Auth0 initialization failed");
+        }
+
+        const isAuthenticated = await auth0.isAuthenticated();
+        
+        if (!isAuthenticated) {
+          console.log("❌ Not authenticated, redirecting to login...");
+          window.location.href = '/';
+          return false;
+        }
+
+        currentUser = await auth0.getUser();
+        console.log("✅ Authenticated user from Auth0:", currentUser.email);
+
+        // Update the module-level userEmail variable
+        window.generatorUserEmail = currentUser.email;
+
+        // Cache the email in dataManager for future use
+        if (window.dataManager) {
+          window.dataManager.setUserEmail(currentUser.email);
+        }
+
+        // Get business data
+        if (window.dataManager) {
+          currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
+          
+          if (currentBusiness) {
+            console.log("✅ Business loaded from dataManager:", currentBusiness.store_info?.name);
+          } else if (businessId && currentUser.email) {
+            console.log("⚠️ Fetching business data from API...");
+            await fetchBusinessData();
+          }
+        } else if (businessId && currentUser.email) {
+          console.log("⚠️ No dataManager, fetching business data...");
+          await fetchBusinessData();
+        }
+
+        // 3. DISPLAY USER INFO AND FETCH WALLET BALANCE
+        userEmailDisplay.textContent = currentUser.email;
+        userInfo.style.display = 'flex';
+
+        await Promise.all([fetchWalletBalance(), fetchOpenAIConfig()]);
+
+        return true;
+
+      } catch (error) {
+        console.error("Authentication error:", error);
+        showError("Authentication failed. Redirecting to login...", generateStatus);
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+        return false;
+      }
+    }
+
+    // ========================================
+    // FETCH BUSINESS DATA
+    // ========================================
+    async function fetchBusinessData() {
+      try {
+        const response = await fetch(`/api/businesses/${businessId}?userEmail=${encodeURIComponent(userEmail)}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch business data');
+        }
+
+        const data = await response.json();
+        currentBusiness = data.business;
+        console.log("✅ Business data fetched:", currentBusiness.store_info?.name);
+
+      } catch (error) {
+        console.error("Error fetching business data:", error);
+        showError("Failed to load business information", generateStatus);
+      }
+    }
+
+    // ========================================
+    // FETCH WALLET BALANCE
+    // ========================================
+    async function fetchWalletBalance() {
+      try {
+        const response = await fetch(`/api/wallet?email=${encodeURIComponent(userEmail)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          walletBalance.textContent = data.wallet?.formatted_balance || `R${(data.wallet?.balance || 0).toFixed(2)}`;
+        }
+      } catch (error) {
+        console.error("Error fetching wallet balance:", error);
+      }
+    }
+
+    // ========================================
+    // FETCH OPENAI CONFIG
+    // ========================================
+    async function fetchOpenAIConfig() {
+      try {
+        const response = await fetch('/api/get-openai-config');
+        
+        if (!response.ok) {
+          throw new Error('Failed to get OpenAI config');
+        }
+
+        openAIConfig = await response.json();
+        console.log("✅ OpenAI config loaded");
+        
+        generateBtn.disabled = false;
+
+      } catch (error) {
+        console.error("Error fetching OpenAI config:", error);
+        showError("Failed to load AI configuration", generateStatus);
+        generateBtn.disabled = true;
+      }
+    }
+
+    // ========================================
+    // TAB NAVIGATION
+    // ========================================
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        document.getElementById(`${tabName}Tab`).classList.add('active');
+        
+        currentTab = tabName;
+      });
+    });
+
+    // ========================================
+    // MODEL SELECTION (GENERATE TAB) - MULTI-SELECT CHECKBOXES
+    // ========================================
+    const useFluxCheckbox = document.getElementById('useFlux');
+    const useGptImageCheckbox = document.getElementById('useGptImage');
+
+    [useFluxCheckbox, useGptImageCheckbox].forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const parent = checkbox.closest('.model-checkbox');
+        
+        if (checkbox.checked) {
+          parent.classList.add('checked');
+        } else {
+          parent.classList.remove('checked');
+        }
+
+        // Ensure at least one model is selected
+        const anySelected = useFluxCheckbox.checked || useGptImageCheckbox.checked;
+        if (!anySelected) {
+          checkbox.checked = true;
+          parent.classList.add('checked');
+        }
+
+        updateGenerateCost();
+      });
+    });
+
+    // ========================================
+    // IMAGE COUNT SELECTION (GENERATE TAB)
+    // ========================================
+    document.querySelectorAll('#generateTab .count-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#generateTab .count-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        generateImageCount = parseInt(btn.dataset.count);
+        updateGenerateCost();
+      });
+    });
+
+    // ========================================
+    // IMAGE COUNT SELECTION (VARIATIONS TAB)
+    // ========================================
+    document.querySelectorAll('#variationsTab .count-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#variationsTab .count-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        variationsCount = parseInt(btn.dataset.count);
+        updateVariationsCost();
+      });
+    });
+
+    // ========================================
+    // QUICK PROMPTS
+    // ========================================
+    document.querySelectorAll('#generateTab .quick-prompt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        generatePrompt.value = btn.dataset.prompt;
+        generatePrompt.focus();
+      });
+    });
+
+    document.querySelectorAll('#editTab .quick-prompt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        editPrompt.value = btn.dataset.prompt;
+        editPrompt.focus();
+      });
+    });
+
+    // ========================================
+    // TOGGLE SWITCHES
+    // ========================================
+    [generateTransparentToggle, generateStreamingToggle, editTransparentToggle].forEach(toggle => {
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('active');
+        });
+      }
+    });
+
+    // ========================================
+    // UPDATE GENERATE COST
+    // ========================================
+    function updateGenerateCost() {
+      let totalCost = 0;
+      let totalBaseCost = 0;
+      let selectedModelCount = 0;
+
+      // Calculate cost for each selected model
+      if (useFluxCheckbox.checked) {
+        totalBaseCost += COSTS.GPT_IMAGE_BASE;
+        selectedModelCount++;
+      }
+      if (useGptImageCheckbox.checked) {
+        totalBaseCost += COSTS.GPT_IMAGE_BASE;
+        selectedModelCount++;
+      }
+
+      // If no models selected, show base cost of 0
+      if (selectedModelCount === 0) {
+        totalCost = 0;
+        totalBaseCost = 0;
+      } else {
+        // Divide by number of models to get per-model cost, then multiply by image count
+        totalCost = totalBaseCost * generateImageCount;
+      }
+      
+      // Update main display
+      const totalCostElement = document.getElementById('generateTotalCost');
+      if (totalCostElement) {
+        totalCostElement.textContent = `R${totalCost.toFixed(2)}`;
+      }
+
+      // Update tooltip breakdown
+      const tooltipBaseCost = document.getElementById('tooltipBaseCost');
+      const tooltipImageCount = document.getElementById('tooltipImageCount');
+      const tooltipTotal = document.getElementById('tooltipTotal');
+      
+      if (tooltipBaseCost) tooltipBaseCost.textContent = `R${totalBaseCost.toFixed(2)}`;
+      if (tooltipImageCount) tooltipImageCount.textContent = `${generateImageCount} × ${selectedModelCount} model${selectedModelCount > 1 ? 's' : ''}`;
+      if (tooltipTotal) tooltipTotal.textContent = `R${totalCost.toFixed(2)}`;
+    }
+
+    generateQualitySelect.addEventListener('change', updateGenerateCost);
+
+    // ========================================
+    // UPDATE EDIT COST
+    // ========================================
+    function updateEditCost() {
+      let baseCost = COSTS.GPT_IMAGE_BASE;
+      let fidelityCost = 0;
+
+      if (editFidelitySelect.value === 'high') {
+        fidelityCost = COSTS.GPT_IMAGE_HIGH_FIDELITY;
+        editFidelityCostRow.style.display = 'flex';
+        editFidelityCost.textContent = `R${fidelityCost.toFixed(2)}`;
+      } else {
+        editFidelityCostRow.style.display = 'none';
+      }
+
+      const totalCost = baseCost + fidelityCost;
+      editTotalCost.textContent = `R${totalCost.toFixed(2)}`;
+    }
+
+    editFidelitySelect.addEventListener('change', updateEditCost);
+
+    // ========================================
+    // UPDATE VARIATIONS COST
+    // ========================================
+    function updateVariationsCost() {
+      const costPerVariation = COSTS.DALLE_2;
+      const totalCost = costPerVariation * variationsCount;
+      
+      variationsCountDisplay.textContent = variationsCount;
+      variationsTotalCost.textContent = `R${totalCost.toFixed(2)}`;
+    }
+
+    // ========================================
+    // FILE UPLOAD - EDIT TAB
+    // ========================================
+    editUploadZone.addEventListener('click', () => editFileInput.click());
+    
+    editFileInput.addEventListener('change', (e) => {
+      handleEditFileUpload(Array.from(e.target.files));
+    });
+
+    editUploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      editUploadZone.classList.add('dragover');
+    });
+
+    editUploadZone.addEventListener('dragleave', () => {
+      editUploadZone.classList.remove('dragover');
+    });
+
+    editUploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      editUploadZone.classList.remove('dragover');
+      handleEditFileUpload(Array.from(e.dataTransfer.files));
+    });
+
+    function handleEditFileUpload(files) {
+      const imageFiles = files.filter(f => f.type.startsWith('image/'));
+      
+      if (imageFiles.length === 0) {
+        showError('Please select image files', editStatus);
+        return;
+      }
+
+      // Limit to 4 images
+      const remainingSlots = 4 - editUploadedFiles.length;
+      const filesToAdd = imageFiles.slice(0, remainingSlots);
+
+      filesToAdd.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          showError(`${file.name} is too large (max 10MB)`, editStatus);
+          return;
+        }
+
+        editUploadedFiles.push(file);
+        displayEditUploadedImage(file, editUploadedFiles.length - 1);
+      });
+
+      if (editUploadedFiles.length > 0) {
+        editGenerateBtn.disabled = false;
+      }
+
+      editFileInput.value = '';
+    }
+
+    function displayEditUploadedImage(file, index) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const div = document.createElement('div');
+        div.className = 'uploaded-image-item';
+        div.dataset.index = index;
+
+        div.innerHTML = `
+          <img src="${e.target.result}" alt="Upload ${index + 1}">
+          <div class="upload-order-badge">${index + 1}</div>
+          <button class="remove-upload-btn" onclick="removeEditUpload(${index})">✕</button>
+        `;
+
+        editUploadedImages.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.removeEditUpload = function(index) {
+      editUploadedFiles.splice(index, 1);
+      editUploadedImages.innerHTML = '';
+      
+      editUploadedFiles.forEach((file, i) => {
+        displayEditUploadedImage(file, i);
+      });
+
+      if (editUploadedFiles.length === 0) {
+        editGenerateBtn.disabled = true;
+      }
+    };
+
+    // ========================================
+    // FILE UPLOAD - VARIATIONS TAB
+    // ========================================
+    variationsUploadZone.addEventListener('click', () => variationsFileInput.click());
+    
+    variationsFileInput.addEventListener('change', (e) => {
+      handleVariationsFileUpload(e.target.files[0]);
+    });
+
+    variationsUploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      variationsUploadZone.classList.add('dragover');
+    });
+
+    variationsUploadZone.addEventListener('dragleave', () => {
+      variationsUploadZone.classList.remove('dragover');
+    });
+
+    variationsUploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      variationsUploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleVariationsFileUpload(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleVariationsFileUpload(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showError('Please select an image file', variationsStatus);
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        showError('Image is too large (max 10MB)', variationsStatus);
+        return;
+      }
+
+      variationsUploadedFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        variationsUploadedImages.innerHTML = `
+          <div class="uploaded-image-item">
+            <img src="${e.target.result}" alt="Base image">
+            <button class="remove-upload-btn" onclick="removeVariationsUpload()">✕</button>
+          </div>
+        `;
+      };
+      reader.readAsDataURL(file);
+
+      variationsGenerateBtn.disabled = false;
+      variationsFileInput.value = '';
+    }
+
+    window.removeVariationsUpload = function() {
+      variationsUploadedFile = null;
+      variationsUploadedImages.innerHTML = '';
+      variationsGenerateBtn.disabled = true;
+    };
+
+    // ========================================
+    // GENERATE IMAGES (TAB 1)
+    // ========================================
+    generateBtn.addEventListener('click', async () => {
+      await generateImages();
+    });
+
+    async function generateImages() {
+      const prompt = generatePrompt.value.trim();
+
+      if (!prompt) {
+        showError("Please enter a prompt", generateStatus);
+        return;
+      }
+
+      if (!openAIConfig) {
+        showError("OpenAI configuration not loaded", generateStatus);
+        return;
+      }
+
+      // Determine which models to use
+      const modelsToUse = [];
+      if (useFluxCheckbox.checked) modelsToUse.push('flux');
+      if (useGptImageCheckbox.checked) modelsToUse.push('gpt-image-1');
+
+      if (modelsToUse.length === 0) {
+        showError("Please select at least one model", generateStatus);
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateProgress.classList.add('active');
+      generateStatus.classList.remove('active');
+      generateProgressFill.style.width = '0%';
+
+      try {
+        // Calculate total cost for all models
+        let totalCost = 0;
+        for (let model of modelsToUse) {
+          let costPerImage = COSTS.GPT_IMAGE_BASE;
+          totalCost += costPerImage * generateImageCount;
+        }
+
+        // Deduct cost
+        generateProgressText.textContent = 'Processing payment...';
+        generateProgressFill.style.width = '10%';
+
+        await deductCost(totalCost, `Image generation (${modelsToUse.join(', ')})`);
+
+        // Build request payload
+        const size = generateSizeSelect.value;
+        const quality = generateQualitySelect.value;
+        const style = generateStyleSelect.value;
+        const format = generateFormatSelect.value;
+        const transparent = generateTransparentToggle.classList.contains('active');
+        
+        let imagesGenerated = 0;
+
+        // Generate for each selected model
+        for (let model of modelsToUse) {
+          // Minimal payload - both models accept same basic parameters
+          const payload = {
+            prompt: prompt,
+            n: generateImageCount,
+            size: size,
+            output_format: 'png'
+          };
+
+          // Determine deployment name
+          let deploymentName = model === 'flux' 
+            ? 'FLUX.1-Kontext-pro' 
+            : 'gpt-image-1';
+
+          generateProgressText.textContent = `Generating ${generateImageCount} image${generateImageCount > 1 ? 's' : ''} with ${model}...`;
+          generateProgressFill.style.width = `${30 + (imagesGenerated / (modelsToUse.length * 2)) * 40}%`;
+
+          const apiUrl = `${openAIConfig.endpoint}openai/deployments/${deploymentName}/images/generations?api-version=2025-04-01-preview`;
+
+          console.log('🚀 Calling Azure OpenAI:', apiUrl);
+          console.log('Model:', model);
+          console.log('Payload:', payload);
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'api-key': openAIConfig.apiKey
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('❌ Azure OpenAI error:', errorData);
+            throw new Error(errorData.error?.message || `Image generation failed for ${model}`);
+          }
+
+          const data = await response.json();
+          console.log(`✅ Images generated with ${model}:`, data.data.length);
+
+          // Process images
+          generateProgressText.textContent = `Processing ${model} images...`;
+          
+          const newImages = data.data.map((item, index) => {
+            // Handle both b64_json and url responses
+            const imageData = item.b64_json || item.url;
+            
+            return {
+              id: `img_${Date.now()}_${model}_${index}`,
+              prompt: prompt,
+              revisedPrompt: item.revised_prompt || prompt,
+              imageData: imageData,
+              model: model,
+              size: size,
+              quality: quality,
+              style: style,
+              timestamp: new Date().toISOString(),
+              type: 'generate'
+            };
+          });
+
+          generatedImages.unshift(...newImages);
+          imagesGenerated += newImages.length;
+          displayImages(newImages);
+        }
+
+        generateProgressFill.style.width = '100%';
+        showSuccess(`Successfully generated ${imagesGenerated} image${imagesGenerated > 1 ? 's' : ''}!`, generateStatus);
+
+        generatePrompt.value = '';
+        await fetchWalletBalance();
+
+      } catch (error) {
+        console.error('Error generating images:', error);
+        showError(error.message || 'Failed to generate images', generateStatus);
+      } finally {
+        generateBtn.disabled = false;
+        generateProgress.classList.remove('active');
+        generateProgressFill.style.width = '0%';
+      }
+    }
+
+    // ========================================
+    // EDIT/COMPOSE IMAGES (TAB 2)
+    // ========================================
+    editGenerateBtn.addEventListener('click', async () => {
+      await editImages();
+    });
+
+    async function editImages() {
+      const prompt = editPrompt.value.trim();
+
+      if (!prompt) {
+        showError("Please enter a prompt", editStatus);
+        return;
+      }
+
+      if (editUploadedFiles.length === 0) {
+        showError("Please upload at least one reference image", editStatus);
+        return;
+      }
+
+      if (!openAIConfig) {
+        showError("OpenAI configuration not loaded", editStatus);
+        return;
+      }
+
+      editGenerateBtn.disabled = true;
+      editProgress.classList.add('active');
+      editStatus.classList.remove('active');
+      editProgressFill.style.width = '0%';
+
+      try {
+        // Calculate cost
+        let totalCost = COSTS.GPT_IMAGE_BASE;
+        if (editFidelitySelect.value === 'high') {
+          totalCost += COSTS.GPT_IMAGE_HIGH_FIDELITY;
+        }
+
+        // Deduct cost
+        editProgressText.textContent = 'Processing payment...';
+        editProgressFill.style.width = '10%';
+
+        await deductCost(totalCost, 'Image editing/composition (gpt-image-1)');
+
+        // Build request payload
+        const size = editSizeSelect.value;
+        const quality = editQualitySelect.value;
+        const fidelity = editFidelitySelect.value;
+        const format = editFormatSelect.value;
+        const transparent = editTransparentToggle.classList.contains('active');
+
+        editProgressText.textContent = 'Uploading reference images...';
+        editProgressFill.style.width = '30%';
+
+        // Convert images to base64
+        const imagePromises = editUploadedFiles.map(file => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+            reader.readAsDataURL(file);
+          });
+        });
+
+        const base64Images = await Promise.all(imagePromises);
+
+        const payload = {
+          prompt: prompt,
+          image: base64Images,
+          size: size,
+          response_format: 'b64_json'
+        };
+
+        if (quality !== 'auto') payload.quality = quality;
+        if (fidelity) payload.input_fidelity = fidelity;
+        if (transparent && (format === 'png' || format === 'webp')) {
+          payload.background = 'transparent';
+        }
+        if (format !== 'png') {
+          payload.output_format = format;
+        }
+
+        editProgressText.textContent = 'Composing image with AI...';
+        editProgressFill.style.width = '50%';
+
+        const apiUrl = `${openAIConfig.endpoint}openai/deployments/gpt-image-1/images/edits?api-version=2025-04-01-preview`;
+
+        console.log('🚀 Calling Azure OpenAI Image Edit:', apiUrl);
+
+        // Create FormData with single image file (API only accepts one image)
+        const formData = new FormData();
+        
+        // Convert first image to blob
+        const binaryString = atob(base64Images[0]);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let j = 0; j < binaryString.length; j++) {
+          bytes[j] = binaryString.charCodeAt(j);
+        }
+        const blob = new Blob([bytes], { type: 'image/png' });
+        formData.append('image', blob, 'image.png');
+        
+        // Add prompt and other parameters
+        formData.append('prompt', prompt);
+        if (quality !== 'auto') formData.append('quality', quality);
+        if (format !== 'png') formData.append('output_format', format);
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'api-key': openAIConfig.apiKey
+          },
+          body: formData
+        });
+
+        editProgressFill.style.width = '80%';
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ Azure OpenAI error:', errorData);
+          throw new Error(errorData.error?.message || 'Image editing failed');
+        }
+
+        const data = await response.json();
+        console.log('✅ Image composed:', data.data.length);
+
+        editProgressFill.style.width = '90%';
+
+        // Process image
+        editProgressText.textContent = 'Processing image...';
+        
+        const newImages = data.data.map((item, index) => ({
+          id: `img_${Date.now()}_${index}`,
+          prompt: prompt,
+          revisedPrompt: item.revised_prompt || prompt,
+          imageData: item.b64_json,
+          model: 'gpt-image-1',
+          size: size,
+          quality: quality,
+          fidelity: fidelity,
+          referenceImages: editUploadedFiles.length,
+          timestamp: new Date().toISOString(),
+          type: 'edit'
+        }));
+
+        generatedImages.unshift(...newImages);
+        editProgressFill.style.width = '100%';
+
+        displayImages(newImages);
+        showSuccess(`Successfully composed image from ${editUploadedFiles.length} reference images!`, editStatus);
+
+        // Clear uploads
+        editPrompt.value = '';
+        editUploadedFiles = [];
+        editUploadedImages.innerHTML = '';
+        editGenerateBtn.disabled = true;
+
+        await fetchWalletBalance();
+
+      } catch (error) {
+        console.error('Error editing images:', error);
+        showError(error.message || 'Failed to compose image', editStatus);
+      } finally {
+        editGenerateBtn.disabled = false;
+        editProgress.classList.remove('active');
+        editProgressFill.style.width = '0%';
+      }
+    }
+
+    // ========================================
+    // GENERATE VARIATIONS (TAB 3)
+    // ========================================
+    variationsGenerateBtn.addEventListener('click', async () => {
+      await generateVariations();
+    });
+
+    async function generateVariations() {
+      if (!variationsUploadedFile) {
+        showError("Please upload a base image", variationsStatus);
+        return;
+      }
+
+      if (!openAIConfig) {
+        showError("OpenAI configuration not loaded", variationsStatus);
+        return;
+      }
+
+      variationsGenerateBtn.disabled = true;
+      variationsProgress.classList.add('active');
+      variationsStatus.classList.remove('active');
+      variationsProgressFill.style.width = '0%';
+
+      try {
+        // Calculate cost
+        const totalCost = COSTS.DALLE_2 * variationsCount;
+
+        // Deduct cost
+        variationsProgressText.textContent = 'Processing payment...';
+        variationsProgressFill.style.width = '10%';
+
+        await deductCost(totalCost, `Image variations (dall-e-2)`);
+
+        // Convert image to base64
+        variationsProgressText.textContent = 'Uploading base image...';
+        variationsProgressFill.style.width = '30%';
+
+        const base64Image = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+          reader.readAsDataURL(variationsUploadedFile);
+        });
+
+        const size = variationsSizeSelect.value;
+
+        const payload = {
+          image: base64Image,
+          n: variationsCount,
+          size: size,
+          response_format: 'b64_json'
+        };
+
+        variationsProgressText.textContent = `Creating ${variationsCount} variation${variationsCount > 1 ? 's' : ''}...`;
+        variationsProgressFill.style.width = '50%';
+
+        const apiUrl = `${openAIConfig.endpoint}openai/deployments/dalle2/images/variations?api-version=2025-04-01-preview`;
+
+        console.log('🚀 Calling Azure OpenAI Image Variations:', apiUrl);
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': openAIConfig.apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+
+        variationsProgressFill.style.width = '80%';
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ Azure OpenAI error:', errorData);
+          throw new Error(errorData.error?.message || 'Variation generation failed');
+        }
+
+        const data = await response.json();
+        console.log('✅ Variations created:', data.data.length);
+
+        variationsProgressFill.style.width = '90%';
+
+        // Process images
+        variationsProgressText.textContent = 'Processing variations...';
+        
+        const newImages = data.data.map((item, index) => ({
+          id: `img_${Date.now()}_${index}`,
+          prompt: 'Image variation',
+          revisedPrompt: `Variation ${index + 1}`,
+          imageData: item.b64_json,
+          model: 'dall-e-2',
+          size: size,
+          timestamp: new Date().toISOString(),
+          type: 'variation'
+        }));
+
+        generatedImages.unshift(...newImages);
+        variationsProgressFill.style.width = '100%';
+
+        displayImages(newImages);
+        showSuccess(`Successfully created ${newImages.length} variation${newImages.length > 1 ? 's' : ''}!`, variationsStatus);
+
+        // Clear upload
+        variationsUploadedFile = null;
+        variationsUploadedImages.innerHTML = '';
+        variationsGenerateBtn.disabled = true;
+
+        await fetchWalletBalance();
+
+      } catch (error) {
+        console.error('Error creating variations:', error);
+        showError(error.message || 'Failed to create variations', variationsStatus);
+      } finally {
+        variationsGenerateBtn.disabled = false;
+        variationsProgress.classList.remove('active');
+        variationsProgressFill.style.width = '0%';
+      }
+    }
+
+    // ========================================
+    // DISPLAY IMAGES
+    // ========================================
+    function displayImages(images) {
+      resultsEmpty.style.display = 'none';
+      
+      // Separate images by model
+      const gptImages = images.filter(img => img.model === 'gpt-image-1');
+      const fluxImages = images.filter(img => img.model === 'flux');
+      
+      // Show/hide sections and populate grids
+      if (gptImages.length > 0) {
+        gptImagesSection.style.display = 'block';
+        gptImages.forEach(image => {
+          const card = createImageCard(image);
+          gptGrid.insertBefore(card, gptGrid.firstChild);
+        });
+      }
+      
+      if (fluxImages.length > 0) {
+        fluxImagesSection.style.display = 'block';
+        fluxImages.forEach(image => {
+          const card = createImageCard(image);
+          fluxGrid.insertBefore(card, fluxGrid.firstChild);
+        });
+      }
+    }
+
+    function createImageCard(image) {
+      const card = document.createElement('div');
+      card.className = 'result-card variant-card image-preview-card';
+      card.id = image.id;
+      card.dataset.imageId = image.id;
+      card.style.position = 'relative';
+      card.style.overflow = 'hidden';
+      card.style.aspectRatio = '1';
+      card.style.borderRadius = '8px';
+      card.style.cursor = 'pointer';
+      card.style.background = '#f5f5f5';
+
+      card.innerHTML = `
+        <div class="variant-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;"></div>
+        <img class="result-image variant-image" alt="Generated" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+        <div class="download-overlay" style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 2;
+        ">
+          <button class="download-icon-btn" style="
+            background: #FF8B00;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+          " onclick="downloadImage('${image.id}'); event.stopPropagation();">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+          </button>
+        </div>
+      `;
+
+      // Show download overlay on hover
+      const overlay = card.querySelector('.download-overlay');
+      card.addEventListener('mouseenter', () => {
+        overlay.style.opacity = '1';
+      });
+      card.addEventListener('mouseleave', () => {
+        overlay.style.opacity = '0';
+      });
+
+      // Load image asynchronously in parallel
+      loadImageInCard(image);
+
+      return card;
+    }
+
+    function loadImageInCard(image) {
+      const card = document.getElementById(image.id);
+      if (!card) return;
+
+      const img = card.querySelector('.result-image');
+      const spinner = card.querySelector('.variant-spinner');
+
+      // Handle both base64 and URL image data
+      const imageSrc = image.imageData.startsWith('http') 
+        ? image.imageData 
+        : `data:image/png;base64,${image.imageData}`;
+
+      img.onload = () => {
+        if (spinner) {
+          spinner.style.display = 'none';
+        }
+        img.style.display = 'block';
+        card.style.background = 'transparent';
+      };
+
+      img.onerror = () => {
+        if (spinner) {
+          spinner.style.display = 'none';
+        }
+        img.style.display = 'none';
+        card.style.background = '#FFF0F0';
+      };
+
+      img.src = imageSrc;
+    }
+
+    // ========================================
+    // DOWNLOAD IMAGE
+    // ========================================
+    window.downloadImage = function(imageId) {
+      const image = generatedImages.find(img => img.id === imageId);
+      if (!image) return;
+
+      const link = document.createElement('a');
+      
+      // Handle both base64 and URL formats
+      if (image.imageData.startsWith('http')) {
+        link.href = image.imageData;
+      } else {
+        link.href = `data:image/png;base64,${image.imageData}`;
+      }
+      
+      link.download = `ai-generated-${imageId}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showSuccess('Image downloaded successfully!', generateStatus);
+    };
+
+    // ========================================
+    // VIEW FULL IMAGE
+    // ========================================
+    window.viewFullImage = function(imageId) {
+      const image = generatedImages.find(img => img.id === imageId);
+      if (!image) return;
+
+      // Handle both base64 and URL formats
+      const imageSrc = image.imageData.startsWith('http') 
+        ? image.imageData 
+        : `data:image/png;base64,${image.imageData}`;
+
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+      `;
+
+      modal.innerHTML = `
+        <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+          <img src="${imageSrc}" 
+               style="max-width: 100%; max-height: 90vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);"
+               alt="${image.prompt}">
+          <button 
+            onclick="this.closest('div').parentElement.remove()"
+            style="
+              position: absolute;
+              top: -10px;
+              right: -10px;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              background: white;
+              border: none;
+              font-size: 24px;
+              cursor: pointer;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            ✕
+          </button>
+        </div>
+      `;
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+
+      document.body.appendChild(modal);
+    };
+
+    // ========================================
+    // DOWNLOAD ALL IMAGES AS ZIP
+    // ========================================
+    async function downloadAllImagesAsZip(modelName, grid) {
+      const cards = grid.querySelectorAll('.image-preview-card');
+      
+      if (cards.length === 0) {
+        showError('No images to download', generateStatus);
+        return;
+      }
+
+      try {
+        // Load JSZip library
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        
+        script.onload = async () => {
+          const zip = new JSZip();
+          const folder = zip.folder(modelName);
+          
+          let imageCount = 0;
+          
+          for (const card of cards) {
+            const imageId = card.dataset.imageId;
+            const image = generatedImages.find(img => img.id === imageId);
+            
+            if (image) {
+              // Convert base64 to blob
+              let imageData = image.imageData;
+              if (!imageData.startsWith('http')) {
+                const binaryString = atob(imageData);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                imageData = bytes;
+              } else {
+                const response = await fetch(imageData);
+                imageData = await response.arrayBuffer();
+              }
+              
+              folder.file(`${modelName}-${imageCount + 1}.png`, imageData);
+              imageCount++;
+            }
+          }
+          
+          const blob = await zip.generateAsync({ type: 'blob' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${modelName}-images.zip`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          showSuccess(`Downloaded ${imageCount} ${modelName} images as ZIP`, generateStatus);
+        };
+        
+        script.onerror = () => {
+          showError('Failed to load ZIP library', generateStatus);
+        };
+        
+        document.head.appendChild(script);
+        
+      } catch (error) {
+        console.error('Error downloading ZIP:', error);
+        showError('Failed to create ZIP file', generateStatus);
+      }
+    }
+
+    // Add event listeners for download all buttons
+    downloadAllGptBtn.addEventListener('click', () => {
+      downloadAllImagesAsZip('GPT', gptGrid);
+    });
+
+    downloadAllFluxBtn.addEventListener('click', () => {
+      downloadAllImagesAsZip('Flux', fluxGrid);
+    });
+
+    // ========================================
+    // DEDUCT COST FROM WALLET
+    // ========================================
+    async function deductCost(amount, description) {
+      try {
+        // Use authenticated email, fallback to URL param, fallback to currentUser
+        const email = window.generatorUserEmail || userEmail || currentUser?.email;
+        
+        if (!email) {
+          throw new Error('User email not available. Please log in again.');
+        }
+
+        const response = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            amount: amount,
+            description: description,
+            metadata: {
+              service: 'image_generation',
+              model: generateModel,
+              tab: currentTab
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          
+          if (response.status === 402) {
+            throw new Error(
+              `Insufficient funds!\n\nRequired: R${amount.toFixed(2)}\nBalance: ${error.formatted_balance || 'R0.00'}\n\nPlease add credits to continue.`
+            );
+          }
+          
+          throw new Error(error.error || 'Payment failed');
+        }
+
+        const result = await response.json();
+        console.log(`✅ Cost deducted: R${amount.toFixed(2)}`);
+        return result;
+
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // ========================================
+    // STATUS MESSAGES
+    // ========================================
+    function showSuccess(message, element) {
+      element.textContent = message;
+      element.className = 'status success active';
+      
+      setTimeout(() => {
+        element.classList.remove('active');
+      }, 5000);
+    }
+
+    function showError(message, element) {
+      element.textContent = message;
+      element.className = 'status error active';
+      
+      setTimeout(() => {
+        element.classList.remove('active');
+      }, 8000);
+    }
+
+    function showInfo(message, element) {
+      element.textContent = message;
+      element.className = 'status info active';
+      
+      setTimeout(() => {
+        element.classList.remove('active');
+      }, 5000);
+    }
+
+    // ========================================
+    // KEYBOARD SHORTCUTS
+    // ========================================
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + Enter to generate
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (currentTab === 'generate' && !generateBtn.disabled && generatePrompt.value.trim()) {
+          generateImages();
+        } else if (currentTab === 'edit' && !editGenerateBtn.disabled) {
+          editImages();
+        } else if (currentTab === 'variations' && !variationsGenerateBtn.disabled) {
+          generateVariations();
+        }
+      }
+    });
+
+    // ========================================
+    // INITIALIZE ON PAGE LOAD
+    // ========================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 Initializing AI Image Generator...');
+      
+      const isAuthenticated = await checkAuthentication();
+      
+      if (isAuthenticated) {
+        authLoading.classList.add('hidden');
+        console.log('✅ Initialization complete');
+        
+        updateGenerateCost();
+        updateEditCost();
+        updateVariationsCost();
+        
+        console.log('📊 Configuration:', {
+          user: currentUser?.email,
+          business: currentBusiness?.store_info?.name,
+          businessId: businessId,
+          hasOpenAI: !!openAIConfig
+        });
+      } else {
+        console.log('❌ Authentication failed');
+      }
+    });
+
+    // ========================================
+    // EXPORT FUNCTIONS (FOR TESTING)
+    // ========================================
+    window.imageGenerator = {
+      generateImages,
+      editImages,
+      generateVariations,
+      downloadImage,
+      viewFullImage,
+      getGeneratedImages: () => generatedImages,
+      clearImages: () => {
+        generatedImages = [];
+        gptGrid.innerHTML = '';
+        fluxGrid.innerHTML = '';
+        resultsEmpty.style.display = 'flex';
+        gptImagesSection.style.display = 'none';
+        fluxImagesSection.style.display = 'none';
+      }
+    };
+
+  </script>
+
+</body>
+</html>

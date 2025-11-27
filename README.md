@@ -75,6 +75,11 @@ AZURE_OPENAI_DIARIZATION_DEPLOYMENT=gpt-4o-transcribe-diarize
 CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
 CLOUDINARY_UPLOAD_PRESET=zuke_uploads
 
+# Mailgun (Email Service for Creative Hub)
+MAILGUN_API_KEY=your-mailgun-api-key
+MAILGUN_DOMAIN=mg.yourdomain.com
+MAILGUN_FROM_EMAIL=noreply@mg.yourdomain.com
+
 # N8N Wallet Webhook (Billing)
 N8N_WALLET_WEBHOOK_URL=https://your-n8n-instance.com/webhook/...
 

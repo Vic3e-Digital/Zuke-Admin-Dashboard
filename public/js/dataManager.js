@@ -10,7 +10,10 @@ class DataManager {
         userEmail: null,
         userEmailTimestamp: null,
         businessCase: null,
-        businessCaseTimestamp: null
+        businessCaseTimestamp: null,
+        auth0Client: null, // Auth0 client cache
+        creativeModels: null, // Creative models cache
+        creativeModelsTimestamp: null
       };
     }
   
@@ -95,12 +98,16 @@ class DataManager {
         userEmail: null,
         userEmailTimestamp: null,
         businessCase: null,
-        businessCaseTimestamp: null
+        businessCaseTimestamp: null,
+        auth0Client: null,
+        creativeModels: null,
+        creativeModelsTimestamp: null
       };
       sessionStorage.removeItem('cachedBusinesses');
       sessionStorage.removeItem('selectedBusiness');
       sessionStorage.removeItem('cachedUserEmail');
       sessionStorage.removeItem('cachedBusinessCase');
+      sessionStorage.removeItem('cachedCreativeModels');
     }
   
     // Register a callback for business changes
@@ -233,6 +240,58 @@ class DataManager {
         return stored;
       }
       return null;
+    }
+
+    // Cache Auth0 Client
+    setAuth0Client(auth0Client) {
+      this.cache.auth0Client = auth0Client;
+    }
+
+    // Get cached Auth0 Client
+    getAuth0Client() {
+      return this.cache.auth0Client;
+    }
+
+    // Cache creative models
+    setCreativeModels(models) {
+      this.cache.creativeModels = models;
+      this.cache.creativeModelsTimestamp = Date.now();
+      sessionStorage.setItem('cachedCreativeModels', JSON.stringify({
+        data: models,
+        timestamp: this.cache.creativeModelsTimestamp
+      }));
+    }
+
+    // Get cached creative models
+    getCreativeModels() {
+      // Check memory cache first
+      if (this.cache.creativeModels && this.isCacheValid(this.cache.creativeModelsTimestamp)) {
+        return this.cache.creativeModels;
+      }
+
+      // Check sessionStorage
+      const stored = sessionStorage.getItem('cachedCreativeModels');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Date.now() - parsed.timestamp < this.cache.cacheExpiry) {
+            this.cache.creativeModels = parsed.data;
+            this.cache.creativeModelsTimestamp = parsed.timestamp;
+            return parsed.data;
+          }
+        } catch (error) {
+          console.error('Error parsing cached creative models:', error);
+        }
+      }
+
+      return null;
+    }
+
+    // Clear creative models cache (for refresh)
+    clearCreativeModelsCache() {
+      this.cache.creativeModels = null;
+      this.cache.creativeModelsTimestamp = null;
+      sessionStorage.removeItem('cachedCreativeModels');
     }
   }
 

@@ -113,6 +113,15 @@ class AnalyticsTracker {
      * Load Microsoft Clarity script
      */
     async loadMicrosoftClarity() {
+        // Skip Clarity on payment/sensitive pages for security
+        const sensitivePages = ['/pages/pricing.html', '/pages/topup.html', '/payment', '/checkout'];
+        const currentPath = window.location.pathname.toLowerCase();
+        
+        if (sensitivePages.some(page => currentPath.includes(page))) {
+            console.log('Skipping Clarity on payment page for security');
+            return Promise.resolve();
+        }
+        
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.type = 'text/javascript';

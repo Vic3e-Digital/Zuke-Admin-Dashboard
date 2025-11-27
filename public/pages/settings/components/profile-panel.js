@@ -226,6 +226,13 @@ export class ProfilePanelComponent {
 
   openBusinessManagement(currentBusiness) {
     const modal = document.getElementById('businessManagementModal');
+    
+    if (!modal) {
+      console.error('businessManagementModal element not found in DOM');
+      this.notifications.show('Error: Modal not found. Please refresh the page.', 'error');
+      return;
+    }
+
     modal.style.display = 'block';
 
     // Load managers
@@ -233,7 +240,7 @@ export class ProfilePanelComponent {
 
     // Set business status
     const statusToggle = document.getElementById('businessActiveToggle');
-    if (currentBusiness.status) {
+    if (statusToggle && currentBusiness.status) {
       statusToggle.checked = currentBusiness.status === 'active';
     }
   }
@@ -241,6 +248,10 @@ export class ProfilePanelComponent {
   async loadBusinessManagers(currentBusiness) {
     try {
       const managersList = document.getElementById('managersList');
+      if (!managersList) {
+        console.warn('managersList element not found in DOM');
+        return;
+      }
 
       const managers = currentBusiness.managers || [];
       const owner = currentBusiness.personal_info?.email;

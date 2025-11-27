@@ -22,7 +22,7 @@
   }
   
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     padding: 20px;
     background: var(--light-bg);
     color: var(--text-primary);
