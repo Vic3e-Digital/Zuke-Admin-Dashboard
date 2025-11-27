@@ -80,11 +80,18 @@ export async function initBusinessPage() {
     const iframe = document.getElementById("modalIframe");
     const closeBtn = document.getElementsByClassName("close")[0];
 
+    // Verify modal elements exist
+    if (!modal || !modalTitle || !iframe) {
+      console.error("Modal elements not found in DOM");
+      return;
+    }
+
     // Setup button handlers
     const businessCaseBtn = document.getElementById("businessCaseBtn");
     if (businessCaseBtn) {
       businessCaseBtn.onclick = function(e) {
         e.stopPropagation();
+        if (!modal || !modalTitle || !iframe) return;
         modalTitle.textContent = "Business Case Assistant";
         iframe.src = `/pages/business-tools/business-case.html`;
         modal.style.display = "block";
@@ -92,47 +99,51 @@ export async function initBusinessPage() {
       }
     }
 
-    // Pitch Deck button (Coming Soon - disabled)
-    const pitchDeckBtn = document.getElementById("pitchDeckBtn");
-    if (pitchDeckBtn) {
-      pitchDeckBtn.onclick = function(e) {
+    // Generate Presentation with AI
+    const presentonBtn = document.getElementById("presentonBtn");
+    if (presentonBtn) {
+      presentonBtn.onclick = function(e) {
         e.stopPropagation();
-        e.preventDefault();
-        // Could add a toast notification here: "Pitch Deck tool coming soon!"
+        if (!modal || !modalTitle || !iframe) return;
+        modalTitle.textContent = "Generate Presentation with AI";
+        iframe.src = `/pages/business/generate-presentation.html?businessName=${encodeURIComponent(businessName)}&businessDescription=${encodeURIComponent(businessDescription)}`;
+        modal.style.display = "block";
+        document.body.style.overflow = 'hidden';
       }
     }
 
     // Add Products button
-const addProductsBtn = document.getElementById("addProductsBtn");
-if (addProductsBtn) {
-  addProductsBtn.onclick = function(e) {
-    e.stopPropagation();
-    modalTitle.textContent = "Add Products";
-    // ✅ Only pass essential IDs
-    iframe.src = `/pages/business/add-product.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`;
-    modal.style.display = "block";
-    document.body.style.overflow = 'hidden';
-  }
-}
+    const addProductsBtn = document.getElementById("addProductsBtn");
+    if (addProductsBtn) {
+      addProductsBtn.onclick = function(e) {
+        e.stopPropagation();
+        if (!modal || !modalTitle || !iframe) return;
+        modalTitle.textContent = "Add Products";
+        iframe.src = `/pages/business/add-product.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`;
+        modal.style.display = "block";
+        document.body.style.overflow = 'hidden';
+      }
+    }
 
-// Add Services button
-const addServicesBtn = document.getElementById("addServicesBtn");
-if (addServicesBtn) {
-  addServicesBtn.onclick = function(e) {
-    e.stopPropagation();
-    modalTitle.textContent = "Add Services";
-    // ✅ Only pass essential IDs
-    iframe.src = `/pages/business/add-service.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`;
-    modal.style.display = "block";
-    document.body.style.overflow = 'hidden';
-  }
-}
+    // Add Services button
+    const addServicesBtn = document.getElementById("addServicesBtn");
+    if (addServicesBtn) {
+      addServicesBtn.onclick = function(e) {
+        e.stopPropagation();
+        if (!modal || !modalTitle || !iframe) return;
+        modalTitle.textContent = "Add Services";
+        iframe.src = `/pages/business/add-service.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}`;
+        modal.style.display = "block";
+        document.body.style.overflow = 'hidden';
+      }
+    }
 
     // Find Business Partners button
     const afaaTool1Btn = document.getElementById("afaaTool1Btn");
     if (afaaTool1Btn) {
       afaaTool1Btn.onclick = function(e) {
         e.stopPropagation();
+        if (!modal || !modalTitle || !iframe) return;
         modalTitle.textContent = "Find Partners from LinkedIn";
         iframe.src = `https://aigents.southafricanorth.azurecontainer.io/form/zuke-x-dineo-simple?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCaseJSON}`;
         modal.style.display = "block";
