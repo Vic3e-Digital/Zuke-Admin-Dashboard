@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Presentation</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <style>
+    body {
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 20px;
+      background: var(--light-bg);
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--dark-neutral);
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark-neutral);
+      font-size: 14px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    button {
+      background: linear-gradient(135deg, var(--primary-orange), var(--alt-orange));
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    .status.loading {
+      background: #cce5ff;
+      color: #004085;
+      border: 1px solid #b8daff;
+      display: block;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 64, 133, 0.3);
+      border-top-color: #004085;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .download-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      background: white;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .download-link:hover {
+      background: #f0f8ff;
+    }
+    .help-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .required {
+      color: var(--primary-orange);
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Generate Presentation with AI</h2>
+    <p class="subtitle">Create professional presentations powered by AI in seconds</p>
+    
+    <form id="presentationForm">
+      <div class="form-group">
+        <label for="topic">Presentation Topic <span class="required">*</span></label>
+        <input type="text" id="topic" required placeholder="e.g., Marketing Strategy for 2025">
+        <div class="help-text">Main subject or title for your presentation</div>
+      </div>
+
+      <div class="form-group">
+        <label for="instructions">Additional Instructions</label>
+        <textarea id="instructions" placeholder="Any specific requirements, focus areas, or key points to include..."></textarea>
+        <div class="help-text">Optional: Provide specific guidance for the AI</div>
+      </div>
+
+      <div class="form-group">
+        <label for="slides">Number of Slides</label>
+        <input type="number" id="slides" value="8" min="3" max="20">
+        <div class="help-text">Between 3 and 20 slides</div>
+      </div>
+
+      <div class="form-group">
+        <label for="tone">Presentation Tone</label>
+        <select id="tone">
+          <option value="default">Default</option>
+          <option value="professional">Professional</option>
+          <option value="casual">Casual</option>
+          <option value="educational">Educational</option>
+          <option value="sales_pitch">Sales Pitch</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="format">Export Format</label>
+        <select id="format">
+          <option value="pptx">PowerPoint (PPTX)</option>
+          <option value="pdf">PDF</option>
+        </select>
+      </div>
+
+      <button type="submit" id="generateBtn">
+        <span id="btnText">Generate Presentation</span>
+      </button>
+    </form>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <script>
+    const PRESENTON_API = 'http://48.195.193.72/api/v1/ppt/presentation/generate';
+    const PRESENTON_BASE = 'http://48.195.193.72';
+
+    let auth0Client = null;
+
+    // Initialize Auth0
+    async function initAuth0() {
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+        return auth0Client;
+      } catch (error) {
+        console.error("Error initializing Auth0:", error);
+        return null;
+      }
+    }
+
+    // Pre-fill form with URL parameters
+    function prefillForm() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const businessName = urlParams.get('businessName');
+      const businessDescription = urlParams.get('businessDescription');
+      
+      if (businessName) {
+        document.getElementById('topic').value = `Business Presentation: ${businessName}`;
+      }
+      
+      if (businessDescription) {
+        document.getElementById('instructions').value = businessDescription;
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('presentationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const statusDiv = document.getElementById('status');
+      const generateBtn = document.getElementById('generateBtn');
+      const btnText = document.getElementById('btnText');
+      
+      // Get form values
+      const topic = document.getElementById('topic').value;
+      const instructions = document.getElementById('instructions').value;
+      const slides = parseInt(document.getElementById('slides').value);
+      const tone = document.getElementById('tone').value;
+      const format = document.getElementById('format').value;
+
+      // Validate
+      if (!topic.trim()) {
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = '❌ Please enter a presentation topic';
+        return;
+      }
+
+      // Show loading
+      statusDiv.className = 'status loading';
+      statusDiv.innerHTML = '<div class="spinner"></div><div>🚀 Generating your presentation... This may take 1-2 minutes.</div>';
+      generateBtn.disabled = true;
+      btnText.textContent = 'Generating...';
+
+      try {
+        const response = await fetch(PRESENTON_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: topic,
+            instructions: instructions || null,
+            n_slides: slides,
+            tone: tone,
+            export_as: format,
+            language: "English",
+            template: "general",
+            include_title_slide: true,
+            include_table_of_contents: false
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Track successful generation
+        if (window.analytics) {
+          window.analytics.trackCreativeEvent('generate_presentation', 'presentation', {
+            topic: topic,
+            slides: slides,
+            format: format,
+            tone: tone
+          });
+        }
+        
+        // Show success with download link
+        statusDiv.className = 'status success';
+        statusDiv.innerHTML = `
+          <strong>✅ Presentation generated successfully!</strong><br><br>
+          <a href="${PRESENTON_BASE}${data.path}" class="download-link" download>
+            📥 Download ${format.toUpperCase()}
+          </a><br>
+          <a href="${PRESENTON_BASE}${data.edit_path}" class="download-link" target="_blank" rel="noopener">
+            ✏️ Edit in Presenton
+          </a>
+        `;
+
+      } catch (error) {
+        console.error('Error:', error);
+        
+        // Track error
+        if (window.analytics) {
+          window.analytics.trackError(`Presentation generation failed: ${error.message}`, 'generate-presentation');
+        }
+        
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = `<strong>❌ Error generating presentation</strong><br>${error.message}<br><br>Please try again or contact support if the issue persists.`;
+      } finally {
+        generateBtn.disabled = false;
+        btnText.textContent = 'Generate Presentation';
+      }
+    });
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      initAuth0();
+      prefillForm();
+    });
+  </script>
+</body>
+</html>
