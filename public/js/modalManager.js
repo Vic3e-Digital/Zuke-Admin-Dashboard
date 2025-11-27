@@ -84,7 +84,7 @@ class ModalManager {
         gap: 10px;
         align-items: center;
         z-index: 9999;
-        max-height: 80px;
+        max-height: 40px;
         overflow-y: auto;
         box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       ">
@@ -113,6 +113,12 @@ class ModalManager {
   enhanceModal(modal, index) {
     const modalContent = modal.querySelector('.modal-content');
     if (!modalContent) return;
+
+    // Wait for modal to be fully ready in DOM
+    if (!modal.offsetParent) {
+      console.warn('⏳ Modal not yet visible, deferring enhancement:', modal.id);
+      return;
+    }
 
     // Get the current title before doing anything
     const currentTitle = document.getElementById('modalTitle')?.textContent || 'Modal';
