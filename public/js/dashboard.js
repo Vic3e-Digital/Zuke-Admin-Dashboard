@@ -151,21 +151,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.dataManager.setUserEmail(user.email);
       window.dataManager.setUserName(user.name);
 
+      // Show all tabs for all users
       const marketplaceNav = document.querySelector('[data-page="marketplace"]');
-const creativeNav = document.querySelector('[data-page="creative"]');
-const marketingNav = document.querySelector('[data-page="test"]');
+      const creativeNav = document.querySelector('[data-page="creative"]');
+      const marketingNav = document.querySelector('[data-page="test"]');
 
-if (!isAdmin) {
-  // Hide admin-only menu items
-  if (marketplaceNav) marketplaceNav.closest('.nav-item').style.display = 'none';
-  if (creativeNav) creativeNav.closest('.nav-item').style.display = 'none';
-  if (marketingNav) marketingNav.closest('.nav-item').style.display = 'none';
-} else {
-  // Show all menu items for admin
-  if (marketplaceNav) marketplaceNav.closest('.nav-item').style.display = '';
-  if (creativeNav) creativeNav.closest('.nav-item').style.display = '';
-  if (marketingNav) marketingNav.closest('.nav-item').style.display = '';
-}
+      // Make all tabs visible
+      if (marketplaceNav) marketplaceNav.closest('.nav-item').style.display = '';
+      if (creativeNav) creativeNav.closest('.nav-item').style.display = '';
+      if (marketingNav) marketingNav.closest('.nav-item').style.display = '';
       // Update welcome message with actual user info
       userWelcome.textContent = `Welcome ${user.name || user.email || 'User'}`;
       if (isAdmin) {

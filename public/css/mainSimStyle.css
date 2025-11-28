@@ -25,6 +25,15 @@
   overflow: hidden;
 }
 
+/* Active main sim card comes first visually and is highlighted */
+.main-sim-card.active {
+  order: -1;
+  box-shadow: 0 12px 24px -6px #FF6B3533, 0 4px 12px rgba(0,0,0,0.12);
+  border: 2px solid #FF6B35;
+  z-index: 2;
+  transform: scale(1.04);
+}
+
 .main-sim-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
@@ -198,8 +207,10 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 250px;
-  height: 250px;
+  width: min(40vw, 250px);
+  height: min(40vw, 250px);
+  max-width: 100%;
+  max-height: 100%;
   overflow: hidden;
   border-top-left-radius: 60%;
   transition: all 0.3s ease;
@@ -208,7 +219,7 @@
 .main-sim-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   transition: transform 0.3s ease;
 }
@@ -258,16 +269,20 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .main-sim-cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  .main-sim-image {
+    width: min(60vw, 120px);
+    height: min(60vw, 120px);
+    max-width: 100%;
+    max-height: 100%;
   }
-}
 
 @media (max-width: 768px) {
-  .main-sim-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 0 16px;
+  .main-sim-image {
+    width: min(80vw, 100px);
+    height: min(80vw, 100px);
+    max-width: 100%;
+    max-height: 100%;
+  }
     margin: 30px 0 20px 0;
   }
   
