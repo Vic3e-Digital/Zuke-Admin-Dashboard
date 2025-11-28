@@ -51,11 +51,13 @@ app.use((req, res, next) => {
 
 // Product management
 const productLog = require('./api/products/log');
+const getProductsServices = require('./api/products/get-products-services');
 const productWebhook = require('./api/webhook/product-created');
 const serviceWebhook = require('./api/webhook/service-created');
 
 
 app.use('/api/products', productLog);
+app.use('/api/products', getProductsServices);
 app.use('/api/webhook', productWebhook);
 app.use('/api/webhook', serviceWebhook);
 app.use('/api', wordpressConfig);
@@ -120,6 +122,7 @@ app.use('/api/activate-subscription', subscriptionActivationRouter);
 app.use('/api/cancel-subscription', cancelSubscriptionRouter);
 app.use('/api/add-credits', addCreditsRouter);
 app.use('/api/social-post', require('./api/social-post'));
+app.use('/api/lead-generation', require('./api/lead-generation'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
 app.use('/api/marketing', marketingApiRouter);

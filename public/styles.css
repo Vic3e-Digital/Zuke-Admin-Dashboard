@@ -169,7 +169,7 @@ body {
   right: 0;
   height: 60px;
   background: #f3f5f9;
-  border-bottom: 1px solid #1f1f1f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -1167,19 +1167,23 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px 40px;
 }
 
 .modal-content {
   background-color: var(--card);
-  margin: 5% auto;
+  margin: 0;
   padding: 0;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--radius);
   width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
+  max-width: 800px;
+  max-height: calc(100vh - 140px);
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .close {
