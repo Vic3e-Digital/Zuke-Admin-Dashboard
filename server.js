@@ -11,6 +11,8 @@ const sendEmailRoutes = require('./api/send-email-api');
 const veoVertexApiRouter = require('./api/veo-vertex-api');
 const audioTranscribeRoutes = require('./api/audio-transcribe-api');
 const marketingApiRouter = require('./api/marketing-api');
+// const callAzureOpenAiRouter = require('./api/call-azure-openai');
+const contentCalendarApi = require('./api/content-calendar-api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +31,7 @@ const regenerateBusinessCaseRouter = require('./api/regenerate-business-case');
 const subscriptionActivationRouter = require('./api/routes/subscription-activation');
 const cancelSubscriptionRouter = require('./api/cancel-subscription');
 const addCreditsRouter = require('./api/add-credits');
+const promoCodesRouter = require('./api/promo-codes');
 
 // -------------------------
 // ✅ MIDDLEWARE FIRST (BEFORE ROUTES!)
@@ -121,12 +124,19 @@ app.use('/api/wallet', require('./api/wallet'));
 app.use('/api/activate-subscription', subscriptionActivationRouter);
 app.use('/api/cancel-subscription', cancelSubscriptionRouter);
 app.use('/api/add-credits', addCreditsRouter);
+app.use('/api', promoCodesRouter);
 app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/lead-generation', require('./api/lead-generation'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
+
+// Content Calendar routes - MUST be before general marketing router
+app.post('/api/marketing/generate-content-calendar', contentCalendarApi.generateContentCalendar);
+app.get('/api/marketing/content-calendars', contentCalendarApi.getContentCalendars);
+
 app.use('/api/marketing', marketingApiRouter);
 app.use('/api/veo-vertex', veoVertexApiRouter);
+// app.use('/api/call-azure-openai', callAzureOpenAiRouter);
 app.use('/api/business-case', businessCaseApi);
 app.use('/api/creative-models', creativeModelsApi);
 app.use('/api/business-creatives', businessCreativesApi);

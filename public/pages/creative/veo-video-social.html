@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Video Generator with Veo | Zuke</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Tab Styles */
+    .tabs-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-button {
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: #999;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      margin-bottom: -2px;
+    }
+
+    .tab-button:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-button.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Video Container */
+    .video-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .video-input-section, .video-preview-section {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    /* Input Box */
+    .video-input-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .video-input-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .video-input-box.has-image {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .video-input-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+
+    .video-preview {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .preview-header {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .progress-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--light-bg);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .progress-bar-container {
+      background: #e0e0e0;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      background: var(--primary-orange);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-button {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .generate-btn {
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      background: #ff9500;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .generate-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .copy-btn, .download-btn, .share-btn, .regenerate-btn, .clear-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .copy-btn:hover, .download-btn:hover, .share-btn:hover, .regenerate-btn:hover, .clear-btn:hover {
+      background: #5a6268;
+    }
+
+    .status {
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      background: white;
+      color: #333;
+    }
+
+    textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .field-note {
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .settings-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .quick-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .option-chip {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+      color: #333;
+    }
+
+    .option-chip:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .option-chip.active {
+      border-color: var(--primary-orange);
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .video-container {
+        flex-direction: column;
+      }
+
+      .video-input-section, .video-preview-section {
+        flex: none;
+        width: 100%;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .action-button {
+        min-width: auto;
+      }
+
+      .settings-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <div class="container">
+      
+      <!-- Header -->
+      <div class="header">
+        <h1>AI Video Generator with Veo</h1>
+        <p>Generate stunning AI videos from text prompts or images powered by Google's advanced video generation model</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-container">
+        <button class="tab-button active" data-tab="text-to-video">✍️ Text to Video</button>
+        <button class="tab-button" data-tab="image-to-video">🖼️ Image to Video</button>
+      </div>
+
+      <!-- Text-to-Video Tab -->
+      <div class="tab-content active" id="text-to-video">
+        <div class="video-container">
+          
+          <!-- Input Section -->
+          <div class="video-input-section">
+            <div class="section-title">Create Your Video</div>
+
+            <!-- Model Selection -->
+            <div class="form-group">
+              <div class="form-label">📹 Model</div>
+              <select id="veoModel" style="margin-bottom: 10px;">
+                <option value="veo-3.1">Veo 3.1 (Best Quality)</option>
+                <option value="veo-3.1-fast">Veo 3.1 Fast (Faster)</option>
+                <option value="veo-3.0">Veo 3.0 (Stable)</option>
+                <option value="veo-3.0-fast">Veo 3.0 Fast (Quick)</option>
+              </select>
+            </div>
+
+            <!-- Duration Selection -->
+            <div class="form-group">
+              <div class="form-label">⏱️ Video Duration</div>
+              <div class="quick-options">
+                <button class="option-chip" data-duration="4" onclick="selectDuration(4)">4s</button>
+                <button class="option-chip active" data-duration="6" onclick="selectDuration(6)">6s</button>
+                <button class="option-chip" data-duration="8" onclick="selectDuration(8)">8s</button>
+              </div>
+            </div>
+
+            <!-- Video Prompt -->
+            <div class="form-group">
+              <div class="form-label">✍️ Video Prompt</div>
+              <textarea id="videoPrompt" placeholder="Describe the video you want to generate. Be specific about camera movements, objects, actions, and mood."></textarea>
+              <div class="field-note">💡 Tip: Include camera movements (pan, zoom, dolly), specific objects, lighting, and actions for best results.</div>
+            </div>
+
+            <!-- Resolution Settings -->
+            <div class="form-group">
+              <div class="settings-row">
+                <div>
+                  <div class="form-label">Resolution</div>
+                  <select id="resolution">
+                    <option value="720p">720p (Standard)</option>
+                    <option value="1080p">1080p (High Quality)</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="form-label">Aspect Ratio</div>
+                  <select id="aspectRatio">
+                    <option value="16:9">16:9 (Landscape)</option>
+                    <option value="9:16">9:16 (Portrait - Reels/TikTok)</option>
+                    <option value="1:1">1:1 (Square)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generateBtn" class="action-button generate-btn" disabled>
+              🎬 Generate Video
+            </button>
+
+            <div id="videoStatus" class="status"></div>
+          </div>
+
+          <!-- Preview Section -->
+          <div class="video-preview-section">
+            <div class="section-title">Video Preview</div>
+
+            <div class="video-preview" id="videoPreview">
+              <div style="color: #999; text-align: center; padding: 20px;">
+                Your generated video will appear here
+              </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressSection">
+              <div class="progress-bar-container">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+              <div class="progress-text" id="progressText">Initializing generation...</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group" id="actionButtons">
+              <button id="downloadBtn" class="action-button download-btn" style="display: none;">
+                📥 Download Video
+              </button>
+              <button id="shareBtn" class="action-button share-btn" style="display: none;">
+                📤 Share to Socials
+              </button>
+              <button id="regenerateBtn" class="action-button regenerate-btn" style="display: none;">
+                🔄 Regenerate
+              </button>
+              <button id="clearBtn" class="action-button clear-btn" style="display: none;">
+                🗑️ Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <input type="file" id="fileInput" class="file-input" accept="image/*">
+      </div>
+
+      <!-- Image-to-Video Tab -->
+      <div class="tab-content" id="image-to-video">
+        <div class="video-container">
+          
+          <!-- Input Section -->
+          <div class="video-input-section">
+            <div class="section-title">Create Your Video</div>
+
+            <!-- Model Selection -->
+            <div class="form-group">
+              <div class="form-label">📹 Model</div>
+              <select id="veoModelImg" style="margin-bottom: 10px;">
+                <option value="veo-3.1">Veo 3.1 (Best Quality)</option>
+                <option value="veo-3.1-fast">Veo 3.1 Fast (Faster)</option>
+                <option value="veo-3.0">Veo 3.0 (Stable)</option>
+                <option value="veo-3.0-fast">Veo 3.0 Fast (Quick)</option>
+              </select>
+            </div>
+
+            <!-- Duration Selection -->
+            <div class="form-group">
+              <div class="form-label">⏱️ Video Duration</div>
+              <div class="quick-options">
+                <button class="option-chip" data-duration-img="4" onclick="selectDurationImg(4)">4s</button>
+                <button class="option-chip active" data-duration-img="6" onclick="selectDurationImg(6)">6s</button>
+                <button class="option-chip" data-duration-img="8" onclick="selectDurationImg(8)">8s</button>
+              </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-group">
+              <div class="form-label">🖼️ Upload Initial Frame</div>
+              <div class="video-input-box" id="uploadBox">
+                <div class="video-input-icon">🖼️</div>
+                <div>Click or drag image here</div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">JPG, PNG (max 20MB)</div>
+              </div>
+              <div id="uploadInfo" style="margin-top: 10px; font-size: 12px; color: #666; display: none;"></div>
+              <button id="removeImageBtn" class="action-button clear-btn" style="display: none; margin-top: 10px;">Remove Image</button>
+            </div>
+
+            <!-- Video Prompt -->
+            <div class="form-group">
+              <div class="form-label">✍️ Video Description</div>
+              <textarea id="videoPromptImg" placeholder="Describe how the image should animate. E.g., 'Camera zooms into the image. Gentle wind rustles leaves. Warm golden hour lighting.'"></textarea>
+              <div class="field-note">💡 Describe camera movements and animation effects for the image.</div>
+            </div>
+
+            <!-- Resolution Settings -->
+            <div class="form-group">
+              <div class="settings-row">
+                <div>
+                  <div class="form-label">Resolution</div>
+                  <select id="resolutionImg">
+                    <option value="720p">720p (Standard)</option>
+                    <option value="1080p">1080p (High Quality)</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="form-label">Aspect Ratio</div>
+                  <select id="aspectRatioImg">
+                    <option value="16:9">16:9 (Landscape)</option>
+                    <option value="9:16">9:16 (Portrait)</option>
+                    <option value="1:1">1:1 (Square)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generateBtnImg" class="action-button generate-btn" disabled>
+              🎬 Generate Video
+            </button>
+
+            <div id="videoStatusImg" class="status"></div>
+          </div>
+
+          <!-- Preview Section -->
+          <div class="video-preview-section">
+            <div class="section-title">Video Preview</div>
+
+            <div class="video-preview" id="videoPreviewImg">
+              <div style="color: #999; text-align: center; padding: 20px;">
+                Your generated video will appear here
+              </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressSectionImg">
+              <div class="progress-bar-container">
+                <div class="progress-fill" id="progressFillImg"></div>
+              </div>
+              <div class="progress-text" id="progressTextImg">Initializing generation...</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group" id="actionButtonsImg">
+              <button id="downloadBtnImg" class="action-button download-btn" style="display: none;">
+                📥 Download Video
+              </button>
+              <button id="shareBtnImg" class="action-button share-btn" style="display: none;">
+                📤 Share to Socials
+              </button>
+              <button id="regenerateBtnImg" class="action-button regenerate-btn" style="display: none;">
+                🔄 Regenerate
+              </button>
+              <button id="clearBtnImg" class="action-button clear-btn" style="display: none;">
+                🗑️ Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <input type="file" id="fileInputImg" class="file-input" accept="image/*">
+      </div>
+    </div>
+
+    <script src="/js/dataManager.js"></script>
+    <script>
+      // ========== STATE ==========
+      let userEmail = null;
+      let businessId = null;
+      let selectedDuration = 6;
+      let selectedDurationImg = 6;
+      let generatedVideoBlob = null;
+      let generatedVideoUrl = null;
+      let uploadedImageFile = null;
+      let isGenerating = false;
+      let currentTab = 'text-to-video';
+
+      // ========== TAB MANAGEMENT ==========
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabName = btn.getAttribute('data-tab');
+          
+          document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          
+          btn.classList.add('active');
+          document.getElementById(tabName).classList.add('active');
+          currentTab = tabName;
+        });
+      });
+
+      // ========== ELEMENT REFERENCES ==========
+      const videoPrompt = document.getElementById('videoPrompt');
+      const generateBtn = document.getElementById('generateBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const shareBtn = document.getElementById('shareBtn');
+      const regenerateBtn = document.getElementById('regenerateBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const videoPreview = document.getElementById('videoPreview');
+      const progressSection = document.getElementById('progressSection');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const videoStatus = document.getElementById('videoStatus');
+
+      const videoPromptImg = document.getElementById('videoPromptImg');
+      const generateBtnImg = document.getElementById('generateBtnImg');
+      const downloadBtnImg = document.getElementById('downloadBtnImg');
+      const shareBtnImg = document.getElementById('shareBtnImg');
+      const regenerateBtnImg = document.getElementById('regenerateBtnImg');
+      const clearBtnImg = document.getElementById('clearBtnImg');
+      const videoPreviewImg = document.getElementById('videoPreviewImg');
+      const progressSectionImg = document.getElementById('progressSectionImg');
+      const progressFillImg = document.getElementById('progressFillImg');
+      const progressTextImg = document.getElementById('progressTextImg');
+      const videoStatusImg = document.getElementById('videoStatusImg');
+
+      const uploadBox = document.getElementById('uploadBox');
+      const fileInputImg = document.getElementById('fileInputImg');
+      const uploadInfo = document.getElementById('uploadInfo');
+      const removeImageBtn = document.getElementById('removeImageBtn');
+
+      // ========== LOAD BUSINESS INFO ==========
+      async function loadBusinessInfo() {
+        try {
+          if (window.parent && window.parent.dataManager) {
+            const business = window.parent.dataManager.getSelectedBusinessOrFirst();
+            if (business) {
+              businessId = business._id;
+            }
+          }
+
+          const urlParams = new URLSearchParams(window.location.search);
+          userEmail = urlParams.get('email');
+
+          if (!userEmail && window.parent && window.parent.auth0Client) {
+            const auth0 = window.parent.auth0Client;
+            const isAuthenticated = await auth0.isAuthenticated();
+            if (isAuthenticated) {
+              const user = await auth0.getUser();
+              if (user && user.email) {
+                userEmail = user.email;
+              }
+            }
+          }
+
+          if (!userEmail || !businessId) {
+            showStatus('Missing user or business information', 'error', videoStatus);
+            return;
+          }
+        } catch (error) {
+          console.error('Error loading business info:', error);
+        }
+      }
+
+      // ========== SELECT DURATION (TEXT-TO-VIDEO) ==========
+      function selectDuration(seconds) {
+        selectedDuration = seconds;
+        document.querySelectorAll('#text-to-video .option-chip[data-duration]').forEach(chip => {
+          chip.classList.remove('active');
+        });
+        document.querySelector(`#text-to-video .option-chip[data-duration="${seconds}"]`).classList.add('active');
+        updateGenerateButton();
+      }
+
+      // ========== SELECT DURATION (IMAGE-TO-VIDEO) ==========
+      function selectDurationImg(seconds) {
+        selectedDurationImg = seconds;
+        document.querySelectorAll('#image-to-video .option-chip[data-duration-img]').forEach(chip => {
+          chip.classList.remove('active');
+        });
+        document.querySelector(`#image-to-video .option-chip[data-duration-img="${seconds}"]`).classList.add('active');
+        updateGenerateButtonImg();
+      }
+
+      // ========== UPDATE GENERATE BUTTON ==========
+      function updateGenerateButton() {
+        const isValid = videoPrompt.value.trim().length > 20;
+        generateBtn.disabled = !isValid;
+      }
+
+      function updateGenerateButtonImg() {
+        const isValid = videoPromptImg.value.trim().length > 20 && uploadedImageFile !== null;
+        generateBtnImg.disabled = !isValid;
+      }
+
+      // ========== GENERATE VIDEO (TEXT-TO-VIDEO) ==========
+      async function generateVideo() {
+        const prompt = videoPrompt.value.trim();
+        const model = document.getElementById('veoModel').value;
+        const resolution = document.getElementById('resolution').value;
+        const aspectRatio = document.getElementById('aspectRatio').value;
+
+        if (!prompt || !userEmail || !businessId) {
+          showStatus('Missing required information', 'error', videoStatus);
+          return;
+        }
+
+        generateBtn.disabled = true;
+        isGenerating = true;
+        progressSection.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Initializing video generation...';
+        showStatus('', 'info', videoStatus);
+
+        try {
+          const requestBody = {
+            businessId: businessId,
+            userEmail: userEmail,
+            prompt: prompt,
+            model: model,
+            duration: selectedDuration,
+            resolution: resolution,
+            aspectRatio: aspectRatio
+          };
+
+          progressText.textContent = 'Sending request to Veo API...';
+          progressFill.style.width = '15%';
+
+          const response = await fetch('/api/veo-vertex/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            if (response.status === 402) {
+              throw new Error('Insufficient credits for video generation');
+            }
+            throw new Error(error.error || 'Video generation failed');
+          }
+
+          const data = await response.json();
+          const operationName = data.operationName;
+
+          await pollVideoGeneration(operationName, videoPrompt, videoPreview, progressSection, progressFill, progressText, downloadBtn, shareBtn, regenerateBtn, clearBtn, videoStatus);
+
+        } catch (error) {
+          console.error('Generation error:', error);
+          showStatus('❌ ' + error.message, 'error', videoStatus);
+          progressSection.style.display = 'none';
+        } finally {
+          generateBtn.disabled = false;
+          isGenerating = false;
+        }
+      }
+
+      // ========== GENERATE VIDEO (IMAGE-TO-VIDEO) ==========
+      async function generateVideoImg() {
+        const prompt = videoPromptImg.value.trim();
+        const model = document.getElementById('veoModelImg').value;
+        const resolution = document.getElementById('resolutionImg').value;
+        const aspectRatio = document.getElementById('aspectRatioImg').value;
+
+        if (!prompt || !uploadedImageFile || !userEmail || !businessId) {
+          showStatus('Missing required information', 'error', videoStatusImg);
+          return;
+        }
+
+        generateBtnImg.disabled = true;
+        isGenerating = true;
+        progressSectionImg.style.display = 'block';
+        progressFillImg.style.width = '0%';
+        progressTextImg.textContent = 'Initializing video generation...';
+        showStatus('', 'info', videoStatusImg);
+
+        try {
+          const imageBase64 = await fileToBase64(uploadedImageFile);
+          
+          const requestBody = {
+            businessId: businessId,
+            userEmail: userEmail,
+            prompt: prompt,
+            model: model,
+            duration: selectedDurationImg,
+            resolution: resolution,
+            aspectRatio: aspectRatio,
+            image: {
+              imageBytes: imageBase64.split(',')[1],
+              mimeType: uploadedImageFile.type
+            }
+          };
+
+          progressTextImg.textContent = 'Sending request to Veo API...';
+          progressFillImg.style.width = '15%';
+
+          const response = await fetch('/api/veo-vertex/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            if (response.status === 402) {
+              throw new Error('Insufficient credits for video generation');
+            }
+            throw new Error(error.error || 'Video generation failed');
+          }
+
+          const data = await response.json();
+          const operationName = data.operationName;
+
+          await pollVideoGeneration(operationName, videoPromptImg, videoPreviewImg, progressSectionImg, progressFillImg, progressTextImg, downloadBtnImg, shareBtnImg, regenerateBtnImg, clearBtnImg, videoStatusImg);
+
+        } catch (error) {
+          console.error('Generation error:', error);
+          showStatus('❌ ' + error.message, 'error', videoStatusImg);
+          progressSectionImg.style.display = 'none';
+        } finally {
+          generateBtnImg.disabled = false;
+          isGenerating = false;
+        }
+      }
+
+      // ========== POLL VIDEO GENERATION ==========
+      async function pollVideoGeneration(operationName, promptElement, previewElement, progressElement, progressFillElement, progressTextElement, downloadElement, shareElement, regenerateElement, clearElement, statusElement) {
+        let attempts = 0;
+        const maxAttempts = 60;
+
+        while (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 10000));
+
+          attempts++;
+          progressTextElement.textContent = `Generating video... (${attempts * 10}s elapsed)`;
+          progressFillElement.style.width = `${Math.min(15 + (attempts * 1.25), 85)}%`;
+
+          try {
+            const response = await fetch('/api/veo-vertex/check-status', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ operationName })
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || 'Status check failed');
+            }
+
+            const data = await response.json();
+
+            if (data.done) {
+              progressFillElement.style.width = '95%';
+              progressTextElement.textContent = 'Processing video...';
+
+              const videos = data.response?.videos;
+              if (!videos || videos.length === 0) {
+                throw new Error('No video in response');
+              }
+
+              const videoFile = videos[0];
+              generatedVideoBlob = await downloadVideoFromVeo(videoFile);
+              displayVideo(generatedVideoBlob, previewElement);
+
+              progressFillElement.style.width = '100%';
+              progressTextElement.textContent = 'Complete!';
+
+              setTimeout(() => {
+                progressElement.style.display = 'none';
+              }, 1500);
+
+              showStatus('✅ Video generated successfully!\n💾 Ready to download or share.', 'success', statusElement);
+              downloadElement.style.display = 'inline-block';
+              shareElement.style.display = 'inline-block';
+              regenerateElement.style.display = 'inline-block';
+              clearElement.style.display = 'inline-block';
+
+              return;
+            }
+
+          } catch (error) {
+            console.error('Poll error:', error);
+          }
+        }
+
+        throw new Error('Video generation timed out after 10 minutes');
+      }
+
+      // ========== DOWNLOAD VIDEO FROM API ==========
+      async function downloadVideoFromVeo(videoFile) {
+        try {
+          const response = await fetch('/api/veo-vertex/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoFile })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to download video');
+          }
+
+          const blob = await response.blob();
+          return blob;
+        } catch (error) {
+          console.error('Download error:', error);
+          throw error;
+        }
+      }
+
+      // ========== DISPLAY VIDEO ==========
+      function displayVideo(blob, previewElement) {
+        const url = URL.createObjectURL(blob);
+        previewElement.innerHTML = `
+          <div class="preview-header">Generated Video</div>
+          <video width="100%" controls style="border-radius: 6px; margin-top: 10px;">
+            <source src="${url}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <div style="font-size: 12px; color: #666; margin-top: 10px;">
+            📊 Size: ${(blob.size / 1024 / 1024).toFixed(2)} MB
+          </div>
+        `;
+        generatedVideoBlob = blob;
+      }
+
+      // ========== FILE TO BASE64 ==========
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // ========== IMAGE UPLOAD HANDLERS ==========
+      uploadBox.addEventListener('click', () => {
+        if (!uploadedImageFile) {
+          fileInputImg.click();
+        }
+      });
+
+      fileInputImg.addEventListener('change', (e) => {
+        handleFileUpload(e.target.files[0]);
+      });
+
+      uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.style.borderColor = 'var(--primary-orange)';
+        uploadBox.style.background = '#FFF8F0';
+      });
+
+      uploadBox.addEventListener('dragleave', () => {
+        uploadBox.style.borderColor = 'var(--border-color)';
+        uploadBox.style.background = 'var(--light-bg)';
+      });
+
+      uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.style.borderColor = 'var(--border-color)';
+        uploadBox.style.background = 'var(--light-bg)';
+        handleFileUpload(e.dataTransfer.files[0]);
+      });
+
+      function handleFileUpload(file) {
+        if (!file || !file.type.startsWith('image/')) {
+          showStatus('Please select an image file', 'error', videoStatusImg);
+          return;
+        }
+
+        const maxSize = 20 * 1024 * 1024;
+        if (file.size > maxSize) {
+          showStatus('Image file is too large. Maximum size is 20MB.', 'error', videoStatusImg);
+          return;
+        }
+
+        uploadedImageFile = file;
+        uploadInfo.textContent = `📁 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+        uploadInfo.style.display = 'block';
+        uploadBox.style.borderColor = 'var(--primary-orange)';
+        uploadBox.style.background = '#FFF8F0';
+        removeImageBtn.style.display = 'inline-block';
+
+        updateGenerateButtonImg();
+      }
+
+      removeImageBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        uploadedImageFile = null;
+        uploadInfo.style.display = 'none';
+        uploadInfo.textContent = '';
+        uploadBox.style.borderColor = 'var(--border-color)';
+        uploadBox.style.background = 'var(--light-bg)';
+        removeImageBtn.style.display = 'none';
+        fileInputImg.value = '';
+        updateGenerateButtonImg();
+      });
+
+      // ========== DOWNLOAD VIDEO ==========
+      downloadBtn.addEventListener('click', () => {
+        if (!generatedVideoBlob) return;
+        const url = URL.createObjectURL(generatedVideoBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `veo-video-${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showStatus('✅ Video downloaded!', 'success', videoStatus);
+        setTimeout(() => {
+          videoStatus.style.display = 'none';
+        }, 2000);
+      });
+
+      downloadBtnImg.addEventListener('click', () => {
+        if (!generatedVideoBlob) return;
+        const url = URL.createObjectURL(generatedVideoBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `veo-video-${Date.now()}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showStatus('✅ Video downloaded!', 'success', videoStatusImg);
+        setTimeout(() => {
+          videoStatusImg.style.display = 'none';
+        }, 2000);
+      });
+
+      // ========== SHARE TO SOCIALS ==========
+      shareBtn.addEventListener('click', () => {
+        showStatus('📱 Social sharing feature coming soon!', 'info', videoStatus);
+        setTimeout(() => {
+          videoStatus.style.display = 'none';
+        }, 3000);
+      });
+
+      shareBtnImg.addEventListener('click', () => {
+        showStatus('📱 Social sharing feature coming soon!', 'info', videoStatusImg);
+        setTimeout(() => {
+          videoStatusImg.style.display = 'none';
+        }, 3000);
+      });
+
+      // ========== REGENERATE VIDEO ==========
+      regenerateBtn.addEventListener('click', generateVideo);
+      regenerateBtnImg.addEventListener('click', generateVideoImg);
+
+      // ========== CLEAR ALL ==========
+      clearBtn.addEventListener('click', () => {
+        videoPrompt.value = '';
+        generatedVideoBlob = null;
+        generatedVideoUrl = null;
+        videoPreview.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Your generated video will appear here</div>';
+        downloadBtn.style.display = 'none';
+        shareBtn.style.display = 'none';
+        regenerateBtn.style.display = 'none';
+        clearBtn.style.display = 'none';
+        progressSection.style.display = 'none';
+        videoStatus.style.display = 'none';
+        updateGenerateButton();
+      });
+
+      clearBtnImg.addEventListener('click', () => {
+        videoPromptImg.value = '';
+        generatedVideoBlob = null;
+        generatedVideoUrl = null;
+        videoPreviewImg.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Your generated video will appear here</div>';
+        downloadBtnImg.style.display = 'none';
+        shareBtnImg.style.display = 'none';
+        regenerateBtnImg.style.display = 'none';
+        clearBtnImg.style.display = 'none';
+        progressSectionImg.style.display = 'none';
+        videoStatusImg.style.display = 'none';
+        updateGenerateButtonImg();
+      });
+
+      // ========== SHOW STATUS ==========
+      function showStatus(message, type, targetElement) {
+        targetElement.textContent = message;
+        targetElement.className = `status ${type}`;
+        targetElement.style.display = 'block';
+      }
+
+      // ========== EVENT LISTENERS ==========
+      videoPrompt.addEventListener('input', updateGenerateButton);
+      videoPromptImg.addEventListener('input', updateGenerateButtonImg);
+      generateBtn.addEventListener('click', generateVideo);
+      generateBtnImg.addEventListener('click', generateVideoImg);
+
+      // ========== INITIALIZE ==========
+      document.addEventListener('DOMContentLoaded', async () => {
+        await loadBusinessInfo();
+        updateGenerateButton();
+        updateGenerateButtonImg();
+      });
+    </script>
+</body>
+</html>

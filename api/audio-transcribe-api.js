@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
 const OpenAI = require('openai').default;
+const { Document, Packer, Paragraph, Table, TableCell, TableRow, BorderStyle, AlignmentType, TextRun } = require('docx');
 const { getDatabase } = require('../lib/mongodb');
 const { ObjectId } = require('mongodb');
 
@@ -623,6 +624,454 @@ router.get('/history/:businessId', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+});
+
+// ========== AZURE SPEECH API - TRANSCRIBE WITH DIARIZATION ==========
+// Storage config for Azure transcriber - support single large file up to 500MB
+const uploadAzure = multer({
+  storage: multer.memoryStorage(),
+  limits: { 
+    fileSize: 500 * 1024 * 1024  // 500MB per file
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/mp4', 'audio/webm', 'audio/flac'];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid audio format'));
+    }
+  }
+});
+
+// Transcribe audio using Azure Cognitive Services Speech API
+async function transcribeWithAzureSpeech(audioBuffer, originalFileName, diarization = true) {
+  console.log('🎙️ Starting Azure Speech transcription...');
+  console.log(`📁 Audio file: ${originalFileName}`);
+  console.log(`📦 File size: ${(audioBuffer.length / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`🎤 Diarization enabled: ${diarization}`);
+
+  try {
+    const azureRegion = process.env.AZURE_SPEECH_REGION || 'eastus';
+    const azureKey = process.env.AZURE_SPEECH_KEY;
+
+    if (!azureKey) {
+      throw new Error('AZURE_SPEECH_KEY environment variable is not set');
+    }
+
+    const apiUrl = `https://${azureRegion}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2025-10-15`;
+
+    console.log(`📤 Calling Azure Speech API: ${azureRegion}`);
+    console.log(`🔗 Endpoint: ${apiUrl}`);
+
+    // Build definition based on diarization setting
+    const definition = {
+      locales: ['en-US'],
+      profanityFilterMode: 'Masked'
+    };
+
+    if (diarization) {
+      definition.diarization = {
+        enabled: true,
+        maxSpeakers: 10
+      };
+    }
+
+    console.log(`📋 Definition:`, JSON.stringify(definition, null, 2));
+
+    // Create FormData for multipart request
+    const FormData = require('form-data');
+    const form = new FormData();
+    form.append('audio', audioBuffer, {
+      filename: originalFileName,
+      contentType: getAudioMimeType(originalFileName)
+    });
+    form.append('definition', JSON.stringify(definition));
+
+    const startTime = Date.now();
+
+    const response = await axios.post(apiUrl, form, {
+      headers: {
+        ...form.getHeaders(),
+        'Ocp-Apim-Subscription-Key': azureKey
+      },
+      timeout: 600000, // 10 minutes timeout
+      validateStatus: (status) => status >= 200 && status < 300
+    });
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`✅ Transcription received in ${duration}s`);
+
+    const result = response.data;
+    console.log(`📝 Combined text length: ${result.combinedPhrases?.[0]?.text?.length || 0} characters`);
+    console.log(`🔤 Phrases: ${result.phrases?.length || 0}`);
+
+    if (diarization && result.phrases) {
+      const speakers = new Set(result.phrases.map(p => p.speaker).filter(s => s !== undefined));
+      console.log(`🎤 Speakers identified: ${speakers.size}`);
+    }
+
+    // Validate response
+    if (!result.combinedPhrases && !result.phrases) {
+      throw new Error('Empty transcription received from Azure API');
+    }
+
+    // Extract duration from response
+    const durationMs = result.durationMilliseconds || 0;
+    const durationMinutes = durationMs / 60000;
+
+    return {
+      text: result.combinedPhrases?.[0]?.text || '',
+      phrases: result.phrases || [],
+      durationMilliseconds: durationMs,
+      durationMinutes: parseFloat(durationMinutes.toFixed(2)),
+      speakers: diarization ? Array.from(new Set(result.phrases?.map(p => p.speaker).filter(s => s !== undefined) || [])).sort() : [],
+      confidence: result.phrases?.length > 0 
+        ? (result.phrases.reduce((sum, p) => sum + (p.confidence || 0), 0) / result.phrases.length).toFixed(4)
+        : 0,
+      language: result.phrases?.[0]?.locale || 'en-US',
+      raw: result
+    };
+
+  } catch (error) {
+    console.error('❌ Azure Speech transcription error:', error.message);
+
+    if (error.response?.data) {
+      console.error('API Response:', JSON.stringify(error.response.data, null, 2));
+    }
+    if (error.response?.status) {
+      console.error('Status Code:', error.response.status);
+    }
+
+    if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      throw new Error('Audio file is too long or processing timed out. Please try a shorter file.');
+    }
+
+    throw new Error(`Azure Speech transcription failed: ${error.message}`);
+  }
+}
+
+// Calculate cost based on audio duration (R0.50 per minute) + optional diarization (R5.00)
+function calculateTranscriptionCost(durationMinutes, includeDiarization = false) {
+  const costPerMinute = 0.50;
+  const diarizationCost = includeDiarization ? 5.00 : 0;
+  const transcriptionCost = parseFloat((durationMinutes * costPerMinute).toFixed(2));
+  const totalCost = parseFloat((transcriptionCost + diarizationCost).toFixed(2));
+  
+  return {
+    transcriptionCost: transcriptionCost,
+    diarizationCost: diarizationCost,
+    totalCost: totalCost,
+    breakdown: `${transcriptionCost} (transcription) + ${diarizationCost} (diarization)`
+  };
+}
+
+// ========== AZURE TRANSCRIPTION ROUTE ==========
+router.post('/azure', uploadAzure.single('audio'), async (req, res) => {
+  console.log('\n🎙️ ========== AZURE SPEECH TRANSCRIPTION REQUEST ==========');
+
+  try {
+    const {
+      businessId,
+      userEmail,
+      diarization = true
+    } = req.body;
+
+    const file = req.file;
+
+    console.log('📦 Request Body:');
+    console.log('  - businessId:', businessId);
+    console.log('  - userEmail:', userEmail);
+    console.log('  - diarization:', diarization);
+    console.log(`  - Audio file: ${file?.originalname || 'none'} (${file ? (file.size / 1024 / 1024).toFixed(2) : 0} MB)`);
+
+    // Validate required fields
+    if (!businessId || !userEmail || !file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: businessId, userEmail, or audio file'
+      });
+    }
+
+    // Get business info
+    const db = await getDatabase();
+    const business = await db.collection('store_submissions').findOne({
+      _id: new ObjectId(businessId)
+    });
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        error: 'Business not found'
+      });
+    }
+
+    const businessName = business?.store_info?.name || 'Your Business';
+    console.log(`\n✅ Business found: ${businessName}`);
+
+    // Transcribe with Azure
+    console.log('\n🔄 Transcribing with Azure Speech API...');
+    const transcription = await transcribeWithAzureSpeech(file.buffer, file.originalname, diarization === 'true' || diarization === true);
+
+    // Calculate cost based on duration + diarization
+    const isDiarizationEnabled = diarization === 'true' || diarization === true;
+    const costBreakdown = calculateTranscriptionCost(transcription.durationMinutes, isDiarizationEnabled);
+    const cost = costBreakdown.totalCost;
+    
+    console.log(`\n💰 Pricing:`);
+    console.log(`  - Duration: ${transcription.durationMinutes} minutes @ R0.50/min = R${costBreakdown.transcriptionCost}`);
+    if (isDiarizationEnabled) {
+      console.log(`  - Diarization (Speaker ID): R${costBreakdown.diarizationCost}`);
+    }
+    console.log(`  - Total cost: R${cost.toFixed(2)}`);
+
+    // ✅ WALLET CHECK AND DEDUCTION
+    console.log('\n💳 Processing wallet...');
+    let walletResult;
+    try {
+      const description = isDiarizationEnabled 
+        ? `Azure Speech transcription with diarization: ${file.originalname} (${transcription.durationMinutes} min)`
+        : `Azure Speech transcription: ${file.originalname} (${transcription.durationMinutes} min)`;
+      
+      walletResult = await deductCost(
+        userEmail,
+        businessId,
+        cost,
+        description
+      );
+    } catch (error) {
+      if (error.status === 402) {
+        return res.status(402).json({
+          success: false,
+          error: 'Insufficient credits',
+          current_balance: error.formatted_balance,
+          required_amount: error.formatted_required
+        });
+      }
+      throw error;
+    }
+
+    // Save to database
+    console.log('\n💾 Saving transcription to database...');
+    const transcriptionRecord = {
+      businessId: new ObjectId(businessId),
+      userEmail: userEmail,
+      audioFileName: file.originalname,
+      audioSize: file.size,
+      language: transcription.language,
+      duration: transcription.durationMinutes,
+      durationMs: transcription.durationMilliseconds,
+      speakers: transcription.speakers,
+      confidence: parseFloat(transcription.confidence),
+      cost: cost,
+      diarization: diarization === 'true' || diarization === true,
+      phrases: transcription.phrases,
+      text: transcription.text,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    const insertResult = await db.collection('audio_transcriptions').insertOne(transcriptionRecord);
+    console.log(`✅ Saved to database with ID: ${insertResult.insertedId}`);
+
+    // Return success response
+    res.json({
+      success: true,
+      transcription: {
+        text: transcription.text,
+        confidence: transcription.confidence,
+        language: transcription.language,
+        durationMinutes: transcription.durationMinutes,
+        speakers: transcription.speakers,
+        phrases: transcription.phrases.map(p => ({
+          text: p.text,
+          offsetMs: p.offsetMilliseconds,
+          durationMs: p.durationMilliseconds,
+          confidence: p.confidence,
+          speaker: p.speaker,
+          words: p.words
+        }))
+      },
+      cost: {
+        amount: cost,
+        formatted: `R${cost.toFixed(2)}`,
+        durationMinutes: transcription.durationMinutes,
+        transcriptionCost: costBreakdown.transcriptionCost,
+        diarizationCost: costBreakdown.diarizationCost,
+        breakdown: costBreakdown.breakdown,
+        costPerMinute: 'R0.50',
+        diarizationFee: 'R5.00 (if enabled)'
+      },
+      wallet: {
+        new_balance: walletResult.formatted_balance
+      }
+    });
+
+    console.log('✅ Transcription completed successfully\n');
+
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+
+    if (error.message.includes('Invalid audio')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid audio format. Please use MP3, WAV, M4A, OGG, or FLAC'
+      });
+    }
+
+    if (error.message.includes('too long')) {
+      return res.status(413).json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Azure Speech transcription failed'
+    });
+  }
+});
+
+// ========== DOWNLOAD TRANSCRIPTION AS WORD ==========
+router.post('/download-word', async (req, res) => {
+  try {
+    const { 
+      transcription,
+      fileName = 'transcription',
+      metadata = {}
+    } = req.body;
+
+    if (!transcription || !transcription.text) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No transcription data provided' 
+      });
+    }
+
+    // Create document sections
+    const docSections = [];
+
+    // Add title
+    docSections.push(
+      new Paragraph({
+        text: 'Audio Transcription Report',
+        heading: 'Heading1',
+        bold: true,
+        size: 28,
+        spacing: { after: 200 }
+      })
+    );
+
+    // Add metadata information
+    if (metadata && Object.keys(metadata).length > 0) {
+      if (metadata.fileName) {
+        docSections.push(new Paragraph({ text: `File: ${metadata.fileName}`, spacing: { after: 100 } }));
+      }
+      if (metadata.duration) {
+        docSections.push(new Paragraph({ text: `Duration: ${metadata.duration} minutes`, spacing: { after: 100 } }));
+      }
+      if (metadata.language) {
+        docSections.push(new Paragraph({ text: `Language: ${metadata.language}`, spacing: { after: 100 } }));
+      }
+      if (metadata.confidence) {
+        docSections.push(new Paragraph({ text: `Confidence: ${(parseFloat(metadata.confidence) * 100).toFixed(1)}%`, spacing: { after: 100 } }));
+      }
+      if (metadata.speakers && metadata.speakers.length > 0) {
+        docSections.push(new Paragraph({ text: `Speakers: ${metadata.speakers.join(', ')}`, spacing: { after: 100 } }));
+      }
+      if (metadata.cost) {
+        docSections.push(new Paragraph({ text: `Cost: R${metadata.cost}`, spacing: { after: 200 } }));
+      }
+    }
+
+    // Add transcription section heading
+    docSections.push(
+      new Paragraph({
+        text: 'Transcription',
+        heading: 'Heading2',
+        bold: true,
+        size: 24,
+        spacing: { before: 200, after: 100 }
+      })
+    );
+
+    // Add transcription content with speaker labels if available
+    if (transcription.phrases && transcription.phrases.length > 0 && transcription.speakers && transcription.speakers.length > 0) {
+      // Group by speaker
+      let currentSpeaker = null;
+      let speakerText = '';
+
+      transcription.phrases.forEach(phrase => {
+        const speaker = phrase.speaker !== undefined ? phrase.speaker : -1;
+
+        if (currentSpeaker !== speaker && speakerText) {
+          docSections.push(
+            new Paragraph({
+              text: `Speaker ${currentSpeaker}:`,
+              bold: true,
+              spacing: { before: 100, after: 50 }
+            })
+          );
+          docSections.push(
+            new Paragraph({
+              text: speakerText,
+              spacing: { after: 100 }
+            })
+          );
+          speakerText = '';
+        }
+
+        currentSpeaker = speaker;
+        speakerText += (speakerText ? ' ' : '') + phrase.text;
+      });
+
+      if (speakerText && currentSpeaker !== null) {
+        docSections.push(
+          new Paragraph({
+            text: `Speaker ${currentSpeaker}:`,
+            bold: true,
+            spacing: { before: 100, after: 50 }
+          })
+        );
+        docSections.push(
+          new Paragraph({
+            text: speakerText,
+            spacing: { after: 100 }
+          })
+        );
+      }
+    } else {
+      // Plain transcription without speaker labels
+      docSections.push(
+        new Paragraph({
+          text: transcription.text,
+          spacing: { line: 240 }
+        })
+      );
+    }
+
+    // Create and generate document
+    const doc = new Document({
+      sections: [{
+        children: docSections
+      }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+
+    // Send file
+    const finalFileName = `${fileName.replace(/\.[^/.]+$/, '')}_transcription.docx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${finalFileName}"`);
+    res.send(buffer);
+
+  } catch (error) {
+    console.error('Word download error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to generate Word document' 
     });
   }
 });

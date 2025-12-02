@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Image to Social Media | Zuke</title>
+  <link rel="stylesheet" href="../../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Tabs Styling */
+    .tabs-container {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      background: white;
+      padding: 12px 0;
+    }
+
+    .tab-btn {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Two-Column Container */
+    .post-image-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .image-upload-section {
+      flex: 1;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .image-details-section {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .upload-instructions {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .upload-instructions.hidden {
+      display: none;
+    }
+
+    /* Image Upload Box */
+    .image-upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .image-upload-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .image-upload-box.has-image {
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      background: transparent;
+      min-height: auto;
+    }
+
+    .upload-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+
+    .image-preview {
+      max-width: 50%;
+      max-height: 150px;
+      border-radius: 6px;
+      margin-top: 0;
+      margin-bottom: 0;
+      display: none;
+      background: #f5f5f5;
+      object-fit: contain;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .file-item .file-icon {
+      font-size: 18px;
+    }
+
+    .file-item .file-info {
+      flex: 1;
+    }
+
+    .file-item .file-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    .file-item .file-size {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .file-item .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .file-item .remove-btn:hover {
+      background: #c82333;
+    }
+
+    /* Caption Section */
+    .caption-section {
+      margin-bottom: 0;
+      margin-top: 12px;
+    }
+
+    .caption-section textarea {
+      min-height: 80px;
+      font-size: 13px;
+      font-family: 'Manrope', sans-serif;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      resize: vertical;
+    }
+
+    /* Platforms Grid - Compact */
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .platforms-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #F9F9F9;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .select-all-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .select-all-checkbox input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--primary-orange);
+    }
+
+    .select-all-checkbox label {
+      margin: 0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .platform-btn {
+      padding: 8px 4px;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .platform-btn:hover:not(:disabled) {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .platform-btn.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+    }
+
+    .platform-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .platform-icon {
+      font-size: 18px;
+      margin-bottom: 4px;
+      color: var(--primary-orange);
+    }
+
+    .platform-name {
+      display: block;
+      font-size: 10px;
+      margin-bottom: 2px;
+      line-height: 1.2;
+    }
+
+    .platform-cost {
+      display: block;
+      font-size: 9px;
+      color: var(--text-secondary);
+    }
+
+    /* Cost Display */
+    .cost-display {
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-orange);
+      font-size: 13px;
+    }
+
+    /* File Input */
+    .file-input {
+      display: none;
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status-message.success {
+      background: #D4EDDA;
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+
+    .status-message.error {
+      background: #F8D7DA;
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+
+    .status-message.info {
+      background: #D1ECF1;
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--primary-orange);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-orange), #FF9500);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Button Container */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .publish-btn {
+      flex: 1;
+      padding: 10px;
+      background: linear-gradient(135deg, var(--primary-orange), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .publish-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+
+    .publish-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .clear-btn {
+      padding: 10px 14px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      background: #5a6268;
+    }
+
+    /* Coming Soon Styling */
+    .coming-soon-container {
+      background: linear-gradient(135deg, #FFF8F0 0%, #FAFAFA 100%);
+      border: 2px dashed var(--primary-orange);
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .coming-soon-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .coming-soon-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .coming-soon-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .explore-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--primary-orange), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .explore-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+
+    .explore-btn:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .post-image-container {
+        flex-direction: column;
+      }
+
+      .image-upload-section, .image-details-section {
+        flex: none;
+        width: 100%;
+      }
+
+      .platforms-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons .publish-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>Post Image to Social Media</h1>
+      <p>Share images instantly across all your social accounts and keep your branding consistent</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button class="tab-btn active" data-tab="post-image">Post Image</button>
+      <button class="tab-btn" data-tab="generate-image">Generate Images</button>
+    </div>
+
+    <!-- Tab 1: Post Image -->
+    <div class="tab-content active" id="post-image">
+      
+      <div class="post-image-container">
+        
+        <!-- Left: Upload Section -->
+        <div class="image-upload-section">
+          <div class="section-title">1. Upload Image</div>
+          
+          <div class="image-upload-box" id="imageUploadBox">
+            <div class="upload-instructions">
+              <div class="upload-icon">🖼️</div>
+              <div style="font-size: 13px; font-weight: 500; color: var(--text-primary);">Click or drag</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">JPG, PNG, GIF (max 10MB)</div>
+            </div>
+          </div>
+
+          <div id="fileInfo"></div>
+          <img id="imagePreview" class="image-preview" alt="Preview">
+
+          <!-- Caption -->
+          <div class="caption-section">
+            <div class="section-title" style="margin-top: 16px;">2. Caption</div>
+            <textarea id="caption" placeholder="What would you like to say about this image? Our AI agents will clean up the wording"></textarea>
+          </div>
+        </div>
+
+        <!-- Right: Platforms -->
+        <div class="image-details-section">
+          
+          <!-- Platform Selection -->
+          <div class="section">
+            <div class="section-title">3. Platforms</div>            <div class="platforms-controls">
+              <div class="select-all-checkbox">
+                <input type="checkbox" id="selectAllCheckbox">
+                <label for="selectAllCheckbox">Select All</label>
+              </div>
+            </div>
+
+            <div class="platforms-grid">
+              <button class="platform-btn" data-platform="facebook" data-cost="1000">
+                <div class="platform-icon"><i class="fab fa-facebook-f"></i></div>
+                <span class="platform-name">Facebook</span>
+                <span class="platform-cost">R10.00</span>
+              </button>
+              <button class="platform-btn" data-platform="instagram" data-cost="1000">
+                <div class="platform-icon"><i class="fab fa-instagram"></i></div>
+                <span class="platform-name">Instagram</span>
+                <span class="platform-cost">R10.00</span>
+              </button>
+              <button class="platform-btn" data-platform="tiktok" data-cost="1000">
+                <div class="platform-icon"><i class="fab fa-tiktok"></i></div>
+                <span class="platform-name">TikTok</span>
+                <span class="platform-cost">R10.00</span>
+              </button>
+              <button class="platform-btn" data-platform="linkedin" data-cost="1000">
+                <div class="platform-icon"><i class="fab fa-linkedin-in"></i></div>
+                <span class="platform-name">LinkedIn</span>
+                <span class="platform-cost">R10.00</span>
+              </button>
+              <button class="platform-btn" data-platform="youtube" data-cost="1000" disabled title="YouTube does not support image posts">
+                <div class="platform-icon"><i class="fab fa-youtube"></i></div>
+                <span class="platform-name">YouTube</span>
+                <span class="platform-cost">(N/A)</span>
+              </button>
+            </div>
+
+            <div class="cost-display" id="costDisplay">Select platforms to see cost</div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="section">
+            <div class="action-buttons">
+              <button class="publish-btn" id="publishBtn" disabled>Publish</button>
+              <button class="clear-btn" id="clearBtn">Clear</button>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-container" id="progressContainer">
+              <div class="progress-text" id="progressText">Uploading image...</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+              <p style="font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 4px;" id="progressPercent">0%</p>
+            </div>
+
+            <!-- Status Messages -->
+            <div class="status-message" id="statusMessage"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Tab 2: Generate Images -->
+    <div class="tab-content" id="generate-image">
+      <div class="section">
+        <div class="coming-soon-container">
+          <div class="coming-soon-icon">🎨</div>
+          <h2 class="coming-soon-title">Generate Images with AI</h2>
+          <p class="coming-soon-desc">Create stunning AI-generated images from text prompts optimized for social media. <br><br>Coming soon!</p>
+          <button class="explore-btn" id="exploreImageGenerators">Click here to explore image generators</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <input type="file" id="fileInput" class="file-input" accept="image/*">
+
+  <script>
+    // ========== CONFIGURATION & STATE ==========
+    const urlParams = new URLSearchParams(window.location.search);
+    let userEmail = urlParams.get('email');
+    let businessId = urlParams.get('businessId');
+    let businessName = urlParams.get('businessName') || 'My Business';
+    
+    let selectedFile = null;
+    let selectedPlatforms = [];
+
+    // ========== ELEMENT REFERENCES ==========
+    const imageUploadBox = document.getElementById('imageUploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const imagePreview = document.getElementById('imagePreview');
+    const publishBtn = document.getElementById('publishBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const costDisplay = document.getElementById('costDisplay');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // ========== CLOUDINARY CONFIG ==========
+    const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
+    const CLOUDINARY_CLOUD_NAME = 'vic-3e';
+
+    // ========== TABS FUNCTIONALITY ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        
+        // Deactivate all tabs
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        
+        // Activate selected tab
+        e.target.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+
+    // ========== FILE UPLOAD HANDLERS ==========
+    imageUploadBox.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFileUpload(e.target.files[0]);
+    });
+
+    imageUploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      imageUploadBox.style.borderColor = 'var(--primary-orange)';
+      imageUploadBox.style.background = '#FFF8F0';
+    });
+
+    imageUploadBox.addEventListener('dragleave', () => {
+      if (!selectedFile) {
+        imageUploadBox.style.borderColor = 'var(--border-color)';
+        imageUploadBox.style.background = 'var(--light-bg)';
+      }
+    });
+
+    imageUploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      imageUploadBox.style.borderColor = 'var(--border-color)';
+      imageUploadBox.style.background = 'var(--light-bg)';
+      handleFileUpload(e.dataTransfer.files[0]);
+    });
+
+    function handleFileUpload(file) {
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showStatus('Please select an image file', 'error');
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        showStatus('Image file is too large. Maximum size is 10MB.', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      imageUploadBox.classList.add('has-image');
+      
+      // Hide upload instructions
+      const instructions = document.querySelector('.upload-instructions');
+      if (instructions) {
+        instructions.classList.add('hidden');
+      }
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.innerHTML = `<div class="file-item"><div class="file-icon">📁</div><div class="file-info"><div class="file-name">${file.name}</div><div class="file-size">${sizeMB} MB</div></div><button class="remove-btn" onclick="removeFile()">Remove</button></div>`;
+
+      updatePublishButton();
+    }
+
+    window.removeFile = function() {
+      selectedFile = null;
+      fileInput.value = '';
+      imageUploadBox.classList.remove('has-image');
+      imagePreview.style.display = 'none';
+      imagePreview.src = '';
+      fileInfo.innerHTML = '';
+      
+      // Show upload instructions again
+      const instructions = document.querySelector('.upload-instructions');
+      if (instructions) {
+        instructions.classList.remove('hidden');
+      }
+      
+      updatePublishButton();
+    };
+
+    // ========== PLATFORM SELECTION ==========
+    document.querySelectorAll('.platform-btn:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const platform = btn.dataset.platform;
+        
+        if (selectedPlatforms.includes(platform)) {
+          selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+        } else {
+          selectedPlatforms.push(platform);
+        }
+        
+        updateCost();
+        updatePublishButton();
+        updateSelectAllCheckbox();
+      });
+    });
+
+    // Select all checkbox functionality
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', () => {
+        const allPlatformBtns = document.querySelectorAll('.platform-btn:not([disabled])');
+        
+        if (selectAllCheckbox.checked) {
+          // Select all
+          selectedPlatforms = [];
+          allPlatformBtns.forEach(btn => {
+            const platform = btn.dataset.platform;
+            btn.classList.add('selected');
+            selectedPlatforms.push(platform);
+          });
+        } else {
+          // Deselect all
+          selectedPlatforms = [];
+          allPlatformBtns.forEach(btn => {
+            btn.classList.remove('selected');
+          });
+        }
+        
+        updateCost();
+        updatePublishButton();
+      });
+    }
+
+    function updateSelectAllCheckbox() {
+      const allPlatformBtns = document.querySelectorAll('.platform-btn:not([disabled])');
+      const allSelected = selectedPlatforms.length === allPlatformBtns.length;
+      if (selectAllCheckbox) {
+        selectAllCheckbox.checked = allSelected;
+      }
+    }
+
+    function updateCost() {
+      let total = 0;
+      selectedPlatforms.forEach(platform => {
+        const btn = document.querySelector(`[data-platform="${platform}"]`);
+        if (btn) total += parseInt(btn.dataset.cost);
+      });
+      costDisplay.textContent = selectedPlatforms.length > 0 
+        ? `Total Cost: R${(total / 100).toFixed(2)}` 
+        : 'Select platforms to see cost';
+    }
+
+    function updatePublishButton() {
+      publishBtn.disabled = !(selectedFile && selectedPlatforms.length > 0);
+    }
+
+    // ========== PUBLISH FUNCTION ==========
+    publishBtn.addEventListener('click', async () => {
+      await publishImage();
+    });
+
+    async function publishImage() {
+      if (!selectedFile || selectedPlatforms.length === 0) return;
+
+      publishBtn.disabled = true;
+      progressContainer.style.display = 'block';
+      statusMessage.style.display = 'none';
+      hideStatus();
+
+      try {
+        progressText.textContent = 'Uploading image to cloud storage...';
+        progressFill.style.width = '0%';
+        progressPercent.textContent = '0%';
+
+        // Upload to Cloudinary
+        const imageUrl = await uploadToCloudinary(selectedFile);
+
+        if (!imageUrl) {
+          throw new Error('Failed to upload image');
+        }
+
+        progressText.textContent = 'Publishing to social media...';
+        progressFill.style.width = '90%';
+
+        // Prepare post content
+        const postContent = {
+          text: document.getElementById('caption').value,
+          image: imageUrl
+        };
+
+        // Post to social media
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: businessId,
+            userEmail: userEmail,
+            platforms: selectedPlatforms,
+            postContent: postContent
+          })
+        });
+
+        const result = await response.json();
+
+        progressFill.style.width = '100%';
+
+        if (result.success) {
+          let message = `✅ Image posted to ${result.platforms.join(', ')}!\n\n` +
+                        `Cost: ${result.formatted_cost}\n` +
+                        `New Balance: ${result.formatted_balance}`;
+          
+          if (result.token_refresh_warnings && result.token_refresh_warnings.length > 0) {
+            message += '\n\n⚠️ Warnings:\n' + result.token_refresh_warnings.join('\n');
+          }
+          
+          showStatus(message, 'success');
+          setTimeout(() => clearForm(), 5000);
+        } else if (response.status === 402) {
+          throw new Error(
+            `Insufficient funds!\n\n` +
+            `Required: ${result.formatted_required}\n` +
+            `Balance: ${result.formatted_balance}\n\n` +
+            `Please add credits or upgrade.`
+          );
+        } else {
+          throw new Error(result.error || 'Failed to publish image');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        
+        if (error.message.includes('token expired') || 
+            error.message.includes('reconnect') ||
+            error.message.includes('Token refresh failed')) {
+          showStatus(
+            '❌ Authentication Error\n\n' + 
+            error.message + '\n\n' +
+            '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+            'error'
+          );
+        } else {
+          showStatus('❌ ' + error.message, 'error');
+        }
+      } finally {
+        progressContainer.style.display = 'none';
+        publishBtn.disabled = false;
+      }
+    }
+
+    // ========== CLOUDINARY UPLOAD ==========
+    async function uploadToCloudinary(file) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressFill.style.width = percentComplete + '%';
+            progressPercent.textContent = Math.round(percentComplete) + '%';
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
+    // ========== CLEAR FORM ==========
+    clearBtn.addEventListener('click', clearForm);
+
+    function clearForm() {
+      selectedFile = null;
+      selectedPlatforms = [];
+      fileInput.value = '';
+      
+      imageUploadBox.classList.remove('has-image');
+      imagePreview.style.display = 'none';
+      imagePreview.src = '';
+      fileInfo.innerHTML = '';
+      
+      document.getElementById('caption').value = '';
+      
+      document.querySelectorAll('.platform-btn').forEach(btn => btn.classList.remove('selected'));
+      
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      
+      updateCost();
+      updatePublishButton();
+      hideStatus();
+    }
+
+    // ========== STATUS MESSAGES ==========
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type}`;
+      statusMessage.style.display = 'block';
+    }
+
+    function hideStatus() {
+      statusMessage.style.display = 'none';
+    }
+
+    // ========== INITIALIZE ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🖼️ Post Image to Social Media initialized');
+      updateCost();
+
+      // Handle explore image generators button
+      const exploreBtn = document.getElementById('exploreImageGenerators');
+      if (exploreBtn) {
+        exploreBtn.addEventListener('click', () => {
+          // Close the modal and navigate to creative tab
+          const modal = window.parent.document.getElementById('marketingModal');
+          if (modal) {
+            modal.style.display = 'none';
+          }
+          // Navigate to creative tab - trigger navigation in parent window
+          if (window.parent && window.parent.dataManager) {
+            window.parent.location.hash = '#creative';
+          } else {
+            window.location.href = '/#creative';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

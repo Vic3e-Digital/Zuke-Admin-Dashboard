@@ -1100,69 +1100,22 @@ export async function initMarketingPage() {
     const userEmail = user.email || user.name || 'unknown';
     const userName = user.name || 'User';
 
-    // Fix for main category cards - properly toggle SIM cards
-    const socialMediaCard = document.getElementById('mainSocialMediaCard');
-    const marketingToolsCard = document.getElementById('mainMarketingToolsCard');
-    const socialMediaCards = document.getElementById('socialMediaCards');
-    const marketingToolsCards = document.getElementById('marketingToolsCards');
-
-    if (socialMediaCard) {
-      socialMediaCard.addEventListener('click', function(e) {
-        // Prevent clicks on child elements from bubbling
-        if (e.target.closest('.main-sim-info-icon')) {
-          return; // Let tooltip handle this
+    // Setup category card click handlers (like business.js)
+    const categoryCards = document.querySelectorAll('.main-sim-card');
+    console.log('[Marketing] Found category cards:', categoryCards.length);
+    categoryCards.forEach(card => {
+      const categoryId = card.getAttribute('data-category');
+      console.log('[Marketing] Setting up click handler for card:', categoryId);
+      card.addEventListener('click', function(e) {
+        // Only toggle if clicking on the card itself, not on buttons inside
+        if (e.target.closest('.sim-action-btn')) {
+          console.log('[Marketing] Click was on SIM card button, not toggling category');
+          return;
         }
-        
-        // Toggle social media cards
-        const isCurrentlyVisible = socialMediaCards.style.display === 'grid';
-        
-        if (isCurrentlyVisible) {
-          // Hide if already visible
-          socialMediaCards.style.display = 'none';
-        } else {
-          // Show social media cards, hide marketing tools cards
-          socialMediaCards.style.display = 'grid';
-          marketingToolsCards.style.display = 'none';
-          
-          // Scroll to the cards after a brief delay to ensure they're rendered
-          setTimeout(() => {
-            socialMediaCards.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'nearest' 
-            });
-          }, 100);
-        }
+        console.log('[Marketing] Main card clicked:', categoryId);
+        toggleSubcategory(categoryId);
       });
-    }
-
-    if (marketingToolsCard) {
-      marketingToolsCard.addEventListener('click', function(e) {
-        // Prevent clicks on child elements from bubbling
-        if (e.target.closest('.main-sim-info-icon')) {
-          return; // Let tooltip handle this
-        }
-        
-        // Toggle marketing tools cards
-        const isCurrentlyVisible = marketingToolsCards.style.display === 'grid';
-        
-        if (isCurrentlyVisible) {
-          // Hide if already visible
-          marketingToolsCards.style.display = 'none';
-        } else {
-          // Show marketing tools cards, hide social media cards
-          marketingToolsCards.style.display = 'grid';
-          socialMediaCards.style.display = 'none';
-          
-          // Scroll to the cards after a brief delay to ensure they're rendered
-          setTimeout(() => {
-            marketingToolsCards.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'nearest' 
-            });
-          }, 100);
-        }
-      });
-    }
+    });
 
     // Setup handlers for SIM card action buttons (defer slightly to avoid blocking)
     setTimeout(() => {
@@ -1198,6 +1151,9 @@ export async function initMarketingPage() {
 }
 
 function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
+  console.log('[Marketing] Setting up SIM card handlers');
+  console.log('[Marketing] userEmail:', userEmail, 'userName:', userName);
+  
   // Get current business info
   const currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
   const businessName = currentBusiness?.store_info?.name || 'No Business';
@@ -1207,12 +1163,12 @@ function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
   // Social Media SIM cards
   const socialMediaActions = {
     postVideo: {
-      title: "Post Video to Socials",
-      url: `/tools/post-video.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&business=${encodeURIComponent(businessName)}&businessId=${businessId}&businessCase=${businessCase}`
+      title: "Post Video to Social Media",
+      url: `/pages/marketing/post-video.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
     },
     postImage: {
       title: "Post Image to Socials",
-      url: `/tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      url: `/pages/marketing/social-media-tools/post-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
     },
     draftEmail: {
       title: "Draft Partner Email",
@@ -1221,6 +1177,14 @@ function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
     textAIImage: {
       title: "AI Image Editor",
       renderAIEditor: true
+    },
+    generateVideo: {
+      title: "Generate AI Videos with Veo",
+      url: `/pages/creative/veo-video-social.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+    },
+    contentCalendar: {
+      title: "AI Content Calendar Generator",
+      url: `/pages/marketing/social-media-tools/content-calendar.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
     }
   };
 
@@ -1245,29 +1209,41 @@ function setupSIMCardHandlers(userEmail, userName, modal, modalTitle, iframe) {
   };
 
   // Handle Social Media SIM card buttons
-  const socialMediaButtons = document.querySelectorAll('#socialMediaCards .sim-action-btn[data-action]');
+  const socialMediaButtons = document.querySelectorAll('#social-media .sim-action-btn[data-action]');
+  console.log('[Marketing] Found social media buttons:', socialMediaButtons.length);
   socialMediaButtons.forEach(btn => {
+    const action = btn.getAttribute('data-action');
+    console.log('[Marketing] Setting up button for action:', action);
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       const action = this.getAttribute('data-action');
+      console.log('[Marketing] Social media button clicked:', action);
       const config = socialMediaActions[action];
       
       if (config) {
         openModalWithConfig(config, modal, modalTitle, iframe, userEmail, userName);
+      } else {
+        console.error('[Marketing] No config found for action:', action);
       }
     });
   });
 
   // Handle Marketing Tools SIM card buttons
-  const marketingToolsButtons = document.querySelectorAll('#marketingToolsCards .sim-action-btn[data-action]');
+  const marketingToolsButtons = document.querySelectorAll('#marketing-tools .sim-action-btn[data-action]');
+  console.log('[Marketing] Found marketing tools buttons:', marketingToolsButtons.length);
   marketingToolsButtons.forEach(btn => {
+    const action = btn.getAttribute('data-action');
+    console.log('[Marketing] Setting up button for action:', action);
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       const action = this.getAttribute('data-action');
+      console.log('[Marketing] Marketing tools button clicked:', action);
       const config = marketingToolsActions[action];
       
       if (config) {
         openModalWithConfig(config, modal, modalTitle, iframe, userEmail, userName);
+      } else {
+        console.error('[Marketing] No config found for action:', action);
       }
     });
   });
@@ -1309,4 +1285,28 @@ function openModalWithConfig(config, modal, modalTitle, iframe, userEmail, userN
   
   modal.style.display = "block";
   document.body.style.overflow = 'hidden';
+}
+
+function toggleSubcategory(categoryId) {
+  // Close all subcategories first
+  const allSubcategories = document.querySelectorAll('.subcategory-container');
+  const clickedSubcategory = document.getElementById(categoryId);
+  const wasActive = clickedSubcategory?.classList.contains('active');
+  
+  allSubcategories.forEach(sub => {
+    sub.classList.remove('active');
+  });
+
+  // Toggle the clicked category (open if it wasn't active)
+  if (clickedSubcategory && !wasActive) {
+    clickedSubcategory.classList.add('active');
+    
+    // Smooth scroll to subcategory
+    setTimeout(() => {
+      clickedSubcategory.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+    }, 100);
+  }
 }

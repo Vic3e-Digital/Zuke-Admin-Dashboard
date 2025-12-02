@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Transcriber (Basic - Under 2MB) | Zuke</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Additional Audio Transcriber Styles */
+    .audio-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .audio-upload-section, .transcription-section {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .audio-upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .audio-upload-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .audio-upload-box.has-audio {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .audio-upload-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+
+    .audio-player {
+      width: 100%;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    .remove-audio-btn {
+      background: #DC3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .remove-audio-btn:hover {
+      background: #c82333;
+    }
+
+    .transcription-preview {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .preview-header {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .speaker-segment {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .speaker-segment:last-child {
+      border-bottom: none;
+    }
+
+    .speaker-label {
+      font-weight: 600;
+      color: var(--primary-orange);
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .segment-text {
+      color: #555;
+      margin-left: 10px;
+    }
+
+    .progress-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--light-bg);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .progress-bar-container {
+      background: #e0e0e0;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      background: var(--primary-orange);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+
+    .email-delivery-section {
+      background: #f9f9f9;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .email-delivery-section.show {
+      display: block;
+    }
+
+    .email-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .email-checkbox-label input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    .email-input-section {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .email-input-section.show {
+      display: block;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-button {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .transcribe-btn {
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    .transcribe-btn:hover:not(:disabled) {
+      background: #ff9500;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .transcribe-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .copy-btn:hover {
+      background: #5a6268;
+    }
+
+    .download-btn {
+      background: #28a745;
+      color: white;
+      position: relative;
+    }
+
+    .download-btn:hover {
+      background: #218838;
+    }
+
+    .download-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      min-width: 150px;
+      margin-top: 5px;
+    }
+
+    .download-dropdown.show {
+      display: block;
+    }
+
+    .download-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 10px 15px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      transition: background 0.2s;
+    }
+
+    .download-dropdown button:hover {
+      background: #f5f5f5;
+    }
+
+    .download-dropdown button:first-child {
+      border-radius: 4px 4px 0 0;
+    }
+
+    .download-dropdown button:last-child {
+      border-radius: 0 0 4px 4px;
+    }
+
+    .clear-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .clear-btn:hover {
+      background: #5a6268;
+    }
+
+    .status {
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .cost-display {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .cost-highlight {
+      font-weight: 600;
+      color: var(--primary-orange);
+    }
+
+    @media (max-width: 768px) {
+      .audio-container {
+        flex-direction: column;
+      }
+
+      .audio-upload-section, .transcription-section {
+        flex: none;
+        width: 100%;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .action-button {
+        min-width: auto;
+      }
+
+      .audio-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.audio-file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.audio-file-item .file-icon {
+  font-size: 20px;
+}
+
+.audio-file-item .file-info {
+  flex: 1;
+}
+
+.audio-file-item .file-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.audio-file-item .file-size {
+  font-size: 12px;
+  color: #666;
+}
+
+.audio-file-item .remove-file-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.audio-file-item .remove-file-btn:hover {
+  background: #c82333;
+}
+
+.file-count-badge {
+  display: inline-block;
+  background: var(--primary-orange);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.transcription-file-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.transcription-file-header:hover {
+  background: #e5e5e5;
+}
+
+.transcription-file-header .file-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.transcription-file-header .toggle-icon {
+  font-size: 12px;
+  color: #666;
+}
+
+.transcription-file-content {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.transcription-file-content.collapsed {
+  display: none;
+}
+
+
+    }
+  </style>
+</head>
+
+<body>
+    <div class="container">
+      
+      <!-- Header -->
+      <div class="header">
+        <h1>Audio Transcriber (Basic)</h1>
+        <p>Convert audio to text with speaker identification (for files under 2MB)</p>
+      </div>
+
+      <!-- Info Alert -->
+      <div class="info-box" style="background: #e3f2fd; border: 1px solid #90caf9; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; color: #1565c0;">
+        <strong>How it works:</strong> Upload a small audio file (MP3, WAV, M4A, OGG - under 2MB). Our service will transcribe it with automatic speaker identification. You can preview the results and download in multiple formats.
+      </div>
+
+      <!-- Main Content -->
+      <div class="audio-container">
+        
+        <!-- Upload Section -->
+        <div class="audio-upload-section">
+          <div class="section-title">Upload Audio</div>
+
+          <div class="audio-upload-box" id="audioUploadBox">
+            <div class="audio-upload-icon">🎙️</div>
+            <div style="font-weight: 500; color: var(--text-primary);">Drag & drop your audio file</div>
+            <div style="font-size: 12px; color: #666; margin-top: 8px;">or click to select</div>
+            <div style="font-size: 11px; color: #999; margin-top: 8px;">Supported: MP3, WAV, M4A, OGG (Max 2MB)</div>
+          </div>
+
+          <audio id="audioPlayer" class="audio-player" controls style="display: none;"></audio>
+          <button id="removeAudioBtn" class="remove-audio-btn">Remove Audio</button>
+
+          <div class="cost-display" style="margin-top: 20px;">
+            <strong>Cost:</strong> <span class="cost-highlight">R15.00</span><br>
+            <span style="font-size: 11px; color: #666;">Includes transcription + speaker identification</span>
+          </div>
+        </div>
+
+        <!-- Transcription Section -->
+        <div class="transcription-section">
+          <div class="section-title">Transcription Preview</div>
+
+          <div class="transcription-preview" id="transcriptionPreview">
+            <div style="color: #999; text-align: center; padding: 20px;">
+              Upload an audio file and click transcribe to see the preview here
+            </div>
+          </div>
+
+          <!-- Progress Section -->
+          <div class="progress-section" id="progressSection">
+            <div class="progress-bar-container">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Initializing transcription...</div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="button-group" id="actionButtons">
+            <button id="transcribeBtn" class="action-button transcribe-btn" disabled>
+              Transcribe Audio
+            </button>
+            <button id="copyBtn" class="action-button copy-btn" style="display: none;">
+              📋 Copy to Clipboard
+            </button>
+            <div style="position: relative; display: none;" id="downloadContainer">
+              <button id="downloadBtn" class="action-button download-btn">
+                📥 Download
+              </button>
+              <div id="downloadDropdown" class="download-dropdown">
+                <button data-format="txt">📄 Plain Text (.txt)</button>
+                <button data-format="json">📋 JSON (.json)</button>
+              </div>
+            </div>
+            <button id="clearBtn" class="action-button clear-btn" style="display: none;">
+              🗑️ Clear
+            </button>
+          </div>
+
+          <!-- Status Messages -->
+          <div id="transcriptionStatus" class="status"></div>
+        </div>
+      </div>
+
+      <input type="file" id="fileInput" class="file-input" accept="audio/*">
+    </div>
+
+    <script>
+      // This is the legacy transcriber for small files (under 2MB)
+      // For larger files, use the newer Azure AI Speech transcriber
+      showStatus('This is the basic transcriber for files under 2MB. For larger files, please use the main Audio Transcriber with Azure AI Speech support.', 'info');
+    </script>
+</body>
+</html>

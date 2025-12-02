@@ -3,7 +3,7 @@ const router = express.Router();
 
 // External webhook endpoints
 const WEBHOOKS = {
-  'find-leads': 'https://aigent-staging.zuke.co.za/webhook/leads-find',
+  'find-leads': 'https://aigents.southafricanorth.azurecontainer.io/webhook/7314886d-74e6-405a-a95a-dda82b490327',
   'enrich-leads': 'https://aigents.southafricanorth.azurecontainer.io/webhook/leads-enrichment',
   'email-leads': 'https://aigent-staging.zuke.co.za/webhook/leads-email'
 };

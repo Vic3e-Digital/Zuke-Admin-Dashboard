@@ -24,7 +24,8 @@ class TikTokOAuthService extends OAuthService {
     const scopes = [
       'user.info.basic',
       'video.list',
-      'video.upload'
+      'video.upload',
+      'video.publish'  // Required for publishing videos
     ];
 
     const { codeVerifier, codeChallenge } = this.generatePKCE();
@@ -105,12 +106,12 @@ class TikTokOAuthService extends OAuthService {
   }
 
   async getUserInfo(accessToken) {
-    // ✅ ONLY request fields available with user.info.basic
+    // ✅ user.info.basic scope includes: open_id, union_id, avatar_url, display_name
     const fields = ['open_id', 'union_id', 'avatar_url', 'display_name'];
 
     const url = `${this.apiBaseUrl}/user/info/?fields=${fields.join(',')}`;
 
-    console.log('[TikTok] 📥 Getting basic user info...');
+    console.log('[TikTok] 📥 Getting user info with fields:', fields);
 
     const response = await fetch(url, {
       headers: {
@@ -122,6 +123,7 @@ class TikTokOAuthService extends OAuthService {
     const data = await response.json();
 
     console.log('[TikTok] Response status:', response.status);
+    console.log('[TikTok] API Response:', JSON.stringify(data, null, 2));
 
     if (data.error && data.error.code !== 'ok') {
       console.error('[TikTok] API Error:', data.error);
@@ -132,7 +134,11 @@ class TikTokOAuthService extends OAuthService {
       throw new Error('No user data in response');
     }
 
-    console.log('[TikTok] ✅ User info retrieved:', data.data.user.display_name);
+    console.log('[TikTok] ✅ User info retrieved:', {
+      open_id: data.data.user.open_id,
+      display_name: data.data.user.display_name,
+      avatar_url: data.data.user.avatar_url
+    });
 
     return data.data.user;
   }
@@ -193,10 +199,10 @@ class TikTokOAuthService extends OAuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      open_id: user.open_id,
+      open_id: user.open_id || '',
       union_id: user.union_id || '',
-      username: user.display_name || '', // Use display_name since username not available
-      display_name: user.display_name || '',
+      username: user.display_name || user.open_id || '',
+      display_name: user.display_name || user.open_id || '',
       avatar_url: user.avatar_url || '',
       follower_count: 0, // Not available with basic scope
       following_count: 0,

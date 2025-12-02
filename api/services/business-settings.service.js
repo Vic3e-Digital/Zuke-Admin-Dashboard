@@ -70,13 +70,22 @@ class BusinessSettingsService {
       throw new Error('Platform not connected');
     }
 
-    return {
+    const tokenData = {
       token: encryptionService.decrypt(platformSettings.access_token),
-      refresh_token: platformSettings.refresh_token 
-        ? encryptionService.decrypt(platformSettings.refresh_token) 
-        : null,
       ...this.getPlatformMetadata(platform, platformSettings)
     };
+
+    // Add refresh token if available and encrypted
+    if (platformSettings.refresh_token) {
+      try {
+        tokenData.refresh_token = encryptionService.decrypt(platformSettings.refresh_token);
+      } catch (err) {
+        console.warn(`[Service] Could not decrypt refresh_token for ${platform}:`, err.message);
+        tokenData.refresh_token = null;
+      }
+    }
+
+    return tokenData;
   }
 
   getDefaultSettings() {
