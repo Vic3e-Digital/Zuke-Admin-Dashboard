@@ -686,8 +686,8 @@ body {
   align-items: flex-start;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  margin-left: 4rem;
-  margin-right: 2rem;
+  margin-left: 20px;
+  margin-right: 20px;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -1167,10 +1167,13 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px 20px 40px;
+  padding: 20px;
+}
+
+.modal[style*="display: block"] {
+  display: flex !important;
 }
 
 .modal-content {
@@ -1180,8 +1183,8 @@ body {
   border: none;
   border-radius: var(--radius);
   width: 90%;
-  max-width: 800px;
-  max-height: calc(100vh - 140px);
+  max-width: 900px;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
@@ -1287,7 +1290,7 @@ body {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 2rem 0 0 0;
 }
 
 
@@ -1372,8 +1375,8 @@ body {
 
 .page-container .sim-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin-top: 2rem;
   width: 100%;
 }

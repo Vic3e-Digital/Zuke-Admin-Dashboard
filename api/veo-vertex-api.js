@@ -294,6 +294,7 @@ router.post('/check-status', async (req, res) => {
 
     console.log('✅ Vertex AI response received');
     console.log('📊 Operation done?', operation.done);
+    console.log('📊 Full response keys:', Object.keys(operation));
     
     if (operation.done) {
       console.log('✅ Video generation complete!');
@@ -333,6 +334,13 @@ router.post('/check-status', async (req, res) => {
           }
         }
       );
+
+      // Return operation with videoFile for easy frontend consumption
+      const response = { ...operation };
+      if (operation.response && operation.response.videos && operation.response.videos.length > 0) {
+        response.videoFile = operation.response.videos[0];
+      }
+      return response;
     } else {
       console.log('⏳ Video still processing...');
     }

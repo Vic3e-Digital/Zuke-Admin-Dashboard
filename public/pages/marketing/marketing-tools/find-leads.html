@@ -13,32 +13,59 @@
       padding: 20px;
       background: #f8f9fa;
     }
-    .container { max-width: 600px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .two-column-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .left-column {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .right-column {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    @media (max-width: 768px) {
+      .two-column-container {
+        flex-direction: column;
+      }
+    }
     
     .section {
       background: white;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     
     .section-title {
-      font-size: 18px;
+      font-size: 14px;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       color: #2c3e50;
     }
     
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
     }
     
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       font-weight: 600;
       color: #333;
+      font-size: 13px;
     }
     
     .required {
@@ -48,12 +75,13 @@
     
     textarea, input[type="text"], input[type="email"], select {
       width: 100%;
-      padding: 12px;
+      padding: 10px 12px;
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: 6px;
       font-family: inherit;
       resize: vertical;
-      min-height: 80px;
+      min-height: 70px;
+      font-size: 13px;
     }
     
     input[type="text"], input[type="email"], select {
@@ -66,9 +94,9 @@
     }
     
     .field-note {
-      font-size: 13px;
+      font-size: 11px;
       color: #666;
-      margin-top: 6px;
+      margin-top: 4px;
       font-style: italic;
     }
     
@@ -76,34 +104,34 @@
       display: inline-block;
       background: #d1fae5;
       color: #065f46;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 10px;
       font-weight: 600;
-      margin-left: 8px;
+      margin-left: 6px;
     }
     
     .info-badge {
       display: inline-block;
       background: #e0e7ff;
       color: #4f46e5;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 10px;
       font-weight: 600;
-      margin-left: 8px;
+      margin-left: 6px;
     }
     
     .collapsible-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 10px 12px;
       background: #f8f9fa;
       border: 1px solid #e0e0e0;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       transition: all 0.2s ease;
     }
     
@@ -115,22 +143,22 @@
     .collapsible-title {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-weight: 600;
       color: #333;
-      font-size: 14px;
+      font-size: 13px;
     }
     
     .collapsible-number {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       background: white;
       border: 2px solid #ddd;
-      border-radius: 6px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       color: #666;
     }
@@ -138,6 +166,8 @@
     .collapsible-arrow {
       transition: transform 0.2s ease;
       color: #666;
+      width: 16px;
+      height: 16px;
     }
     
     .collapsible-arrow.open {
@@ -170,68 +200,96 @@
     }
     
     .cost {
-      background: #fff3cd;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 15px;
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange, #ff6b35);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
       text-align: center;
       font-weight: 600;
+      color: var(--primary-orange, #ff6b35);
+      font-size: 13px;
     }
     
     .generate-btn {
       width: 100%;
-      padding: 15px;
-      background: var(--primary-orange, linear-gradient(135deg, #ff6b35 0%, #ff9500 100%));
+      padding: 10px;
+      background: linear-gradient(135deg, var(--primary-orange, #ff6b35), #FF7B00);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 6px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: all 0.2s ease;
     }
     
-    .generate-btn:hover:not(:disabled) { opacity: 0.9; }
+    .generate-btn:hover:not(:disabled) { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
     
-    .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .generate-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed;
+      transform: none;
+    }
     
     .status {
-      margin-top: 15px;
+      margin-top: 12px;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 6px;
       display: none;
       white-space: pre-wrap;
       animation: slideIn 0.3s ease;
+      font-size: 13px;
+      line-height: 1.5;
     }
     
-    .status.success { background: #d4edda; color: #155724; }
-    .status.error { background: #f8d7da; color: #721c24; }
-    .status.info { background: #d1ecf1; color: #0c5460; }
-    .status.loading { background: #e7f3ff; color: #004085; }
+    .status.success { 
+      background: #D4EDDA; 
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+    .status.error { 
+      background: #F8D7DA; 
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+    .status.info { 
+      background: #D1ECF1; 
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+    .status.loading { 
+      background: #e7f3ff; 
+      color: #004085;
+    }
     
     .progress {
       display: none;
-      margin-top: 15px;
+      margin-top: 12px;
       text-align: center;
     }
     
     .progress-text {
       color: var(--primary-orange, #ff6b35);
-      font-weight: 600;
-      margin-bottom: 10px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      font-size: 12px;
     }
     
     .progress-bar {
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: #f0f0f0;
-      border-radius: 4px;
+      border-radius: 3px;
       overflow: hidden;
     }
     
     .progress-fill {
       height: 100%;
-      background: var(--primary-orange, linear-gradient(90deg, #ff6b35, #ff9500));
+      background: linear-gradient(90deg, var(--primary-orange, #ff6b35), #FF9500);
       width: 0%;
       transition: width 0.3s ease;
       animation: pulse 1.5s ease-in-out infinite;
@@ -255,11 +313,11 @@
     .suggestion-card {
       background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 149, 0, 0.08) 100%);
       border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 8px;
+      padding: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       position: relative;
       overflow: hidden;
     }
@@ -278,9 +336,9 @@
     .suggestion-card::before {
       content: '✨';
       position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 20px;
+      top: 10px;
+      right: 10px;
+      font-size: 16px;
       opacity: 0;
       transition: opacity 0.2s;
     }
@@ -291,26 +349,26 @@
     
     .suggestion-title {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 13px;
       color: #2c3e50;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       line-height: 1.3;
     }
     
     .suggestion-preview {
-      font-size: 13px;
+      font-size: 12px;
       color: #666;
-      line-height: 1.5;
+      line-height: 1.4;
     }
     
     .suggestion-badge {
       display: inline-block;
       background: var(--primary-orange, #ff6b35);
       color: white;
-      font-size: 11px;
+      font-size: 10px;
       padding: 3px 8px;
       border-radius: 4px;
-      margin-top: 8px;
+      margin-top: 6px;
       font-weight: 600;
     }
     
@@ -325,74 +383,108 @@
     .example-box {
       background: #f8f9fa;
       border-left: 4px solid var(--primary-orange, #ff6b35);
-      padding: 12px;
+      padding: 10px;
       border-radius: 6px;
-      margin-top: 10px;
-      font-size: 13px;
+      margin-top: 8px;
+      font-size: 12px;
       color: #666;
     }
 
     .example-box strong {
       display: block;
       color: #333;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
     }
 
     .example-box p {
       margin: 4px 0;
-      line-height: 1.5;
+      line-height: 1.4;
     }
   </style>
 </head>
 <body>
   <div class="container">
     
-    <!-- AI SUGGESTIONS -->
-    <div class="section" id="suggestionsSection" style="display: none;">
-      <div class="section-title">
-        💡 AI Target Audience Suggestions for <span id="businessNameInline">Your Business</span>
-      </div>
-      
-      
-    </div>
-
     <form id="leadGenForm">
+      
+      <div class="two-column-container">
+        
+        <!-- LEFT COLUMN -->
+        <div class="left-column">
+          
+          <!-- AI SUGGESTIONS Input -->
+          <div class="section" id="suggestionsSection">
+            <div class="section-title">
+              💡 Who are you looking for?
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333; font-size: 13px;">
+                Target Person/Role <span style="color: #666; font-weight: 400; font-size: 11px;">(Optional)</span>
+              </label>
+              <input 
+                type="text" 
+                id="suggestionPrompt" 
+                placeholder="e.g., startup founders, real estate agents..."
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 13px;"
+              >
+              <p style="font-size: 11px; color: #666; margin-top: 4px; font-style: italic;">
+                Describe the type of person you want to target
+              </p>
+            </div>
 
-      <div style="text-align: center; margin-bottom: 24px;">
-        <button type="button" id="generateSuggestionsBtn" style="padding: 10px 20px; background: var(--primary-orange, #ff6b35); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
-          <span id="btnText">✨ Generate AI Suggestions</span>
-          <span id="btnSpinner" style="display: none;"><span class="spinner"></span></span>
-          <span style="background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 4px; font-size: 12px;">R2.00</span>
-        </button>
-      </div>
-      
-      <div id="suggestionsLoading" style="display: none; text-align: center; padding: 20px; color: #666;">
-        <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-orange, #ff6b35); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <p style="margin-top: 10px;">Generating personalized suggestions...</p>
-      </div>
-      
-      <div id="suggestionsContent" style="display: none; margin-bottom: 24px;">
-        <div id="suggestionCards">
-          <!-- Cards injected here -->
-        </div>
-        <button type="button" id="refreshSuggestionsBtn" style="padding: 8px 16px; background: var(--primary-orange, #ff6b35); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 12px;">
-          🔄 Get New Suggestions
-        </button>
-      </div>
-      
-      <div id="suggestionsError" style="display: none; color: #d9534f; padding: 12px; background: #f8d7da; border-radius: 6px; margin-top: 12px; margin-bottom: 24px;"></div>
-      
-      <!-- Collapsible Section 1: Your Information -->
-      <div class="collapsible-header" onclick="toggleCollapsible('userInfo')">
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #333; font-size: 13px;">
+                Target City <span style="color: #666; font-weight: 400; font-size: 11px;">(Optional)</span>
+              </label>
+              <input 
+                type="text" 
+                id="suggestionCity" 
+                placeholder="e.g., Cape Town, Houston, London..."
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 13px;"
+              >
+              <p style="font-size: 11px; color: #666; margin-top: 4px; font-style: italic;">
+                City to focus the AI suggestions
+              </p>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <button type="button" id="generateSuggestionsBtn" style="width: 100%; padding: 10px; background: var(--primary-orange, #ff6b35); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span id="btnText">✨ Generate AI Suggestions</span>
+                <span id="btnSpinner" style="display: none;"><span class="spinner"></span></span>
+                <span style="background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 4px; font-size: 11px;">R2.00</span>
+              </button>
+            </div>
+            
+            <div id="suggestionsLoading" style="display: none; text-align: center; padding: 20px; color: #666;">
+              <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-orange, #ff6b35); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <p style="margin-top: 10px; font-size: 12px;">Generating suggestions...</p>
+            </div>
+            
+            <div id="suggestionsContent" style="display: none;">
+              <div id="suggestionCards">
+                <!-- Cards injected here -->
+              </div>
+              <button type="button" id="refreshSuggestionsBtn" style="width: 100%; padding: 8px 12px; background: var(--primary-orange, #ff6b35); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; margin-top: 8px;">
+                🔄 Get New Suggestions
+              </button>
+            </div>
+            
+            <div id="suggestionsError" style="display: none; color: #d9534f; padding: 12px; background: #f8d7da; border-radius: 6px; font-size: 12px;"></div>
+          </div>
+          
+          <!-- Collapsible: Your & Business Information -->
+      <div class="collapsible-header" onclick="toggleCollapsible('accountInfo')">
         <div class="collapsible-title">
-          <div class="collapsible-number">1</div>
-          <span>Your Information</span>
+          <div class="collapsible-number">👤</div>
+          <span>Your & Business Information</span>
         </div>
-        <svg class="collapsible-arrow" id="userInfoArrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <svg class="collapsible-arrow" id="accountInfoArrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
         </svg>
       </div>
-      <div class="collapsible-content" id="userInfo">
+      <div class="collapsible-content" id="accountInfo">
         <div class="section">
 
         <div class="form-group">
@@ -411,21 +503,6 @@
           <input type="email" id="userEmail" name="userEmail" readonly required>
           <p class="field-note">Results will be sent here</p>
         </div>
-        </div>
-      </div>
-
-      <!-- Collapsible Section 2: Business Information -->
-      <div class="collapsible-header" onclick="toggleCollapsible('businessInfo')">
-        <div class="collapsible-title">
-          <div class="collapsible-number">2</div>
-          <span>Business Information</span>
-        </div>
-        <svg class="collapsible-arrow" id="businessInfoArrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-        </svg>
-      </div>
-      <div class="collapsible-content" id="businessInfo">
-        <div class="section">
 
         <div class="form-group">
           <label>
@@ -445,43 +522,19 @@
         </div>
         </div>
       </div>
-
-      <!-- 3. Target Audience -->
-      <div class="section">
-        <div class="section-title">3. Target Audience</div>
-
-        <div class="form-group">
-          <label>Target Role/Position <span class="required">*</span></label>
-          <input type="text" id="targetRole" name="targetRole" placeholder="CEO" required>
-          <p class="field-note">Primary job title to target (one role works best)</p>
+      
+      <!-- Advanced Options Collapsible -->
+      <div class="collapsible-header" onclick="toggleCollapsible('advancedOptions')">
+        <div class="collapsible-title">
+          <div class="collapsible-number">⚙️</div>
+          <span>Advanced Options</span>
         </div>
-
-        <div class="form-group">
-          <label>Target Country <span class="required">*</span></label>
-          <select id="targetCountry" name="targetCountry" required>
-            <option value="">Select a country...</option>
-            <option value="South Africa" selected>South Africa</option>
-            <option value="Nigeria">Nigeria</option>
-            <option value="United Kingdom">United Kingdom</option>
-            <option value="United States">United States</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Target City <span class="info-badge">Optional</span></label>
-          <input type="text" id="targetCity" name="targetCity" placeholder="e.g., Cape Town, Lagos, London">
-          <p class="field-note">Specific city to narrow down your search</p>
-        </div>
-
-        <div class="form-group">
-          <label>Search Variants <span class="required">*</span></label>
-          <select id="variants" name="variants" required>
-            <option value="1">1x - Single Run (R50.00)</option>
-            <option value="2">2x - Double Run (R100.00)</option>
-            <option value="3" selected>3x - Triple Run (R150.00)</option>
-          </select>
-          <p class="field-note">Multiple runs with similar searches increase lead coverage. Price scales with runs.</p>
-        </div>
+        <svg class="collapsible-arrow" id="advancedOptionsArrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="collapsible-content" id="advancedOptions">
+        <div class="section">
 
         <div class="form-group">
           <label>
@@ -490,7 +543,7 @@
           <textarea id="context" name="context" placeholder="E.g., Looking for Series A-C funded startups..." rows="3"></textarea>
           <p class="field-note">
             Funding stage, company size, specific challenges, etc.
-            <svg id="exampleInfoIcon" style="width: 16px; height: 16px; display: inline-block; margin-left: 6px; cursor: pointer; vertical-align: middle;" viewBox="0 0 20 20" fill="currentColor">
+            <svg id="exampleInfoIcon" style="width: 14px; height: 14px; display: inline-block; margin-left: 4px; cursor: pointer; vertical-align: middle;" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
             </svg>
           </p>
@@ -507,38 +560,83 @@
           <p class="field-note">Choose which product/service to focus leads on</p>
         </div>
 
-        <div id="exampleTooltip" style="display: none; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin-top: 12px; font-size: 13px; color: #666; animation: slideIn 0.3s ease;">
-          <strong style="color: #333; display: block; margin-bottom: 10px;">💡 Example Use Cases:</strong>
-          <p style="margin: 6px 0; line-height: 1.6;"><strong>B2B Sales:</strong> "Looking for enterprise clients for our SaaS platform"</p>
-          <p style="margin: 6px 0; line-height: 1.6;"><strong>Coaching:</strong> "Seeking C-suite executives for leadership coaching"</p>
-          <p style="margin: 6px 0; line-height: 1.6;"><strong>Partnerships:</strong> "Exploring partnerships with fintech companies"</p>
+        <div id="exampleTooltip" style="display: none; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; margin-top: 8px; font-size: 12px; color: #666; animation: slideIn 0.3s ease;">
+          <strong style="color: #333; display: block; margin-bottom: 8px; font-size: 13px;">💡 Example Use Cases:</strong>
+          <p style="margin: 4px 0; line-height: 1.4;"><strong>B2B Sales:</strong> "Looking for enterprise clients for our SaaS platform"</p>
+          <p style="margin: 4px 0; line-height: 1.4;"><strong>Coaching:</strong> "Seeking C-suite executives for leadership coaching"</p>
+          <p style="margin: 4px 0; line-height: 1.4;"><strong>Partnerships:</strong> "Exploring partnerships with fintech companies"</p>
+        </div>
+        
         </div>
       </div>
+        
+        </div>
+        <!-- END LEFT COLUMN -->
+        
+        <!-- RIGHT COLUMN -->
+        <div class="right-column">
 
-      <!-- 3. Target Audience -->
+      <!-- Target Audience -->
       <div class="section">
-        <div class="section-title">4. Advanced Options</div>
+        <div class="section-title">🎯 Target Audience</div>
 
         <div class="form-group">
-          <label style="display: flex; align-items: center; cursor: pointer;">
-            <input type="checkbox" id="autoEnrich" name="autoEnrich" style="width: auto; margin-right: 10px; cursor: pointer;">
-            <span>Automatically enrich leads with additional data</span>
-          </label>
-          <p class="field-note">Get phone numbers, company size, and other details automatically</p>
+          <label>Target Role/Position <span class="required">*</span></label>
+          <input type="text" id="targetRole" name="targetRole" placeholder="CEO" required>
+          <p class="field-note">Primary job title to target (one role works best)</p>
         </div>
 
         <div class="form-group">
-          <label style="display: flex; align-items: center; cursor: not-allowed; opacity: 0.6;">
-            <input type="checkbox" id="autoEmail" name="autoEmail" disabled style="width: auto; margin-right: 10px; cursor: not-allowed;">
-            <span>Automatically send outreach emails <span style="background: #fbbf24; color: #78350f; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 8px;">COMING SOON</span></span>
+          <label>Target Location <span class="required">*</span></label>
+          <input type="text" id="targetCountry" name="targetCountry" placeholder="e.g., Houston, TX, USA or Cape Town, South Africa" required>
+          <p class="field-note">Enter city, state/province, and country for best results</p>
+        </div>
+
+        <!-- <div class="form-group">
+          <label>Target City <span class="info-badge">Optional</span></label>
+          <input type="text" id="targetCity" name="targetCity" placeholder="e.g., Cape Town, Lagos, London">
+          <p class="field-note">Specific city to narrow down your search</p>
+        </div> -->
+
+        <div class="form-group">
+          <label>Search Variants <span class="required">*</span></label>
+          <select id="variants" name="variants" required>
+            <option value="1" selected>1x - Single Run (R50.00)</option>
+            <option value="2">2x - Double Run (R100.00)</option>
+            <option value="3">3x - Triple Run (R150.00)</option>
+          </select>
+          <p class="field-note">Multiple runs with similar searches increase lead coverage. Price scales with runs.</p>
+        </div>
+
+      </div>
+      
+      <!-- Automation Options -->
+      <div class="section">
+        <div class="section-title">🤖 Automation Options</div>
+
+        <div class="form-group">
+          <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+            <input type="checkbox" id="autoEnrich" name="autoEnrich" style="width: auto; margin-right: 8px; cursor: pointer;">
+            <span>Auto Enrich</span>
+            <svg style="width: 14px; height: 14px; margin-left: 6px; color: #666; cursor: help;" viewBox="0 0 20 20" fill="currentColor" title="Get phone numbers, company size, and other details automatically">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
           </label>
-          <p class="field-note">AI-powered personalized emails will be sent to qualified leads</p>
+          <p class="field-note" style="margin-left: 26px;">Get phone numbers, company size, and other details automatically</p>
+        </div>
+
+        <div class="form-group">
+          <label style="display: flex; align-items: center; cursor: not-allowed; opacity: 0.6; font-weight: 500;">
+            <input type="checkbox" id="autoEmail" name="autoEmail" disabled style="width: auto; margin-right: 8px; cursor: not-allowed;">
+            <span>Auto Email Outreach <span style="background: #fbbf24; color: #78350f; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 6px;">COMING SOON</span></span>
+          </label>
+          <p class="field-note" style="margin-left: 26px;">AI-powered personalized emails will be sent to qualified leads</p>
         </div>
       </div>
-
+      
       <!-- Cost Display -->
       <div class="cost" id="costDisplay">
-        Lead Generation Cost: R150.00
+        Lead Generation Cost: R50.00
       </div>
 
       <!-- Submit Button -->
@@ -556,6 +654,12 @@
 
       <!-- Status -->
       <div class="status" id="status"></div>
+      
+        </div>
+        <!-- END RIGHT COLUMN -->
+      
+      </div>
+      <!-- END TWO COLUMN CONTAINER -->
     </form>
   </div>
 
@@ -680,9 +784,28 @@ Unique Value: ${businessCase.uniqueValue || 'Not specified'}
 Goals: ${businessCase.goals || 'Not specified'}
         `.trim();
 
+        const userPrompt = document.getElementById('suggestionPrompt')?.value?.trim() || '';
+        const userCity = document.getElementById('suggestionCity')?.value?.trim() || '';
+        
+        let additionalContext = '';
+        if (userPrompt || userCity) {
+          additionalContext = '\n\n';
+          if (userPrompt) {
+            additionalContext += `The user is specifically looking for: "${userPrompt}"\n`;
+          }
+          if (userCity) {
+            additionalContext += `Target location: ${userCity}\n`;
+          }
+          additionalContext += 'Focus suggestions around these specifics while considering the business context.';
+        }
+
+        // Add timestamp and request counter for variation
+        const timestamp = Date.now();
+        const variationPrompt = cardsContainer.innerHTML ? '\n\nIMPORTANT: Generate DIFFERENT suggestions from previous responses. Focus on alternative roles, industries, or segments that were not covered before.' : '';
+
         const prompt = `Based on this business information:
 
-${businessInfo}
+${businessInfo}${additionalContext}${variationPrompt}
 
 Generate exactly 3 creative and specific target audience suggestions for LinkedIn lead generation.
 
@@ -694,8 +817,13 @@ Each suggestion should include:
 
 IMPORTANT: 
 - Use only ONE specific job title per suggestion (e.g., "CEO" not "CEO, CTO, Founder")
-- Choose countries ONLY from: South Africa, Nigeria, United Kingdom, United States
-- Vary the countries across the 3 suggestions
+- For location, provide specific details like "Houston, TX, USA" or "Cape Town, South Africa"
+- If a target city is specified, ALL 3 suggestions MUST be for that city with full location details
+- If no city is specified, vary the locations across the 3 suggestions
+- Explore diverse industries and roles that would benefit from this business
+- Think creatively about non-obvious target audiences
+
+Request ID: ${timestamp}
 
 Return ONLY valid JSON in this exact format:
 {
@@ -703,7 +831,7 @@ Return ONLY valid JSON in this exact format:
     {
       "title": "Segment Name",
       "targetRole": "Single primary job title",
-      "country": "South Africa",
+      "location": "City, State/Province, Country",
       "context": "2-3 sentences explaining why this audience is valuable and how your business can help them."
     }
   ]
@@ -740,7 +868,7 @@ Return ONLY valid JSON in this exact format:
             <div class="suggestion-title">${suggestion.title}</div>
             <div class="suggestion-preview">
               <strong>Target Role:</strong> ${suggestion.targetRole}<br>
-              <strong>Location:</strong> ${suggestion.country}<br><br>
+              <strong>Location:</strong> ${suggestion.location || suggestion.country}<br><br>
               ${suggestion.context}
             </div>
             <span class="suggestion-badge">Click to use</span>
@@ -754,7 +882,7 @@ Return ONLY valid JSON in this exact format:
             card.classList.add('selected');
             
             document.getElementById('targetRole').value = suggestion.targetRole;
-            document.getElementById('targetCountry').value = suggestion.country;
+            document.getElementById('targetCountry').value = suggestion.location || suggestion.country;
             document.getElementById('context').value = suggestion.context;
             
             // Update submit button state
@@ -822,7 +950,12 @@ Return ONLY valid JSON in this exact format:
         }
 
         const businessName = currentBusiness?.store_info?.name || currentBusiness?.name || 'Your Business';
-        document.getElementById('businessNameInline').textContent = businessName;
+        
+        // Only update if element exists (removed from current layout)
+        const businessNameInline = document.getElementById('businessNameInline');
+        if (businessNameInline) {
+          businessNameInline.textContent = businessName;
+        }
 
         if (businessName) {
           document.getElementById('businessName').value = businessName;
@@ -1052,23 +1185,20 @@ Return ONLY valid JSON in this exact format:
         progressFill.style.width = '100%';
 
         showStatus(
-          `✅ Success! Lead generation completed.\n\n` +
-          `📊 Total Leads: ${result.data?.totalLeads || 'N/A'}\n` +
-          `⭐ High-Quality Leads: ${result.data?.highScoringLeads || 'N/A'}\n` +
-          `📈 Average Score: ${result.data?.averageScore || 'N/A'}/10\n\n` +
-          `🔄 Variants Run: ${data.variants}x\n` +
+          `✅ Lead generation request submitted successfully!\n\n` +
+          `🔄 Variants: ${data.variants}x\n` +
           `💰 Cost: R${totalCost.toFixed(2)}\n` +
           `💳 New Balance: ${walletResult.formatted_balance}\n\n` +
-          `📧 Detailed report sent to ${data.email}` +
-          (result.data?.spreadsheetUrl ? `\n\n🔗 View Results: ${result.data.spreadsheetUrl}` : ''),
+          `📧 Your leads are being generated and will be sent to ${data.email} shortly.\n\n` +
+          `⏱️ This usually takes 5-15 minutes depending on the search complexity.`,
           'success'
         );
 
         setTimeout(() => {
           document.getElementById('targetRole').value = '';
           document.getElementById('context').value = '';
-          document.getElementById('targetCountry').value = 'South Africa';
-          document.getElementById('variants').value = '3';
+          document.getElementById('targetCountry').value = '';
+          document.getElementById('variants').value = '1';
           
           document.querySelectorAll('.suggestion-card').forEach(c => 
             c.classList.remove('selected')

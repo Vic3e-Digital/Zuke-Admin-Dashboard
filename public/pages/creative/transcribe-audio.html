@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audio Transcriber with Diarization | Zuke</title>
+  <title>Audio Transcriber with Azure AI | Zuke</title>
   <link rel="stylesheet" href="../../css/formStyle.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
   <style>
-    /* Additional Audio Transcriber Styles */
+    /* Audio Transcriber Styles */
     .audio-container {
       display: flex;
       gap: 20px;
@@ -52,35 +52,13 @@
       opacity: 0.6;
     }
 
-    .audio-player {
-      width: 100%;
-      margin-top: 15px;
-      margin-bottom: 10px;
-    }
-
-    .remove-audio-btn {
-      background: #DC3545;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      margin-top: 10px;
-      display: none;
-    }
-
-    .remove-audio-btn:hover {
-      background: #c82333;
-    }
-
     .transcription-preview {
       background: var(--light-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 15px;
       margin-top: 15px;
-      max-height: 300px;
+      max-height: 400px;
       overflow-y: auto;
       font-size: 14px;
       line-height: 1.6;
@@ -146,40 +124,6 @@
       text-align: center;
     }
 
-    .email-delivery-section {
-      background: #f9f9f9;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-      display: none;
-    }
-
-    .email-delivery-section.show {
-      display: block;
-    }
-
-    .email-checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-
-    .email-checkbox-label input[type="checkbox"] {
-      cursor: pointer;
-    }
-
-    .email-input-section {
-      margin-top: 12px;
-      display: none;
-    }
-
-    .email-input-section.show {
-      display: block;
-    }
-
     .button-group {
       display: flex;
       gap: 10px;
@@ -223,59 +167,6 @@
 
     .copy-btn:hover {
       background: #5a6268;
-    }
-
-    .download-btn {
-      background: #28a745;
-      color: white;
-      position: relative;
-    }
-
-    .download-btn:hover {
-      background: #218838;
-    }
-
-    .download-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      min-width: 150px;
-      margin-top: 5px;
-    }
-
-    .download-dropdown.show {
-      display: block;
-    }
-
-    .download-dropdown button {
-      display: block;
-      width: 100%;
-      padding: 10px 15px;
-      border: none;
-      background: none;
-      text-align: left;
-      cursor: pointer;
-      font-size: 14px;
-      color: #333;
-      transition: background 0.2s;
-    }
-
-    .download-dropdown button:hover {
-      background: #f5f5f5;
-    }
-
-    .download-dropdown button:first-child {
-      border-radius: 4px 4px 0 0;
-    }
-
-    .download-dropdown button:last-child {
-      border-radius: 0 0 4px 4px;
     }
 
     .clear-btn {
@@ -330,6 +221,50 @@
       color: var(--primary-orange);
     }
 
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .file-item .file-icon {
+      font-size: 20px;
+    }
+
+    .file-item .file-info {
+      flex: 1;
+    }
+
+    .file-item .file-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .file-item .file-size {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .file-item .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .file-item .remove-btn:hover {
+      background: #c82333;
+    }
+
     @media (max-width: 768px) {
       .audio-container {
         flex-direction: column;
@@ -347,105 +282,6 @@
       .action-button {
         min-width: auto;
       }
-
-      .audio-file-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.audio-file-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.audio-file-item .file-icon {
-  font-size: 20px;
-}
-
-.audio-file-item .file-info {
-  flex: 1;
-}
-
-.audio-file-item .file-name {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.audio-file-item .file-size {
-  font-size: 12px;
-  color: #666;
-}
-
-.audio-file-item .remove-file-btn {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.audio-file-item .remove-file-btn:hover {
-  background: #c82333;
-}
-
-.file-count-badge {
-  display: inline-block;
-  background: var(--primary-orange);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: 8px;
-}
-
-.transcription-file-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  background: #f0f0f0;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.transcription-file-header:hover {
-  background: #e5e5e5;
-}
-
-.transcription-file-header .file-title {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.transcription-file-header .toggle-icon {
-  font-size: 12px;
-  color: #666;
-}
-
-.transcription-file-content {
-  display: block;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.transcription-file-content.collapsed {
-  display: none;
-}
-
-
     }
   </style>
 </head>
@@ -455,13 +291,13 @@
       
       <!-- Header -->
       <div class="header">
-        <h1>Audio Transcriber</h1>
-        <p>Convert audio to text with speaker identification (diarization)</p>
+        <h1>Audio Transcriber with Azure AI</h1>
+        <p>Convert large audio files to text with advanced speech recognition powered by Azure Cognitive Services</p>
       </div>
 
       <!-- Info Alert -->
-      <div class="info-box" style="background: #e3f2fd; border: 1px solid #90caf9; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; color: #1565c0;">
-        <strong>How it works:</strong> Upload an audio file (MP3, WAV, M4A, OGG). Our Azure OpenAI Whisper model will transcribe it with automatic speaker identification. You can preview the results and download in multiple formats.
+      <div class="info-box" style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; color: #856404;">
+        <strong>🚀 Powered by Azure AI Speech:</strong> This transcriber uses Microsoft's advanced speech recognition technology and supports audio files up to 500MB. Perfect for long recordings, podcasts, interviews, and more.
       </div>
 
       <!-- Main Content -->
@@ -469,21 +305,35 @@
         
         <!-- Upload Section -->
         <div class="audio-upload-section">
-          <div class="section-title">Upload Audio</div>
+          <div class="section-title">Upload Audio File</div>
 
           <div class="audio-upload-box" id="audioUploadBox">
-            <div class="audio-upload-icon">🎙️</div>
+            <div class="audio-upload-icon">☁️</div>
             <div style="font-weight: 500; color: var(--text-primary);">Drag & drop your audio file</div>
             <div style="font-size: 12px; color: #666; margin-top: 8px;">or click to select</div>
-            <div style="font-size: 11px; color: #999; margin-top: 8px;">Supported: MP3, WAV, M4A, OGG (Max 25MB)</div>
+            <div style="font-size: 11px; color: #999; margin-top: 8px;">Supported: MP3, WAV, M4A, OGG, FLAC (Max 500MB)</div>
           </div>
 
-          <audio id="audioPlayer" class="audio-player" controls style="display: none;"></audio>
-          <button id="removeAudioBtn" class="remove-audio-btn">Remove Audio</button>
+          <div id="fileDisplay" style="margin-top: 15px;"></div>
+
+          <!-- Diarization Toggle -->
+          <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="diarizationToggle" checked style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="diarizationToggle" style="cursor: pointer; font-weight: 500; color: var(--text-primary); flex: 1; margin: 0;">
+                Enable Speaker Identification
+              </label>
+            </div>
+            <div style="font-size: 12px; color: #666; margin-top: 6px; margin-left: 28px;">
+              Automatically identify different speakers in the conversation (+R5.00)
+            </div>
+          </div>
 
           <div class="cost-display" style="margin-top: 20px;">
-            <strong>Cost:</strong> <span class="cost-highlight">R15.00</span><br>
-            <span style="font-size: 11px; color: #666;">Includes transcription + speaker identification</span>
+            <strong>Pricing:</strong><br>
+            <span class="cost-highlight">R0.50</span> per minute (transcription)<br>
+            <span class="cost-highlight">R5.00</span> for speaker identification (if enabled)<br>
+            <span style="font-size: 11px; color: #666;">Powered by Azure Cognitive Services</span>
           </div>
         </div>
 
@@ -508,20 +358,14 @@
           <!-- Action Buttons -->
           <div class="button-group" id="actionButtons">
             <button id="transcribeBtn" class="action-button transcribe-btn" disabled>
-              Transcribe Audio
+              ⚡ Transcribe with Azure AI
             </button>
             <button id="copyBtn" class="action-button copy-btn" style="display: none;">
               📋 Copy to Clipboard
             </button>
-            <div style="position: relative; display: none;" id="downloadContainer">
-              <button id="downloadBtn" class="action-button download-btn">
-                📥 Download
-              </button>
-              <div id="downloadDropdown" class="download-dropdown">
-                <button data-format="txt">📄 Plain Text (.txt)</button>
-                <button data-format="json">📋 JSON (.json)</button>
-              </div>
-            </div>
+            <button id="downloadBtn" class="action-button copy-btn" style="display: none;">
+              📄 Download as Word
+            </button>
             <button id="clearBtn" class="action-button clear-btn" style="display: none;">
               🗑️ Clear
             </button>
@@ -537,11 +381,6 @@
 
     <script>
   // ========== CONFIGURATION & STATE ==========
-  const COSTS = {
-    PER_FILE: 15.00,
-    MAX_FILES: 4
-  };
-
   const urlParams = new URLSearchParams(window.location.search);
   let userEmail = urlParams.get('email');
   let businessId = urlParams.get('businessId');
@@ -551,39 +390,38 @@
   let currentBusiness = null;
   let businessCase = {};
   
-  let uploadedAudioFiles = []; // Changed to array
-  let currentTranscriptions = null; // Changed to store multiple
+  let uploadedAudioFile = null;
+  let currentTranscription = null;
   let isTranscribing = false;
 
   // ========== ELEMENT REFERENCES ==========
   const audioUploadBox = document.getElementById('audioUploadBox');
   const fileInput = document.getElementById('fileInput');
+  const fileDisplay = document.getElementById('fileDisplay');
   const transcribeBtn = document.getElementById('transcribeBtn');
   const copyBtn = document.getElementById('copyBtn');
   const downloadBtn = document.getElementById('downloadBtn');
-  const downloadContainer = document.getElementById('downloadContainer');
-  const downloadDropdown = document.getElementById('downloadDropdown');
-  const downloadFormatBtns = document.querySelectorAll('#downloadDropdown button');
   const clearBtn = document.getElementById('clearBtn');
   const transcriptionPreview = document.getElementById('transcriptionPreview');
   const progressSection = document.getElementById('progressSection');
   const progressFill = document.getElementById('progressFill');
   const progressText = document.getElementById('progressText');
   const transcriptionStatus = document.getElementById('transcriptionStatus');
+  const diarizationToggle = document.getElementById('diarizationToggle');
 
-  // ========== AUTH0 & BUSINESS INFO (same as before) ==========
+  // ========== AUTH0 & BUSINESS INFO ==========
   async function getAuth0Client() {
     if (window.auth0Client) {
-      console.log('✅ Using global Auth0 client from app.js');
+      console.log('✅ Using global Auth0 client');
       return window.auth0Client;
     }
     
     if (window.parent && window.parent.auth0Client) {
-      console.log('✅ Using parent Auth0 client from app.js');
+      console.log('✅ Using parent Auth0 client');
       return window.parent.auth0Client;
     }
     
-    console.warn('⚠️ Global Auth0 client not available. Will use URL parameters for email.');
+    console.warn('⚠️ Global Auth0 client not available');
     return null;
   }
 
@@ -595,23 +433,10 @@
           if (currentBusiness) {
             businessId = currentBusiness._id;
             businessCase = currentBusiness.initial_business_case || {};
-            console.log('✅ Loaded business data from parent dataManager');
+            console.log('✅ Loaded business from parent');
           }
         } catch (e) {
-          console.warn('Could not access parent dataManager:', e);
-        }
-      }
-
-      if (!businessId && window.dataManager) {
-        try {
-          currentBusiness = window.dataManager.getSelectedBusinessOrFirst();
-          if (currentBusiness) {
-            businessId = currentBusiness._id;
-            businessCase = currentBusiness.initial_business_case || {};
-            console.log('✅ Loaded business data from own dataManager');
-          }
-        } catch (e) {
-          console.warn('Could not access own dataManager:', e);
+          console.warn('Could not access parent dataManager');
         }
       }
 
@@ -624,42 +449,35 @@
               const user = await auth0.getUser();
               if (user && user.email) {
                 userEmail = user.email;
-                console.log('✅ Got user email from Auth0:', userEmail);
+                console.log('✅ Got user email from Auth0');
               }
-            } else {
-              console.warn('⚠️ User not authenticated in Auth0');
             }
           } catch (error) {
-            console.error('❌ Error getting user from Auth0:', error);
+            console.error('Error getting user:', error);
           }
         }
       }
 
       if (!userEmail || !businessId) {
-        console.error('❌ Missing required info:', { 
-                    userEmail: !!userEmail, 
-          businessId: !!businessId,
-          fromUrl: { email: urlParams.get('email'), businessId: urlParams.get('businessId') }
-        });
-        showStatus('Missing user or business information. Please ensure you are logged in and have selected a business.', 'error');
+        console.error('Missing required info');
+        showStatus('Missing user or business information. Please ensure you are logged in.', 'error');
         return;
       }
 
-      console.log('✅ Business info loaded successfully:', { userEmail, businessId });
-
+      console.log('✅ Business info loaded');
     } catch (error) {
-      console.error('❌ Error loading business info:', error);
-      showStatus(`Error loading business information: ${error.message}`, 'error');
+      console.error('Error loading business info:', error);
+      showStatus(`Error: ${error.message}`, 'error');
     }
   }
 
-  // ========== FILE UPLOAD HANDLERS - MULTI-FILE SUPPORT ==========
+  // ========== FILE UPLOAD HANDLERS ==========
   audioUploadBox.addEventListener('click', () => {
     fileInput.click();
   });
 
   fileInput.addEventListener('change', (e) => {
-    handleAudioUpload(Array.from(e.target.files));
+    handleAudioUpload(e.target.files[0]);
   });
 
   audioUploadBox.addEventListener('dragover', (e) => {
@@ -669,7 +487,7 @@
   });
 
   audioUploadBox.addEventListener('dragleave', () => {
-    if (uploadedAudioFiles.length === 0) {
+    if (!uploadedAudioFile) {
       audioUploadBox.style.borderColor = 'var(--border-color)';
       audioUploadBox.style.background = 'var(--light-bg)';
     }
@@ -679,202 +497,114 @@
     e.preventDefault();
     audioUploadBox.style.borderColor = 'var(--border-color)';
     audioUploadBox.style.background = 'var(--light-bg)';
-    handleAudioUpload(Array.from(e.dataTransfer.files));
+    handleAudioUpload(e.dataTransfer.files[0]);
   });
 
-  // Make file input support multiple files
-  fileInput.setAttribute('multiple', 'multiple');
+  function handleAudioUpload(file) {
+    if (!file) return;
 
-  function handleAudioUpload(files) {
-    if (!files || files.length === 0) return;
-
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/mp4'];
-    const maxSize = 25 * 1024 * 1024;
+    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/mp4', 'audio/flac'];
+    const maxSize = 500 * 1024 * 1024; // 500MB
     
-    // Filter valid files
-    const validFiles = files.filter(file => {
-      if (!validTypes.includes(file.type)) {
-        showStatus(`Skipped ${file.name}: Invalid format. Use MP3, WAV, M4A, or OGG`, 'error');
-        return false;
-      }
-      if (file.size > maxSize) {
-        showStatus(`Skipped ${file.name}: File too large (max 25MB)`, 'error');
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length === 0) {
+    if (!validTypes.includes(file.type)) {
+      showStatus(`Invalid format: ${file.type}. Use MP3, WAV, M4A, OGG, or FLAC`, 'error');
       return;
     }
 
-    // Check total file count
-    if (uploadedAudioFiles.length + validFiles.length > COSTS.MAX_FILES) {
-      showStatus(`Maximum ${COSTS.MAX_FILES} files allowed. Please remove some files first.`, 'error');
+    if (file.size > maxSize) {
+      showStatus(`File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum 500MB allowed`, 'error');
       return;
     }
 
-    // Add files to the list
-    validFiles.forEach(file => {
-      uploadedAudioFiles.push(file);
-    });
-
-    updateFileList();
-    updateCostDisplay();
+    uploadedAudioFile = file;
+    updateFileDisplay();
     transcribeBtn.disabled = false;
     hideStatus();
   }
 
-  function updateFileList() {
-    if (uploadedAudioFiles.length === 0) {
-      audioUploadBox.innerHTML = `
-        <div class="audio-upload-icon">🎙️</div>
-        <div style="font-weight: 500; color: var(--text-primary);">Drag & drop your audio files</div>
-        <div style="font-size: 12px; color: #666; margin-top: 8px;">or click to select (up to ${COSTS.MAX_FILES} files)</div>
-        <div style="font-size: 11px; color: #999; margin-top: 8px;">Supported: MP3, WAV, M4A, OGG (Max 25MB each)</div>
-      `;
+  function updateFileDisplay() {
+    if (!uploadedAudioFile) {
       audioUploadBox.classList.remove('has-audio');
+      fileDisplay.innerHTML = '';
       return;
     }
 
     audioUploadBox.classList.add('has-audio');
+    const sizeMB = (uploadedAudioFile.size / 1024 / 1024).toFixed(2);
+    const estimatedCost = (sizeMB * 0.5).toFixed(2);
     
-    let html = `
-      <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 10px;">
-        Selected Files <span class="file-count-badge">${uploadedAudioFiles.length}/${COSTS.MAX_FILES}</span>
+    fileDisplay.innerHTML = `
+      <div class="file-item">
+        <div class="file-icon">🎵</div>
+        <div class="file-info">
+          <div class="file-name">${uploadedAudioFile.name}</div>
+          <div class="file-size">${sizeMB} MB • Estimated cost: R${estimatedCost}</div>
+        </div>
+        <button class="remove-btn" onclick="removeFile()">✕</button>
       </div>
-      <div class="audio-file-list">
     `;
-
-    uploadedAudioFiles.forEach((file, index) => {
-      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-      html += `
-        <div class="audio-file-item">
-          <div class="file-icon">🎵</div>
-          <div class="file-info">
-            <div class="file-name">${file.name}</div>
-            <div class="file-size">${sizeMB} MB</div>
-          </div>
-          <button class="remove-file-btn" onclick="removeFile(${index})">✕</button>
-        </div>
-      `;
-    });
-
-    html += `</div>`;
-    
-    if (uploadedAudioFiles.length < COSTS.MAX_FILES) {
-      html += `
-        <div style="font-size: 12px; color: #666; margin-top: 10px; text-align: center;">
-          Click to add more files (${COSTS.MAX_FILES - uploadedAudioFiles.length} remaining)
-        </div>
-      `;
-    }
-
-    audioUploadBox.innerHTML = html;
   }
 
-  window.removeFile = function(index) {
-    uploadedAudioFiles.splice(index, 1);
-    updateFileList();
-    updateCostDisplay();
-    
-    if (uploadedAudioFiles.length === 0) {
-      transcribeBtn.disabled = true;
-      fileInput.value = '';
-    }
+  window.removeFile = function() {
+    uploadedAudioFile = null;
+    fileInput.value = '';
+    updateFileDisplay();
+    transcribeBtn.disabled = true;
   };
 
-  function updateCostDisplay() {
-    const costDisplay = document.querySelector('.cost-display');
-    if (uploadedAudioFiles.length === 0) {
-      costDisplay.innerHTML = `
-        <strong>Cost:</strong> <span class="cost-highlight">R${COSTS.PER_FILE.toFixed(2)}</span> per file<br>
-        <span style="font-size: 11px; color: #666;">Includes transcription + speaker identification</span>
-      `;
-    } else {
-      const totalCost = COSTS.PER_FILE * uploadedAudioFiles.length;
-      costDisplay.innerHTML = `
-        <strong>Total Cost:</strong> <span class="cost-highlight">R${totalCost.toFixed(2)}</span><br>
-        <span style="font-size: 11px; color: #666;">R${COSTS.PER_FILE.toFixed(2)} × ${uploadedAudioFiles.length} file${uploadedAudioFiles.length > 1 ? 's' : ''}</span>
-      `;
-    }
-  }
-
   function clearAll() {
-    uploadedAudioFiles = [];
-    currentTranscriptions = null;
+    uploadedAudioFile = null;
+    currentTranscription = null;
     fileInput.value = '';
     transcribeBtn.disabled = true;
     copyBtn.style.display = 'none';
-    downloadContainer.style.display = 'none';
+    downloadBtn.style.display = 'none';
     clearBtn.style.display = 'none';
-    updateFileList();
-    updateCostDisplay();
-    transcriptionPreview.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Upload audio files and click transcribe to see the preview here</div>';
+    updateFileDisplay();
+    transcriptionPreview.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Upload an audio file to begin</div>';
     progressSection.style.display = 'none';
     hideStatus();
   }
 
   clearBtn.addEventListener('click', clearAll);
 
-  // ========== TRANSCRIBE AUDIO - MULTI-FILE SUPPORT ==========
+  // ========== TRANSCRIBE AUDIO WITH AZURE AI ==========
   transcribeBtn.addEventListener('click', async () => {
     await transcribeAudio();
   });
 
   async function transcribeAudio() {
-    if (uploadedAudioFiles.length === 0 || !userEmail || !businessId) {
-      showStatus('Missing required information. Please upload audio files and ensure you are logged in.', 'error');
+    if (!uploadedAudioFile || !userEmail || !businessId) {
+      showStatus('Missing required information', 'error');
       return;
-    }
-
-    // Calculate total size and estimate
-    const totalSize = uploadedAudioFiles.reduce((sum, file) => sum + file.size, 0);
-    const totalSizeMB = totalSize / 1024 / 1024;
-    const estimatedMinutes = Math.ceil(totalSizeMB * 1);
-    
-    if (totalSizeMB > 50) {
-      const proceed = confirm(
-        `⚠️ Large batch detected (${totalSizeMB.toFixed(1)} MB total)\n\n` +
-        `Estimated processing time: ${estimatedMinutes}+ minutes\n\n` +
-        `Continue?`
-      );
-      
-      if (!proceed) {
-        return;
-      }
     }
 
     transcribeBtn.disabled = true;
     isTranscribing = true;
     progressSection.style.display = 'block';
     progressFill.style.width = '0%';
-    progressText.textContent = `Initializing batch transcription of ${uploadedAudioFiles.length} file(s)...`;
+    progressText.textContent = 'Preparing file for Azure AI Speech...';
     hideStatus();
 
     try {
       const formData = new FormData();
-      
-      // Append all audio files
-      uploadedAudioFiles.forEach((file) => {
-        formData.append('audio', file);
-      });
-      
+      formData.append('audio', uploadedAudioFile);
       formData.append('businessId', businessId);
       formData.append('userEmail', userEmail);
+      formData.append('diarization', diarizationToggle.checked);
 
-      progressText.textContent = `Uploading ${uploadedAudioFiles.length} file(s) (${totalSizeMB.toFixed(1)} MB)...`;
-      progressFill.style.width = '10%';
+      progressText.textContent = `Uploading ${uploadedAudioFile.name} to Azure...`;
+      progressFill.style.width = '15%';
 
-      // Simulate progress for long-running operations
+      // Simulate progress
       const progressInterval = setInterval(() => {
-        const currentWidth = parseFloat(progressFill.style.width);
-        if (currentWidth < 80) {
-          progressFill.style.width = `${currentWidth + 1}%`;
+        const current = parseFloat(progressFill.style.width);
+        if (current < 85) {
+          progressFill.style.width = `${current + 2}%`;
         }
-      }, 3000);
+      }, 2000);
 
-      const response = await fetch('/api/audio-transcribe/transcribe', {
+      const response = await fetch('/api/audio-transcribe/azure', {
         method: 'POST',
         body: formData
       });
@@ -885,21 +615,17 @@
       if (!response.ok) {
         const error = await response.json();
         if (response.status === 402) {
-          throw new Error(`Insufficient funds!\n\nRequired: R${error.required?.toFixed(2)}\nBalance: ${error.formatted_balance}\n\nPlease add credits to continue.`);
-        }
-        if (response.status === 408) {
-          throw new Error(error.error || 'Processing timed out. Please try shorter audio files.');
+          throw new Error(`Insufficient credits. Required: R${error.required}, Balance: ${error.balance}`);
         }
         throw new Error(error.error || 'Transcription failed');
       }
 
       const result = await response.json();
+      progressFill.style.width = '98%';
+      progressText.textContent = 'Processing results...';
 
-      progressFill.style.width = '95%';
-      progressText.textContent = 'Formatting results...';
-
-      displayMultiFileTranscription(result);
-      currentTranscriptions = result;
+      displayTranscription(result);
+      currentTranscription = result;
 
       progressFill.style.width = '100%';
       progressText.textContent = 'Complete!';
@@ -908,21 +634,33 @@
         progressSection.style.display = 'none';
       }, 1500);
 
-      let successMsg = '✅ Batch transcription complete!';
-      successMsg += `\n📁 Processed: ${result.summary.successful}/${result.summary.total} file(s)`;
-      if (result.summary.failed > 0) {
-        successMsg += `\n⚠️ Failed: ${result.summary.failed} file(s)`;
+      let successMsg = '✅ Transcription complete!\n';
+      successMsg += `📄 File: ${uploadedAudioFile.name}\n`;
+      successMsg += `⏱️ Duration: ${result.cost?.durationMinutes || 'Unknown'} minutes\n`;
+      
+      // Show cost breakdown
+      if (result.cost?.transcriptionCost !== undefined && result.cost?.diarizationCost !== undefined) {
+        successMsg += `💰 Cost breakdown:\n`;
+        successMsg += `   • Transcription: R${result.cost.transcriptionCost.toFixed(2)}\n`;
+        if (result.cost.diarizationCost > 0) {
+          successMsg += `   • Speaker ID: R${result.cost.diarizationCost.toFixed(2)}\n`;
+        }
+        successMsg += `   • Total: R${result.cost?.amount?.toFixed(2) || 'N/A'}\n`;
+      } else {
+        successMsg += `💰 Cost: R${result.cost?.amount?.toFixed(2) || 'N/A'}\n`;
       }
-      successMsg += `\n💰 Cost: R${result.costs.charged.toFixed(2)}`;
-      if (result.summary.refunded > 0) {
-        successMsg += ` (R${result.summary.refunded.toFixed(2)} refunded)`;
+      
+      if (result.transcription.speakers && result.transcription.speakers.length > 0) {
+        successMsg += `🎤 Speakers detected: ${result.transcription.speakers.length}\n`;
       }
-      successMsg += `\n📊 New balance: ${result.formattedBalance || 'N/A'}`;
+      
+      if (result.wallet?.new_balance) {
+        successMsg += `📊 New balance: ${result.wallet.new_balance}`;
+      }
 
-      showStatus(successMsg, result.summary.failed > 0 ? 'info' : 'success');
-
+      showStatus(successMsg, 'success');
       copyBtn.style.display = 'inline-block';
-      downloadContainer.style.display = 'inline-block';
+      downloadBtn.style.display = 'inline-block';
       clearBtn.style.display = 'inline-block';
 
     } catch (error) {
@@ -935,189 +673,142 @@
     }
   }
 
-  function displayMultiFileTranscription(result) {
-    if (!result.files || result.files.length === 0) {
-      transcriptionPreview.innerHTML = '<div style="color: #999; padding: 10px;">No transcription results</div>';
+  function displayTranscription(result) {
+    if (!result.transcription || !result.transcription.text) {
+      transcriptionPreview.innerHTML = '<div style="color: #999; padding: 10px;">No transcription available</div>';
       return;
     }
 
-    let html = `
-      <div class="preview-header">
-        Transcription Results (${result.summary.successful}/${result.summary.total} files)
-      </div>
-    `;
+    let html = '<div class="preview-header">Transcription Results</div>';
+    
+    if (result.transcription.confidence) {
+      html += `<div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+        📊 Confidence: ${(parseFloat(result.transcription.confidence) * 100).toFixed(1)}%
+      </div>`;
+    }
 
-    result.files.forEach((file, index) => {
-      const fileId = `file-${index}`;
+    if (result.transcription.language) {
+      html += `<div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+        🌍 Language: ${result.transcription.language}
+      </div>`;
+    }
+
+    if (result.transcription.speakers && result.transcription.speakers.length > 0) {
+      html += `<div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+        🎤 Speakers: ${result.transcription.speakers.join(', ')}
+      </div>`;
+    }
+
+    // Display with speaker labels if diarization is enabled
+    if (diarizationToggle.checked && result.transcription.phrases && result.transcription.phrases.length > 0) {
+      html += '<div style="margin-top: 15px;">';
       
-      if (file.success) {
-        html += `
-          <div style="margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden;">
-            <div class="transcription-file-header" onclick="toggleFileContent('${fileId}')">
-              <div>
-                <div class="file-title">📄 ${file.fileName}</div>
-                <div style="font-size: 11px; color: #666;">
-                  ${file.metadata.speakerGroups} speaker segments • 
-                  ${file.metadata.segmentCount} total segments
-                  ${file.metadata.duration ? ` • ${Math.round(file.metadata.duration / 60)} min` : ''}
-                </div>
-              </div>
-              <div class="toggle-icon">▼</div>
-            </div>
-            <div id="${fileId}" class="transcription-file-content">
-        `;
-
-        if (file.grouped && Array.isArray(file.grouped)) {
-          file.grouped.forEach(group => {
-            html += `
-              <div class="speaker-segment">
-                <div class="speaker-label">${group.speaker}</div>
-                <div class="segment-text">${group.text}</div>
-              </div>
-            `;
-          });
-        } else if (file.text) {
-          html += `<div style="padding: 10px;">${file.text}</div>`;
+      let currentSpeaker = null;
+      let speakerText = '';
+      
+      result.transcription.phrases.forEach(phrase => {
+        const speaker = phrase.speaker !== undefined ? `Speaker ${phrase.speaker}` : 'Unknown';
+        
+        if (currentSpeaker !== speaker && speakerText) {
+          html += `<div class="speaker-segment">
+            <div class="speaker-label">${currentSpeaker}</div>
+            <div class="segment-text">${speakerText}</div>
+          </div>`;
+          speakerText = '';
         }
-
-        html += `
-            </div>
-          </div>
-        `;
-      } else {
-        html += `
-          <div style="margin-bottom: 15px; border: 1px solid #f5c6cb; border-radius: 6px; padding: 10px; background: #f8d7da;">
-            <div style="font-weight: 600; color: #721c24;">❌ ${file.fileName}</div>
-            <div style="font-size: 12px; color: #721c24; margin-top: 5px;">Error: ${file.error}</div>
-          </div>
-        `;
+        
+        currentSpeaker = speaker;
+        speakerText += (speakerText ? ' ' : '') + phrase.text;
+      });
+      
+      if (speakerText && currentSpeaker) {
+        html += `<div class="speaker-segment">
+          <div class="speaker-label">${currentSpeaker}</div>
+          <div class="segment-text">${speakerText}</div>
+        </div>`;
       }
-    });
-
+      
+      html += '</div>';
+    } else {
+      html += `<div style="white-space: pre-wrap; color: #333; margin-top: 15px;">${result.transcription.text}</div>`;
+    }
+    
     transcriptionPreview.innerHTML = html;
   }
 
-  window.toggleFileContent = function(fileId) {
-    const content = document.getElementById(fileId);
-    const header = content.previousElementSibling;
-    const icon = header.querySelector('.toggle-icon');
-    
-    if (content.classList.contains('collapsed')) {
-      content.classList.remove('collapsed');
-      icon.textContent = '▼';
-    } else {
-      content.classList.add('collapsed');
-      icon.textContent = '▶';
-    }
-  };
-
-  // ========== COPY TO CLIPBOARD - MULTI-FILE SUPPORT ==========
+  // ========== COPY TO CLIPBOARD ==========
   copyBtn.addEventListener('click', async () => {
     try {
-      let textToCopy = '';
-      
-      if (currentTranscriptions && currentTranscriptions.files) {
-        currentTranscriptions.files.forEach((file, index) => {
-          if (file.success) {
-            textToCopy += `\n\n========== ${file.fileName} ==========\n\n`;
-            
-            if (file.grouped && Array.isArray(file.grouped)) {
-              textToCopy += file.grouped
-                .map(group => `[${group.speaker}]: ${group.text}`)
-                .join('\n\n');
-            } else if (file.text) {
-              textToCopy += file.text;
-            }
-          }
-        });
+      if (!currentTranscription || !currentTranscription.transcription || !currentTranscription.transcription.text) {
+        throw new Error('No transcription data');
       }
 
-      if (!textToCopy) {
-        throw new Error('No transcription data to copy');
-      }
-
-      await navigator.clipboard.writeText(textToCopy.trim());
-      showStatus('✅ All transcriptions copied to clipboard!', 'success');
+      await navigator.clipboard.writeText(currentTranscription.transcription.text);
+      showStatus('✅ Transcription copied to clipboard!', 'success');
       
       setTimeout(() => {
         hideStatus();
       }, 2000);
     } catch (error) {
-      showStatus('Failed to copy to clipboard', 'error');
+      showStatus('Failed to copy: ' + error.message, 'error');
     }
   });
 
-  // ========== DOWNLOAD MANAGER - MULTI-FILE SUPPORT ==========
-  downloadBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    downloadDropdown.classList.toggle('show');
-  });
-
-  downloadFormatBtns.forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const format = btn.dataset.format;
-      await downloadTranscription(format);
-      downloadDropdown.classList.remove('show');
-    });
-  });
-
-  document.addEventListener('click', () => {
-    downloadDropdown.classList.remove('show');
-  });
-
-  async function downloadTranscription(format) {
+  // ========== DOWNLOAD AS WORD ==========
+  downloadBtn.addEventListener('click', async () => {
     try {
-      showStatus(`⏳ Generating ${format.toUpperCase()} file(s)...`, 'info');
-
-      // If multiple files, download each separately
-      if (currentTranscriptions && currentTranscriptions.files) {
-        for (const file of currentTranscriptions.files) {
-          if (!file.success) continue;
-
-          const response = await fetch('/api/audio-transcribe/download', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              format: format,
-              transcription: file,
-              fileName: file.fileName.replace(/\.[^/.]+$/, '') // Remove extension
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error(`Download failed for ${file.fileName}`);
-          }
-
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${file.fileName.replace(/\.[^/.]+$/, '')}.${format}`;
-          document.body.appendChild(a);
-          a.click();
-          
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-
-          // Small delay between downloads
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-
-        showStatus(`✅ ${currentTranscriptions.files.filter(f => f.success).length} ${format.toUpperCase()} file(s) downloaded!`, 'success');
-        
-        setTimeout(() => {
-          hideStatus();
-        }, 2000);
+      if (!currentTranscription || !currentTranscription.transcription) {
+        throw new Error('No transcription data');
       }
+
+      downloadBtn.disabled = true;
+      showStatus('📄 Generating Word document...', 'info');
+
+      const response = await fetch('/api/audio-transcribe/download-word', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transcription: currentTranscription.transcription,
+          fileName: uploadedAudioFile.name,
+          metadata: {
+            fileName: uploadedAudioFile.name,
+            duration: currentTranscription.cost?.durationMinutes,
+            language: currentTranscription.transcription.language,
+            confidence: currentTranscription.transcription.confidence,
+            speakers: currentTranscription.transcription.speakers,
+            cost: currentTranscription.cost?.amount?.toFixed(2)
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate Word document');
+      }
+
+      // Download the file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${uploadedAudioFile.name.replace(/\.[^/.]+$/, '')}_transcription.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      showStatus('✅ Word document downloaded successfully!', 'success');
+      setTimeout(() => {
+        hideStatus();
+      }, 2000);
+
     } catch (error) {
-      console.error('Download error:', error);
-      showStatus(`Failed to download: ${error.message}`, 'error');
+      showStatus('Failed to download: ' + error.message, 'error');
+    } finally {
+      downloadBtn.disabled = false;
     }
-  }
+  });
 
   // ========== SHOW/HIDE STATUS ==========
   function showStatus(message, type) {
@@ -1130,16 +821,10 @@
     transcriptionStatus.style.display = 'none';
   }
 
-    // ========== INITIALIZE ON PAGE LOAD ==========
+  // ========== INITIALIZE ON PAGE LOAD ==========
   document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🎙️ Audio Transcriber initialized (Multi-file support)');
+    console.log('🎙️ Azure AI Speech Transcriber initialized');
     await loadBusinessInfo();
-    updateCostDisplay();
-    
-    // If missing info, show helpful message
-    if (!userEmail || !businessId) {
-      showStatus('⚠️ Please ensure you are logged in and have selected a business to use this feature.', 'error');
-    }
   });
 </script>
 </body>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Video to Social Media | Zuke</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Tabs Styling */
+    .tabs-container {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      background: white;
+      padding: 12px 0;
+    }
+
+    .tab-btn {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Coming Soon Styling */
+    .coming-soon-container {
+      background: linear-gradient(135deg, #FFF8F0 0%, #FAFAFA 100%);
+      border: 2px dashed var(--primary-orange);
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .coming-soon-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .coming-soon-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .coming-soon-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .explore-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--primary-orange), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .explore-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+
+    .explore-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Video Upload Box */
+    .video-upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .video-upload-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .video-upload-box.has-video {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      padding: 12px;
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .video-preview {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+      background: #f5f5f5;
+    }
+
+    .file-info {
+      margin-top: 12px;
+      padding: 12px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #333;
+      display: none;
+    }
+
+    .file-info strong {
+      color: var(--primary-orange);
+    }
+
+    /* Platforms Grid */
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .platforms-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #F9F9F9;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .select-all-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .select-all-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary-orange);
+    }
+
+    .select-all-checkbox label {
+      margin: 0;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .platform-btn {
+      padding: 12px 8px;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .platform-btn:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .platform-btn.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+    }
+
+    .platform-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+      color: var(--primary-orange);
+    }
+
+    .platform-name {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .platform-cost {
+      display: block;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    /* Cost Display */
+    .cost-display {
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-orange);
+      font-size: 14px;
+    }
+
+    /* Platform-specific fields */
+    .platform-fields {
+      background: #F9F9F9;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .platform-fields.active {
+      display: block;
+    }
+
+    .platform-field-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    /* File Input */
+    .file-input {
+      display: none;
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status-message.success {
+      background: #D4EDDA;
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+
+    .status-message.error {
+      background: #F8D7DA;
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+
+    .status-message.info {
+      background: #D1ECF1;
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: var(--primary-orange);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-orange), #FF9500);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Button Container */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .publish-btn {
+      flex: 1;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--primary-orange), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .publish-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+
+    .publish-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .clear-btn {
+      padding: 12px 16px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      background: #5a6268;
+    }
+
+    @media (max-width: 768px) {
+      .platforms-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .action-buttons .publish-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>Post Video to Social Media</h1>
+      <p>Upload or schedule videos instantly across all your social accounts</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button class="tab-btn active" data-tab="post-video">Post Video</button>
+      <button class="tab-btn" data-tab="generate-video">Generate Videos</button>
+    </div>
+
+    <!-- Tab 1: Post Video -->
+    <div class="tab-content active" id="post-video">
+      
+      <!-- Video Upload -->
+      <div class="section">
+        <div class="section-title">Upload Video</div>
+        
+        <div class="video-upload-box" id="videoUploadBox">
+          <div class="upload-icon">🎥</div>
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Click or drag video here</h3>
+          <p style="font-size: 13px; color: var(--text-secondary);">MP4, MOV, AVI (max 100MB)</p>
+        </div>
+
+        <div class="file-info" id="fileInfo"></div>
+        <video id="videoPreview" class="video-preview" controls></video>
+      </div>
+
+      <!-- Caption -->
+      <div class="section">
+        <div class="section-title">Caption & Description</div>
+        <div class="form-group">
+          <label for="caption">Video Caption/Description:</label>
+          <textarea id="caption" placeholder="Write your video caption/description..."></textarea>
+        </div>
+      </div>
+
+      <!-- YouTube Fields -->
+      <div class="section platform-fields" id="youtubeFields">
+        <div class="platform-field-title">🎥 YouTube Settings</div>
+        <div class="form-group">
+          <label for="youtubeTitle">Video Title <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
+          <input type="text" id="youtubeTitle" placeholder="Leave blank for AI-generated title">
+          <div class="field-note">Our AI will generate an optimized title if you leave it blank</div>
+        </div>
+        <div class="form-group">
+          <label for="youtubeTags">Tags <span style="color: var(--text-secondary); font-weight: normal;">(optional)</span></label>
+          <input type="text" id="youtubeTags" placeholder="e.g., tutorial, howto, tips">
+        </div>
+      </div>
+
+      <!-- Instagram Note -->
+      <div class="section platform-fields" id="instagramNote">
+        <div class="platform-field-title">📱 Instagram Requirements</div>
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">Videos should be under 60 seconds for feed posts. For longer videos, consider using Instagram Reels format.</p>
+      </div>
+
+      <!-- Platform Selection -->
+      <div class="section">
+        <div class="section-title">Select Platforms</div>
+        
+        <div class="platforms-controls">
+          <div class="select-all-checkbox">
+            <input type="checkbox" id="selectAllCheckbox">
+            <label for="selectAllCheckbox">Select All</label>
+          </div>
+        </div>
+
+        <div class="platforms-grid">
+          <button class="platform-btn" data-platform="facebook" data-cost="1000">
+            <div class="platform-icon"><i class="fab fa-facebook-f"></i></div>
+            <span class="platform-name">Facebook</span>
+            <span class="platform-cost">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="instagram" data-cost="1000">
+            <div class="platform-icon"><i class="fab fa-instagram"></i></div>
+            <span class="platform-name">Instagram</span>
+            <span class="platform-cost">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="tiktok" data-cost="1000">
+            <div class="platform-icon"><i class="fab fa-tiktok"></i></div>
+            <span class="platform-name">TikTok</span>
+            <span class="platform-cost">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="linkedin" data-cost="1000">
+            <div class="platform-icon"><i class="fab fa-linkedin-in"></i></div>
+            <span class="platform-name">LinkedIn</span>
+            <span class="platform-cost">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="youtube" data-cost="1000">
+            <div class="platform-icon"><i class="fab fa-youtube"></i></div>
+            <span class="platform-name">YouTube</span>
+            <span class="platform-cost">R10.00</span>
+          </button>
+        </div>
+
+        <div class="cost-display" id="costDisplay">Select platforms to see cost</div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="section">
+        <div class="action-buttons">
+          <button class="publish-btn" id="publishBtn" disabled>Publish Video to Selected Platforms</button>
+          <button class="clear-btn" id="clearBtn">Clear</button>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-text" id="progressText">Uploading video...</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <p style="font-size: 12px; color: var(--text-secondary); text-align: center; margin-top: 6px;" id="progressPercent">0%</p>
+        </div>
+
+        <!-- Status Messages -->
+        <div class="status-message" id="statusMessage"></div>
+      </div>
+
+    </div>
+
+    <!-- Tab 2: Generate Videos -->
+    <div class="tab-content" id="generate-video">
+      <div class="section">
+        <div class="coming-soon-container">
+          <div class="coming-soon-icon">🎬</div>
+          <h2 class="coming-soon-title">Generate Videos with AI</h2>
+          <p class="coming-soon-desc">Create stunning AI-generated videos from text prompts optimized for social media. <br><br>Coming soon!</p>
+          <button class="explore-btn" id="exploreVideoGenerators">Click here to explore video generators</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <input type="file" id="fileInput" class="file-input" accept="video/*">
+
+  <script>
+    // ========== CONFIGURATION & STATE ==========
+    const urlParams = new URLSearchParams(window.location.search);
+    let userEmail = urlParams.get('email');
+    let businessId = urlParams.get('businessId');
+    let businessName = urlParams.get('businessName') || 'My Business';
+    
+    let selectedFile = null;
+    let selectedPlatforms = [];
+
+    // ========== ELEMENT REFERENCES ==========
+    const videoUploadBox = document.getElementById('videoUploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const videoPreview = document.getElementById('videoPreview');
+    const publishBtn = document.getElementById('publishBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const costDisplay = document.getElementById('costDisplay');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const statusMessage = document.getElementById('statusMessage');
+    const youtubeFields = document.getElementById('youtubeFields');
+    const instagramNote = document.getElementById('instagramNote');
+    const youtubeTitle = document.getElementById('youtubeTitle');
+
+    // ========== CLOUDINARY CONFIG ==========
+    const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
+    const CLOUDINARY_CLOUD_NAME = 'vic-3e';
+
+    // ========== TABS FUNCTIONALITY ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        
+        // Deactivate all tabs
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        
+        // Activate selected tab
+        e.target.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+
+    // ========== FILE UPLOAD HANDLERS ==========
+    videoUploadBox.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFileUpload(e.target.files[0]);
+    });
+
+    videoUploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      videoUploadBox.style.borderColor = 'var(--primary-orange)';
+      videoUploadBox.style.background = '#FFF8F0';
+    });
+
+    videoUploadBox.addEventListener('dragleave', () => {
+      if (!selectedFile) {
+        videoUploadBox.style.borderColor = 'var(--border-color)';
+        videoUploadBox.style.background = 'var(--light-bg)';
+      }
+    });
+
+    videoUploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      videoUploadBox.style.borderColor = 'var(--border-color)';
+      videoUploadBox.style.background = 'var(--light-bg)';
+      handleFileUpload(e.dataTransfer.files[0]);
+    });
+
+    function handleFileUpload(file) {
+      if (!file) return;
+
+      if (!file.type.startsWith('video/')) {
+        showStatus('Please select a video file', 'error');
+        return;
+      }
+
+      const maxSize = 100 * 1024 * 1024; // 100MB
+      if (file.size > maxSize) {
+        showStatus('Video file is too large. Maximum size is 100MB.', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      videoUploadBox.classList.add('has-video');
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        videoPreview.src = e.target.result;
+        videoPreview.style.display = 'block';
+        
+        // Check video duration for Instagram
+        videoPreview.onloadedmetadata = () => {
+          const duration = videoPreview.duration;
+          if (selectedPlatforms.includes('instagram') && duration > 60) {
+            showStatus('⚠️ Note: This video is longer than 60 seconds. Instagram may trim it or it may be better suited for Reels.', 'info');
+          }
+        };
+      };
+      reader.readAsDataURL(file);
+
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      fileInfo.innerHTML = `<strong>📁 ${file.name}</strong> (${sizeMB} MB) <button onclick="removeFile()" style="float: right; background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Remove</button>`;
+      fileInfo.style.display = 'block';
+
+      updatePublishButton();
+    }
+
+    window.removeFile = function() {
+      selectedFile = null;
+      fileInput.value = '';
+      videoUploadBox.classList.remove('has-video');
+      videoPreview.style.display = 'none';
+      videoPreview.src = '';
+      fileInfo.style.display = 'none';
+      updatePublishButton();
+    };
+
+    // ========== PLATFORM SELECTION ==========
+    document.querySelectorAll('.platform-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const platform = btn.dataset.platform;
+        
+        if (selectedPlatforms.includes(platform)) {
+          selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+        } else {
+          selectedPlatforms.push(platform);
+        }
+        
+        updatePlatformFields();
+        updateCost();
+        updatePublishButton();
+        updateSelectAllCheckbox();
+      });
+    });
+
+    // Select all checkbox functionality
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', () => {
+        const allPlatformBtns = document.querySelectorAll('.platform-btn');
+        
+        if (selectAllCheckbox.checked) {
+          // Select all
+          selectedPlatforms = [];
+          allPlatformBtns.forEach(btn => {
+            const platform = btn.dataset.platform;
+            btn.classList.add('selected');
+            selectedPlatforms.push(platform);
+          });
+        } else {
+          // Deselect all
+          selectedPlatforms = [];
+          allPlatformBtns.forEach(btn => {
+            btn.classList.remove('selected');
+          });
+        }
+        
+        updatePlatformFields();
+        updateCost();
+        updatePublishButton();
+      });
+    }
+
+    function updateSelectAllCheckbox() {
+      const allPlatformBtns = document.querySelectorAll('.platform-btn');
+      const allSelected = selectedPlatforms.length === allPlatformBtns.length;
+      if (selectAllCheckbox) {
+        selectAllCheckbox.checked = allSelected;
+      }
+    }
+
+    function updatePlatformFields() {
+      youtubeFields.classList.toggle('active', selectedPlatforms.includes('youtube'));
+      instagramNote.classList.toggle('active', selectedPlatforms.includes('instagram'));
+    }
+
+    function updateCost() {
+      let total = 0;
+      selectedPlatforms.forEach(platform => {
+        const btn = document.querySelector(`[data-platform="${platform}"]`);
+        if (btn) total += parseInt(btn.dataset.cost);
+      });
+      costDisplay.textContent = selectedPlatforms.length > 0 
+        ? `Total Cost: R${(total / 100).toFixed(2)}` 
+        : 'Select platforms to see cost';
+    }
+
+    function updatePublishButton() {
+      publishBtn.disabled = !(selectedFile && selectedPlatforms.length > 0);
+    }
+
+    // ========== PUBLISH FUNCTION ==========
+    publishBtn.addEventListener('click', async () => {
+      await publishVideo();
+    });
+
+    async function publishVideo() {
+      if (!selectedFile || selectedPlatforms.length === 0) return;
+
+      publishBtn.disabled = true;
+      progressContainer.style.display = 'block';
+      statusMessage.style.display = 'none';
+      hideStatus();
+
+      try {
+        progressText.textContent = 'Uploading video to cloud storage...';
+        progressFill.style.width = '0%';
+        progressPercent.textContent = '0%';
+
+        // Upload to Cloudinary
+        const videoUrl = await uploadToCloudinary(selectedFile);
+
+        if (!videoUrl) {
+          throw new Error('Failed to upload video');
+        }
+
+        progressText.textContent = 'Publishing to social media...';
+        progressFill.style.width = '90%';
+
+        // Prepare post content
+        const postContent = {
+          text: document.getElementById('caption').value,
+          video: videoUrl
+        };
+
+        // Add YouTube-specific fields if YouTube is selected
+        if (selectedPlatforms.includes('youtube')) {
+          const titleValue = youtubeTitle.value.trim();
+          if (titleValue) {
+            postContent.youtubeTitle = titleValue;
+          }
+          const tags = document.getElementById('youtubeTags').value.trim();
+          if (tags) {
+            postContent.youtubeTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+          }
+        }
+
+        // Post to social media
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId: businessId,
+            userEmail: userEmail,
+            platforms: selectedPlatforms,
+            postContent: postContent
+          })
+        });
+
+        const result = await response.json();
+
+        progressFill.style.width = '100%';
+
+        if (result.success) {
+          let message = `✅ Video posted to ${result.platforms.join(', ')}!\n\n` +
+                        `Cost: ${result.formatted_cost}\n` +
+                        `New Balance: ${result.formatted_balance}`;
+          
+          if (result.token_refresh_warnings && result.token_refresh_warnings.length > 0) {
+            message += '\n\n⚠️ Warnings:\n' + result.token_refresh_warnings.join('\n');
+          }
+          
+          showStatus(message, 'success');
+          setTimeout(() => clearForm(), 5000);
+        } else if (response.status === 402) {
+          throw new Error(
+            `Insufficient funds!\n\n` +
+            `Required: ${result.formatted_required}\n` +
+            `Balance: ${result.formatted_balance}\n\n` +
+            `Please add credits or upgrade.`
+          );
+        } else {
+          throw new Error(result.error || 'Failed to publish video');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        
+        if (error.message.includes('token expired') || 
+            error.message.includes('reconnect') ||
+            error.message.includes('Token refresh failed')) {
+          showStatus(
+            '❌ Authentication Error\n\n' + 
+            error.message + '\n\n' +
+            '👉 Go to Settings → Social Media to reconnect the affected platform(s).',
+            'error'
+          );
+        } else {
+          showStatus('❌ ' + error.message, 'error');
+        }
+      } finally {
+        progressContainer.style.display = 'none';
+        publishBtn.disabled = false;
+      }
+    }
+
+    // ========== CLOUDINARY UPLOAD ==========
+    async function uploadToCloudinary(file) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressFill.style.width = percentComplete + '%';
+            progressPercent.textContent = Math.round(percentComplete) + '%';
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
+    // ========== CLEAR FORM ==========
+    clearBtn.addEventListener('click', clearForm);
+
+    function clearForm() {
+      selectedFile = null;
+      selectedPlatforms = [];
+      fileInput.value = '';
+      
+      videoUploadBox.classList.remove('has-video');
+      videoPreview.style.display = 'none';
+      videoPreview.src = '';
+      fileInfo.style.display = 'none';
+      
+      document.getElementById('caption').value = '';
+      document.getElementById('youtubeTitle').value = '';
+      document.getElementById('youtubeTags').value = '';
+      
+      document.querySelectorAll('.platform-btn').forEach(btn => btn.classList.remove('selected'));
+      
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      youtubeFields.classList.remove('active');
+      instagramNote.classList.remove('active');
+      
+      updateCost();
+      updatePublishButton();
+      hideStatus();
+    }
+
+    // ========== STATUS MESSAGES ==========
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type}`;
+      statusMessage.style.display = 'block';
+    }
+
+    function hideStatus() {
+      statusMessage.style.display = 'none';
+    }
+
+    // ========== INITIALIZE ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🎥 Post Video to Social Media initialized');
+      updateCost();
+
+      // Handle explore video generators button
+      const exploreBtn = document.getElementById('exploreVideoGenerators');
+      if (exploreBtn) {
+        exploreBtn.addEventListener('click', () => {
+          // Close the modal and navigate to creative tab
+          const modal = window.parent.document.getElementById('marketingModal');
+          if (modal) {
+            modal.style.display = 'none';
+          }
+          // Navigate to creative tab - trigger navigation in parent window
+          if (window.parent && window.parent.dataManager) {
+            window.parent.location.hash = '#creative';
+          } else {
+            window.location.href = '/#creative';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

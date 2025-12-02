@@ -158,14 +158,6 @@ export async function initCreativePage() {
   const modalTitle = document.getElementById("modalTitle");
   const iframe = document.getElementById("modalIframe");
   const closeBtn = document.getElementsByClassName("close")[0];
-  
-  // Get main cards and sim cards containers
-  const mainModelsCard = document.getElementById("mainModelsCard");
-  const mainStoreCard = document.getElementById("mainStoreCard");
-  const mainAudioCard = document.getElementById("mainAudioCard");
-  const modelsCardsContainer = document.getElementById("modelsCardsContainer");
-  const simCardsContainer = document.getElementById("simCardsContainer");
-  const audioCardsContainer = document.getElementById("audioCardsContainer");
 
   try {
     // Check dataManager cache FIRST
@@ -206,122 +198,21 @@ export async function initCreativePage() {
     const businessName = currentBusiness?.store_info?.name || 'No Business';
     const businessId = currentBusiness?._id || '';
 
-    // ========== PHOTOGRAPHY MODELS NAVIGATION ==========
-    if (mainModelsCard && modelsCardsContainer) {
-      mainModelsCard.addEventListener('click', function(e) {
-        // Don't trigger if clicking the info icon/tooltip or arrow
-        if (e.target.closest('.main-sim-info-icon, .main-sim-info-tooltip, .main-sim-arrow')) {
+    // Setup category card click handlers (like business.js)
+    const categoryCards = document.querySelectorAll('.main-sim-card');
+    console.log('Found category cards:', categoryCards.length);
+    categoryCards.forEach(card => {
+      const categoryId = card.getAttribute('data-category');
+      console.log('Setting up click handler for card:', categoryId);
+      card.addEventListener('click', function(e) {
+        // Only toggle if clicking on the card itself, not on buttons inside
+        if (e.target.closest('.sim-action-btn')) {
           return;
         }
-        
-        // Hide other containers
-        if (simCardsContainer) simCardsContainer.style.display = 'none';
-        if (audioCardsContainer) audioCardsContainer.style.display = 'none';
-        
-        // Toggle the models cards visibility
-        if (modelsCardsContainer.style.display === 'none' || modelsCardsContainer.style.display === '') {
-          modelsCardsContainer.style.display = 'grid';
-          // Smooth scroll to models cards
-          setTimeout(() => {
-            modelsCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 100);
-        } else {
-          modelsCardsContainer.style.display = 'none';
-        }
+        console.log('Main card clicked:', categoryId);
+        toggleSubcategory(categoryId);
       });
-      
-      // Add cursor pointer to indicate it's clickable
-      mainModelsCard.style.cursor = 'pointer';
-    }
-
-    // ========== BRANDING (STORE) NAVIGATION ==========
-    if (mainStoreCard && simCardsContainer) {
-      mainStoreCard.addEventListener('click', function(e) {
-        // Don't toggle if clicking on info icon or its tooltip
-        if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
-          return;
-        }
-        
-        // Hide other containers
-        if (modelsCardsContainer) modelsCardsContainer.style.display = 'none';
-        if (audioCardsContainer) audioCardsContainer.style.display = 'none';
-        
-        // Toggle display
-        if (simCardsContainer.style.display === 'none' || simCardsContainer.style.display === '') {
-          simCardsContainer.style.display = 'grid';
-          // Smooth scroll to sim cards
-          setTimeout(() => {
-            simCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 100);
-        } else {
-          simCardsContainer.style.display = 'none';
-        }
-      });
-      
-      // Add cursor pointer to indicate it's clickable
-      mainStoreCard.style.cursor = 'pointer';
-    }
-
-    // ========== AUDIO NAVIGATION ==========
-    if (mainAudioCard && audioCardsContainer) {
-      mainAudioCard.addEventListener('click', function(e) {
-        // Don't toggle if clicking on info icon or its tooltip
-        if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
-          return;
-        }
-        
-                // Hide other containers
-        if (modelsCardsContainer) modelsCardsContainer.style.display = 'none';
-        if (simCardsContainer) simCardsContainer.style.display = 'none';
-        const photoshootsCardsContainer = document.getElementById('photoshootsCardsContainer');
-        if (photoshootsCardsContainer) photoshootsCardsContainer.style.display = 'none';
-        
-        // Toggle display
-        if (audioCardsContainer.style.display === 'none' || audioCardsContainer.style.display === '') {
-          audioCardsContainer.style.display = 'grid';
-          // Smooth scroll to audio cards
-          setTimeout(() => {
-            audioCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 100);
-        } else {
-          audioCardsContainer.style.display = 'none';
-        }
-      });
-      
-      // Add cursor pointer to indicate it's clickable
-      mainAudioCard.style.cursor = 'pointer';
-    }
-
-    // ========== PHOTOSHOOTS NAVIGATION ==========
-    const mainPhotoshootsCard = document.getElementById('mainPhotoshootsCard');
-    const photoshootsCardsContainer = document.getElementById('photoshootsCardsContainer');
-    if (mainPhotoshootsCard && photoshootsCardsContainer) {
-      mainPhotoshootsCard.addEventListener('click', function(e) {
-        // Don't toggle if clicking on info icon or its tooltip
-        if (e.target.closest('.main-sim-info-icon') || e.target.closest('.main-sim-info-tooltip')) {
-          return;
-        }
-        
-        // Hide other containers
-        if (modelsCardsContainer) modelsCardsContainer.style.display = 'none';
-        if (simCardsContainer) simCardsContainer.style.display = 'none';
-        if (audioCardsContainer) audioCardsContainer.style.display = 'none';
-        
-        // Toggle display
-        if (photoshootsCardsContainer.style.display === 'none' || photoshootsCardsContainer.style.display === '') {
-          photoshootsCardsContainer.style.display = 'grid';
-          // Smooth scroll to photoshoots cards
-          setTimeout(() => {
-            photoshootsCardsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 100);
-        } else {
-          photoshootsCardsContainer.style.display = 'none';
-        }
-      });
-      
-      // Add cursor pointer to indicate it's clickable
-      mainPhotoshootsCard.style.cursor = 'pointer';
-    }
+    });
 
     // ========== BUTTON CONFIGURATIONS ==========
     // Setup buttons with dynamic URLs (active features)
@@ -501,5 +392,42 @@ export async function initCreativePage() {
 
   } catch (error) {
     console.error("Error in initCreativePage:", error);
+  }
+}
+
+function toggleSubcategory(categoryId) {
+  console.log('toggleSubcategory called with:', categoryId);
+  
+  // Close all subcategories first
+  const allSubcategories = document.querySelectorAll('.subcategory-container');
+  const clickedSubcategory = document.getElementById(categoryId);
+  
+  console.log('Found subcategory element:', clickedSubcategory);
+  console.log('Element classes BEFORE:', clickedSubcategory?.className);
+  
+  const wasActive = clickedSubcategory?.classList.contains('active');
+  console.log('Was active?', wasActive);
+  
+  // Remove active from all
+  allSubcategories.forEach(sub => {
+    console.log('Removing active from:', sub.id);
+    sub.classList.remove('active');
+  });
+
+  // Toggle the clicked category (open if it wasn't active)
+  if (clickedSubcategory && !wasActive) {
+    clickedSubcategory.classList.add('active');
+    console.log('Adding active class to:', categoryId);
+    console.log('Element classes AFTER:', clickedSubcategory.className);
+    
+    // Smooth scroll to subcategory
+    setTimeout(() => {
+      clickedSubcategory.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+    }, 100);
+  } else {
+    console.log('NOT adding active class because wasActive =', wasActive);
   }
 }

@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Video to Social Media</title>
+  <link rel="stylesheet" href="../../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Tab Navigation */
+    .tab-container {
+      display: flex;
+      gap: 0;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-button {
+      padding: 15px 25px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.3s ease;
+      position: relative;
+      bottom: -2px;
+    }
+
+    .tab-button:hover {
+      color: var(--primary-orange);
+    }
+
+    .tab-button.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Video Upload Styles */
+    .video-upload-section {
+      margin-bottom: 30px;
+    }
+
+    .upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .upload-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .upload-box.dragover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .upload-box.has-video {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      opacity: 0.6;
+    }
+
+    .upload-box h3 {
+      margin: 0 0 10px 0;
+      color: var(--text-primary);
+    }
+
+    .upload-box p {
+      color: #999;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    #videoPreview {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 20px;
+      display: none;
+      max-height: 400px;
+    }
+
+    .file-info {
+      margin-top: 15px;
+      padding: 15px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #333;
+      display: none;
+    }
+
+    .file-info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .file-info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Platform Selection */
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .platform-btn {
+      padding: 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .platform-btn:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .platform-btn.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+
+    .platform-btn i {
+      font-size: 24px;
+    }
+
+    .platform-info {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    /* Cost Display */
+    .cost-display {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+      text-align: center;
+      font-weight: 600;
+      color: #856404;
+    }
+
+    /* Action Buttons */
+    .action-button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b35 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .action-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .action-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Status Message */
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    /* Progress */
+    .progress-section {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-orange);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    /* Model Selection (for AI tab) */
+    .model-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .model-option {
+      position: relative;
+    }
+
+    .model-option input[type="radio"] {
+      display: none;
+    }
+
+    .model-label {
+      display: block;
+      padding: 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    .model-option input[type="radio"]:checked + .model-label {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+
+    .model-label:hover {
+      border-color: var(--primary-orange);
+    }
+
+    .model-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .model-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .model-desc {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* Creation Mode Radio Buttons */
+    .mode-option {
+      position: relative;
+    }
+
+    .mode-option input[type="radio"] {
+      display: none;
+    }
+
+    .mode-label {
+      display: block;
+      padding: 12px 20px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      background: white;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .mode-option input[type="radio"]:checked + .mode-label {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+
+    .mode-label:hover {
+      border-color: var(--primary-orange);
+    }
+
+    .creation-mode {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    /* Duration Selection */
+    .duration-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .duration-btn {
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .duration-btn:hover {
+      border-color: var(--primary-orange);
+    }
+
+    .duration-btn.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 100px;
+      font-size: 14px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 25px 0 15px 0;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-note {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #004085;
+      margin: 15px 0;
+      border-left: 4px solid var(--primary-orange);
+    }
+
+    @media (max-width: 768px) {
+      .platforms-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tab-button {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+
+      .model-selector {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .suggestion-card {
+      padding: 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    .suggestion-card:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .suggestion-card.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .suggestion-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--primary-orange);
+    }
+
+    .suggestion-preview {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .quick-ideas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .idea-btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .idea-btn:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .idea-btn.active {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+      font-weight: 600;
+    }
+
+    .ai-ideas-btn {
+      border-color: var(--primary-orange);
+      background: var(--primary-orange);
+      color: white;
+      font-weight: 600;
+    }
+
+    .ai-ideas-btn:hover {
+      background: #ff9500;
+      border-color: #ff9500;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Post Videos to Social Media</h1>
+      <p>Share your content across multiple social platforms</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+      <button class="tab-button active" data-tab="post-own">
+        <i class="fas fa-upload"></i> Post Your Video
+      </button>
+      <button class="tab-button" data-tab="generate-ai">
+        <i class="fas fa-sparkles"></i> Generate with AI
+      </button>
+    </div>
+
+    <!-- TAB 1: POST OWN VIDEO -->
+    <div id="post-own" class="tab-content active">
+      <div class="video-upload-section">
+        <div class="section-title">
+          <span>📹</span> Upload Video
+        </div>
+        
+        <div class="upload-box" id="uploadBox">
+          <div class="upload-icon">🎥</div>
+          <h3>Click or drag video here</h3>
+          <p>MP4, MOV, AVI (max 100MB)</p>
+          <input type="file" id="fileInput" accept="video/*" style="display: none;">
+          <video id="videoPreview" controls></video>
+          <div class="file-info" id="fileInfo">
+            <div class="file-info-item">
+              <span id="fileName">File name</span>
+              <span id="fileSize">Size</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">
+          <span>✍️</span> Video Caption
+        </div>
+        <textarea id="caption" placeholder="Write your video caption/description..."></textarea>
+      </div>
+
+      <div>
+        <div class="section-title">
+          <span>📱</span> Select Platforms
+        </div>
+        <div class="platforms-grid">
+          <button class="platform-btn" data-platform="facebook" data-cost="1000">
+            <i class="fab fa-facebook-f"></i>
+            <span>Facebook</span>
+            <span class="platform-info">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="instagram" data-cost="1000">
+            <i class="fab fa-instagram"></i>
+            <span>Instagram</span>
+            <span class="platform-info">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="linkedin" data-cost="1000">
+            <i class="fab fa-linkedin-in"></i>
+            <span>LinkedIn</span>
+            <span class="platform-info">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="youtube" data-cost="1000">
+            <i class="fab fa-youtube"></i>
+            <span>YouTube</span>
+            <span class="platform-info">R10.00</span>
+          </button>
+          <button class="platform-btn" data-platform="tiktok" data-cost="1000">
+            <i class="fab fa-tiktok"></i>
+            <span>TikTok</span>
+            <span class="platform-info">R10.00</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="cost-display" id="costDisplay">Select platforms to see cost</div>
+      <button class="action-button" id="publishBtn" disabled>Publish Video</button>
+
+      <div class="progress-section" id="progress">
+        <p class="progress-text" id="progressText">Uploading video...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
+
+    <!-- TAB 2: GENERATE WITH AI -->
+    <div id="generate-ai" class="tab-content">
+      <!-- 1️⃣ Creation Mode -->
+      <div style="margin-bottom: 25px;">
+        <div class="section-title">
+          <span>🎨</span> Creation Mode
+        </div>
+        <div class="creation-mode">
+          <div class="mode-option">
+            <input type="radio" id="mode-prompt" name="creationMode" value="prompt" checked>
+            <label for="mode-prompt" class="mode-label">
+              💭 Text to Video
+            </label>
+          </div>
+          <div class="mode-option">
+            <input type="radio" id="mode-image" name="creationMode" value="image">
+            <label for="mode-image" class="mode-label">
+              🖼️ Image to Video
+            </label>
+          </div>
+        </div>
+
+        <!-- Image Upload (hidden by default) -->
+        <div id="imageUploadSection" style="display: none; margin-top: 15px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Upload Reference Image</label>
+          <div class="image-upload-box" id="imageUploadBox">
+            <div class="upload-icon">🖼️</div>
+            <div id="imagePlaceholder">
+              <p style="font-weight: 600; margin-bottom: 5px;">Click or drag image here</p>
+              <p style="color: #999; font-size: 13px;">JPG, PNG (max 20MB)</p>
+            </div>
+            <img id="uploadPreview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 8px;" alt="Upload preview">
+            <div id="uploadInfo" class="upload-info" style="display: none; margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 6px; font-size: 12px;"></div>
+            <button id="removeImageBtn" class="remove-image-btn" style="display: none; margin-top: 10px; padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">Remove</button>
+          </div>
+          <input type="file" id="aiFileInput" accept="image/*" style="display: none;">
+          <p class="field-note">This image will be the first frame of your video</p>
+        </div>
+      </div>
+
+      <!-- 2️⃣ Select Model -->
+      <div style="margin-bottom: 25px;">
+        <div class="section-title">
+          <span>🚀</span> Select AI Model
+        </div>
+        <div class="model-selector">
+          <div class="model-option">
+            <input type="radio" id="model-veo-31" name="aiModel" value="veo-3.1" checked>
+            <label for="model-veo-31" class="model-label">
+              <span class="model-icon">🎥</span>
+              <span class="model-name">Veo 3.1</span>
+              <span class="model-desc">Google - Best Quality</span>
+            </label>
+          </div>
+          <div class="model-option">
+            <input type="radio" id="model-veo-31-fast" name="aiModel" value="veo-3.1-fast">
+            <label for="model-veo-31-fast" class="model-label">
+              <span class="model-icon">⚡</span>
+              <span class="model-name">Veo 3.1 Fast</span>
+              <span class="model-desc">Google - Faster</span>
+            </label>
+          </div>
+          <div class="model-option">
+            <input type="radio" id="model-sora2" name="aiModel" value="sora-2">
+            <label for="model-sora2" class="model-label">
+              <span class="model-icon">✨</span>
+              <span class="model-name">Sora</span>
+              <span class="model-desc">Azure</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3️⃣ Video Settings (Compact) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+        <div>
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Duration</label>
+          <div class="duration-selector" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+            <button class="duration-btn" data-duration="4" style="padding: 8px 6px; font-size: 12px;">4s</button>
+            <button class="duration-btn" data-duration="6" style="padding: 8px 6px; font-size: 12px;">6s</button>
+            <button class="duration-btn selected" data-duration="8" style="padding: 8px 6px; font-size: 12px;">8s</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="aspectRatio" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Aspect Ratio</label>
+          <select id="aspectRatio" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13px;">
+            <option value="16:9" selected>16:9 (YouTube)</option>
+            <option value="9:16">9:16 (Shorts)</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="resolution" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Resolution</label>
+          <select id="resolution" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13px;">
+            <option value="720p" selected>720p HD</option>
+            <option value="1080p">1080p Full HD</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4️⃣ Video Concept -->
+      <div style="margin-bottom: 25px;">
+        <div class="section-title">
+          <span>💡</span> Video Concept
+        </div>
+
+        <!-- Quick Idea Buttons -->
+        <div class="quick-ideas">
+          <button class="idea-btn" data-idea="cinematic">🎬 Cinematic</button>
+          <button class="idea-btn" data-idea="product">📦 Product</button>
+          <button class="idea-btn" data-idea="nature">🌿 Nature</button>
+          <button class="idea-btn" data-idea="dialogue">💬 Dialogue</button>
+          <button class="idea-btn ai-ideas-btn" id="aiIdeasBtn">✨ AI Ideas</button>
+        </div>
+
+        <!-- AI Suggestions -->
+        <div id="suggestionsSection" class="hidden" style="margin-bottom: 15px;">
+          <div id="suggestionsLoading" style="text-align: center; padding: 15px; color: #666;">
+            <div style="display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid var(--primary-orange); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p style="margin-top: 8px; font-size: 13px;">Generating AI video ideas...</p>
+          </div>
+          
+          <div id="suggestionsContent" class="hidden">
+            <div id="suggestionCards" style="max-height: 250px; overflow-y: auto;"></div>
+            <button id="refreshSuggestionsBtn" style="padding: 8px 16px; background: var(--primary-orange); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; margin-top: 10px; width: 100%;">
+              🔄 Get New Ideas
+            </button>
+          </div>
+          
+          <div id="suggestionsError" class="hidden" style="color: #d9534f; padding: 10px; background: #f8d7da; border-radius: 6px; font-size: 12px;"></div>
+        </div>
+
+        <!-- Video Prompt -->
+        <label for="videoPrompt" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">
+          <span id="promptLabel">Video Description</span>
+          <span class="info-badge">Required</span>
+        </label>
+        <textarea id="videoPrompt" placeholder="Describe your video concept in detail..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; min-height: 80px; font-size: 13px;"></textarea>
+
+        <!-- Advanced Options (Collapsible) -->
+        <details style="margin-top: 15px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+          <summary style="cursor: pointer; font-weight: 600; font-size: 14px;">⚙️ Advanced Options</summary>
+          
+          <div style="margin-top: 15px;">
+            <p class="field-note">💡 Pro Tips: Include camera angle, lighting, mood, and action</p>
+
+            <label for="negativePrompt" style="display: block; margin-top: 12px; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Negative Prompt (Optional)</label>
+            <textarea id="negativePrompt" placeholder="What to avoid: cartoon, blurry, distorted..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; min-height: 60px; font-size: 13px;"></textarea>
+          </div>
+        </details>
+
+        <!-- Caption (Hidden until video is approved) -->
+        <div id="captionSection" class="hidden" style="margin-top: 15px;">
+          <label for="aiCaption" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Social Media Caption (Optional)</label>
+          <textarea id="aiCaption" placeholder="Write your post caption..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; resize: vertical; min-height: 60px; font-size: 13px;"></textarea>
+        </div>
+      </div>
+
+      <!-- Cost & Generate -->
+      <div class="cost-display" id="costDisplayGeneration" style="background: #fff3cd; border: 1px solid #ffc107; color: #856404; margin-bottom: 15px;">
+        <strong>💰 Generation: R80.00</strong>
+      </div>
+
+      <button class="action-button" id="generateAIBtn" disabled>✨ Generate Video Preview (R80.00)</button>
+
+      <!-- Progress -->
+      <div class="progress-section" id="progressAI">
+        <p class="progress-text" id="progressTextAI">Generating video...</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFillAI"></div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status" id="statusAI"></div>
+
+      <!-- Video Preview (Modal-like) -->
+      <div class="video-preview-container hidden" id="videoPreviewContainer" style="margin-top: 20px; padding: 20px; background: white; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div class="cost-display" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; margin-bottom: 15px; font-size: 13px;">
+          ✅ Preview generated! Review and decide.
+        </div>
+        <video id="previewVideo" class="preview-video" controls style="width: 100%; border-radius: 12px; margin-bottom: 15px; max-height: 350px;"></video>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+          <button class="discard-btn" id="discardBtn" style="padding: 10px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 12px;">
+            🗑️ Discard
+          </button>
+          <button class="regenerate-btn" id="regenerateBtn" style="padding: 10px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 12px;">
+            🔄 Regen
+          </button>
+          <a class="download-btn" id="downloadBtn" download="video.mp4" style="padding: 10px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 12px; text-align: center; text-decoration: none; display: none;">
+            ⬇️ Download
+          </a>
+          <button class="use-video-btn" id="useVideoBtn" style="padding: 10px; background: linear-gradient(135deg, var(--primary-orange) 0%, #ff6b35 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 12px;">
+            ✓ Use
+          </button>
+        </div>
+      </div>
+
+      <!-- Platform Section (shown after video approved) -->
+      <div id="platformSection" class="hidden" style="margin-top: 20px; padding: 20px; background: white; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div class="section-title" style="margin-top: 0;">
+          <span>📱</span> Publish Video
+        </div>
+        <p class="field-note" style="margin-bottom: 15px;">Check the platforms where you want to publish this video</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 15px;">
+          <label style="display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            <input type="checkbox" class="platform-checkbox" data-platform="facebook" data-cost="1000" style="margin-right: 8px; cursor: pointer;">
+            <span><i class="fab fa-facebook-f"></i> Facebook</span>
+          </label>
+          <label style="display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            <input type="checkbox" class="platform-checkbox" data-platform="instagram" data-cost="1000" style="margin-right: 8px; cursor: pointer;">
+            <span><i class="fab fa-instagram"></i> Instagram</span>
+          </label>
+          <label style="display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            <input type="checkbox" class="platform-checkbox" data-platform="linkedin" data-cost="1000" style="margin-right: 8px; cursor: pointer;">
+            <span><i class="fab fa-linkedin-in"></i> LinkedIn</span>
+          </label>
+          <label style="display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            <input type="checkbox" class="platform-checkbox" data-platform="youtube" data-cost="1000" style="margin-right: 8px; cursor: pointer;">
+            <span><i class="fab fa-youtube"></i> YouTube</span>
+          </label>
+          <label style="display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            <input type="checkbox" class="platform-checkbox" data-platform="tiktok" data-cost="1000" style="margin-right: 8px; cursor: pointer;">
+            <span><i class="fab fa-tiktok"></i> TikTok</span>
+          </label>
+        </div>
+
+        <div class="cost-display" id="costDisplayAI" style="background: #e7f3ff; border: 1px solid #b3d9ff; color: #004085; margin-bottom: 15px;">💰 Publishing: R10.00 per platform selected</div>
+        <button class="action-button" id="publishAIBtn" disabled>📤 Publish</button>
+
+        <div class="status" id="publishStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email');
+    const businessId = urlParams.get('businessId');
+    const businessName = urlParams.get('businessName');
+
+    // Cloudinary config (shared)
+    const CLOUDINARY_UPLOAD_PRESET = 'n8n-ai-preset';
+    const CLOUDINARY_CLOUD_NAME = 'vic-3e';
+
+    // ========== TAB SWITCHING ==========
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const tabName = button.dataset.tab;
+        
+        // Remove active from all buttons and content
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active to clicked button and corresponding content
+        button.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+
+    // ========== POST OWN VIDEO TAB ==========
+    let selectedFile = null;
+    let selectedPlatforms = [];
+
+    const uploadBoxPost = document.getElementById('uploadBox');
+    const fileInputPost = document.getElementById('fileInput');
+    const videoPreview = document.getElementById('videoPreview');
+    const fileInfo = document.getElementById('fileInfo');
+    const publishBtn = document.getElementById('publishBtn');
+    const costDisplay = document.getElementById('costDisplay');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    // Upload handlers
+    uploadBoxPost.addEventListener('click', () => fileInputPost.click());
+    fileInputPost.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    
+    uploadBoxPost.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBoxPost.classList.add('dragover');
+    });
+    uploadBoxPost.addEventListener('dragleave', () => uploadBoxPost.classList.remove('dragover'));
+    uploadBoxPost.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBoxPost.classList.remove('dragover');
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('video/')) {
+        showStatus('Please select a video file', 'error');
+        return;
+      }
+
+      const maxSize = 100 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showStatus('Video file is too large. Maximum size is 100MB.', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        videoPreview.src = e.target.result;
+        videoPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = `${sizeMB} MB`;
+      fileInfo.style.display = 'block';
+
+      uploadBoxPost.classList.add('has-video');
+      updatePublishButton();
+    }
+
+    // Platform selection
+    document.querySelectorAll('#post-own .platform-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const platform = btn.dataset.platform;
+        if (selectedPlatforms.includes(platform)) {
+          selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+        } else {
+          selectedPlatforms.push(platform);
+        }
+        updateCost();
+        updatePublishButton();
+      });
+    });
+
+    function updateCost() {
+      let total = 0;
+      selectedPlatforms.forEach(platform => {
+        const btn = document.querySelector(`#post-own [data-platform="${platform}"]`);
+        if (btn) total += parseInt(btn.dataset.cost);
+      });
+      costDisplay.textContent = selectedPlatforms.length > 0 
+        ? `Total Cost: R${(total / 100).toFixed(2)}` 
+        : 'Select platforms to see cost';
+    }
+
+    function updatePublishButton() {
+      const isValid = selectedFile && selectedPlatforms.length > 0;
+      publishBtn.disabled = !isValid;
+    }
+
+    // Publish
+    publishBtn.addEventListener('click', async () => {
+      if (!selectedFile || selectedPlatforms.length === 0) return;
+      
+      publishBtn.disabled = true;
+      progress.style.display = 'block';
+      status.style.display = 'none';
+
+      try {
+        progressText.textContent = 'Uploading video to cloud storage...';
+        const videoUrl = await uploadToCloudinary(selectedFile);
+
+        if (!videoUrl) {
+          throw new Error('Failed to upload video');
+        }
+
+        progressText.textContent = 'Publishing to social media...';
+        progressFill.style.width = '100%';
+
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: userEmail,
+            businessId: businessId,
+            platforms: selectedPlatforms,
+            postContent: {
+              text: document.getElementById('caption').value,
+              video: videoUrl
+            }
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showStatus(`✅ Video posted to ${result.platforms.join(', ')}!`, 'success');
+          selectedFile = null;
+          selectedPlatforms = [];
+          videoPreview.style.display = 'none';
+          videoPreview.src = '';
+          fileInfo.style.display = 'none';
+          document.getElementById('caption').value = '';
+          document.querySelectorAll('#post-own .platform-btn').forEach(btn => btn.classList.remove('selected'));
+          progressFill.style.width = '0%';
+          updateCost();
+          updatePublishButton();
+          setTimeout(() => resetForm(), 5000);
+        } else {
+          throw new Error(result.error || 'Failed to post video');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        showStatus(`Error: ${error.message}`, 'error');
+      } finally {
+        progress.style.display = 'none';
+        publishBtn.disabled = false;
+      }
+    });
+
+    async function uploadToCloudinary(file) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const xhr = new XMLHttpRequest();
+        
+        xhr.addEventListener('load', () => {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } catch (e) {
+            reject(new Error('Invalid response from upload service'));
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.style.display = 'block';
+    }
+
+    function resetForm() {
+      selectedFile = null;
+      selectedPlatforms = [];
+      videoPreview.style.display = 'none';
+      videoPreview.src = '';
+      fileInfo.style.display = 'none';
+      document.getElementById('caption').value = '';
+      document.querySelectorAll('#post-own .platform-btn').forEach(btn => btn.classList.remove('selected'));
+      progressFill.style.width = '0%';
+      updateCost();
+      updatePublishButton();
+    }
+
+    // ========== GENERATE WITH AI TAB ==========
+    let aiSelectedPlatforms = [];
+    let generatedVideoBlob = null;
+    let generatedVideoUrl = null;
+    let uploadedImageFile = null;
+    let selectedDuration = 8;
+    let currentProvider = 'vertex-ai';
+
+    const GENERATION_COST = 80;
+
+    const ideaTemplates = {
+      cinematic: "A cinematic dolly shot tracking through a modern office space at golden hour. Natural light streams through floor-to-ceiling windows. A confident professional walks through the frame. Ambient office sounds, footsteps, keyboard clicks in the distance. Professional, warm, aspirational mood.",
+      product: "Studio shot with clean white background. Product slowly rotates on a turntable, professional lighting highlighting key features. Smooth, elegant movement. Subtle ambient sound, soft product placement sound. High-end commercial style.",
+      nature: "Aerial drone shot pulling back from a serene mountain lake at sunrise. Mist rolling over the water, golden light breaking through. Birds chirping, gentle water sounds, peaceful morning ambiance. Breathtaking, tranquil, cinematic nature scene.",
+      dialogue: "Medium shot of two people in conversation. Person 1: 'This changes everything.' Person 2: 'Are you sure about this?' Naturalistic lighting, subtle background ambiance, realistic dialogue delivery. Dramatic, tension-filled mood."
+    };
+
+    const generateAIBtn = document.getElementById('generateAIBtn');
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    const discardBtn = document.getElementById('discardBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const useVideoBtn = document.getElementById('useVideoBtn');
+    const publishAIBtn = document.getElementById('publishAIBtn');
+    const costDisplayAI = document.getElementById('costDisplayAI');
+    const statusAI = document.getElementById('statusAI');
+    const publishStatus = document.getElementById('publishStatus');
+    const progressAI = document.getElementById('progressAI');
+    const progressFillAI = document.getElementById('progressFillAI');
+    const progressTextAI = document.getElementById('progressTextAI');
+    const videoPreviewContainer = document.getElementById('videoPreviewContainer');
+    const previewVideo = document.getElementById('previewVideo');
+    const platformSection = document.getElementById('platformSection');
+    const imageUploadBox = document.getElementById('imageUploadBox');
+    const aiFileInput = document.getElementById('aiFileInput');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const imagePlaceholder = document.getElementById('imagePlaceholder');
+    const uploadInfo = document.getElementById('uploadInfo');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    const imageUploadSection = document.getElementById('imageUploadSection');
+    const promptLabel = document.getElementById('promptLabel');
+
+    // Creation mode change
+    document.querySelectorAll('input[name="creationMode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        if (mode === 'image') {
+          imageUploadSection.style.display = 'block';
+          promptLabel.textContent = 'Video Enhancement Description';
+        } else {
+          imageUploadSection.style.display = 'none';
+          promptLabel.textContent = 'Video Description';
+        }
+      });
+    });
+
+    // Model change - automatically set provider based on model
+    document.querySelectorAll('input[name="aiModel"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const model = e.target.value;
+        currentProvider = model === 'sora-2' ? 'azure' : 'vertex-ai';
+      });
+    });
+
+    // Duration buttons
+    document.querySelectorAll('.duration-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedDuration = parseInt(btn.dataset.duration);
+      });
+    });
+
+    // Resolution validation
+    function validateResolutionSettings() {
+      const resolution = document.getElementById('resolution').value;
+      const aspectRatio = document.getElementById('aspectRatio').value;
+      const duration = selectedDuration;
+
+      if (resolution === '1080p') {
+        if (duration !== 8 || aspectRatio !== '16:9') {
+          document.getElementById('resolution').value = '720p';
+          alert('1080p is only available for 8-second videos in 16:9 aspect ratio');
+        }
+      }
+    }
+
+    document.getElementById('resolution').addEventListener('change', validateResolutionSettings);
+    document.getElementById('aspectRatio').addEventListener('change', validateResolutionSettings);
+
+    // Video prompt input validation
+    document.getElementById('videoPrompt').addEventListener('input', updateGenerateButton);
+
+    // Quick idea buttons
+    document.querySelectorAll('.idea-btn:not(.ai-ideas-btn)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idea = btn.dataset.idea;
+        const ideaText = ideaTemplates[idea];
+        if (ideaText) {
+          document.getElementById('videoPrompt').value = ideaText;
+          updateGenerateButton();
+        }
+      });
+    });
+
+    // AI Ideas button
+    document.getElementById('aiIdeasBtn').addEventListener('click', fetchSuggestions);
+    document.getElementById('refreshSuggestionsBtn').addEventListener('click', fetchSuggestions);
+
+    function updateGenerateButton() {
+      const prompt = document.getElementById('videoPrompt').value.trim();
+      const isValid = prompt.length > 0;
+      generateAIBtn.disabled = !isValid;
+    }
+
+    // Fetch AI suggestions
+    async function fetchSuggestions() {
+      const suggestionsSection = document.getElementById('suggestionsSection');
+      const loadingDiv = document.getElementById('suggestionsLoading');
+      const contentDiv = document.getElementById('suggestionsContent');
+      const errorDiv = document.getElementById('suggestionsError');
+
+      suggestionsSection.classList.remove('hidden');
+      loadingDiv.style.display = 'block';
+      contentDiv.classList.add('hidden');
+      errorDiv.classList.add('hidden');
+
+      try {
+        const prompt = `You are a creative AI video director. Generate 3 unique, specific video ideas for a business.
+        
+Business: ${businessName}
+
+Generate exactly 3 creative video prompts optimized for Veo AI video generation (8 seconds max).
+
+Each video should include:
+- Specific camera movements (dolly, tracking, aerial, etc.)
+- Dialogue in quotes: "spoken words"
+- Sound effects in parentheses: (footsteps, wind, ambient noise)
+- Visual details: lighting, composition, mood
+- Action and movement
+
+Return ONLY valid JSON in this exact format:
+{
+  "suggestions": [
+    { "title": "Video Title", "description": "Full prompt" },
+    { "title": "Video Title", "description": "Full prompt" },
+    { "title": "Video Title", "description": "Full prompt" }
+  ]
+}
+
+Make each suggestion cinematic, specific, and optimized for 8-second AI video generation with audio.`;
+
+        // Call Azure OpenAI or Gemini
+        const response = await fetch('/api/call-azure-openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+
+        const result = await response.json();
+        let data;
+        try {
+          data = JSON.parse(result.content || result.text);
+        } catch (e) {
+          data = { suggestions: [] };
+        }
+
+        const suggestions = data.suggestions || [];
+        
+        if (suggestions.length === 0) {
+          throw new Error('No suggestions generated');
+        }
+
+        const cardsContainer = document.getElementById('suggestionCards');
+        cardsContainer.innerHTML = '';
+
+        suggestions.forEach((suggestion, index) => {
+          const card = document.createElement('div');
+          card.className = 'suggestion-card';
+          card.style.cssText = `
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+          `;
+          card.innerHTML = `
+            <div style="font-weight: 600; margin-bottom: 8px; color: var(--primary-orange);">${suggestion.title}</div>
+            <div style="font-size: 13px; color: #666; line-height: 1.5;">${suggestion.description}</div>
+          `;
+          card.addEventListener('click', () => {
+            document.getElementById('videoPrompt').value = suggestion.description;
+            suggestionsSection.classList.add('hidden');
+            updateGenerateButton();
+          });
+          cardsContainer.appendChild(card);
+        });
+        
+        loadingDiv.style.display = 'none';
+        contentDiv.classList.remove('hidden');
+
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        errorDiv.textContent = 'Failed to generate suggestions. Try again.';
+        errorDiv.classList.remove('hidden');
+      }
+    }
+
+    // Generate video
+    generateAIBtn.addEventListener('click', generateVideo);
+    regenerateBtn.addEventListener('click', generateVideo);
+
+    async function generateVideo() {
+      if (!document.getElementById('videoPrompt').value.trim()) return;
+      
+      generateAIBtn.disabled = true;
+      progressAI.style.display = 'block';
+      statusAI.style.display = 'none';
+
+      try {
+        progressTextAI.textContent = 'Generating video with AI...';
+        progressFillAI.style.width = '10%';
+
+        const model = document.querySelector('input[name="aiModel"]:checked').value;
+        const prompt = document.getElementById('videoPrompt').value;
+        const negativePrompt = document.getElementById('negativePrompt').value;
+        const duration = selectedDuration;
+        const aspectRatio = document.getElementById('aspectRatio').value;
+        const resolution = document.getElementById('resolution').value;
+        
+        let requestBody = {
+          prompt: prompt,
+          model: model,
+          userEmail: userEmail,
+          businessId: businessId,
+          config: {
+            durationSeconds: duration,
+            aspectRatio: aspectRatio,
+            resolution: resolution
+          }
+        };
+
+        if (negativePrompt.trim()) {
+          requestBody.negativePrompt = negativePrompt;
+        }
+
+        if (uploadedImageFile) {
+          const imageBase64 = await fileToBase64(uploadedImageFile);
+          requestBody.image = {
+            imageBytes: imageBase64,
+            mimeType: uploadedImageFile.type
+          };
+        }
+
+        let endpoint;
+        
+        // Determine endpoint based on model
+        if (model === 'sora-2') {
+          endpoint = '/api/sora/generate'; // Azure Sora 2 endpoint
+          currentProvider = 'azure';
+        } else {
+          endpoint = '/api/veo-vertex/generate'; // Veo (Google)
+          currentProvider = 'vertex-ai';
+        }
+
+        progressFillAI.style.width = '30%';
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Video generation failed');
+        }
+
+        const data = await response.json();
+        const operationName = data.operationName || data.videoId;
+
+        progressFillAI.style.width = '50%';
+        progressTextAI.textContent = 'Processing video generation...';
+
+    // Poll for status with correct endpoint
+        const statusEndpoint = model === 'sora-2' ? '/api/sora/check-status' : 
+                               '/api/veo-vertex/check-status';
+        
+        const result = await pollVideoGeneration(operationName, currentProvider);
+        
+        progressFillAI.style.width = '85%';
+        progressTextAI.textContent = 'Downloading video...';
+
+        // Download with correct endpoint
+        const downloadEndpoint = model === 'sora-2' ? '/api/sora/download' : 
+                                 '/api/veo-vertex/download';
+        
+        generatedVideoBlob = await downloadVideoFromAPI(result.video || result.videoFile, downloadEndpoint);
+        generatedVideoUrl = URL.createObjectURL(generatedVideoBlob);
+        
+        progressFillAI.style.width = '100%';
+        progressTextAI.textContent = 'Complete!';
+
+        previewVideo.src = generatedVideoUrl;
+        videoPreviewContainer.classList.remove('hidden');
+
+        showStatusAI('✅ Video generated successfully!', 'success');
+
+        setTimeout(() => {
+          progressAI.style.display = 'none';
+        }, 1500);
+
+      } catch (error) {
+        console.error('Error:', error);
+        showStatusAI(`Error: ${error.message}`, 'error');
+      } finally {
+        generateAIBtn.disabled = false;
+      }
+    }
+
+    // Poll for video generation status
+    async function pollVideoGeneration(operationName, provider) {
+      let attempts = 0;
+      const maxAttempts = 60;
+      
+      const apiProvider = provider || currentProvider || 'vertex-ai';
+      
+      console.log('🔍 ========== STARTING VIDEO POLLING ==========');
+      console.log('📍 Operation Name:', operationName);
+      console.log('🔧 Provider:', apiProvider);
+      console.log('📡 Endpoint:', apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/sora/check-status');
+      
+      const endpoint = apiProvider === 'vertex-ai' ? '/api/veo-vertex/check-status' : '/api/sora/check-status';
+      
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        attempts++;
+        progressTextAI.textContent = `Generating video... (${attempts * 5}s elapsed)`;
+        
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operationName })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to check video status');
+          }
+
+          const data = await response.json();
+          
+          console.log(`\n📊 ========== POLL ATTEMPT ${attempts} ==========`);
+          console.log('Raw response:', JSON.stringify(data, null, 2));
+          console.log('✓ done:', data.done);
+          console.log('✓ hasResponse:', !!data.response);
+          console.log('✓ hasError:', !!data.error);
+          
+          if (data.done) {
+            console.log('\n🎉 ========== VIDEO GENERATION COMPLETE! ==========');
+            
+            if (data.error) {
+              throw new Error(data.error.message || 'Video generation failed');
+            }
+            
+            console.log('📦 Full response object:', data.response);
+            console.log('📦 Response type:', data.response?.['@type']);
+            
+            // ✅ HANDLE DIFFERENT RESPONSE STRUCTURES
+            let videoSample = null;
+            
+            if (apiProvider === 'vertex-ai') {
+              // Vertex AI returns videos array in response
+              if (data.response && data.response.videos && data.response.videos.length > 0) {
+                videoSample = data.response.videos[0];
+              } else if (data.videoFile) {
+                videoSample = { video: data.videoFile };
+              }
+            } else {
+              // Gemini API returns different structure
+              if (data.response && data.response.candidates && data.response.candidates.length > 0) {
+                const candidate = data.response.candidates[0];
+                if (candidate.generatedContentBlob) {
+                  videoSample = { video: candidate.generatedContentBlob };
+                }
+              } else if (data.response && data.response.video) {
+                videoSample = { video: data.response.video };
+              } else if (data.video) {
+                videoSample = { video: data.video };
+              }
+            }
+            
+            if (!videoSample || !videoSample.video) {
+              console.error('No video found in response');
+              throw new Error('No video returned from generation');
+            }
+            
+            console.log('\n✅ ========== RETURNING VIDEO SAMPLE ==========');
+            console.log('Final video sample:', JSON.stringify(videoSample, null, 2));
+            
+            return videoSample;
+          }
+          
+          const progressPercent = Math.min(50 + (attempts * 2), 90);
+          progressFillAI.style.width = `${progressPercent}%`;
+          
+        } catch (error) {
+          console.error('❌ Poll error:', error);
+          throw error;
+        }
+      }
+      
+      throw new Error('Video generation timed out after 5 minutes');
+    }
+
+    // Download video
+    async function downloadVideoFromAPI(videoFile, downloadEndpoint) {
+      if (!videoFile) {
+        throw new Error('No video file returned from generation');
+      }
+
+      if (videoFile.bytesBase64Encoded) {
+        const binaryString = atob(videoFile.bytesBase64Encoded);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: videoFile.mimeType });
+      }
+
+      const response = await fetch(downloadEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoFile })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download video');
+      }
+
+      return await response.blob();
+    }
+
+    // File to Base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Image upload handlers
+    imageUploadBox.addEventListener('click', () => aiFileInput.click());
+    aiFileInput.addEventListener('change', (e) => handleImageUpload(e.target.files[0]));
+    
+    imageUploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      imageUploadBox.classList.add('dragover');
+    });
+    
+    imageUploadBox.addEventListener('dragleave', () => {
+      imageUploadBox.classList.remove('dragover');
+    });
+    
+    imageUploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      imageUploadBox.classList.remove('dragover');
+      handleImageUpload(e.dataTransfer.files[0]);
+    });
+
+    function handleImageUpload(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showStatusAI('Please select an image file', 'error');
+        return;
+      }
+
+      const maxSize = 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showStatusAI('Image file is too large. Maximum size is 20MB.', 'error');
+        return;
+      }
+
+      uploadedImageFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadPreview.src = e.target.result;
+        uploadPreview.style.display = 'block';
+        imagePlaceholder.style.display = 'none';
+        removeImageBtn.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      uploadInfo.textContent = `📁 ${file.name} (${sizeMB} MB)`;
+      uploadInfo.style.display = 'block';
+    }
+
+    removeImageBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      uploadedImageFile = null;
+      aiFileInput.value = '';
+      uploadPreview.style.display = 'none';
+      imagePlaceholder.style.display = 'block';
+      removeImageBtn.style.display = 'none';
+      uploadInfo.style.display = 'none';
+    });
+
+    // Discard button
+    discardBtn.addEventListener('click', () => {
+      generatedVideoBlob = null;
+      generatedVideoUrl = null;
+      videoPreviewContainer.classList.add('hidden');
+      platformSection.classList.add('hidden');
+      document.getElementById('captionSection').classList.add('hidden');
+      aiSelectedPlatforms = [];
+      document.querySelectorAll('.platform-checkbox').forEach(cb => cb.checked = false);
+      updateAICost();
+      progressFillAI.style.width = '0%';
+      showStatusAI('Video discarded', 'info');
+      setTimeout(() => statusAI.style.display = 'none', 3000);
+    });
+
+    // Use video button
+    useVideoBtn.addEventListener('click', () => {
+      videoPreviewContainer.classList.add('hidden');
+      platformSection.classList.remove('hidden');
+      document.getElementById('captionSection').classList.remove('hidden');
+      window.scrollTo(0, platformSection.offsetTop - 100);
+    });
+
+    // Platform selection
+    document.querySelectorAll('.platform-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const platform = checkbox.dataset.platform;
+        if (checkbox.checked) {
+          aiSelectedPlatforms.push(platform);
+        } else {
+          aiSelectedPlatforms = aiSelectedPlatforms.filter(p => p !== platform);
+        }
+        updateAICost();
+        updatePublishButtonText();
+      });
+    });
+
+    function updatePublishButtonText() {
+      let total = 0;
+      aiSelectedPlatforms.forEach(platform => {
+        const checkbox = document.querySelector(`#platformSection [data-platform="${platform}"]`);
+        if (checkbox) total += parseInt(checkbox.dataset.cost);
+      });
+      publishAIBtn.textContent = aiSelectedPlatforms.length > 0
+        ? `📤 Publish (R${(total / 100).toFixed(2)})`
+        : '📤 Publish';
+    }
+
+    function updateAICost() {
+      let total = 0;
+      aiSelectedPlatforms.forEach(platform => {
+        const checkbox = document.querySelector(`#platformSection [data-platform="${platform}"]`);
+        if (checkbox) total += parseInt(checkbox.dataset.cost);
+      });
+      
+      if (aiSelectedPlatforms.length > 0) {
+        costDisplayAI.textContent = `💰 Publishing: R${(total / 100).toFixed(2)} (${aiSelectedPlatforms.length} platform${aiSelectedPlatforms.length > 1 ? 's' : ''})`;
+      } else {
+        costDisplayAI.textContent = '💰 Publishing: R10.00 per platform selected';
+      }
+      publishAIBtn.disabled = aiSelectedPlatforms.length === 0;
+    }
+
+    // Publish button
+    publishAIBtn.addEventListener('click', async () => {
+      if (!generatedVideoBlob || aiSelectedPlatforms.length === 0) return;
+      
+      publishAIBtn.disabled = true;
+      progressAI.style.display = 'block';
+      statusAI.style.display = 'none';
+
+      try {
+        progressTextAI.textContent = 'Uploading video to cloud storage...';
+        progressFillAI.style.width = '30%';
+
+        const videoUrl = await uploadToCloudinary(generatedVideoBlob);
+        
+        progressTextAI.textContent = 'Publishing to social media...';
+        progressFillAI.style.width = '70%';
+
+        const caption = document.getElementById('aiCaption').value || '';
+
+        const response = await fetch('/api/social-post/post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            businessId: businessId,
+            platforms: aiSelectedPlatforms,
+            postContent: {
+              text: caption,
+              video: videoUrl
+            }
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          progressFillAI.style.width = '100%';
+          showStatusAI(`✅ Video published to ${aiSelectedPlatforms.join(', ')}!`, 'success');
+          setTimeout(() => {
+            progressAI.style.display = 'none';
+            platformSection.classList.add('hidden');
+            videoPreviewContainer.classList.add('hidden');
+            resetAIForm();
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Failed to publish video');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        showStatusAI(`Error: ${error.message}`, 'error');
+      } finally {
+        progressAI.style.display = 'none';
+        publishAIBtn.disabled = false;
+      }
+    });
+
+    async function uploadToCloudinary(blob) {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', blob);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', () => {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response.secure_url);
+          } catch (e) {
+            reject(new Error('Invalid response from upload service'));
+          }
+        });
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
+        });
+        
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+    }
+
+    function showStatusAI(message, type) {
+      statusAI.textContent = message;
+      statusAI.className = `status ${type}`;
+      statusAI.style.display = 'block';
+    }
+
+    function resetAIForm() {
+      document.getElementById('videoPrompt').value = '';
+      document.getElementById('negativePrompt').value = '';
+      document.getElementById('aiCaption').value = '';
+      document.querySelectorAll('#platformSection .platform-btn').forEach(btn => btn.classList.remove('selected'));
+      aiSelectedPlatforms = [];
+      generatedVideoBlob = null;
+      generatedVideoUrl = null;
+      uploadedImageFile = null;
+      document.querySelector('input[name="creationMode"][value="prompt"]').checked = true;
+      imageUploadSection.style.display = 'none';
+      updateAICost();
+      updateGenerateButton();
+    }
+  </script>
+</body>
+</html>

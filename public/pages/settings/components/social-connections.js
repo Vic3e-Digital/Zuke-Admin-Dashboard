@@ -119,7 +119,7 @@ export class SocialConnectionsComponent {
 
   setupEventListeners(currentBusiness) {
     // Connect buttons
-    ['facebook', 'instagram', 'linkedin', 'youtube'].forEach(platform => {
+    ['facebook', 'instagram', 'linkedin', 'youtube', 'tiktok'].forEach(platform => {
       const btn = document.getElementById(`connect${Formatters.capitalize(platform)}Btn`);
       if (btn) {
         btn.onclick = () => this.connectPlatform(platform, currentBusiness);

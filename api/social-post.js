@@ -48,6 +48,7 @@ const PRICING = {
   instagram: 10,    // R10.00 per post
   linkedin: 10,     // R10.00 per post
   youtube: 10,      // R10.00 per video upload
+  tiktok: 10,       // R10.00 per video upload
   base_fee: 0
 };
 
@@ -268,6 +269,86 @@ async function refreshLinkedInToken(platformSettings, businessId, db) {
   }
 }
 
+async function refreshTikTokToken(platformSettings, businessId, db) {
+  console.log('[TikTok] Checking token expiration...');
+  
+  const now = new Date();
+  const expiresAt = new Date(platformSettings.expires_at);
+  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+  if (expiresAt > fiveMinutesFromNow) {
+    console.log('[TikTok] ✓ Token is still valid');
+    return decryptToken(platformSettings.access_token);
+  }
+
+  console.log('[TikTok] ⟳ Token expired/expiring, refreshing...');
+
+  try {
+    const refreshToken = decryptToken(platformSettings.refresh_token);
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', 
+      new URLSearchParams({
+        client_key: process.env.TIKTOK_CLIENT_KEY,
+        client_secret: process.env.TIKTOK_CLIENT_SECRET,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken
+      }),
+      {
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cache-Control': 'no-cache'
+        }
+      }
+    );
+
+    const data = response.data;
+
+    if (data.error || !data.access_token) {
+      throw new Error(data.error?.message || 'Failed to refresh token');
+    }
+
+    const newAccessToken = data.access_token;
+    const newRefreshToken = data.refresh_token;
+    const expiresIn = data.expires_in || 86400;
+    const newExpiresAt = new Date(Date.now() + expiresIn * 1000);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.tiktok.access_token': encryptToken(newAccessToken),
+          'automation_settings.social_media.tiktok.refresh_token': encryptToken(newRefreshToken),
+          'automation_settings.social_media.tiktok.expires_at': newExpiresAt,
+          'automation_settings.social_media.tiktok.last_refreshed': new Date(),
+          'automation_settings.social_media.tiktok.status': 'active'
+        }
+      }
+    );
+
+    console.log('[TikTok] ✓ Token refreshed successfully');
+    return newAccessToken;
+
+  } catch (error) {
+    console.error('[TikTok] ✗ Token refresh failed:', error.response?.data || error.message);
+
+    await db.collection('store_submissions').updateOne(
+      { _id: new ObjectId(businessId) },
+      {
+        $set: {
+          'automation_settings.social_media.tiktok.status': 'error',
+          'automation_settings.social_media.tiktok.error': 'Token refresh failed - please reconnect'
+        }
+      }
+    );
+
+    throw new Error('TikTok token expired. Please reconnect your TikTok account in Settings.');
+  }
+}
+
 // ========================================
 // MAIN POST ROUTE
 // ========================================
@@ -460,6 +541,13 @@ if (postContent.contentType === 'video' && postContent.duration && postContent.r
             organization_id: platformSettings.organization_id,
             organization_name: platformSettings.organization_name
           };
+        } else if (platform === 'tiktok') {
+          accessToken = await refreshTikTokToken(platformSettings, businessId, db);
+          platformCredentials.tiktok = {
+            access_token: accessToken,
+            open_id: platformSettings.open_id,
+            display_name: platformSettings.display_name
+          };
         }
 
       } catch (error) {
@@ -633,6 +721,13 @@ if (postContent.contentType === 'video' && postContent.duration && postContent.r
             organization_id: platformSettings.organization_id,
             organization_name: platformSettings.organization_name
           };
+        } else if (platform === 'tiktok') {
+          accessToken = await refreshTikTokToken(platformSettings, businessId, db);
+          platformCredentials.tiktok = {
+            access_token: accessToken,
+            open_id: platformSettings.open_id,
+            display_name: platformSettings.display_name
+          };
         }
 
       } catch (error) {
@@ -726,7 +821,6 @@ if (postContent.contentType === 'video' && postContent.duration && postContent.r
 });
 
 // ✅ Get pricing info
-// ✅ Get pricing info
 router.get('/pricing', (req, res) => {
   res.json({
     success: true,
@@ -735,6 +829,7 @@ router.get('/pricing', (req, res) => {
       instagram: { amount: PRICING.instagram, formatted: `R${PRICING.instagram.toFixed(2)}` },
       linkedin: { amount: PRICING.linkedin, formatted: `R${PRICING.linkedin.toFixed(2)}` },
       youtube: { amount: PRICING.youtube, formatted: `R${PRICING.youtube.toFixed(2)}` },
+      tiktok: { amount: PRICING.tiktok, formatted: `R${PRICING.tiktok.toFixed(2)}` },
       base_fee: { amount: PRICING.base_fee, formatted: `R${PRICING.base_fee.toFixed(2)}` }
     }
   });

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Content Calendar Generator | Zuke</title>
+  <link rel="stylesheet" href="../../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Two-Column Layout */
+    .calendar-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .calendar-settings-section {
+      flex: 1;
+      min-width: 350px;
+    }
+
+    .calendar-output-section {
+      flex: 1;
+      min-width: 400px;
+    }
+
+    /* Form Controls */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .form-group-inline {
+      margin-bottom: 0;
+    }
+
+    .frequency-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .frequency-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .frequency-btn:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .frequency-btn.selected {
+      border-color: var(--primary-orange);
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    .content-types {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .type-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .type-checkbox:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .type-checkbox.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+    }
+
+    .type-checkbox input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--primary-orange);
+    }
+
+    /* Output Preview */
+    .calendar-preview {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0;
+      max-height: 500px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .calendar-preview.empty {
+      padding: 40px;
+      text-align: center;
+      color: #999;
+    }
+
+    .calendar-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .calendar-item:hover {
+      background: #FFF8F0;
+    }
+
+    .calendar-item:last-child {
+      border-bottom: none;
+    }
+
+    .calendar-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .calendar-item-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .calendar-item-date {
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: #F0F0F0;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .calendar-item-type {
+      display: inline-block;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .type-image {
+      background: #E3F2FD;
+      color: #1976D2;
+    }
+
+    .type-video {
+      background: #FCE4EC;
+      color: #C2185B;
+    }
+
+    .calendar-item-description {
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .calendar-item-why {
+      font-size: 11px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 10px;
+      padding-left: 10px;
+      border-left: 2px solid var(--primary-orange);
+    }
+
+    .calendar-item-prompt {
+      background: #F9F9F9;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #555;
+      font-family: 'Courier New', monospace;
+      margin-top: 8px;
+    }
+
+    .prompt-label {
+      font-weight: 600;
+      color: var(--primary-orange);
+      margin-bottom: 4px;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    /* Action Buttons */
+    .generate-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--primary-orange), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 16px;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .export-btn {
+      flex: 1;
+      padding: 10px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: none;
+    }
+
+    .export-btn:hover {
+      background: #5a6268;
+    }
+
+    .export-btn.visible {
+      display: block;
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status-message.success {
+      background: #D4EDDA;
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+
+    .status-message.error {
+      background: #F8D7DA;
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+
+    .status-message.info {
+      background: #D1ECF1;
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--primary-orange);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-orange), #FF9500);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: #856404;
+    }
+
+    .info-box strong {
+      color: var(--primary-orange);
+    }
+
+    @media (max-width: 768px) {
+      .calendar-container {
+        flex-direction: column;
+      }
+
+      .calendar-settings-section,
+      .calendar-output-section {
+        flex: none;
+        width: 100%;
+        min-width: auto;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .export-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>AI Content Calendar Generator</h1>
+      <p>Create a strategic content calendar tailored to your business, audience, and market trends</p>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="info-box">
+      <strong>🤖 AI-Powered Planning:</strong> Our AI analyzes your business case, target market, seasonal trends, and competitor insights to generate a strategic content calendar with ready-to-use prompts for image and video creation.
+    </div>
+
+    <div class="calendar-container">
+      
+      <!-- Left: Settings -->
+      <div class="calendar-settings-section">
+        <div class="section-title">Calendar Settings</div>
+
+        <!-- Duration & Frequency -->
+        <div class="form-row">
+          <div class="form-group form-group-inline">
+            <label for="duration">Duration</label>
+            <select id="duration">
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3" selected>3 Months</option>
+              <option value="6">6 Months</option>
+            </select>
+          </div>
+
+          <div class="form-group form-group-inline">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate">
+          </div>
+        </div>
+
+        <!-- Frequency -->
+        <div class="form-group">
+          <label>Posting Frequency</label>
+          <div class="frequency-options">
+            <button class="frequency-btn" data-frequency="1">1 per week</button>
+            <button class="frequency-btn selected" data-frequency="2">2 per week</button>
+            <button class="frequency-btn" data-frequency="3">3 per week</button>
+            <button class="frequency-btn" data-frequency="5">5 per week (daily)</button>
+            <button class="frequency-btn" data-frequency="custom">Custom</button>
+          </div>
+          <input type="number" id="customFrequency" placeholder="Posts per week" style="display: none; margin-top: 8px;" min="1" max="14">
+        </div>
+
+        <!-- Content Types -->
+        <div class="form-group">
+          <label>Content Types</label>
+          <div class="content-types">
+            <div class="type-checkbox selected" data-type="image">
+              <input type="checkbox" id="includeImages" checked>
+              <label for="includeImages">Images</label>
+            </div>
+            <div class="type-checkbox selected" data-type="video">
+              <input type="checkbox" id="includeVideos" checked>
+              <label for="includeVideos">Videos</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Context -->
+        <div class="form-group">
+          <label for="additionalContext">Additional Context (Optional)</label>
+          <textarea id="additionalContext" placeholder="E.g., upcoming promotions, product launches, seasonal campaigns, specific themes..." rows="3"></textarea>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="generate-btn" id="generateBtn">🤖 Generate Content Calendar with AI</button>
+
+        <!-- Progress -->
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-text" id="progressText">Analyzing business context...</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div class="status-message" id="statusMessage"></div>
+      </div>
+
+      <!-- Right: Calendar Output -->
+      <div class="calendar-output-section">
+        <div class="section-title">Generated Calendar</div>
+
+        <div class="calendar-preview empty" id="calendarPreview">
+          <div>📅</div>
+          <p style="margin-top: 12px;">Your AI-generated content calendar will appear here</p>
+          <p style="font-size: 11px; color: #999; margin-top: 8px;">Configure your settings and click Generate</p>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="export-buttons">
+          <button class="export-btn" id="exportJsonBtn">📄 Export JSON</button>
+          <button class="export-btn" id="exportCsvBtn">📊 Export CSV</button>
+          <button class="export-btn" id="copyBtn">📋 Copy to Clipboard</button>
+        </div>
+        
+        <!-- Import Feature (Coming Soon) -->
+        <div class="export-buttons" style="margin-top: 8px;">
+          <button class="export-btn" id="importCsvBtn" style="background: #6c757d; opacity: 0.6; cursor: not-allowed;" disabled>
+            📥 Import CSV to n8n <span style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin-left: 4px;">COMING SOON</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // ========== CONFIGURATION & STATE ==========
+    const urlParams = new URLSearchParams(window.location.search);
+    let userEmail = urlParams.get('email');
+    let businessId = urlParams.get('businessId');
+    let businessName = urlParams.get('businessName') || 'My Business';
+    
+    let currentCalendar = null;
+    let selectedFrequency = 2;
+    let contentTypes = { image: true, video: true };
+
+    // ========== ELEMENT REFERENCES ==========
+    const generateBtn = document.getElementById('generateBtn');
+    const calendarPreview = document.getElementById('calendarPreview');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const statusMessage = document.getElementById('statusMessage');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // ========== INITIALIZE START DATE ==========
+    document.getElementById('startDate').valueAsDate = new Date();
+
+    // ========== FREQUENCY SELECTION ==========
+    document.querySelectorAll('.frequency-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.frequency-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        
+        const freq = btn.dataset.frequency;
+        if (freq === 'custom') {
+          document.getElementById('customFrequency').style.display = 'block';
+          selectedFrequency = parseInt(document.getElementById('customFrequency').value) || 2;
+        } else {
+          document.getElementById('customFrequency').style.display = 'none';
+          selectedFrequency = parseInt(freq);
+        }
+      });
+    });
+
+    document.getElementById('customFrequency').addEventListener('input', (e) => {
+      selectedFrequency = parseInt(e.target.value) || 2;
+    });
+
+    // ========== CONTENT TYPE SELECTION ==========
+    document.querySelectorAll('.type-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('click', () => {
+        const type = checkbox.dataset.type;
+        const input = checkbox.querySelector('input[type="checkbox"]');
+        
+        input.checked = !input.checked;
+        contentTypes[type] = input.checked;
+        
+        if (input.checked) {
+          checkbox.classList.add('selected');
+        } else {
+          checkbox.classList.remove('selected');
+        }
+      });
+
+      // Also handle direct checkbox clicks
+      checkbox.querySelector('input[type="checkbox"]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const type = checkbox.dataset.type;
+        contentTypes[type] = e.target.checked;
+        
+        if (e.target.checked) {
+          checkbox.classList.add('selected');
+        } else {
+          checkbox.classList.remove('selected');
+        }
+      });
+    });
+
+    // ========== GENERATE CALENDAR ==========
+    generateBtn.addEventListener('click', async () => {
+      await generateCalendar();
+    });
+
+    async function generateCalendar() {
+      if (!userEmail || !businessId) {
+        showStatus('Missing user or business information', 'error');
+        return;
+      }
+
+      if (!contentTypes.image && !contentTypes.video) {
+        showStatus('Please select at least one content type', 'error');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      progressContainer.style.display = 'block';
+      hideStatus();
+
+      try {
+        const duration = parseInt(document.getElementById('duration').value);
+        const startDate = document.getElementById('startDate').value;
+        const additionalContext = document.getElementById('additionalContext').value;
+
+        progressText.textContent = 'Analyzing your business case...';
+        progressFill.style.width = '20%';
+
+        const response = await fetch('/api/marketing/generate-content-calendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId,
+            userEmail,
+            duration,
+            startDate,
+            postsPerWeek: selectedFrequency,
+            contentTypes,
+            additionalContext
+          })
+        });
+
+        progressFill.style.width = '60%';
+        progressText.textContent = 'AI is crafting your content strategy...';
+
+        if (!response.ok) {
+          const error = await response.json();
+          if (response.status === 402) {
+            throw new Error(`Insufficient credits. Required: ${error.required}, Balance: ${error.balance}`);
+          }
+          throw new Error(error.error || 'Failed to generate calendar');
+        }
+
+        const result = await response.json();
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        currentCalendar = result.calendar;
+        displayCalendar(result.calendar);
+
+        showStatus(
+          `✅ Calendar generated successfully!\n\n` +
+          `📅 ${result.calendar.length} posts planned\n` +
+          `💰 Cost: ${result.formatted_cost}\n` +
+          `📊 New Balance: ${result.formatted_balance}`,
+          'success'
+        );
+
+        // Show export buttons
+        exportJsonBtn.classList.add('visible');
+        exportCsvBtn.classList.add('visible');
+        copyBtn.classList.add('visible');
+        document.getElementById('importCsvBtn').classList.add('visible');
+
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+        }, 1500);
+
+      } catch (error) {
+        console.error('Error:', error);
+        progressContainer.style.display = 'none';
+        showStatus('❌ ' + error.message, 'error');
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    // ========== DISPLAY CALENDAR ==========
+    function displayCalendar(calendar) {
+      if (!calendar || calendar.length === 0) {
+        calendarPreview.innerHTML = '<div class="empty">No content items generated</div>';
+        calendarPreview.classList.add('empty');
+        return;
+      }
+
+      calendarPreview.classList.remove('empty');
+      
+      let html = '';
+      calendar.forEach(item => {
+        const typeClass = item.type === 'image' ? 'type-image' : 'type-video';
+        const typeIcon = item.type === 'image' ? '🖼️' : '🎥';
+        
+        html += `
+          <div class="calendar-item">
+            <div class="calendar-item-header">
+              <div class="calendar-item-title">
+                ${typeIcon} ${item.contentName}
+                <span class="calendar-item-type ${typeClass}">${item.type}</span>
+              </div>
+              <div class="calendar-item-date">${formatDate(item.date)}</div>
+            </div>
+            <div class="calendar-item-description">${item.description}</div>
+            <div class="calendar-item-why">💡 Why: ${item.why}</div>
+            <div class="calendar-item-prompt">
+              <div class="prompt-label">AI Prompt:</div>
+              ${item.aiPrompt}
+            </div>
+          </div>
+        `;
+      });
+
+      calendarPreview.innerHTML = html;
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    // ========== EXPORT FUNCTIONS ==========
+    exportJsonBtn.addEventListener('click', () => {
+      if (!currentCalendar) return;
+      
+      const dataStr = JSON.stringify(currentCalendar, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `content-calendar-${Date.now()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      showStatus('✅ JSON file downloaded', 'success');
+      setTimeout(hideStatus, 2000);
+    });
+
+    exportCsvBtn.addEventListener('click', () => {
+      if (!currentCalendar) return;
+      
+      let csv = 'Date,Content Name,Caption to use,AI prompt for gpt-image-1/flux\n';
+      currentCalendar.forEach(item => {
+        const formattedDate = new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        csv += `"${formattedDate}","${item.contentName}","${item.description.replace(/"/g, '""')}","${item.aiPrompt.replace(/"/g, '""')}"\n`;
+      });
+      
+      const dataBlob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `content-calendar-${Date.now()}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      showStatus('✅ CSV file downloaded', 'success');
+      setTimeout(hideStatus, 2000);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      if (!currentCalendar) return;
+      
+      try {
+        const text = JSON.stringify(currentCalendar, null, 2);
+        await navigator.clipboard.writeText(text);
+        showStatus('✅ Calendar copied to clipboard!', 'success');
+        setTimeout(hideStatus, 2000);
+      } catch (error) {
+        showStatus('Failed to copy: ' + error.message, 'error');
+      }
+    });
+
+    // ========== SHOW/HIDE STATUS ==========
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type}`;
+      statusMessage.style.display = 'block';
+    }
+
+    function hideStatus() {
+      statusMessage.style.display = 'none';
+    }
+
+    // ========== INITIALIZE ON PAGE LOAD ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📅 AI Content Calendar Generator initialized');
+    });
+  </script>
+</body>
+</html>

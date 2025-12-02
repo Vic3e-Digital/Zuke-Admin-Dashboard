@@ -527,8 +527,8 @@ router.post('/auth/:platform/refresh',
       const { platform } = req.params;
       const { businessId } = req.body;
 
-      // Currently only YouTube supports token refresh
-      if (platform !== 'youtube') {
+      // YouTube and TikTok support token refresh
+      if (!['youtube', 'tiktok'].includes(platform)) {
         return res.json({ 
           success: false, 
           error: 'Token refresh not supported for this platform' 
@@ -544,20 +544,49 @@ router.post('/auth/:platform/refresh',
         });
       }
 
-      const newTokenData = await youtubeOAuth.refreshToken(tokenData.refresh_token);
+      let newTokenData;
+      if (platform === 'youtube') {
+        newTokenData = await youtubeOAuth.refreshToken(tokenData.refresh_token);
+      } else if (platform === 'tiktok') {
+        newTokenData = await tiktokOAuth.refreshToken(tokenData.refresh_token);
+      }
 
-      await businessSettingsService.updatePlatformConnection(businessId, platform, {
+      // For YouTube, include expires_at in response; for TikTok, preserve all existing fields
+      let updateData = {
         access_token: newTokenData.access_token,
-        expires_at: youtubeOAuth.calculateExpiry(newTokenData.expires_in)
-      });
+        refresh_token: newTokenData.refresh_token || tokenData.refresh_token
+      };
+
+      if (platform === 'youtube') {
+        updateData.expires_at = youtubeOAuth.calculateExpiry(newTokenData.expires_in);
+      } else if (platform === 'tiktok') {
+        updateData.expires_at = tiktokOAuth.calculateExpiry(newTokenData.expires_in);
+        
+        // Preserve other TikTok fields from current data
+        const db = await getDatabase();
+        const business = await db.collection('store_submissions').findOne({
+          _id: new ObjectId(businessId)
+        });
+        const currentTikTokData = business?.automation_settings?.social_media?.tiktok || {};
+        updateData = { ...currentTikTokData, ...updateData };
+      }
+
+      await businessSettingsService.updatePlatformConnection(businessId, platform, updateData);
 
       console.log(`[OAuth] ${platform} token refreshed for business: ${businessId}`);
 
-      res.json({ 
-        success: true, 
-        message: 'Token refreshed successfully',
-        expires_at: youtubeOAuth.calculateExpiry(newTokenData.expires_in)
-      });
+      const response = {
+        success: true,
+        message: 'Token refreshed successfully'
+      };
+
+      if (platform === 'youtube') {
+        response.expires_at = youtubeOAuth.calculateExpiry(newTokenData.expires_in);
+      } else if (platform === 'tiktok') {
+        response.expires_at = tiktokOAuth.calculateExpiry(newTokenData.expires_in);
+      }
+
+      res.json(response);
 
     } catch (error) {
       console.error(`[Settings] Error refreshing token:`, error);
@@ -668,13 +697,13 @@ router.get('/auth/tiktok/callback', async (req, res) => {
 
     console.log(`[OAuth] ✅ TikTok connected successfully`);
     console.log(`[OAuth] Business: ${businessId.substring(0, 8)}...`);
-    console.log(`[OAuth] User: @${userInfo.username || userInfo.display_name}`);
+    console.log(`[OAuth] TikTok Account: ${userInfo.display_name || userInfo.open_id}`);
 
     // Success page
     res.send(OAuthTemplates.success('tiktok', {
-      display_name: userInfo.display_name,
-      username: userInfo.username || userInfo.display_name,
-      follower_count: userInfo.follower_count || 0
+      display_name: userInfo.display_name || userInfo.open_id || 'TikTok Account',
+      username: userInfo.display_name || userInfo.open_id || 'TikTok',
+      follower_count: 0
     }));
 
   } catch (error) {
@@ -721,36 +750,7 @@ router.post('/auth/tiktok/test', async (req, res) => {
   }
 });
 
-// TikTok Refresh Token
-router.post('/auth/tiktok/refresh', async (req, res) => {
-  try {
-    const { businessId } = req.body;
-    const tokenData = await businessSettingsService.getPlatformToken(businessId, 'tiktok');
-    
-    if (!tokenData || !tokenData.refresh_token) {
-      return res.json({ 
-        success: false, 
-        error: 'No refresh token available. Please reconnect your account.' 
-      });
-    }
 
-    const newTokenData = await tiktokOAuth.refreshToken(tokenData.refresh_token);
-
-    await businessSettingsService.updatePlatformConnection(businessId, 'tiktok', {
-      access_token: newTokenData.access_token,
-      refresh_token: newTokenData.refresh_token,
-      expires_at: tiktokOAuth.calculateExpiry(newTokenData.expires_in)
-    });
-
-    res.json({ success: true, message: 'Token refreshed successfully' });
-  } catch (error) {
-    console.error('[OAuth] TikTok refresh error:', error);
-    res.json({ 
-      success: false, 
-      error: 'Failed to refresh token. You may need to reconnect your account.' 
-    });
-  }
-});
 
 // -------------------------
 // Test Apollo API Connection

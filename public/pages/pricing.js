@@ -10,7 +10,7 @@ const plans = [
   {
     id: 'ignite',
     name: 'Ignite',
-    description: 'For the new marketer on a budget who just wants basic tracking',
+    description: 'For users starting out in their business',
     monthlyPrice: 99,
     yearlyPrice: 990
   },
@@ -201,10 +201,13 @@ function renderPlans() {
     card.className = 'plan-card';
     card.setAttribute('data-plan', plan.id);
     
+    const pricePerMonth = Math.round(threeMonthPrice / 3);
+    const yearlyPricePerMonth = Math.round(yearlyPrice / 12);
+    
     card.innerHTML = `
       <div class="plan-radio"></div>
       <div class="plan-content">
-        <div class="plan-name">${plan.name}</div>
+        <div class="plan-name">${plan.name} <span style="color: var(--text-secondary); font-weight: 500; font-size: 0.85em;">(R${pricePerMonth}pm)</span></div>
         <div class="plan-description">${plan.description}</div>
       </div>
       <div class="plan-pricing">
@@ -322,6 +325,13 @@ function setupPromoCode() {
   
   if (!promoInput || !applyBtn) return;
   
+  // Promotional codes mapping
+  const promoCodes = {
+    'ZUKEXAFAA': { plan: 'ignite', description: 'AFAA Ignite Plan Access' },
+    'ZUKEXREDISCOVERMECOACHING': { plan: 'ignite', description: 'Rediscover Me Coaching Ignite Access' },
+    'ZUKEXSPARK': { plan: 'spark', description: 'Spark Plan Promotional Access' }
+  };
+  
   // Auto-uppercase as user types
   promoInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.toUpperCase();
@@ -329,7 +339,7 @@ function setupPromoCode() {
   
   // Apply promo code
   applyBtn.addEventListener('click', async () => {
-    const code = promoInput.value.trim();
+    const code = promoInput.value.trim().toUpperCase();
     
     if (!code) {
       showPromoMessage('Please enter a promotional code', 'error');
@@ -340,6 +350,28 @@ function setupPromoCode() {
     applyBtn.textContent = 'Checking...';
     
     try {
+      // Check if code exists in our promo codes
+      const promoDetails = promoCodes[code];
+      
+      if (!promoDetails) {
+        showPromoMessage('Invalid promotional code', 'error');
+        proceedBtn.disabled = true;
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+        return;
+      }
+      
+      // Check if selected plan matches the promo code plan
+      if (promoDetails.plan !== selectedPlan) {
+        const planName = plans.find(p => p.id === promoDetails.plan)?.name || promoDetails.plan;
+        showPromoMessage(`This code is only valid for the ${planName} plan`, 'error');
+        proceedBtn.disabled = true;
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+        return;
+      }
+      
+      // Validate with backend
       const response = await fetch('/api/validate-promo-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -347,20 +379,35 @@ function setupPromoCode() {
           code,
           email: currentUser.email,
           planId: selectedPlan,
-          isYearly
+          isYearly,
+          description: promoDetails.description
         })
       });
       
       const result = await response.json();
       
       if (result.success) {
-        showPromoMessage(`✓ Code applied! ${result.discount}% discount`, 'success');
-        // Update displayed pricing if needed
-        updatePricingWithDiscount(result.discount);
+        showPromoMessage(`✓ Code applied! ${promoDetails.description}`, 'success');
+        // Update the summary to show free access
+        const plan = plans.find(p => p.id === selectedPlan);
+        const summaryElement = document.getElementById('selectedPlanSummary');
+        if (summaryElement && plan) {
+          summaryElement.innerHTML = `
+            <h3>You've selected:</h3>
+            <div class="plan-detail">
+              ${plan.name} - ${isYearly ? 'Yearly' : '3-Month'}
+            </div>
+            <div style="margin-top: 10px; color: #27ae60; font-weight: 700;">
+              ✓ Free with promotional code
+            </div>
+          `;
+        }
+        // Store the validated code for processing
+        window.validatedPromoCode = code;
         // Enable proceed button
         proceedBtn.disabled = false;
       } else {
-        showPromoMessage(result.message || 'Invalid promotional code', 'error');
+        showPromoMessage(result.message || 'Code validation failed', 'error');
         proceedBtn.disabled = true;
       }
     } catch (error) {
@@ -582,41 +629,47 @@ async function processPayment() {
       alert('PayFast integration coming soon! Please use Paystack for now.');
       
     } else if (selectedPaymentMethod === 'invitation') {
-      const code = prompt('Please enter your invitation code:');
-      if (!code) return;
+      // Use the validated promo code from the form
+      const code = window.validatedPromoCode;
+      if (!code) {
+        alert('⚠️ Please apply a valid promotional code first.');
+        return;
+      }
       
       document.getElementById('proceedPaymentBtn').disabled = true;
-      document.getElementById('proceedPaymentBtn').textContent = 'Validating...';
+      document.getElementById('proceedPaymentBtn').textContent = 'Activating...';
       
       try {
-        const response = await fetch('/api/validate-invitation', {
+        const response = await fetch('/api/activate-promo-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: currentUser.email,
             code: code,
             plan: selectedPlan,
+            planName: plan.name,
             isYearly: isYearly,
-            amount: displayPrice,
-            autoRenew: autoRenew
+            amount: 0, // Free with promo code
+            autoRenew: false, // Promo codes don't auto-renew
+            userId: currentUser.sub
           })
         });
         
         const data = await response.json();
         
         if (data.success) {
-          alert('✅ Invitation code applied successfully!\n\nYour plan is now active.');
+          alert('✅ Promotional code applied successfully!\n\nYour ' + plan.name + ' plan is now active.');
           setTimeout(() => {
             window.location.href = '/dashboard.html';
           }, 1500);
         } else {
-          alert(`❌ ${data.message || 'Invalid invitation code.'}`);
+          alert(`❌ ${data.message || 'Failed to activate promotional subscription.'}`);
           document.getElementById('proceedPaymentBtn').disabled = false;
           document.getElementById('proceedPaymentBtn').textContent = 'Proceed to Payment';
         }
       } catch (error) {
-        console.error('Error validating invitation code:', error);
-        alert('❌ Error validating code. Please try again.');
+        console.error('Error activating promotional subscription:', error);
+        alert('❌ Error activating subscription. Please try again.');
         document.getElementById('proceedPaymentBtn').disabled = false;
         document.getElementById('proceedPaymentBtn').textContent = 'Proceed to Payment';
       }

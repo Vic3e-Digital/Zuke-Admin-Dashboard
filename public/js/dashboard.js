@@ -6,10 +6,26 @@ function truncateText(text, maxLength) {
   return text.substr(0, maxLength) + '...';
 }
 
+// Function to hide the global loading overlay
+function hideLoadingOverlay() {
+  const overlay = document.getElementById('globalLoadingOverlay');
+  if (overlay) {
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  }
+}
+
 // Auth0 client
 let auth0Client = null;
 // Make currentPage globally accessible
 let currentPage = "dashboard";
+
+// Add request cancellation to prevent race conditions
+let currentLoadAbortController = null;
+let lastLoadId = 0;
 
 const fetchAuthConfig = () => fetch("/auth_config.json");
 
@@ -644,6 +660,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function loadPage(page) {
     currentPage = page;
+    
+    // Increment load ID to track this specific load request
+    const loadId = ++lastLoadId;
+    
+    // Cancel any previous loading requests
+    if (currentLoadAbortController) {
+      currentLoadAbortController.abort();
+    }
+    currentLoadAbortController = new AbortController();
+    
+    // Show loading state immediately
+    pageContent.innerHTML = `
+      <div class="loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; gap: 20px;">
+        <div class="loading-spinner" style="
+          width: 40px;
+          height: 40px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #667eea;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        "></div>
+        <p style="color: #666; font-size: 14px;">Loading ${page}...</p>
+      </div>
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `;
 
     // Track page view
     if (window.analytics) {
@@ -655,7 +701,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       switch (page) {
         case "dashboard":
-          content = await loadBusinessesPage();
+          content = await loadBusinessesPage(loadId);
           break;
         case "marketplace":
           content = await loadMarketplacePage();
@@ -685,13 +731,34 @@ document.addEventListener("DOMContentLoaded", async () => {
           content = '<div style="padding: 30px;"><h1>Page not found</h1></div>';
       }
 
+      // Check if this is still the current load request
+      // If a new page was requested while this was loading, skip rendering
+      if (loadId !== lastLoadId) {
+        console.log(`Load request ${loadId} cancelled (current: ${lastLoadId})`);
+        return;
+      }
+
       pageContent.innerHTML = content;
 
       // Initialize page-specific functionality
       initializePageFunctionality(page);
+      
+      // Hide overlay using requestAnimationFrame to ensure content is painted and styles are applied
+      requestAnimationFrame(() => {
+        // Give the browser a moment to apply CSS and render
+        setTimeout(() => {
+          if (loadId === lastLoadId) {
+            hideLoadingOverlay();
+          }
+        }, 150);
+      });
     } catch (error) {
-      console.error("Error loading page:", error);
-      pageContent.innerHTML = '<div style="padding: 30px;"><h1>Error loading page</h1></div>';
+      // Only show error if this is still the current load request
+      if (loadId === lastLoadId) {
+        console.error("Error loading page:", error);
+        pageContent.innerHTML = '<div style="padding: 30px;"><h1>Error loading page</h1></div>';
+        hideLoadingOverlay();
+      }
     }
   }
 
@@ -702,27 +769,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     return loadTopupPage.cache;
   }
 
-  async function loadBusinessesPage() {
-    // Show loading state first
-    pageContent.innerHTML = `
-      <div class="businesses-page">
-        <div class="page-header">
-          <h1 class="page-title">My Businesses</h1>
-        </div>
-        <div class="loading-container">
-          <div class="loading-spinner"></div>
-          <p>Loading your businesses...</p>
-        </div>
-      </div>
-    `;
-    
+  async function loadBusinessesPage(loadId) {
     const user = await auth0Client.getUser();
+    
+    // Check if this is still the current request
+    if (loadId !== lastLoadId) {
+      console.log(`loadBusinessesPage: Request ${loadId} was cancelled (current: ${lastLoadId})`);
+      return '';
+    }
+    
     const userEmail = user?.email || '';
     const userFirstName = user?.given_name || '';
     const userLastName = user?.family_name || '';
     
     const businesses = await fetchBusinessesByEmail();
+    
+    // Check again after first async operation
+    if (loadId !== lastLoadId) {
+      console.log(`loadBusinessesPage: Request ${loadId} was cancelled after fetching businesses`);
+      return '';
+    }
+    
     const planStatus = await checkUserHasPlan();
+    
+    // Check again after second async operation
+    if (loadId !== lastLoadId) {
+      console.log(`loadBusinessesPage: Request ${loadId} was cancelled after checking plan`);
+      return '';
+    }
     
     // Build the page HTML with SIM card style
     return `
@@ -929,14 +1003,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
 
   async function initializePageFunctionality(page) {
-    // After page loads, enhance any modals on the new page
-    if (window.modalManager && typeof window.modalManager.enhanceAllModals === 'function') {
-      setTimeout(() => {
-        console.log('🔄 Re-scanning for modals on page:', page);
-        window.modalManager.enhanceAllModals();
-      }, 100);
-    }
-
+    // Page-specific functionality initialization
     switch (page) {
     case "dashboard":
   // Initialize business filter dropdown
