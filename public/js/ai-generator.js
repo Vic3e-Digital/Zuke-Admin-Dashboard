@@ -126,21 +126,29 @@ class AIGenerator {
   
     /**
      * Generate single image with AI (FLUX or DALL-E)
+     * @param {string} prompt - Image generation prompt
+     * @param {string} model - 'flux' or 'dalle'
+     * @param {string} size - Image size: '1024x1024', '1536x1024', '1024x1536', or 'auto'
      */
-    async generateImage(prompt, model = 'flux') {
+    async generateImage(prompt, model = 'flux', size = '1024x1024') {
       const safePrompt = shortenPrompt(prompt);
     
       const deployment = model === 'flux' ? 'FLUX.1-Kontext-pro' : 'gpt-image-1';
       const url = `${this.config.endpoint}openai/deployments/${deployment}/images/generations?api-version=2025-04-01-preview`;
     
+      // Validate and normalize size parameter
+      const validSizes = ['1024x1024', '1536x1024', '1024x1536', 'auto'];
+      const finalSize = validSizes.includes(size) ? size : '1024x1024';
+    
       console.log(`🖼️ Generating image with ${deployment}`);
+      console.log('Size:', finalSize);
       console.log('Prompt length:', safePrompt.length);
       console.log('Prompt preview:', safePrompt.slice(0, 300));
     
       const body = {
         prompt: safePrompt,
         n: 1,
-        size: "1024x1024",
+        size: finalSize,
         output_format: "png"
       };
     
@@ -176,51 +184,78 @@ class AIGenerator {
       throw new Error('No image data in response');
     }
   
-    /**
-     * Improve existing image with AI
-     */
-    async generateImageWithEdit(baseImageFile, improvementPrompt) {
-      // ✅ shorten here, too
-      const safePrompt = shortenPrompt(improvementPrompt);
+  /**
+   * Improve existing image with AI
+   * Supports single image or multiple images (up to 10 for FLUX multi-reference)
+   * @param {File|File[]} imageFiles - Single File or array of Files
+   * @param {string} improvementPrompt - The prompt describing the desired output
+   * @returns {Promise<string>} Base64 image data or URL
+   */
+  async generateImageWithEdit(imageFiles, improvementPrompt) {
+    // ✅ shorten here, too
+    const safePrompt = shortenPrompt(improvementPrompt);
+  
+    // Normalize input to array
+    const images = Array.isArray(imageFiles) ? imageFiles : [imageFiles];
     
-      const deployment = 'FLUX.1-Kontext-pro';
-      const url = `${this.config.endpoint}openai/deployments/${deployment}/images/edits?api-version=2025-04-01-preview`;
-    
-      console.log(`🛠️ Editing image with ${deployment}`);
-      console.log('Prompt length:', safePrompt.length);
-    
-      const formData = new FormData();
-      formData.append("prompt", safePrompt);
-      formData.append("n", "1");
-      formData.append("size", "1024x1024");
-      formData.append("image", baseImageFile);
-    
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'api-key': this.config.apiKey
-        },
-        body: formData
-      });
-    
-      if (!response.ok) {
-        const errText = await response.text().catch(() => '');
-        console.error('❌ Image edit failed:', response.status, errText);
-        throw new Error(`Image edit failed: ${response.status}`);
-      }
-    
-      const data = await response.json();
-    
-      if (data.data && data.data[0] && data.data[0].b64_json) {
-        return data.data[0].b64_json;
-      } else if (data.data && data.data[0] && data.data[0].url) {
-        return data.data[0].url;
-      }
-    
-      throw new Error('No image data in response');
+    // Validate image count (FLUX.2 supports up to 10 images)
+    if (images.length > 10) {
+      throw new Error('Maximum 10 images supported for multi-reference generation');
     }
   
-    /**
+    const deployment = 'FLUX.1-Kontext-pro';
+    const url = `${this.config.endpoint}openai/deployments/${deployment}/images/edits?api-version=2025-04-01-preview`;
+  
+    console.log(`🛠️ Editing image with ${deployment}`);
+    console.log(`📸 Using ${images.length} image(s) for generation`);
+    console.log('Prompt length:', safePrompt.length);
+  
+    const formData = new FormData();
+    formData.append("prompt", safePrompt);
+    formData.append("n", "1");
+    formData.append("size", "1024x1024");
+    
+    // Add images using FLUX multi-reference format
+    // For multi-reference: input_image, input_image_2, input_image_3, etc.
+    if (images.length === 1) {
+      // Single image mode - use "image" parameter
+      formData.append("image", images[0]);
+      console.log('📸 Single image mode: using "image" parameter');
+    } else {
+      // Multi-reference mode - use input_image, input_image_2, etc.
+      formData.append("input_image", images[0]);
+      console.log('📸 Multi-reference mode: using "input_image" parameter');
+      
+      for (let i = 1; i < images.length; i++) {
+        formData.append(`input_image_${i + 1}`, images[i]);
+        console.log(`➕ Added input_image_${i + 1} (${images[i].name})`);
+      }
+    }
+  
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'api-key': this.config.apiKey
+      },
+      body: formData
+    });
+  
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error('❌ Image edit failed:', response.status, errText);
+      throw new Error(`Image edit failed: ${response.status}`);
+    }
+  
+    const data = await response.json();
+  
+    if (data.data && data.data[0] && data.data[0].b64_json) {
+      return data.data[0].b64_json;
+    } else if (data.data && data.data[0] && data.data[0].url) {
+      return data.data[0].url;
+    }
+  
+    throw new Error('No image data in response');
+  }    /**
      * Convert base64 to File object
      */
     base64ToFile(base64Data, filename = 'image.png') {

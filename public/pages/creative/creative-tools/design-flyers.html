@@ -1,0 +1,2847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Flyer Designer | Zuke</title>
+  <link rel="stylesheet" href="/css/formStyle.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    .two-column-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .left-column {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .right-column {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    @media (max-width: 768px) {
+      .two-column-container {
+        flex-direction: column;
+      }
+    }
+    
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+    }
+    
+    .required {
+      color: #ff6b6b;
+      margin-left: 4px;
+    }
+    
+    textarea, input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 70px;
+      font-size: 13px;
+    }
+    
+    input[type="text"], input[type="number"], select {
+      min-height: auto;
+    }
+    
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    input:read-only {
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    .field-note {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    
+    .prefilled-badge {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    
+    .info-badge {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #4f46e5;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .collapsible-header:hover {
+      background: #f0f1f2;
+      border-color: var(--primary-orange, #ff6b35);
+    }
+    
+    .collapsible-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+    }
+    
+    .collapsible-number {
+      width: 24px;
+      height: 24px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #666;
+    }
+    
+    .collapsible-arrow {
+      transition: transform 0.2s ease;
+      color: #666;
+      width: 16px;
+      height: 16px;
+    }
+    
+    .collapsible-arrow.open {
+      transform: rotate(180deg);
+    }
+    
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .collapsible-content.open {
+      max-height: 3000px;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .cost {
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange, #ff6b35);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-orange, #ff6b35);
+      font-size: 13px;
+    }
+    
+    .generate-btn {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, var(--primary-orange, #ff6b35), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .generate-btn:hover:not(:disabled) { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+    
+    .generate-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-secondary {
+      padding: 8px 16px;
+      background: #f8f9fa;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-secondary:hover:not(:disabled) {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
+    
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .status {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    .status.success { 
+      background: #D4EDDA; 
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+    .status.error { 
+      background: #F8D7DA; 
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+    .status.info { 
+      background: #D1ECF1; 
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+    .status.loading { 
+      background: #e7f3ff; 
+      color: #004085;
+    }
+    
+    .progress {
+      display: none;
+      margin-top: 12px;
+      text-align: center;
+    }
+    
+    .progress-text {
+      color: var(--primary-orange, #ff6b35);
+      font-weight: 500;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-orange, #ff6b35), #FF9500);
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .suggestion-card {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 149, 0, 0.08) 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .suggestion-card:hover {
+      border-color: var(--primary-orange, #ff6b35);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
+    }
+    
+    .suggestion-card.selected {
+      border-color: var(--primary-orange, #ff6b35);
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 149, 0, 0.15) 100%);
+    }
+    
+    .suggestion-card::before {
+      content: '✨';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .suggestion-card:hover::before {
+      opacity: 1;
+    }
+    
+    .suggestion-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: #2c3e50;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    
+    .suggestion-preview {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+    }
+    
+    .suggestion-badge {
+      display: inline-block;
+      background: var(--primary-orange, #ff6b35);
+      color: white;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    
+    .suggestion-card.selected .suggestion-badge {
+      background: #10b981;
+    }
+    
+    .suggestion-card.selected .suggestion-badge::before {
+      content: '✓ ';
+    }
+
+    .example-box {
+      background: #f8f9fa;
+      border-left: 4px solid var(--primary-orange, #ff6b35);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .example-box strong {
+      display: block;
+      color: #333;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .example-box p {
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+
+    .color-input-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .color-input-group input[type="text"] {
+      flex: 1;
+    }
+
+    .color-input-group input[type="color"] {
+      width: 50px;
+      height: 40px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .element-list {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .element-item {
+      padding: 8px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .element-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .element-info {
+      flex: 1;
+    }
+
+    .element-type {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #4f46e5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .remove-btn:hover {
+      background: #c82333;
+    }
+
+    .add-element-btn {
+      width: 100%;
+      padding: 8px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .add-element-btn:hover {
+      background: #218838;
+    }
+
+    .preview-container {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .json-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 11px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .copy-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .copy-btn:hover {
+      background: #5a6268;
+    }
+
+    /* Tabs */
+    .tabs-container {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.2s ease;
+      position: relative;
+      bottom: -2px;
+    }
+
+    .tab:hover {
+      color: var(--primary-orange, #ff6b35);
+      background: rgba(255, 107, 53, 0.05);
+    }
+
+    .tab.active {
+      color: var(--primary-orange, #ff6b35);
+      border-bottom-color: var(--primary-orange, #ff6b35);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Model Selection */
+    .model-selection {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .model-checkbox {
+      display: block;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: white;
+      position: relative;
+    }
+
+    .model-checkbox.checked {
+      border-color: var(--primary-orange, #ff6b35);
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 149, 0, 0.08) 100%);
+    }
+
+    .model-checkbox:hover {
+      border-color: var(--primary-orange, #ff6b35);
+    }
+
+    .model-checkbox input[type="checkbox"] {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .model-checkbox-label {
+      margin-right: 24px;
+    }
+
+    .model-checkbox-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: #2c3e50;
+      margin-bottom: 4px;
+    }
+
+    .model-checkbox-desc {
+      font-size: 11px;
+      color: #666;
+    }
+
+    /* Variants Grid */
+    .variants-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .variant-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 8px;
+      background: white;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .variant-card.generating {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 149, 0, 0.05) 100%);
+    }
+
+    .variant-card.generated {
+      cursor: pointer;
+    }
+
+    .variant-card.generated:hover {
+      border-color: var(--primary-orange, #ff6b35);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .variant-card.unselected {
+      opacity: 0.5;
+    }
+
+    .variant-checkbox {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .variant-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f5f5f5;
+    }
+
+    .variant-label {
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #666;
+      text-align: center;
+    }
+
+    .variant-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .variant-status {
+      margin-top: 4px;
+      font-size: 10px;
+      color: #666;
+      text-align: center;
+    }
+
+    .variants-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .download-all-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .download-all-btn:hover {
+      background: #218838;
+    }
+
+    .download-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Upload Box Styles */
+    .upload-box {
+      position: relative;
+    }
+
+    .upload-box.has-image {
+      border-color: var(--primary-orange, #ff6b35) !important;
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 149, 0, 0.05) 100%) !important;
+    }
+
+    .upload-icon {
+      transition: transform 0.2s ease;
+    }
+
+    .upload-box:hover .upload-icon {
+      transform: translateY(-4px);
+    }
+
+    .uploaded-images-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .uploaded-image-item {
+      position: relative;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .uploaded-image-item:hover {
+      border-color: var(--primary-orange, #ff6b35);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .uploaded-image-item img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+    }
+
+    .uploaded-image-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .uploaded-image-remove:hover {
+      background: #c82333;
+      transform: scale(1.1);
+    }
+
+    .image-count-badge {
+      display: inline-block;
+      background: var(--primary-orange, #ff6b35);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .select-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .select-btn {
+      padding: 6px 12px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .select-btn:hover {
+      border-color: var(--primary-orange, #ff6b35);
+      color: var(--primary-orange, #ff6b35);
+    }
+
+    .variants-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+
+    .selected-count {
+      font-size: 12px;
+      color: #666;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <form id="flyerForm">
+      
+      <div class="two-column-container">
+        
+        <!-- LEFT COLUMN -->
+        <div class="left-column">
+          
+          <!-- Simple Prompt Section -->
+          <div class="section">
+            <div class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
+              <span>✨ Describe Your Flyer/Ad</span>
+              <div style="position: relative; display: inline-block;">
+                <svg id="businessInfoIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="cursor: help;">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <div id="businessTooltip" style="display: none; position: absolute; right: 0; top: 25px; background: #2c3e50; color: white; padding: 8px 12px; border-radius: 6px; white-space: nowrap; font-size: 12px; font-weight: 500; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <div style="position: absolute; right: 10px; top: -5px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid #2c3e50;"></div>
+                  <span id="tooltipBusinessName">Loading...</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>
+                What do you want to create? <span class="required">*</span>
+              </label>
+              <textarea 
+                id="simplePrompt" 
+                name="simplePrompt"
+                placeholder="e.g., A Thanksgiving cabin rental ad with cozy interior photos, warm autumn colors, and 'Your Thanksgiving Getaway' as the main headline..."
+                rows="6"
+                required
+              ></textarea>
+              <p class="field-note">Describe the purpose, style, colors, and any specific elements you want</p>
+            </div>
+
+            <button type="button" id="generateSuggestionsBtn" class="generate-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span id="btnText">✨ Generate AI Suggestions</span>
+              <span id="btnSpinner" style="display: none;"><span class="spinner"></span></span>
+              <span style="background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 4px; font-size: 11px;">R5.00</span>
+            </button>
+            
+            <div id="suggestionsLoading" style="display: none; text-align: center; padding: 20px; color: #666;">
+              <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-orange, #ff6b35); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <p style="margin-top: 10px; font-size: 12px;">Generating design suggestions...</p>
+            </div>
+            
+            <div id="suggestionsContent" style="display: none; margin-top: 12px;">
+              <div class="section-title" style="margin-top: 12px;">💡 AI Suggestions</div>
+              <div id="suggestionCards"></div>
+            </div>
+            
+            <div id="suggestionsError" style="display: none; color: #d9534f; padding: 12px; background: #f8d7da; border-radius: 6px; font-size: 12px; margin-top: 12px;"></div>
+          </div>
+
+          <!-- Advanced Settings Collapsible -->
+          <div class="collapsible-header" onclick="toggleCollapsible('advancedSettings')">
+            <div class="collapsible-title">
+              <div class="collapsible-number">⚙️</div>
+              <span>Advanced Design Settings</span>
+            </div>
+            <svg class="collapsible-arrow" id="advancedSettingsArrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="collapsible-content" id="advancedSettings">
+            <div class="section">
+
+              <!-- Canvas Properties -->
+              <div class="form-group">
+                <label>Canvas Width (px) <span class="info-badge">Optional</span></label>
+                <input type="number" id="canvasWidth" name="canvasWidth" placeholder="1024" value="1024">
+                <p class="field-note">AI supports: 1024 (square), 1536 (landscape), 1024 (portrait)</p>
+              </div>
+
+              <div class="form-group">
+                <label>Canvas Height (px) <span class="info-badge">Optional</span></label>
+                <input type="number" id="canvasHeight" name="canvasHeight" placeholder="1024" value="1024">
+                <p class="field-note">AI supports: 1024 (square), 1024 (landscape), 1536 (portrait)</p>
+              </div>
+
+              <div class="form-group">
+                <label>Background Color <span class="info-badge">Optional</span></label>
+                <div class="color-input-group">
+                  <input type="text" id="backgroundColor" name="backgroundColor" placeholder="#3E1E12">
+                  <input type="color" id="backgroundColorPicker" value="#3E1E12">
+                </div>
+                <p class="field-note">Choose or enter a hex color code</p>
+              </div>
+
+              <div class="form-group">
+                <label>Design Theme <span class="info-badge">Optional</span></label>
+                <input type="text" id="designTheme" name="designTheme" placeholder="e.g., Modern, Vintage, Minimalist, Autumn">
+                <p class="field-note">Overall style or mood for the design</p>
+              </div>
+
+              <!-- Text Elements -->
+              <div class="form-group">
+                <label>Main Headline <span class="info-badge">Optional</span></label>
+                <input type="text" id="mainHeadline" name="mainHeadline" placeholder="Your Thanksgiving Getaway">
+              </div>
+
+              <div class="form-group">
+                <label>Headline Font Size <span class="info-badge">Optional</span></label>
+                <input type="number" id="headlineFontSize" name="headlineFontSize" placeholder="72">
+              </div>
+
+              <div class="form-group">
+                <label>Headline Color <span class="info-badge">Optional</span></label>
+                <div class="color-input-group">
+                  <input type="text" id="headlineColor" name="headlineColor" placeholder="#FFFFFF">
+                  <input type="color" id="headlineColorPicker" value="#FFFFFF">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Subheadline <span class="info-badge">Optional</span></label>
+                <input type="text" id="subHeadline" name="subHeadline" placeholder="COZY CABINS, ROOM FOR EVERYONE">
+              </div>
+
+              <div class="form-group">
+                <label>Website/Contact URL <span class="info-badge">Optional</span></label>
+                <input type="text" id="websiteUrl" name="websiteUrl" placeholder="www.yourbusiness.com">
+              </div>
+
+              <!-- Typography -->
+              <div class="form-group">
+                <label>Font Family <span class="info-badge">Optional</span></label>
+                <select id="fontFamily" name="fontFamily">
+                  <option value="">Auto-select</option>
+                  <option value="Serif">Serif (Elegant, Traditional)</option>
+                  <option value="Sans-serif">Sans-serif (Modern, Clean)</option>
+                  <option value="Monospace">Monospace (Tech, Modern)</option>
+                  <option value="Cursive">Cursive (Creative, Handwritten)</option>
+                </select>
+              </div>
+
+              <!-- Layout -->
+              <div class="form-group">
+                <label>Layout Style <span class="info-badge">Optional</span></label>
+                <select id="layoutStyle" name="layoutStyle">
+                  <option value="">Auto-decide</option>
+                  <option value="grid">Grid Layout</option>
+                  <option value="collage">Collage Style</option>
+                  <option value="hero">Hero Image with Text</option>
+                  <option value="split">Split Screen</option>
+                  <option value="centered">Centered Focus</option>
+                </select>
+              </div>
+
+              <!-- Decorations -->
+              <div class="form-group">
+                <label>Decorative Elements <span class="info-badge">Optional</span></label>
+                <input type="text" id="decorativeElements" name="decorativeElements" placeholder="e.g., autumn leaves, string lights, geometric shapes">
+                <p class="field-note">Any decorative graphics or overlays</p>
+              </div>
+
+              <!-- Custom Elements List -->
+              <div class="form-group">
+                <label>Custom Elements <span class="info-badge">Advanced</span></label>
+                <div id="customElementsList" class="element-list" style="display: none;">
+                  <!-- Dynamic elements will be added here -->
+                </div>
+                <button type="button" id="addElementBtn" class="add-element-btn">+ Add Custom Element</button>
+              </div>
+
+            </div>
+          </div>
+          
+        </div>
+        <!-- END LEFT COLUMN -->
+        
+        <!-- RIGHT COLUMN -->
+        <div class="right-column">
+
+          <!-- Image Generation -->
+          <div class="section">
+            <div class="section-title">🖼️ Image Generation</div>
+
+            <!-- Tabs -->
+            <div class="tabs-container">
+              <button type="button" class="tab active" data-tab="upload">
+                📷 Single Image Source
+              </button>
+              <button type="button" class="tab" data-tab="multiple">
+                🖼️ Multiple Images
+              </button>
+              <button type="button" class="tab" data-tab="generate">
+                ✨ Generate from Text
+              </button>
+            </div>
+
+            <!-- Single Image Upload Tab -->
+            <div id="uploadModeSection" class="tab-content active" data-tab-content="upload">
+              <div class="form-group">
+                <label>Upload Base Image (Optional)</label>
+                <div class="upload-box" id="uploadBox" style="border: 2px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: #f8f9fa;">
+                  <div id="uploadPlaceholder">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 12px; color: #666;">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    <p style="font-weight: 600; margin-bottom: 5px; font-size: 14px;">Click or drag image here</p>
+                    <p style="color: #666; font-size: 12px;">JPG, PNG (max 10MB)</p>
+                  </div>
+                  <img id="uploadPreview" class="upload-preview" alt="Upload preview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 6px;">
+                  <button type="button" id="removeImageBtn" class="remove-image-btn" style="display: none; margin-top: 8px; padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Remove</button>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <p class="field-note">Upload a base image to enhance, or leave empty to generate from text below</p>
+              </div>
+
+              <div class="form-group">
+                <label>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                  </svg>
+                  Image Generation Context *
+                </label>
+                <textarea 
+                  id="imageContext" 
+                  placeholder="Describe what you want in the images. E.g., 'Professional promotional flyer with warm autumn colors, cozy cabin interior, fireplace, inviting atmosphere, commercial photography style'..."
+                  rows="3"
+                ></textarea>
+                <button type="button" class="btn-secondary" id="generateUploadSuggestionBtn" style="margin-top: 8px; width: 100%;" disabled>
+                  ✨ Generate Suggestion
+                </button>
+                <p class="field-note">This will be used to enhance uploaded image or generate from scratch if no image is uploaded</p>
+              </div>
+            </div>
+
+            <!-- Multiple Images Tab -->
+            <div id="multipleModeSection" class="tab-content" data-tab-content="multiple">
+              <div class="form-group">
+                <label>
+                  Upload Multiple Images
+                  <span class="image-count-badge" id="imageCountBadge" style="display: none;">0 images</span>
+                </label>
+                <div class="upload-box" id="uploadBoxMultiple" style="border: 2px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: #f8f9fa;">
+                  <div id="uploadPlaceholderMultiple">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto 12px; color: #666;">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    <p style="font-weight: 600; margin-bottom: 5px; font-size: 14px;">Click or drag multiple images here</p>
+                    <p style="color: #666; font-size: 12px;">Select multiple images • JPG, PNG (max 10MB each)</p>
+                  </div>
+                </div>
+                <input type="file" id="fileInputMultiple" accept="image/*" multiple style="display: none;">
+                
+                <!-- Gallery for uploaded images -->
+                <div class="uploaded-images-gallery" id="uploadedImagesGallery" style="display: none;"></div>
+                
+                <p class="field-note">Upload multiple base images to use in your flyer design</p>
+              </div>
+
+              <div class="form-group">
+                <label>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                  </svg>
+                  Image Composition Context *
+                </label>
+                <textarea 
+                  id="multipleImageContext" 
+                  placeholder="Describe how to use these images together. E.g., 'Create a collage flyer using these product photos, arrange them in a grid with autumn colors, add promotional text overlays'..."
+                  rows="3"
+                ></textarea>
+                <button type="button" class="btn-secondary" id="generateMultipleSuggestionBtn" style="margin-top: 8px; width: 100%;" disabled>
+                  ✨ Generate Suggestion
+                </button>
+                <p class="field-note">Describe how to combine and use the uploaded images in your design</p>
+              </div>
+            </div>
+
+            <!-- Generate Mode Tab -->
+            <div id="generateModeSection" class="tab-content" data-tab-content="generate">
+              <div class="form-group">
+                <label for="generationPrompt">Image Generation Prompt *</label>
+                <textarea 
+                  id="generationPrompt" 
+                  placeholder="Describe the images you want to generate in detail. E.g., 'Professional promotional flyer with warm autumn colors, cozy cabin interior, fireplace, comfortable furniture, inviting atmosphere, commercial photography style'..."
+                  rows="5"
+                ></textarea>
+                <button type="button" class="btn-secondary" id="generateTextSuggestionBtn" style="margin-top: 8px; width: 100%;" disabled>
+                  ✨ Generate Suggestion
+                </button>
+                <p class="field-note">Be specific about setting, people, mood, and style. AI will generate 2 variations per model.</p>
+              </div>
+            </div>
+
+            <!-- AI Model Selection -->
+            <div class="form-group">
+              <label>AI Image Model *</label>
+              <div class="model-selection">
+                <label class="model-checkbox checked" id="fluxCheckbox">
+                  <input type="checkbox" id="useFlux" checked>
+                  <div class="model-checkbox-label">
+                    <div class="model-checkbox-title">FLUX Pro</div>
+                    <div class="model-checkbox-desc">Creative & Artistic</div>
+                  </div>
+                </label>
+                <label class="model-checkbox checked" id="dalleCheckbox">
+                  <input type="checkbox" id="useDalle" checked>
+                  <div class="model-checkbox-label">
+                    <div class="model-checkbox-title">DALL-E 3</div>
+                    <div class="model-checkbox-desc">Photorealistic</div>
+                  </div>
+                </label>
+              </div>
+              <p class="field-note">Select one or both models. More models = more variants.</p>
+            </div>
+
+            <!-- Generate Button -->
+            <button type="button" class="btn" id="generateVariantsBtn" disabled style="margin-top: 12px;">
+              Generate Flyers (R10.00)
+            </button>
+            
+            <!-- Progress -->
+            <div class="progress" id="imageProgress">
+              <p class="progress-text" id="imageProgressText">Generating images...</p>
+              <div class="progress-bar">
+                <div class="progress-fill" id="imageProgressFill"></div>
+              </div>
+            </div>
+            
+            <div class="status" id="imageStatus"></div>
+            
+            <!-- Variants Section -->
+            <div id="variantsSection" class="hidden" style="margin-top: 16px;">
+              
+              <!-- Header with Download Button -->
+              <div class="variants-header">
+                <label style="margin: 0; font-weight: 600;">Generated Images</label>
+                <button type="button" class="download-all-btn" id="downloadAllBtn">
+                  <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                  </svg>
+                  Download Selected
+                </button>
+              </div>
+            
+              <!-- Select All / Deselect All Controls -->
+              <div class="variants-controls" id="variantsControls" style="display: none;">
+                <div class="select-controls">
+                  <button type="button" id="selectAllBtn" class="select-btn">Select All</button>
+                  <button type="button" id="deselectAllBtn" class="select-btn">Deselect All</button>
+                </div>
+                <div class="selected-count">
+                  <span id="selectedCount">0</span> / <span id="totalCount">0</span> selected
+                </div>
+              </div>
+            
+              <!-- Variants Grid -->
+              <div class="variants-grid" id="variantsGrid"></div>
+              
+            </div>
+          </div>
+
+          <!-- Cost Display -->
+          <div class="cost" id="costDisplay">
+            Design Cost: R5.00 (JSON Design Spec)
+            <div id="imageCostDisplay" style="font-size: 11px; margin-top: 4px; opacity: 0.8; display: none;">
+              + R10.00 for image generation
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="generate-btn" id="submitBtn" disabled>
+            🎨 Generate Flyer Design
+          </button>
+
+          <!-- Progress -->
+          <div class="progress" id="progress">
+            <p class="progress-text" id="progressText">Processing...</p>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="status" id="status"></div>
+
+          <!-- Preview Section -->
+          <div id="previewSection" style="display: none; margin-top: 12px;">
+            <div class="section-title">🎨 Generated Design</div>
+            <div class="preview-container">
+              <img id="previewImage" class="preview-image" alt="Generated Design" style="display: none;">
+              <div id="jsonOutput" class="json-output" style="display: none;"></div>
+              <button type="button" id="copyJsonBtn" class="copy-btn" style="display: none;">📋 Copy JSON</button>
+            </div>
+          </div>
+          
+        </div>
+        <!-- END RIGHT COLUMN -->
+      
+      </div>
+      <!-- END TWO COLUMN CONTAINER -->
+    </form>
+  </div>
+
+  <script src="/js/dataManager.js"></script>
+  <script src="/js/ai-generator.js"></script>
+
+  <script>
+    // ========== GLOBAL VARIABLES ==========
+    let auth0Client = null;
+    let currentBusiness = null;
+    let currentUser = null;
+    let openAIConfig = null;
+    let aiGenerator = null;
+    let customElements = [];
+    let generatedVariants = [];
+
+    const BASE_DESIGN_COST = 5; // R5 for design JSON generation
+    const IMAGE_GEN_COST = 10; // R10 for image generation
+    const SUGGESTION_COST = 5; // R5 for AI suggestions
+
+    const form = document.getElementById('flyerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    // ========== AUTH0 CLIENT ==========
+    async function getAuth0Client() {
+      if (window.auth0Client) return window.auth0Client;
+      
+      try {
+        const response = await fetch("/auth_config.json");
+        const config = await response.json();
+        auth0Client = await auth0.createAuth0Client({
+          domain: config.domain,
+          clientId: config.clientId,
+          cacheLocation: 'localstorage',
+          useRefreshTokens: true
+        });
+        window.auth0Client = auth0Client;
+        return auth0Client;
+      } catch (error) {
+        console.error("Error configuring Auth0:", error);
+        return null;
+      }
+    }
+
+    // ========== FETCH OPENAI CONFIG ==========
+    async function getOpenAIConfig() {
+      if (openAIConfig) return openAIConfig;
+      
+      try {
+        const response = await fetch('/api/get-openai-config');
+        if (!response.ok) throw new Error('Failed to get OpenAI config');
+        openAIConfig = await response.json();
+        return openAIConfig;
+      } catch (error) {
+        console.error('Error fetching OpenAI config:', error);
+        return null;
+      }
+    }
+
+    // ========== CALL AZURE OPENAI ==========
+    async function callAzureOpenAI(prompt, systemPrompt) {
+      const config = await getOpenAIConfig();
+      if (!config) throw new Error('OpenAI config not available');
+
+      const url = `${config.endpoint}openai/deployments/${config.deployment}/chat/completions?api-version=2025-01-01-preview`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': config.apiKey
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_tokens: 3000,
+          temperature: 1.1,
+          top_p: 0.95,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Azure OpenAI error:', errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    }
+
+    // ========== GENERATE SUGGESTIONS ==========
+    async function fetchSuggestions() {
+      const loadingDiv = document.getElementById('suggestionsLoading');
+      const contentDiv = document.getElementById('suggestionsContent');
+      const errorDiv = document.getElementById('suggestionsError');
+      const cardsContainer = document.getElementById('suggestionCards');
+
+      loadingDiv.style.display = 'block';
+      contentDiv.style.display = 'none';
+      errorDiv.style.display = 'none';
+
+      try {
+        const simplePrompt = document.getElementById('simplePrompt').value.trim();
+        
+        if (!simplePrompt) {
+          throw new Error('Please describe your flyer first');
+        }
+
+        const businessCase = currentBusiness?.initial_business_case || {};
+        const storeName = currentBusiness?.store_info?.name || 'Your Business';
+        const industry = businessCase?.industry || '';
+        const valueProposition = businessCase?.value_proposition || '';
+        
+        // Add randomness for variety
+        const timestamp = Date.now();
+        const randomSeed = Math.floor(Math.random() * 1000);
+        
+        const systemPrompt = `You are an expert graphic designer and marketing specialist. Generate exactly 3 COMPLETELY DIFFERENT creative design suggestions for flyers/ads. Each suggestion must be UNIQUE and offer a distinct creative direction.
+
+IMPORTANT: Make each suggestion vastly different from typical approaches. Think outside the box. Consider different design movements, cultural styles, and creative trends.
+
+Return ONLY valid JSON in this format:
+{
+  "suggestions": [
+    {
+      "title": "Creative design concept name",
+      "style": "Detailed visual style (e.g., Modern Minimalist, Vintage 1950s, Bold Geometric, Organic Hand-drawn)",
+      "theme": "One-word theme (e.g., Modern, Vintage, Bold, Elegant, Playful, Professional)",
+      "primary_color": "#hexcode",
+      "secondary_color": "#hexcode",
+      "accent_color": "#hexcode",
+      "background_color": "#hexcode",
+      "headline_color": "#hexcode",
+      "layout": "grid|collage|hero|split|centered",
+      "font_family": "Serif|Sans-serif|Monospace|Cursive",
+      "headline_suggestion": "Catchy headline text",
+      "subheadline_suggestion": "Supporting subheadline text",
+      "cta_suggestion": "Call to action text",
+      "decorative_elements": "Specific decorative elements to include",
+      "highlights": "Key design elements and mood description"
+    }
+  ]
+}`;
+
+        const prompt = `Business: ${storeName}
+${industry ? `Industry: ${industry}` : ''}
+${valueProposition ? `Value Proposition: ${valueProposition}` : ''}
+
+User wants to create: ${simplePrompt}
+
+Session ID: ${timestamp}-${randomSeed}
+
+Generate 3 VASTLY DIFFERENT design suggestions. Each should have:
+- Unique visual style and aesthetic
+- Different color palettes (provide hex codes)
+- Different layout approaches
+- Specific headline and CTA suggestions
+- Distinct mood and design elements
+
+Make each suggestion creative, practical, and completely different from the others. Avoid generic designs.`;
+
+        console.log('🤖 Calling Azure OpenAI for suggestions...');
+        const response = await callAzureOpenAI(prompt, systemPrompt);
+        
+        let data;
+        try {
+          data = JSON.parse(response);
+        } catch (e) {
+          const jsonMatch = response.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            data = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('Invalid JSON response from AI');
+          }
+        }
+
+        const suggestions = data.suggestions || [];
+        
+        if (suggestions.length === 0) {
+          throw new Error('No suggestions generated');
+        }
+
+        cardsContainer.innerHTML = '';
+
+        suggestions.forEach((suggestion, index) => {
+          const card = document.createElement('div');
+          card.className = 'suggestion-card';
+          
+          // Create color palette preview
+          const colorPalette = `
+            <div style="display: flex; gap: 4px; margin-top: 8px;">
+              ${suggestion.primary_color ? `<div style="width: 24px; height: 24px; background: ${suggestion.primary_color}; border-radius: 4px; border: 1px solid #ddd;" title="Primary"></div>` : ''}
+              ${suggestion.secondary_color ? `<div style="width: 24px; height: 24px; background: ${suggestion.secondary_color}; border-radius: 4px; border: 1px solid #ddd;" title="Secondary"></div>` : ''}
+              ${suggestion.accent_color ? `<div style="width: 24px; height: 24px; background: ${suggestion.accent_color}; border-radius: 4px; border: 1px solid #ddd;" title="Accent"></div>` : ''}
+            </div>
+          `;
+          
+          card.innerHTML = `
+            <div class="suggestion-title">${suggestion.title}</div>
+            <div class="suggestion-preview">
+              <strong>Style:</strong> ${suggestion.style}<br>
+              <strong>Layout:</strong> ${suggestion.layout || 'Auto'}<br>
+              <strong>Font:</strong> ${suggestion.font_family || 'Auto'}<br>
+              <strong>Colors:</strong> ${colorPalette}<br>
+              <strong>Headline:</strong> "${suggestion.headline_suggestion || 'Auto'}"<br><br>
+              ${suggestion.highlights}
+            </div>
+            <span class="suggestion-badge">Click to apply</span>
+          `;
+          
+          card.addEventListener('click', () => {
+            document.querySelectorAll('.suggestion-card').forEach(c => 
+              c.classList.remove('selected')
+            );
+            
+            card.classList.add('selected');
+            
+            // Populate ALL advanced settings from suggestion
+            if (suggestion.theme) {
+              document.getElementById('designTheme').value = suggestion.theme;
+            }
+            
+            if (suggestion.headline_suggestion) {
+              document.getElementById('mainHeadline').value = suggestion.headline_suggestion;
+            }
+            
+            if (suggestion.subheadline_suggestion) {
+              document.getElementById('subHeadline').value = suggestion.subheadline_suggestion;
+            }
+            
+            if (suggestion.background_color) {
+              document.getElementById('backgroundColor').value = suggestion.background_color;
+              document.getElementById('backgroundColorPicker').value = suggestion.background_color;
+            }
+            
+            if (suggestion.headline_color) {
+              document.getElementById('headlineColor').value = suggestion.headline_color;
+              document.getElementById('headlineColorPicker').value = suggestion.headline_color;
+            }
+            
+            if (suggestion.layout) {
+              document.getElementById('layoutStyle').value = suggestion.layout;
+            }
+            
+            if (suggestion.font_family) {
+              document.getElementById('fontFamily').value = suggestion.font_family;
+            }
+            
+            if (suggestion.decorative_elements) {
+              document.getElementById('decorativeElements').value = suggestion.decorative_elements;
+            }
+            
+            if (suggestion.cta_suggestion) {
+              const ctaSelect = document.getElementById('callToAction');
+              // Try to match with existing options
+              const ctaText = suggestion.cta_suggestion.toLowerCase();
+              if (ctaText.includes('book')) {
+                ctaSelect.value = 'Book Now';
+              } else if (ctaText.includes('shop')) {
+                ctaSelect.value = 'Shop Now';
+              } else if (ctaText.includes('learn')) {
+                ctaSelect.value = 'Learn More';
+              } else if (ctaText.includes('start') || ctaText.includes('get started')) {
+                ctaSelect.value = 'Get Started';
+              } else if (ctaText.includes('contact')) {
+                ctaSelect.value = 'Contact Us';
+              } else if (ctaText.includes('visit')) {
+                ctaSelect.value = 'Visit Us';
+              } else {
+                // Custom CTA
+                ctaSelect.value = 'Custom';
+                document.getElementById('customCTAText').value = suggestion.cta_suggestion;
+                document.getElementById('customCTAGroup').style.display = 'block';
+              }
+            }
+            
+            showStatus('✅ Design suggestion applied to advanced settings! Check the left panel.', 'success');
+            setTimeout(() => {
+              status.style.display = 'none';
+            }, 4000);
+          });
+          
+          cardsContainer.appendChild(card);
+        });
+        
+        loadingDiv.style.display = 'none';
+        contentDiv.style.display = 'block';
+
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = `⚠️ ${error.message}`;
+      }
+    }
+
+    // ========== LOAD USER AND BUSINESS INFO ==========
+    async function loadUserAndBusinessInfo() {
+      try {
+        const auth0 = await getAuth0Client();
+        if (!auth0) return;
+
+        const isAuthenticated = await auth0.isAuthenticated();
+        if (!isAuthenticated) {
+          showStatus('⚠️ Please log in to use this feature', 'error');
+          return;
+        }
+
+        currentUser = await auth0.getUser();
+        console.log('👤 Current user:', currentUser);
+
+        currentBusiness = window.dataManager?.getSelectedBusinessOrFirst();
+        console.log('🏢 Current business:', currentBusiness);
+
+        if (!currentBusiness) {
+          showStatus('⚠️ No business selected. Please set up your business first.', 'error');
+          submitBtn.disabled = true;
+          return;
+        }
+
+        const businessName = currentBusiness?.store_info?.name || currentBusiness?.name || 'Your Business';
+        
+        if (businessName) {
+          document.getElementById('tooltipBusinessName').textContent = businessName;
+        }
+
+        // Auto-fill website URL if available
+        if (currentBusiness?.store_info?.website) {
+          document.getElementById('websiteUrl').value = currentBusiness.store_info.website;
+        }
+
+        // Initialize AI Generator
+        const config = await getOpenAIConfig();
+        if (config) {
+          aiGenerator = new AIGenerator(config);
+          console.log('✅ AI Generator initialized');
+        }
+
+        submitBtn.disabled = false;
+        console.log('✅ User and business info loaded');
+
+      } catch (error) {
+        console.error('Error loading business:', error);
+        showStatus('⚠️ Error loading business information.', 'error');
+      }
+    }
+
+    // ========== FORM SUBMISSION ==========
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const simplePrompt = document.getElementById('simplePrompt').value.trim();
+      
+      if (!simplePrompt) {
+        showStatus('❌ Please describe what you want to create', 'error');
+        return;
+      }
+
+      // Gather simplified form data
+      const formData = {
+        // Required
+        simplePrompt: simplePrompt,
+        businessName: currentBusiness?.store_info?.name || 'Your Business',
+        email: currentUser?.email || '',
+        businessId: currentBusiness?._id,
+
+        // Canvas size (default to square 1024x1024)
+        canvasWidth: 1024,
+        canvasHeight: 1024
+      };
+
+      console.log('📋 Form data:', formData);
+
+      submitBtn.disabled = true;
+      progress.style.display = 'block';
+      status.style.display = 'none';
+      document.getElementById('previewSection').style.display = 'none';
+      progressFill.style.width = '10%';
+
+      try {
+        // ✅ STEP 1: Deduct from wallet
+        progressText.textContent = 'Processing payment...';
+        progressFill.style.width = '20%';
+
+        const walletResponse = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            amount: BASE_DESIGN_COST,
+            description: `Flyer design generation`,
+            metadata: {
+              feature: 'flyer-design',
+              action: 'generate-design',
+              businessId: formData.businessId,
+              outputFormat: formData.outputFormat
+            }
+          })
+        });
+
+        if (!walletResponse.ok) {
+          const walletError = await walletResponse.json();
+          
+          if (walletResponse.status === 402) {
+            throw new Error(
+              `Insufficient funds!\n\n` +
+              `Required: R${BASE_DESIGN_COST.toFixed(2)}\n` +
+              `Balance: ${walletError.formatted_balance}\n\n` +
+              `Please add credits to continue.`
+            );
+          }
+          
+          throw new Error(walletError.error || 'Payment failed');
+        }
+
+        const walletResult = await walletResponse.json();
+        console.log('✅ Wallet deducted:', walletResult);
+
+        // ✅ STEP 2: Generate simple design spec with AI
+        progressText.textContent = 'Generating design with AI...';
+        progressFill.style.width = '50%';
+
+        const systemPrompt = `You are an expert graphic designer. Create a simple JSON design specification for a flyer/ad. Keep it clean and straightforward - NO complex nested structures.
+
+Return JSON in this format:
+{
+  "design_concept": "One sentence describing the overall design concept and mood",
+  "canvas_size": { "width": number, "height": number },
+  "color_palette": ["#hexcolor1", "#hexcolor2", "#hexcolor3"],
+  "layout_type": "grid|hero|split|collage|centered",
+  "headline": "Main attention-grabbing text",
+  "subheadline": "Supporting text",
+  "body_text": "Additional descriptive text",
+  "call_to_action": "Action button text",
+  "image_suggestions": ["Description of image 1", "Description of image 2"],
+  "style_notes": "Font styles, visual effects, decorative elements to include"
+}
+
+Keep it simple, practical, and easy to implement.`;
+
+        const designPrompt = `Create a flyer/ad design specification for:
+
+${formData.simplePrompt}
+
+Business: ${formData.businessName}
+Canvas Size: ${formData.canvasWidth}x${formData.canvasHeight}px
+
+Generate a complete but simple design spec that captures the essence of what they want to create. Be creative and professional.`;
+
+        console.log('🤖 Calling Azure OpenAI for design...');
+        const response = await callAzureOpenAI(designPrompt, systemPrompt);
+
+        progressFill.style.width = '90%';
+
+        let designJSON;
+        try {
+          designJSON = JSON.parse(response);
+        } catch (e) {
+          const jsonMatch = response.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            designJSON = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('Invalid JSON response from AI');
+          }
+        }
+
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        // Display design spec
+        document.getElementById('previewSection').style.display = 'block';
+        document.getElementById('jsonOutput').textContent = JSON.stringify(designJSON, null, 2);
+        document.getElementById('jsonOutput').style.display = 'block';
+        document.getElementById('copyJsonBtn').style.display = 'inline-block';
+
+        showStatus(
+          `✅ Design specification generated!\n\n` +
+          `💰 Cost: R${BASE_DESIGN_COST.toFixed(2)}\n` +
+          `💳 New Balance: ${walletResult.formatted_balance}\n\n` +
+          `💡 Now use "Generate Images" button above to create visual variants`,
+          'success'
+        );
+
+        // TODO: Send email with design and image
+
+      } catch (error) {
+        console.error('❌ Error:', error);
+        
+        if (error.message.includes('Insufficient funds')) {
+          showStatus(
+            '❌ Insufficient Funds\n\n' +
+            'Please add credits to continue.',
+            'error'
+          );
+        } else {
+          showStatus(`❌ Error: ${error.message}`, 'error');
+        }
+        
+        submitBtn.disabled = false;
+      } finally {
+        progress.style.display = 'none';
+      }
+    });
+
+    // ========== GENERATE IMAGE VARIANTS ==========
+    async function generateImageVariants() {
+      if (!aiGenerator) return;
+
+      const useFlux = document.getElementById('useFlux').checked;
+      const useDalle = document.getElementById('useDalle').checked;
+      
+      if (!useFlux && !useDalle) {
+        showImageStatus('Please select at least one AI model', 'error');
+        return;
+      }
+
+      let promptText = '';
+      let isUploadMode = false;
+      let isMultipleMode = false;
+      
+      if (activeTab === 'upload') {
+        promptText = imageContextInput.value.trim();
+        isUploadMode = true;
+        
+        // Validate uploaded image for single upload mode
+        if (!uploadedImage) {
+          showImageStatus('Please upload an image first', 'error');
+          return;
+        }
+      } else if (activeTab === 'multiple') {
+        promptText = multipleImageContextInput.value.trim();
+        isMultipleMode = true;
+        
+        // Validate uploaded images for multiple images mode
+        if (uploadedImages.length === 0) {
+          showImageStatus('Please upload at least one image', 'error');
+          return;
+        }
+        
+        if (uploadedImages.length > 10) {
+          showImageStatus('Maximum 10 images supported', 'error');
+          return;
+        }
+      } else {
+        promptText = generationPromptInput.value.trim();
+      }
+      
+      if (!promptText) {
+        showImageStatus('Please provide context or prompt for image generation', 'error');
+        return;
+      }
+
+      document.getElementById('generateVariantsBtn').disabled = true;
+      document.getElementById('imageProgress').style.display = 'block';
+      document.getElementById('imageStatus').style.display = 'none';
+      document.getElementById('variantsSection').classList.remove('hidden');
+      
+      const variantsGrid = document.getElementById('variantsGrid');
+      variantsGrid.innerHTML = '';
+      generatedVariants = [];
+
+      try {
+        // Deduct cost
+        const userEmail = currentUser?.email;
+        const walletResponse = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            amount: IMAGE_GEN_COST,
+            description: `Flyer image generation`,
+            metadata: {
+              feature: 'flyer-images',
+              action: 'generate-images',
+              businessId: currentBusiness?._id
+            }
+          })
+        });
+
+        if (!walletResponse.ok) {
+          const walletError = await walletResponse.json();
+          if (walletResponse.status === 402) {
+            throw new Error(
+              `Insufficient funds!\n\n` +
+              `Required: R${IMAGE_GEN_COST.toFixed(2)}\n` +
+              `Balance: ${walletError.formatted_balance}\n\n` +
+              `Please add credits to continue.`
+            );
+          }
+          throw new Error(walletError.error || 'Payment failed');
+        }
+
+        const businessName = currentBusiness?.store_info?.name || 'your business';
+        const variantTypes = ['main', 'alternate'];
+        
+        // Build contextual prompts for flyer imagery
+        // For multiple images mode, enhance prompt to reference available images
+        let enhancedPrompt = promptText;
+        if (isMultipleMode && uploadedImages.length > 1) {
+          enhancedPrompt = `Using the ${uploadedImages.length} provided reference images: ${promptText}`;
+          console.log(`🎨 Enhanced prompt for ${uploadedImages.length} images:`, enhancedPrompt);
+        }
+        
+        const contextualPrompts = {
+          main: `${enhancedPrompt}. Professional promotional flyer design for ${businessName}. High-end commercial photography style, professional lighting, eye-catching composition, marketing material quality.`,
+          
+          alternate: `${enhancedPrompt}. ${businessName} promotional material, alternate composition, creative perspective, professional marketing photography, engaging visual style, commercial quality.`
+        };
+        
+        document.getElementById('imageProgressText').textContent = 'Generating images with AI...';
+        document.getElementById('imageProgressFill').style.width = '10%';
+
+        const modelsToUse = [];
+        if (useFlux) modelsToUse.push('flux');
+        if (useDalle) modelsToUse.push('dalle');
+        
+        let totalVariants = variantTypes.length * modelsToUse.length;
+        let completedVariants = 0;
+
+        let variantIndex = 0;
+
+        // Generate progressively
+        for (const model of modelsToUse) {
+          for (const variantType of variantTypes) {
+            const cardId = `variant_${variantType}_${model}_${Date.now()}_${variantIndex}`;
+            const card = createVariantCard(cardId, variantType, model, 'generating');
+
+            card.dataset.variantIndex = variantIndex;
+
+            variantsGrid.appendChild(card);
+            
+            try {
+              const prompt = contextualPrompts[variantType];
+              
+              document.getElementById('imageProgressText').textContent = 
+                `Generating ${variantType} with ${model.toUpperCase()}... (${completedVariants + 1}/${totalVariants})`;
+              
+              let imageData;
+              
+              // Handle different modes - use dedicated API for multi-image
+              if (isUploadMode && uploadedImage) {
+                // Single image upload mode - use new API
+                console.log('📸 Single image mode via API');
+                const formData = new FormData();
+                formData.append('images', uploadedImage);
+                formData.append('prompt', prompt);
+                formData.append('model', model);
+                formData.append('size', '1024x1024');
+                
+                const response = await fetch('/api/image-generation/multi-image', {
+                  method: 'POST',
+                  body: formData
+                });
+                
+                if (!response.ok) {
+                  throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                imageData = data.imageData;
+                
+              } else if (isMultipleMode && uploadedImages.length > 0) {
+                // Multiple images mode - use new dedicated API
+                console.log(`🎨 Multiple images mode via API: ${uploadedImages.length} images`);
+                const formData = new FormData();
+                
+                // Append all images
+                uploadedImages.forEach((file, index) => {
+                  formData.append('images', file);
+                  console.log(`📎 Appending image ${index + 1}: ${file.name}`);
+                });
+                
+                formData.append('prompt', prompt);
+                formData.append('model', model);
+                formData.append('size', '1024x1024');
+                
+                const response = await fetch('/api/image-generation/multi-image', {
+                  method: 'POST',
+                  body: formData
+                });
+                
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.error || `API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                imageData = data.imageData;
+                console.log(`✅ Multi-image generation successful`);
+                
+              } else {
+                // Generate from scratch - use text-to-image endpoint
+                console.log('📝 Text-to-image mode via API');
+                const response = await fetch('/api/image-generation/multi-image/text-to-image', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    prompt: prompt,
+                    model: model,
+                    size: '1024x1024'
+                  })
+                });
+                
+                if (!response.ok) {
+                  throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                imageData = data.imageData;
+              }
+              
+              updateVariantCard(cardId, imageData, 'generated');
+              
+              generatedVariants.push({
+                type: `${variantType}_${model}`,
+                displayType: variantType,
+                model: model,
+                imageData: imageData,
+                prompt: prompt
+              });
+              
+              completedVariants++;
+              const progress = 10 + (completedVariants / totalVariants) * 85;
+              document.getElementById('imageProgressFill').style.width = `${progress}%`;
+              
+              updateSelectedCount();
+              
+            } catch (error) {
+              console.error(`Failed to generate ${variantType} with ${model}:`, error);
+              updateVariantCard(cardId, null, 'failed');
+            }
+            variantIndex++;
+          }
+        }
+
+        document.getElementById('imageProgressFill').style.width = '100%';
+        
+        showImageStatus(
+          `Images generated!\n${generatedVariants.length} total images created\nCost: R${IMAGE_GEN_COST.toFixed(2)}`,
+          'success'
+        );
+
+      } catch (error) {
+        console.error('Error generating images:', error);
+        showImageStatus(error.message, 'error');
+      } finally {
+        document.getElementById('imageProgress').style.display = 'none';
+        document.getElementById('generateVariantsBtn').disabled = false;
+      }
+    }
+
+    // ========== CREATE VARIANT CARD ==========
+    function createVariantCard(cardId, variantType, model, state = 'generating') {
+      const card = document.createElement('div');
+      card.className = `variant-card ${state}`;
+      card.id = cardId;
+      card.dataset.selected = 'true';
+      
+      card.innerHTML = `
+        <input type="checkbox" class="variant-checkbox" checked>
+        <div class="variant-spinner" style="${state === 'generating' ? '' : 'display: none;'}">
+          <div class="spinner"></div>
+        </div>
+        <img class="variant-image" style="display: ${state === 'generating' ? 'none' : 'block'};" alt="${variantType}">
+        <div class="variant-label">${capitalizeFirst(variantType)} (${model.toUpperCase()})</div>
+        <div class="variant-status">${state === 'generating' ? 'Generating...' : ''}</div>
+      `;
+      
+      const checkbox = card.querySelector('.variant-checkbox');
+      checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        toggleVariantSelection(cardId, checkbox.checked);
+      });
+      
+      return card;
+    }
+
+    // ========== UPDATE VARIANT CARD ==========
+    function updateVariantCard(cardId, imageData, state) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      
+      const img = card.querySelector('.variant-image');
+      const status = card.querySelector('.variant-status');
+      const spinner = card.querySelector('.variant-spinner');
+      
+      if (spinner) spinner.style.display = 'none';
+      
+      card.className = `variant-card ${state}`;
+      
+      if (state === 'generated' && imageData) {
+        img.src = `data:image/png;base64,${imageData}`;
+        img.style.display = 'block';
+        status.textContent = 'Generated';
+        status.style.color = '#10b981';
+      } else if (state === 'failed') {
+        status.textContent = 'Failed';
+        status.style.color = '#dc3545';
+        card.dataset.selected = 'false';
+        card.classList.add('unselected');
+      }
+    }
+
+    // ========== TOGGLE VARIANT SELECTION ==========
+    function toggleVariantSelection(cardId, isSelected) {
+      const card = document.getElementById(cardId);
+      if (!card) return;
+      
+      card.dataset.selected = isSelected.toString();
+      
+      if (isSelected) {
+        card.classList.remove('unselected');
+      } else {
+        card.classList.add('unselected');
+      }
+      
+      updateSelectedCount();
+    }
+
+    // ========== UPDATE SELECTED COUNT ==========
+    function updateSelectedCount() {
+      const allCards = document.querySelectorAll('.variant-card[data-selected]');
+      const selectedCards = document.querySelectorAll('.variant-card[data-selected="true"]');
+      
+      document.getElementById('selectedCount').textContent = selectedCards.length;
+      document.getElementById('totalCount').textContent = allCards.length;
+      
+      const controls = document.getElementById('variantsControls');
+      if (allCards.length > 0) controls.style.display = 'flex';
+    }
+
+    // ========== HELPER FUNCTIONS ==========
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function showImageStatus(message, type) {
+      const imageStatus = document.getElementById('imageStatus');
+      imageStatus.textContent = message;
+      imageStatus.className = `status ${type}`;
+      imageStatus.style.display = 'block';
+    }
+
+    // ========== COPY JSON BUTTON ==========
+    document.getElementById('copyJsonBtn').addEventListener('click', () => {
+      const jsonText = document.getElementById('jsonOutput').textContent;
+      navigator.clipboard.writeText(jsonText).then(() => {
+        const btn = document.getElementById('copyJsonBtn');
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    });
+
+    // ========== SHOW STATUS ==========
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.style.display = 'block';
+    }
+
+    // ========== COLOR PICKER SYNC ==========
+    document.getElementById('backgroundColorPicker').addEventListener('input', (e) => {
+      document.getElementById('backgroundColor').value = e.target.value;
+    });
+
+    document.getElementById('backgroundColor').addEventListener('input', (e) => {
+      const value = e.target.value;
+      if (/^#[0-9A-F]{6}$/i.test(value)) {
+        document.getElementById('backgroundColorPicker').value = value;
+      }
+    });
+
+    document.getElementById('headlineColorPicker').addEventListener('input', (e) => {
+      document.getElementById('headlineColor').value = e.target.value;
+    });
+
+    document.getElementById('headlineColor').addEventListener('input', (e) => {
+      const value = e.target.value;
+      if (/^#[0-9A-F]{6}$/i.test(value)) {
+        document.getElementById('headlineColorPicker').value = value;
+      }
+    });
+
+    // ========== GENERATE SUGGESTIONS BUTTON ==========
+    document.getElementById('generateSuggestionsBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('generateSuggestionsBtn');
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline-block';
+      
+      try {
+        // Deduct for suggestions
+        const walletResponse = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: currentUser?.email,
+            amount: SUGGESTION_COST,
+            description: 'AI Design Suggestions',
+            metadata: {
+              feature: 'flyer_design',
+              action: 'ai_suggestions',
+              businessId: currentBusiness?._id
+            }
+          })
+        });
+
+        if (!walletResponse.ok) {
+          const walletError = await walletResponse.json();
+          if (walletResponse.status === 402) {
+            showStatus(`❌ Insufficient funds! Required: R${SUGGESTION_COST.toFixed(2)}\nBalance: ${walletError.formatted_balance}`, 'error');
+            return;
+          }
+          throw new Error(walletError.error || 'Payment failed');
+        }
+
+        await fetchSuggestions();
+      } catch (error) {
+        console.error('Error:', error);
+        showStatus(`❌ ${error.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    });
+
+    // ========== COLLAPSIBLE SECTIONS ==========
+    function toggleCollapsible(sectionId) {
+      const content = document.getElementById(sectionId);
+      const arrow = document.getElementById(sectionId + 'Arrow');
+      
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        arrow.classList.remove('open');
+      } else {
+        content.classList.add('open');
+        arrow.classList.add('open');
+      }
+    }
+
+    // Make it globally accessible
+    window.toggleCollapsible = toggleCollapsible;
+
+    // ========== BUSINESS INFO TOOLTIP ==========
+    document.getElementById('businessInfoIcon')?.addEventListener('mouseenter', () => {
+      document.getElementById('businessTooltip').style.display = 'block';
+    });
+
+    document.getElementById('businessInfoIcon')?.addEventListener('mouseleave', () => {
+      document.getElementById('businessTooltip').style.display = 'none';
+    });
+
+    // ========== IMAGE MODE TABS ==========
+    const imageContextInput = document.getElementById('imageContext');
+    const multipleImageContextInput = document.getElementById('multipleImageContext');
+    const generationPromptInput = document.getElementById('generationPrompt');
+    let activeTab = 'upload'; // Default active tab
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+        
+        // Update tab buttons
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.querySelector(`[data-tab-content="${tabName}"]`).classList.add('active');
+        
+        // Update active tab
+        activeTab = tabName;
+        
+        // Update required fields
+        if (tabName === 'upload') {
+          generationPromptInput.required = false;
+          multipleImageContextInput.required = false;
+          imageContextInput.required = true;
+        } else if (tabName === 'multiple') {
+          generationPromptInput.required = false;
+          imageContextInput.required = false;
+          multipleImageContextInput.required = true;
+        } else {
+          imageContextInput.required = false;
+          multipleImageContextInput.required = false;
+          generationPromptInput.required = true;
+        }
+        
+        validateImageGeneration();
+      });
+    });
+
+    // ========== GENERATE SUGGESTION BUTTONS ==========
+    // Upload & Enhance Mode Suggestion
+    document.getElementById('generateUploadSuggestionBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('generateUploadSuggestionBtn');
+      const imageContextInput = document.getElementById('imageContext');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating...';
+      
+      try {
+        // Build context from form data
+        const simplePrompt = document.getElementById('simplePrompt').value.trim();
+        const businessName = currentBusiness?.store_info?.name || 'Your Business';
+        
+        const contextInfo = [];
+        if (simplePrompt) contextInfo.push(`Purpose: ${simplePrompt}`);
+        if (businessName) contextInfo.push(`Business: ${businessName}`);
+        
+        const systemPrompt = `You are an expert graphic designer. Generate a detailed image enhancement prompt for a flyer design. Focus on how to enhance or use an uploaded image (person photo, template, etc.) to create an effective flyer. Return ONLY the prompt text, no JSON.`;
+        
+        const userPrompt = `Create a detailed image enhancement/generation prompt for a flyer with these details:
+
+${contextInfo.join('\n')}
+
+${uploadedImages.length > 0 ? `Note: User has uploaded ${uploadedImages.length} base image(s)` : 'Note: Will generate from scratch'}
+
+Write a clear, detailed prompt that describes how to create/enhance the flyer image. Include: composition, mood, colors, style, and design elements.`;
+
+        console.log('🤖 Generating upload suggestion...');
+        const suggestion = await callAzureOpenAI(userPrompt, systemPrompt);
+        
+        // Populate the imageContext textarea
+        imageContextInput.value = suggestion.trim();
+        validateImageGeneration();
+        
+      } catch (error) {
+        console.error('Error generating suggestion:', error);
+        showImageStatus('❌ Failed to generate suggestion', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Suggestion';
+      }
+    });
+
+    // Multiple Images Mode Suggestion
+    document.getElementById('generateMultipleSuggestionBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('generateMultipleSuggestionBtn');
+      const multipleImageContextInput = document.getElementById('multipleImageContext');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating...';
+      
+      try {
+        const simplePrompt = document.getElementById('simplePrompt').value.trim();
+        const businessName = currentBusiness?.store_info?.name || 'Your Business';
+        
+        const contextInfo = [];
+        if (simplePrompt) contextInfo.push(`Purpose: ${simplePrompt}`);
+        if (businessName) contextInfo.push(`Business: ${businessName}`);
+        
+        const systemPrompt = `You are an expert graphic designer. Generate a detailed prompt for combining multiple images in a flyer design. Focus on layout, composition, and how to use multiple images together effectively. Return ONLY the prompt text, no JSON.`;
+        
+        const userPrompt = `Create a detailed prompt for combining multiple images in a flyer design:
+
+${contextInfo.join('\n')}
+
+${uploadedImages.length > 0 ? `Note: User has uploaded ${uploadedImages.length} images` : 'Note: User will upload multiple images'}
+
+Write a clear, detailed prompt describing how to arrange and use multiple images in the flyer. Include: layout composition, image arrangement, color harmony, text overlay suggestions, and overall design cohesion.`;
+
+        console.log('🤖 Generating multiple images suggestion...');
+        const suggestion = await callAzureOpenAI(userPrompt, systemPrompt);
+        
+        multipleImageContextInput.value = suggestion.trim();
+        validateImageGeneration();
+        
+      } catch (error) {
+        console.error('Error generating suggestion:', error);
+        showImageStatus('❌ Failed to generate suggestion', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Suggestion';
+      }
+    });
+
+    // Multiple Images Mode Suggestion
+    document.getElementById('generateMultipleSuggestionBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('generateMultipleSuggestionBtn');
+      const multipleImageContextInput = document.getElementById('multipleImageContext');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating...';
+      
+      try {
+        const simplePrompt = document.getElementById('simplePrompt').value.trim();
+        const businessName = currentBusiness?.store_info?.name || 'Your Business';
+        
+        const contextInfo = [];
+        if (simplePrompt) contextInfo.push(`Purpose: ${simplePrompt}`);
+        if (businessName) contextInfo.push(`Business: ${businessName}`);
+        
+        const systemPrompt = `You are an expert graphic designer. Generate a detailed prompt for combining multiple images in a flyer design. Focus on layout, composition, and how to use multiple images together effectively. Return ONLY the prompt text, no JSON.`;
+        
+        const userPrompt = `Create a detailed prompt for combining multiple images in a flyer design:
+
+${contextInfo.join('\n')}
+
+${uploadedImages.length > 0 ? `Note: User has uploaded ${uploadedImages.length} images` : 'Note: User will upload multiple images'}
+
+Write a clear, detailed prompt describing how to arrange and use multiple images in the flyer. Include: layout composition, image arrangement, color harmony, text overlay suggestions, and overall design cohesion.`;
+
+        console.log('🤖 Generating multiple images suggestion...');
+        const suggestion = await callAzureOpenAI(userPrompt, systemPrompt);
+        
+        multipleImageContextInput.value = suggestion.trim();
+        validateImageGeneration();
+        
+      } catch (error) {
+        console.error('Error generating suggestion:', error);
+        showImageStatus('❌ Failed to generate suggestion', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Suggestion';
+      }
+    });
+
+    // Generate from Text Mode Suggestion
+    document.getElementById('generateTextSuggestionBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('generateTextSuggestionBtn');
+      const generationPromptInput = document.getElementById('generationPrompt');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating...';
+      
+      try {
+        // Get advanced settings from form
+        const formData = {
+          simplePrompt: document.getElementById('simplePrompt').value.trim(),
+          businessName: currentBusiness?.store_info?.name || 'Your Business',
+          backgroundColor: document.getElementById('backgroundColor').value,
+          headlineColor: document.getElementById('headlineColor').value,
+          headlineText: document.getElementById('headlineText').value.trim(),
+          subheadlineText: document.getElementById('subheadlineText').value.trim(),
+          bodyText: document.getElementById('bodyText').value.trim(),
+          callToAction: document.getElementById('callToAction').value,
+          canvasWidth: document.getElementById('canvasWidth').value || '1024',
+          canvasHeight: document.getElementById('canvasHeight').value || '1024'
+        };
+        
+        const systemPrompt = `You are an expert graphic designer and prompt engineer. Generate a detailed, refined image generation prompt for a flyer design based on the provided information. The prompt should be optimized for AI image generation (FLUX/DALL-E). Return ONLY the prompt text, no JSON.`;
+        
+        const userPrompt = `Create a refined image generation prompt for a flyer with these specifications:
+
+**Purpose:** ${formData.simplePrompt}
+**Business:** ${formData.businessName}
+${formData.headlineText ? `**Headline:** ${formData.headlineText}` : ''}
+${formData.subheadlineText ? `**Subheadline:** ${formData.subheadlineText}` : ''}
+${formData.bodyText ? `**Body:** ${formData.bodyText}` : ''}
+${formData.callToAction && formData.callToAction !== '' ? `**Call to Action:** ${formData.callToAction}` : ''}
+**Canvas Size:** ${formData.canvasWidth}x${formData.canvasHeight}px
+**Color Scheme:** Background ${formData.backgroundColor}, Headline ${formData.headlineColor}
+
+Generate a detailed, professional prompt that describes the complete flyer image to be generated. Include: composition, layout, visual style, mood, colors, typography feel, and design elements. Make it specific and optimized for AI image generation.`;
+
+        console.log('🤖 Generating text suggestion...');
+        const suggestion = await callAzureOpenAI(userPrompt, systemPrompt);
+        
+        // Populate the generationPrompt textarea
+        generationPromptInput.value = suggestion.trim();
+        validateImageGeneration();
+        
+      } catch (error) {
+        console.error('Error generating suggestion:', error);
+        showImageStatus('❌ Failed to generate suggestion', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Suggestion';
+      }
+    });
+
+    // ========== IMAGE UPLOAD HANDLERS ==========
+    // Single image upload
+    let uploadedImage = null;
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+
+    // Multiple images upload
+    let uploadedImages = [];
+    const uploadBoxMultiple = document.getElementById('uploadBoxMultiple');
+    const fileInputMultiple = document.getElementById('fileInputMultiple');
+    const uploadPlaceholderMultiple = document.getElementById('uploadPlaceholderMultiple');
+    const uploadedImagesGallery = document.getElementById('uploadedImagesGallery');
+    const imageCountBadge = document.getElementById('imageCountBadge');
+
+    // Single image handlers
+    uploadBox.addEventListener('click', () => {
+      if (!uploadedImage) {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleSingleFileUpload(e.target.files[0]);
+    });
+
+    // Multiple images handlers
+    uploadBoxMultiple.addEventListener('click', () => {
+      fileInputMultiple.click();
+    });
+
+    fileInputMultiple.addEventListener('change', (e) => {
+      handleMultipleFileUpload(e.target.files);
+    });
+
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.style.borderColor = 'var(--primary-orange)';
+      uploadBox.style.background = '#FFF8F0';
+    });
+
+    uploadBox.addEventListener('dragleave', () => {
+      uploadBox.style.borderColor = '#ddd';
+      uploadBox.style.background = '#f8f9fa';
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.style.borderColor = '#ddd';
+      uploadBox.style.background = '#f8f9fa';
+      handleSingleFileUpload(e.dataTransfer.files[0]);
+    });
+
+    // Multiple images drag and drop
+    uploadBoxMultiple.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBoxMultiple.style.borderColor = 'var(--primary-orange)';
+      uploadBoxMultiple.style.background = '#FFF8F0';
+    });
+
+    uploadBoxMultiple.addEventListener('dragleave', () => {
+      uploadBoxMultiple.style.borderColor = '#ddd';
+      uploadBoxMultiple.style.background = '#f8f9fa';
+    });
+
+    uploadBoxMultiple.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBoxMultiple.style.borderColor = '#ddd';
+      uploadBoxMultiple.style.background = '#f8f9fa';
+      handleMultipleFileUpload(e.dataTransfer.files);
+    });
+
+    function handleSingleFileUpload(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showImageStatus('Please select an image file', 'error');
+        return;
+      }
+
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showImageStatus('Image file is too large. Maximum size is 10MB.', 'error');
+        return;
+      }
+
+      uploadedImage = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadPreview.src = e.target.result;
+        uploadPreview.style.display = 'block';
+        uploadPlaceholder.style.display = 'none';
+        removeImageBtn.style.display = 'inline-block';
+        uploadBox.classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+
+      validateImageGeneration();
+    }
+
+    function handleMultipleFileUpload(files) {
+      if (!files || files.length === 0) return;
+
+      const maxSize = 10 * 1024 * 1024;
+      let validFiles = [];
+
+      for (let file of files) {
+        if (!file.type.startsWith('image/')) {
+          showImageStatus(`${file.name} is not an image file`, 'error');
+          continue;
+        }
+
+        if (file.size > maxSize) {
+          showImageStatus(`${file.name} is too large. Max 10MB per image.`, 'error');
+          continue;
+        }
+
+        validFiles.push(file);
+      }
+
+      if (validFiles.length === 0) return;
+
+      // Check if adding these files would exceed the 10 image limit
+      const remainingSlots = 10 - uploadedImages.length;
+      if (validFiles.length > remainingSlots) {
+        showImageStatus(`Maximum 10 images allowed. You can add ${remainingSlots} more image${remainingSlots !== 1 ? 's' : ''}.`, 'error');
+        validFiles = validFiles.slice(0, remainingSlots);
+      }
+
+      if (validFiles.length === 0) return;
+
+      // Add new files to uploadedImages array
+      validFiles.forEach(file => {
+        uploadedImages.push(file);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          addImageToGallery(file, e.target.result);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      updateImageGalleryDisplay();
+      validateImageGeneration();
+    }
+
+    function addImageToGallery(file, dataUrl) {
+      const imageItem = document.createElement('div');
+      imageItem.className = 'uploaded-image-item';
+      imageItem.dataset.fileName = file.name;
+      
+      imageItem.innerHTML = `
+        <img src="${dataUrl}" alt="${file.name}">
+        <button type="button" class="uploaded-image-remove" title="Remove">×</button>
+      `;
+      
+      const removeBtn = imageItem.querySelector('.uploaded-image-remove');
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeImageFromGallery(file.name);
+      });
+      
+      uploadedImagesGallery.appendChild(imageItem);
+    }
+
+    function removeImageFromGallery(fileName) {
+      // Remove from array
+      uploadedImages = uploadedImages.filter(img => img.name !== fileName);
+      
+      // Remove from DOM
+      const imageItem = uploadedImagesGallery.querySelector(`[data-file-name="${fileName}"]`);
+      if (imageItem) imageItem.remove();
+      
+      updateImageGalleryDisplay();
+      validateImageGeneration();
+    }
+
+    function updateImageGalleryDisplay() {
+      const count = uploadedImages.length;
+      
+      if (count > 0) {
+        uploadedImagesGallery.style.display = 'grid';
+        uploadBox.classList.add('has-image');
+        imageCountBadge.style.display = 'inline-block';
+        imageCountBadge.textContent = `${count} image${count !== 1 ? 's' : ''}`;
+      } else {
+        uploadedImagesGallery.style.display = 'none';
+        uploadBox.classList.remove('has-image');
+        imageCountBadge.style.display = 'none';
+        generatedVariants = [];
+        document.getElementById('variantsSection').classList.add('hidden');
+      }
+      
+      fileInput.value = '';
+    }
+
+
+
+    // ========== MODEL CHECKBOX STYLING ==========
+    [document.getElementById('useFlux'), document.getElementById('useDalle')].forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const parent = checkbox.closest('.model-checkbox');
+        if (checkbox.checked) {
+          parent.classList.add('checked');
+        } else {
+          parent.classList.remove('checked');
+        }
+        
+        // Ensure at least one is selected
+        const useFlux = document.getElementById('useFlux').checked;
+        const useDalle = document.getElementById('useDalle').checked;
+        if (!useFlux && !useDalle) {
+          checkbox.checked = true;
+          parent.classList.add('checked');
+        }
+        
+        validateImageGeneration();
+      });
+    });
+
+    // ========== VALIDATE IMAGE GENERATION ==========
+    function validateImageGeneration() {
+      const contextText = imageContextInput.value.trim();
+      const multipleContextText = multipleImageContextInput.value.trim();
+      const promptText = generationPromptInput.value.trim();
+      const useFlux = document.getElementById('useFlux').checked;
+      const useDalle = document.getElementById('useDalle').checked;
+      const simplePrompt = document.getElementById('simplePrompt').value.trim();
+      
+      let canGenerate = false;
+      
+      if (activeTab === 'upload') {
+        // Single image: can generate if we have context
+        canGenerate = contextText.length > 0;
+      } else if (activeTab === 'multiple') {
+        // Multiple images: can generate if we have context
+        canGenerate = multipleContextText.length > 0;
+      } else {
+        // Generate mode needs prompt
+        canGenerate = promptText.length > 0;
+      }
+      
+      document.getElementById('generateVariantsBtn').disabled = !(
+        canGenerate && (useFlux || useDalle)
+      );
+      
+      // Enable/disable suggestion buttons
+      const uploadSuggestionBtn = document.getElementById('generateUploadSuggestionBtn');
+      const multipleSuggestionBtn = document.getElementById('generateMultipleSuggestionBtn');
+      const textSuggestionBtn = document.getElementById('generateTextSuggestionBtn');
+      
+      // All suggestion buttons need at least simplePrompt
+      if (uploadSuggestionBtn) {
+        uploadSuggestionBtn.disabled = !simplePrompt;
+      }
+      
+      if (multipleSuggestionBtn) {
+        multipleSuggestionBtn.disabled = !simplePrompt;
+      }
+      
+      if (textSuggestionBtn) {
+        textSuggestionBtn.disabled = !simplePrompt;
+      }
+    }
+
+    imageContextInput.addEventListener('input', validateImageGeneration);
+    multipleImageContextInput.addEventListener('input', validateImageGeneration);
+    generationPromptInput.addEventListener('input', validateImageGeneration);
+    document.getElementById('simplePrompt').addEventListener('input', validateImageGeneration);
+
+    // ========== GENERATE IMAGES BUTTON ==========
+    document.getElementById('generateVariantsBtn').addEventListener('click', async () => {
+      await generateImageVariants();
+    });
+
+    // ========== SELECT/DESELECT ALL ==========
+    document.getElementById('selectAllBtn')?.addEventListener('click', () => {
+      document.querySelectorAll('.variant-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+        const cardId = checkbox.closest('.variant-card').id;
+        toggleVariantSelection(cardId, true);
+      });
+    });
+
+    document.getElementById('deselectAllBtn')?.addEventListener('click', () => {
+      document.querySelectorAll('.variant-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+        const cardId = checkbox.closest('.variant-card').id;
+        toggleVariantSelection(cardId, false);
+      });
+    });
+
+    // ========== DOWNLOAD SELECTED IMAGES ==========
+    document.getElementById('downloadAllBtn').addEventListener('click', async () => {
+      try {
+        const selectedVariants = generatedVariants.filter((variant, index) => {
+          const cardId = document.querySelectorAll('.variant-card')[index]?.id;
+          const card = document.getElementById(cardId);
+          return card && card.dataset.selected === 'true';
+        });
+
+        if (selectedVariants.length === 0) {
+          showImageStatus('No images selected for download', 'error');
+          return;
+        }
+
+        for (let i = 0; i < selectedVariants.length; i++) {
+          const variant = selectedVariants[i];
+          const link = document.createElement('a');
+          link.href = `data:image/png;base64,${variant.imageData}`;
+          link.download = `flyer-${variant.type}-${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        showImageStatus(`Downloaded ${selectedVariants.length} image(s)`, 'success');
+      } catch (error) {
+        console.error('Download error:', error);
+        showImageStatus('Failed to download images', 'error');
+      }
+    });
+
+    // ========== ENABLE/DISABLE SUBMIT ==========
+    function updateSubmitButton() {
+      const simplePrompt = document.getElementById('simplePrompt').value.trim();
+      submitBtn.disabled = !simplePrompt;
+    }
+
+    document.getElementById('simplePrompt').addEventListener('input', updateSubmitButton);
+
+    // ========== INITIALIZE ==========
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 Initializing Flyer Designer...');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Loading...';
+      
+      try {
+        await loadUserAndBusinessInfo();
+        
+        if (currentBusiness) {
+          submitBtn.textContent = '🎨 Generate Flyer Design';
+          updateSubmitButton();
+        }
+      } catch (error) {
+        console.error('❌ Init error:', error);
+        showStatus('❌ Failed to load. Please refresh.', 'error');
+      }
+    });
+
+    // ========== LISTEN FOR BUSINESS CHANGES ==========
+    if (window.dataManager) {
+      window.dataManager.onBusinessChange((business) => {
+        console.log('🔄 Business changed');
+        currentBusiness = business;
+        loadUserAndBusinessInfo();
+      });
+    }
+    
+  </script>
+</body>
+</html>

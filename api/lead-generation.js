@@ -1,20 +1,67 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { ObjectId } = require('mongodb');
+const { getDatabase } = require('../lib/mongodb');
 
 const N8N_WEBHOOK_URL = 'https://aigents.southafricanorth.azurecontainer.io/webhook/7314886d-74e6-405a-a95a-dda82b490327';
 
 /**
  * Proxy endpoint for lead generation webhook
  * This avoids CORS issues by making the request from the server
+ * Also enriches the payload with Apollo and Mailgun configuration
  */
 router.post('/generate', async (req, res) => {
   try {
     console.log('📤 Proxying lead generation request to n8n...');
     console.log('Request body:', req.body);
 
-    // Forward the request to n8n webhook
-    const response = await axios.post(N8N_WEBHOOK_URL, req.body, {
+    const { businessId } = req.body;
+
+    // Enrich payload with Apollo and Mailgun config from business settings
+    let enrichedPayload = { ...req.body };
+
+    if (businessId) {
+      try {
+        const db = await getDatabase();
+        const business = await db.collection('store_submissions').findOne({
+          _id: new ObjectId(businessId)
+        });
+
+        if (business?.automation_settings) {
+          const { apollo_config, mailgun_config } = business.automation_settings;
+
+          // Add Apollo config if enabled
+          if (apollo_config?.enabled && apollo_config?.api_key) {
+            enrichedPayload.apollo = {
+              api_key: apollo_config.api_key,
+              enabled: true
+            };
+            console.log('✅ Apollo config added to payload');
+          }
+
+          // Add Mailgun config if enabled
+          if (mailgun_config?.enabled && mailgun_config?.api_key) {
+            enrichedPayload.mailgun = {
+              api_key: mailgun_config.api_key,
+              api_domain: mailgun_config.api_domain,
+              email_domain: mailgun_config.email_domain,
+              from_email: mailgun_config.from_email,
+              enabled: true
+            };
+            console.log('✅ Mailgun config added to payload');
+          }
+        }
+      } catch (dbError) {
+        console.warn('⚠️ Could not fetch business settings:', dbError.message);
+        // Continue without enrichment
+      }
+    }
+
+    console.log('📦 Enriched payload:', JSON.stringify(enrichedPayload, null, 2));
+
+    // Forward the enriched request to n8n webhook
+    const response = await axios.post(N8N_WEBHOOK_URL, enrichedPayload, {
       headers: {
         'Content-Type': 'application/json'
       },

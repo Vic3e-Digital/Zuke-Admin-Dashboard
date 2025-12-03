@@ -226,10 +226,7 @@ export async function initCreativePage() {
 
     // Setup coming soon buttons
     const comingSoonButtons = [
-      {
-        btn: document.getElementById("openFlyerBtn"),
-        name: "Design Flyers"
-      }
+      // No coming soon buttons currently
     ];
 
     // Setup beta buttons - WITH BETA WARNING
@@ -255,11 +252,6 @@ export async function initCreativePage() {
         url: `/tools/improve-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       },
       {
-        btn: document.getElementById("transcribeAudioBtn"),
-        title: "Transcribe Audio",
-        url: `/pages/creative/transcribe-audio.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
-      },
-      {
         btn: document.querySelector('#textAIImageCard .sim-action-btn'),
         title: "Text + AI Image",
         url: `/tools/text-ai-image.html`
@@ -277,6 +269,11 @@ export async function initCreativePage() {
         btn: document.getElementById("browseModelsBtn"),
         title: "Browse Models",
         url: `/pages/creative/browse-models.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      },
+      {
+        btn: document.getElementById("transcribeAudioBtn"),
+        title: "Transcribe Audio",
+        url: `/pages/creative/transcribe-audio.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       }
     ];
 
@@ -296,6 +293,15 @@ export async function initCreativePage() {
         title: "Generate Images",
         url: `/pages/creative/photoshoot.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
         // url: `/pages/creative/Image-Generation.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+      }
+    ];
+
+    // Setup Design Flyers button (NEW)
+    const flyerDesignButtons = [
+      {
+        btn: document.getElementById("openFlyerBtn"),
+        title: "Design Flyers & Ads",
+        url: `/pages/creative/creative-tools/design-flyers.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       }
     ];
 
@@ -362,6 +368,19 @@ export async function initCreativePage() {
 
     // Add click handlers for Generate Image button (using standard modal)
     generateImageButtons.forEach(({btn, title, url}) => {
+      if (btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          modalTitle.textContent = title;
+          iframe.src = url;
+          modal.style.display = "block";
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    });
+
+    // Add click handlers for Design Flyers button (using standard modal)
+    flyerDesignButtons.forEach(({btn, title, url}) => {
       if (btn) {
         btn.onclick = function(e) {
           e.stopPropagation();
