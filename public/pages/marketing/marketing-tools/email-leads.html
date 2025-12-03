@@ -8,7 +8,7 @@
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
   <style>
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -25,6 +25,45 @@
     .header p {
       color: #666;
       font-size: 14px;
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-button {
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      bottom: -2px;
+    }
+
+    .tab-button:hover {
+      color: var(--primary-orange);
+    }
+
+    .tab-button.active {
+      color: var(--primary-orange);
+      border-bottom-color: var(--primary-orange);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     .form-section {
@@ -147,6 +186,23 @@
       color: #1565c0;
       line-height: 1.5;
     }
+
+    .warning-box {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #856404;
+      line-height: 1.5;
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 150px;
+      font-family: inherit;
+    }
   </style>
 </head>
 <body>
@@ -156,58 +212,194 @@
       <p>Send personalized email campaigns and track engagement</p>
     </div>
 
-    <div class="info-box">
-      📌 <strong>How it works:</strong> Paste a link to your Google Sheet containing your leads with email addresses. We'll send personalized emails and track engagement metrics like open rates and clicks.
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <button type="button" class="tab-button active" data-tab="one-to-one">One-to-One Email</button>
+      <button type="button" class="tab-button" data-tab="bulk-send">Bulk Send</button>
     </div>
 
-    <div class="form-section">
-      <form id="emailLeadsForm">
-        <div class="form-group">
-          <label class="form-label">Google Sheet Link</label>
-          <input
-            type="url"
-            id="sheetsUrl"
-            class="form-input"
-            placeholder="https://docs.google.com/spreadsheets/d/..."
-            required
-          >
-          <div class="form-hint">
-            Make sure the sheet is publicly accessible or shared with the app
+    <!-- One-to-One Tab -->
+    <div id="one-to-one-tab" class="tab-content active">
+      <div class="info-box">
+        📌 <strong>One-to-One Email:</strong> Send a single personalized email using your configured Mailgun settings.
+      </div>
+
+      <div class="form-section">
+        <form id="oneToOneForm">
+          <div class="form-group">
+            <label class="form-label">Recipient Email *</label>
+            <input
+              type="email"
+              id="recipientEmail"
+              class="form-input"
+              placeholder="recipient@example.com"
+              required
+            >
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label">Email Subject</label>
-          <input
-            type="text"
-            id="emailSubject"
-            class="form-input"
-            placeholder="e.g., 'Let's grow your business together'"
-            required
-          >
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Email Template (Optional)</label>
-          <textarea
-            id="emailTemplate"
-            class="form-input"
-            style="resize: vertical; min-height: 150px;"
-            placeholder="Enter your email template. Use {{name}}, {{company}}, {{email}} for personalization"
-          ></textarea>
-          <div class="form-hint">
-            If left blank, a professional template will be auto-generated
+          <div class="form-group">
+            <label class="form-label">Subject *</label>
+            <input
+              type="text"
+              id="emailSubjectOne"
+              class="form-input"
+              placeholder="e.g., 'Let's grow your business together'"
+              required
+            >
           </div>
-        </div>
 
-        <div class="button-group">
-          <button type="submit" class="action-button submit-btn" id="submitBtn">
-            Submit
-          </button>
-        </div>
-      </form>
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <textarea
+              id="emailBodyOne"
+              class="form-input"
+              placeholder="Enter your email message here..."
+              required
+            ></textarea>
+            <div class="form-hint">
+              This will be sent as plain text or HTML
+            </div>
+          </div>
 
-      <div id="status" class="status"></div>
+          <!-- Email Signature Section -->
+          <div class="form-group" id="signatureSection" style="display: none;">
+            <label class="form-label">Email Signature</label>
+            <div id="signatureDisplay" style="padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+              <!-- Signature will be displayed here -->
+            </div>
+            <div class="form-hint">
+              This signature will be automatically appended to your email. Configure in Settings > Automation.
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="action-button submit-btn" id="sendOneBtn">
+              Send Email
+            </button>
+          </div>
+        </form>
+
+        <div id="statusOne" class="status"></div>
+      </div>
+    </div>
+
+    <!-- Bulk Send Tab -->
+    <div id="bulk-send-tab" class="tab-content">
+      <div class="info-box">
+        📌 <strong>Bulk Email:</strong> Send emails to multiple recipients from a Google Sheet. The sheet should have columns for email addresses and any personalization data.
+      </div>
+
+      <div class="form-section">
+        <form id="emailLeadsForm">
+          <div class="form-group">
+            <label class="form-label">Google Sheet Link *</label>
+            <input
+              type="url"
+              id="sheetsUrl"
+              class="form-input"
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+              required
+            >
+            <div class="form-hint">
+              Make sure the sheet is publicly accessible or shared with the app
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Subject *</label>
+            <input
+              type="text"
+              id="emailSubject"
+              class="form-input"
+              placeholder="e.g., 'Let's grow your business together'"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Template (Optional)</label>
+            <textarea
+              id="emailTemplate"
+              class="form-input"
+              placeholder="Enter your email template. Use {{name}}, {{company}}, {{email}} for personalization"
+            ></textarea>
+            <div class="form-hint">
+              If left blank, a professional template will be auto-generated. Use {{variable}} for personalization.
+            </div>
+          </div>
+
+          <!-- AI Improvement Section -->
+          <div class="form-group" style="border-top: 2px solid #e0e0e0; padding-top: 20px; margin-top: 20px;">
+            <label class="form-label">🤖 AI Email Enhancement</label>
+            <div style="margin-bottom: 15px;">
+              <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="aiEnhanceEnabled" style="width: auto;">
+                <span>Enable AI to improve my email message</span>
+              </label>
+            </div>
+
+            <div id="aiEnhanceOptions" style="display: none;">
+              <div style="margin-bottom: 15px;">
+                <label class="form-label">Enhancement Level</label>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                  <input 
+                    type="range" 
+                    id="aiEnhanceLevel" 
+                    min="0" 
+                    max="2" 
+                    value="1" 
+                    step="1"
+                    style="flex: 1; cursor: pointer;"
+                  >
+                  <span id="aiLevelLabel" style="min-width: 120px; font-weight: 600; color: #667eea;">Moderate</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 5px;">
+                  <span>Send as-is</span>
+                  <span>Moderate</span>
+                  <span>Major improvement</span>
+                </div>
+                <div class="form-hint" style="margin-top: 8px;">
+                  <strong>0 (As-is):</strong> No changes<br>
+                  <strong>1 (Moderate):</strong> Polish grammar, tone, and clarity<br>
+                  <strong>2 (Major):</strong> Rewrite for maximum impact and persuasion
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">AI Instructions (Optional)</label>
+                <textarea
+                  id="aiInstructions"
+                  class="form-input"
+                  rows="3"
+                  placeholder="e.g., 'Make the intro dynamic but keep the body of the email my version' or 'Focus on improving the call-to-action'"
+                ></textarea>
+                <div class="form-hint">
+                  Specify what you want AI to change or preserve in your email
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email Signature Section for Bulk -->
+          <div class="form-group" id="signatureSectionBulk" style="display: none; border-top: 2px solid #e0e0e0; padding-top: 20px;">
+            <label class="form-label">Email Signature</label>
+            <div id="signatureDisplayBulk" style="padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+              <!-- Signature will be displayed here -->
+            </div>
+            <div class="form-hint">
+              This signature will be automatically appended to all emails. Configure in Settings > Automation.
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="action-button submit-btn" id="submitBtn">
+              Send Bulk Emails
+            </button>
+          </div>
+        </form>
+
+        <div id="status" class="status"></div>
+      </div>
     </div>
   </div>
 
@@ -216,9 +408,274 @@
     let userEmail = urlParams.get('email');
     let businessId = urlParams.get('businessId');
 
-    const form = document.getElementById('emailLeadsForm');
+    // Tab elements
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Forms
+    const oneToOneForm = document.getElementById('oneToOneForm');
+    const bulkForm = document.getElementById('emailLeadsForm');
+    
+    // Buttons
+    const sendOneBtn = document.getElementById('sendOneBtn');
     const submitBtn = document.getElementById('submitBtn');
+    
+    // Status divs
+    const statusOne = document.getElementById('statusOne');
     const statusDiv = document.getElementById('status');
+
+    let mailgunConfig = null;
+    let emailSignature = null;
+
+    // Tab switching
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.dataset.tab;
+        
+        // Update button states
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Update content visibility
+        tabContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === `${targetTab}-tab`) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Generate signature HTML
+    function generateSignatureHtml(signature) {
+      if (!signature || !signature.enabled) return '';
+
+      let html = `\n\n${signature.closing || 'Kind regards'},\n`;
+      html += `${signature.name || 'Your Name'}\n`;
+      
+      if (signature.company) {
+        html += `${signature.company}\n`;
+      }
+      
+      const links = [];
+      if (signature.phone) links.push(`📱 ${signature.phone}`);
+      if (signature.website) links.push(`🌐 ${signature.website}`);
+      if (signature.linkedin) links.push(`💼 ${signature.linkedin}`);
+      if (signature.calendar) links.push(`📅 ${signature.calendar}`);
+      
+      if (links.length > 0) {
+        html += `\n${links.join(' | ')}\n`;
+      }
+      
+      if (signature.note) {
+        html += `\n${signature.note}`;
+      }
+
+      return html;
+    }
+
+    // Display signature preview
+    function displaySignature(signature) {
+      const signatureSection = document.getElementById('signatureSection');
+      const signatureDisplay = document.getElementById('signatureDisplay');
+      const signatureSectionBulk = document.getElementById('signatureSectionBulk');
+      const signatureDisplayBulk = document.getElementById('signatureDisplayBulk');
+      
+      if (!signature || !signature.enabled) {
+        signatureSection.style.display = 'none';
+        if (signatureSectionBulk) signatureSectionBulk.style.display = 'none';
+        return;
+      }
+
+      let html = `<p style="margin: 0;">${signature.closing || 'Kind regards'},</p>`;
+      html += `<p style="margin: 5px 0 0 0; font-weight: 600;">${signature.name || 'Your Name'}</p>`;
+      
+      if (signature.company) {
+        html += `<p style="margin: 2px 0 0 0; color: #666;">${signature.company}</p>`;
+      }
+      
+      const links = [];
+      if (signature.phone) links.push(`📱 ${signature.phone}`);
+      if (signature.website) links.push(`<a href="${signature.website}" style="color: #667eea; text-decoration: none;">🌐 Website</a>`);
+      if (signature.linkedin) links.push(`<a href="${signature.linkedin}" style="color: #0077b5; text-decoration: none;">💼 LinkedIn</a>`);
+      if (signature.calendar) links.push(`<a href="${signature.calendar}" style="color: #4CAF50; text-decoration: none;">📅 Book a Meeting</a>`);
+      
+      if (links.length > 0) {
+        html += `<p style="margin: 8px 0 0 0; font-size: 13px;">${links.join(' | ')}</p>`;
+      }
+      
+      if (signature.note) {
+        html += `<p style="margin: 10px 0 0 0; font-style: italic; color: #888; font-size: 13px;">${signature.note}</p>`;
+      }
+
+      signatureDisplay.innerHTML = html;
+      signatureSection.style.display = 'block';
+      
+      // Also display in bulk tab
+      if (signatureDisplayBulk) {
+        signatureDisplayBulk.innerHTML = html;
+        signatureSectionBulk.style.display = 'block';
+      }
+    }
+
+    // Check Mailgun configuration and load signature on load
+    async function checkMailgunConfig() {
+      if (!businessId) {
+        console.warn('No business ID provided');
+        return false;
+      }
+
+      try {
+        const response = await fetch(`/api/business-settings/${businessId}`);
+        const data = await response.json();
+        
+        if (data.success && data.business?.automation_settings?.mailgun_config) {
+          mailgunConfig = data.business.automation_settings.mailgun_config;
+          
+          if (!mailgunConfig.enabled || !mailgunConfig.api_key) {
+            showWarning('Mailgun is not configured. Please configure it in Settings > Automation.');
+            return false;
+          }
+        } else {
+          showWarning('Mailgun is not configured. Please configure it in Settings > Automation.');
+          return false;
+        }
+
+        // Load email signature
+        if (data.business?.automation_settings?.email_signature) {
+          emailSignature = data.business.automation_settings.email_signature;
+          displaySignature(emailSignature);
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Error checking Mailgun config:', error);
+        showWarning('Could not verify Mailgun configuration.');
+        return false;
+      }
+    }
+
+    function showWarning(message) {
+      const warningBox = document.createElement('div');
+      warningBox.className = 'warning-box';
+      warningBox.innerHTML = `⚠️ <strong>Warning:</strong> ${message}`;
+      
+      const activeTab = document.querySelector('.tab-content.active');
+      const infoBox = activeTab.querySelector('.info-box');
+      if (infoBox && !activeTab.querySelector('.warning-box')) {
+        infoBox.after(warningBox);
+      }
+    }
+
+    // Initialize
+    checkMailgunConfig();
+
+    // AI Enhancement toggle and slider
+    const aiEnhanceEnabled = document.getElementById('aiEnhanceEnabled');
+    const aiEnhanceOptions = document.getElementById('aiEnhanceOptions');
+    const aiEnhanceLevel = document.getElementById('aiEnhanceLevel');
+    const aiLevelLabel = document.getElementById('aiLevelLabel');
+
+    if (aiEnhanceEnabled) {
+      aiEnhanceEnabled.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          aiEnhanceOptions.style.display = 'block';
+        } else {
+          aiEnhanceOptions.style.display = 'none';
+        }
+      });
+    }
+
+    if (aiEnhanceLevel) {
+      aiEnhanceLevel.addEventListener('input', (e) => {
+        const level = parseInt(e.target.value);
+        switch(level) {
+          case 0:
+            aiLevelLabel.textContent = 'Send as-is';
+            aiLevelLabel.style.color = '#666';
+            break;
+          case 1:
+            aiLevelLabel.textContent = 'Moderate';
+            aiLevelLabel.style.color = '#667eea';
+            break;
+          case 2:
+            aiLevelLabel.textContent = 'Major';
+            aiLevelLabel.style.color = '#FF6B35';
+            break;
+        }
+      });
+    }
+
+    // One-to-One Email Form
+    oneToOneForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const recipientEmail = document.getElementById('recipientEmail').value.trim();
+      const emailSubject = document.getElementById('emailSubjectOne').value.trim();
+      const emailBody = document.getElementById('emailBodyOne').value.trim();
+
+      if (!recipientEmail || !emailSubject || !emailBody) {
+        showStatus('Please fill in all required fields', 'error', statusOne);
+        return;
+      }
+
+      if (!userEmail || !businessId) {
+        showStatus('Missing user or business information', 'error', statusOne);
+        return;
+      }
+
+      // Check if Mailgun is configured
+      const hasMailgun = await checkMailgunConfig();
+      if (!hasMailgun) {
+        showStatus('Mailgun is not configured. Please set it up in Settings.', 'error', statusOne);
+        return;
+      }
+
+      sendOneBtn.disabled = true;
+      sendOneBtn.textContent = 'Sending...';
+      showStatus('Sending email...', 'info', statusOne);
+
+      try {
+        // Append signature if enabled
+        let finalBody = emailBody;
+        if (emailSignature && emailSignature.enabled) {
+          finalBody += generateSignatureHtml(emailSignature);
+        }
+
+        const payload = {
+          businessId,
+          recipientEmail,
+          subject: emailSubject,
+          body: finalBody,
+          mailgunConfig
+        };
+
+        const response = await fetch('/api/marketing/send-one-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to send: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        showStatus('✅ Email sent successfully!', 'success', statusOne);
+        oneToOneForm.reset();
+
+      } catch (error) {
+        console.error('Error:', error);
+        showStatus(`Error: ${error.message}`, 'error', statusOne);
+      } finally {
+        sendOneBtn.disabled = false;
+        sendOneBtn.textContent = 'Send Email';
+      }
+    });
+
+    // Bulk Email Form
+    const form = document.getElementById('emailLeadsForm');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -228,30 +685,50 @@
       const emailTemplate = document.getElementById('emailTemplate').value.trim();
 
       if (!sheetsUrl) {
-        showStatus('Please enter a Google Sheet URL', 'error');
+        showStatus('Please enter a Google Sheet URL', 'error', statusDiv);
         return;
       }
 
       if (!emailSubject) {
-        showStatus('Please enter an email subject', 'error');
+        showStatus('Please enter an email subject', 'error', statusDiv);
         return;
       }
 
       if (!userEmail || !businessId) {
-        showStatus('Missing user or business information', 'error');
+        showStatus('Missing user or business information', 'error', statusDiv);
+        return;
+      }
+
+      // Check if Mailgun is configured
+      const hasMailgun = await checkMailgunConfig();
+      if (!hasMailgun) {
+        showStatus('Mailgun is not configured. Please set it up in Settings.', 'error', statusDiv);
         return;
       }
 
       submitBtn.disabled = true;
-      showStatus('Processing your request...', 'info');
+      submitBtn.textContent = 'Processing...';
+      showStatus('Processing your bulk email request...', 'info', statusDiv);
 
       try {
+        // Get AI enhancement settings
+        const aiEnhanceEnabled = document.getElementById('aiEnhanceEnabled')?.checked || false;
+        const aiEnhanceLevel = aiEnhanceEnabled ? parseInt(document.getElementById('aiEnhanceLevel')?.value || 0) : 0;
+        const aiInstructions = document.getElementById('aiInstructions')?.value.trim() || '';
+
         const payload = {
           sheetsUrl,
           emailSubject,
           emailTemplate,
           userEmail,
-          businessId
+          businessId,
+          mailgunConfig,
+          emailSignature: emailSignature, // Include signature for webhook to use
+          aiEnhancement: {
+            enabled: aiEnhanceEnabled,
+            level: aiEnhanceLevel,
+            instructions: aiInstructions
+          }
         };
 
         const response = await fetch('/api/marketing/email-leads', {
@@ -266,21 +743,22 @@
         }
 
         const result = await response.json();
-        showStatus('✅ Your email campaign has been submitted! Emails will be sent to your leads and engagement will be tracked.', 'success');
+        showStatus('✅ Your bulk email campaign has been submitted! Emails will be sent to your leads and engagement will be tracked.', 'success', statusDiv);
         form.reset();
 
       } catch (error) {
         console.error('Error:', error);
-        showStatus(`Error: ${error.message}`, 'error');
+        showStatus(`Error: ${error.message}`, 'error', statusDiv);
       } finally {
         submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Bulk Emails';
       }
     });
 
-    function showStatus(message, type) {
-      statusDiv.textContent = message;
-      statusDiv.className = `status ${type}`;
-      statusDiv.style.display = 'block';
+    function showStatus(message, type, element) {
+      element.textContent = message;
+      element.className = `status ${type}`;
+      element.style.display = 'block';
     }
   </script>
 </body>

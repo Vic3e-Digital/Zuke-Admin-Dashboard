@@ -1,0 +1,252 @@
+/* ========================================
+   TAB-BASED NAVIGATION STYLES
+   ======================================== */
+
+/* Tabs Container */
+.tabs-container {
+  padding: 0 20px;
+  margin: 30px 0 0 0;
+}
+
+.tabs-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: #F3F4F6;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+/* Individual Tab Button */
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: #374151;
+}
+
+.tab-btn.active {
+  background: #FFFFFF;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab Icon */
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.tab-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+/* Active tab underline accent (optional) */
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+}
+
+/* Tab with colored indicator */
+.tab-btn[data-tab="photography-models"].active {
+  border-bottom: 2px solid #8B5CF6;
+}
+
+.tab-btn[data-tab="store-management"].active {
+  border-bottom: 2px solid #FF6B35;
+}
+
+.tab-btn[data-tab="audio-tools"].active {
+  border-bottom: 2px solid #F59E0B;
+}
+
+.tab-btn[data-tab="ai-generation"].active {
+  border-bottom: 2px solid #3B82F6;
+}
+
+.tab-btn[data-tab="photoshoots"].active {
+  border-bottom: 2px solid #10B981;
+}
+
+/* ========================================
+   TAB PANELS
+   ======================================== */
+
+.tab-panel {
+  display: none;
+  padding: 30px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Panel Header */
+.panel-header {
+  margin-bottom: 24px;
+}
+
+.panel-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.panel-description {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* ========================================
+   SIM CARDS GRID (for cards inside panels)
+   ======================================== */
+
+.sim-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+
+.page-header {
+  padding: 0 20px;
+  margin-bottom: 0;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  font-size: 16px;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* ========================================
+   RESPONSIVE STYLES
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .tabs-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .tabs-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .tabs-container {
+    padding: 0 16px;
+    margin: 20px 0 0 0;
+  }
+  
+  .tabs-wrapper {
+    padding: 6px;
+    gap: 4px;
+  }
+  
+  .tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  
+  .tab-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .tab-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .tab-panel {
+    padding: 20px 16px;
+  }
+  
+  .panel-header h2 {
+    font-size: 20px;
+  }
+  
+  .sim-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .page-header {
+    padding: 0 16px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  /* Hide text on very small screens, show only icons */
+  .tab-btn span:not(.tab-icon) {
+    display: none;
+  }
+  
+  .tab-btn .tab-icon {
+    margin: 0;
+  }
+}

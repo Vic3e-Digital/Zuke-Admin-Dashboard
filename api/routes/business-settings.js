@@ -822,4 +822,57 @@ router.post('/:businessId/test-apollo',
   }
 );
 
+// -------------------------
+// Test Mailgun Connection
+// -------------------------
+router.post('/:businessId/test-mailgun',
+  ValidationMiddleware.validateBusinessId,
+  async (req, res) => {
+    try {
+      const { api_key, api_domain, email_domain } = req.body;
+
+      if (!api_key || !api_domain || !email_domain) {
+        return res.json({ 
+          success: false, 
+          error: 'All Mailgun fields are required' 
+        });
+      }
+
+      console.log('[Mailgun] Testing API connection...');
+
+      // Test Mailgun API by getting domain info
+      const domainUrl = `${api_domain}/v3/domains/${email_domain}`;
+      
+      const response = await fetch(domainUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`api:${api_key}`).toString('base64')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Invalid API credentials or domain');
+      }
+
+      const data = await response.json();
+
+      res.json({ 
+        success: true, 
+        message: 'Mailgun connected successfully',
+        domain_name: data.domain?.name || email_domain,
+        state: data.domain?.state || 'active'
+      });
+
+    } catch (error) {
+      console.error('[Mailgun] Test connection error:', error);
+      res.json({ 
+        success: false, 
+        error: error.message || 'Failed to connect to Mailgun API'
+      });
+    }
+  }
+);
+
 module.exports = router;

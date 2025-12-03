@@ -32,6 +32,7 @@ const subscriptionActivationRouter = require('./api/routes/subscription-activati
 const cancelSubscriptionRouter = require('./api/cancel-subscription');
 const addCreditsRouter = require('./api/add-credits');
 const promoCodesRouter = require('./api/promo-codes');
+const emailTrackingRouter = require('./api/routes/email-tracking');
 
 // -------------------------
 // ✅ MIDDLEWARE FIRST (BEFORE ROUTES!)
@@ -125,10 +126,15 @@ app.use('/api/activate-subscription', subscriptionActivationRouter);
 app.use('/api/cancel-subscription', cancelSubscriptionRouter);
 app.use('/api/add-credits', addCreditsRouter);
 app.use('/api', promoCodesRouter);
+app.use('/api/email-tracking', emailTrackingRouter);
 app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/lead-generation', require('./api/lead-generation'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
+
+// Image generation API
+const multiImageRouter = require('./api/image-generation/multi-image');
+app.use('/api/image-generation', multiImageRouter);
 
 // Content Calendar routes - MUST be before general marketing router
 app.post('/api/marketing/generate-content-calendar', contentCalendarApi.generateContentCalendar);

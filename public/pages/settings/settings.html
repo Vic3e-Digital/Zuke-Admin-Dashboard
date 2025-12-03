@@ -427,6 +427,181 @@
     </div>
   </div>
 
+  <!-- ✅ Mailgun Email Settings Category (NEW) -->
+  <div class="automation-category">
+    <div class="category-header">
+      <div class="category-icon mailgun">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+      </div>
+      <div class="category-info">
+        <h3>Mailgun Email Service</h3>
+        <p>Configure Mailgun for automated email delivery in lead generation</p>
+      </div>
+      <span class="availability-badge active">Active</span>
+    </div>
+    
+    <div class="automation-links">
+      <div class="settings-section">
+        <div class="form-group">
+          <label>Mailgun API Key</label>
+          <input type="password" id="mailgunApiKey" class="form-input" 
+                 placeholder="Enter your Mailgun API key" />
+          <span class="field-note">
+            Get your API key from 
+            <a href="https://app.mailgun.com/app/account/security/api_keys" target="_blank" style="color: #667eea; text-decoration: underline;">
+              Mailgun Dashboard
+            </a>
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>API Domain (Base URL)</label>
+          <input type="text" id="mailgunApiDomain" class="form-input" 
+                 placeholder="https://api.mailgun.net" />
+          <span class="field-note">Usually https://api.mailgun.net or https://api.eu.mailgun.net for EU region</span>
+        </div>
+
+        <div class="form-group">
+          <label>Email Domain</label>
+          <input type="text" id="mailgunEmailDomain" class="form-input" 
+                 placeholder="e.g., mg.zuke.co.za" />
+          <span class="field-note">The domain you've configured in Mailgun for sending emails</span>
+        </div>
+
+        <div class="form-group">
+          <label>From Email Address</label>
+          <input type="email" id="mailgunFromEmail" class="form-input" 
+                 placeholder="noreply@zuke.co.za" />
+          <span class="field-note">Default sender email address for automated emails</span>
+        </div>
+
+        <div class="toggle-setting">
+          <div class="toggle-info">
+            <h4>Enable Mailgun Integration</h4>
+            <p>Allow automated email delivery for lead generation and enrichment</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="mailgunEnabled" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="detail-actions" style="margin-top: 15px;">
+          <button class="btn-secondary btn-sm" onclick="testMailgunConnection()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            Test Connection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Email Signature Settings (NEW) -->
+  <div class="automation-category">
+    <div class="category-header">
+      <div class="category-icon" style="background: #E8F5E9;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <div class="category-info">
+        <h3>Email Signature</h3>
+        <p>Customize your email signature with contact details and links</p>
+      </div>
+      <span class="availability-badge active">Active</span>
+    </div>
+    
+    <div class="automation-links">
+      <div class="settings-section">
+        <div class="form-group">
+          <label>Signature Name/Title</label>
+          <input type="text" id="signatureName" class="form-input" 
+                 placeholder="e.g., John Doe - Marketing Manager" />
+          <span class="field-note">Your name and job title</span>
+        </div>
+
+        <div class="form-group">
+          <label>Closing Line</label>
+          <select id="signatureClosing" class="form-input">
+            <option value="Kind regards">Kind regards</option>
+            <option value="Best regards">Best regards</option>
+            <option value="Warm regards">Warm regards</option>
+            <option value="Thanks">Thanks</option>
+            <option value="Cheers">Cheers</option>
+            <option value="Sincerely">Sincerely</option>
+          </select>
+          <span class="field-note">Choose your email closing</span>
+        </div>
+
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" id="signatureCompany" class="form-input" 
+                 placeholder="e.g., Zuke Digital" />
+          <span class="field-note">Your company or business name</span>
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="signaturePhone" class="form-input" 
+                 placeholder="e.g., +27 11 123 4567" />
+          <span class="field-note">Contact phone number (optional)</span>
+        </div>
+
+        <div class="form-group">
+          <label>Website URL</label>
+          <input type="url" id="signatureWebsite" class="form-input" 
+                 placeholder="https://www.yourcompany.com" />
+          <span class="field-note">Your business website (optional)</span>
+        </div>
+
+        <div class="form-group">
+          <label>LinkedIn Profile URL</label>
+          <input type="url" id="signatureLinkedin" class="form-input" 
+                 placeholder="https://www.linkedin.com/in/yourprofile" />
+          <span class="field-note">Your LinkedIn profile link (optional)</span>
+        </div>
+
+        <div class="form-group">
+          <label>Calendar Booking Page</label>
+          <input type="url" id="signatureCalendar" class="form-input" 
+                 placeholder="https://calendly.com/yourlink" />
+          <span class="field-note">Link to your calendar booking page (optional)</span>
+        </div>
+
+        <div class="form-group">
+          <label>Additional Note</label>
+          <textarea id="signatureNote" class="form-input" rows="2" 
+                    placeholder="e.g., Let's connect and grow your business together!"></textarea>
+          <span class="field-note">Optional tagline or additional message</span>
+        </div>
+
+        <div class="toggle-setting">
+          <div class="toggle-info">
+            <h4>Enable Email Signature</h4>
+            <p>Automatically append signature to emails</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="signatureEnabled" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #666;">Preview:</h4>
+          <div id="signaturePreview" style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;">
+            <!-- Preview will be generated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <!-- Sales Category (Growth & Blaze Plans) -->
 <div class="automation-category" style="display: none;">
   <div class="category-header">
@@ -1328,6 +1503,7 @@
 .category-icon.email { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; }
 .category-icon.ai { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
 .category-icon.apollo { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; }
+.category-icon.mailgun { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
 
 .category-info {
   flex: 1;
