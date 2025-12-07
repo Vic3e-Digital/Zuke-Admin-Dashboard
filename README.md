@@ -1,41 +1,211 @@
-# Zuke Admin Dashboard
+# Zuke - Turn Ideas Into Income
 
-A comprehensive web-based admin dashboard for managing Zuke businesses, creatives, and audio transcription services with real-time analytics and multi-platform social media integration.
+**AI-Powered Innovation & Business Acceleration Platform**
 
-## 🚀 Features
+Zuke is a comprehensive platform that democratizes business success by providing AI-powered tools to validate ideas, build prototypes, find partners, and scale operations. Whether you're a student launching a final-year project, a team competing in a hackathon, a corporate innovation lab testing new concepts, or a hustler building a sustainable business in the informal economy - Zuke accelerates your path from idea to income.
+
+---
+
+## 🎯 Who Is Zuke For?
+
+### B2B: Innovation Acceleration
+Perfect for organizations and teams that need to move fast from concept to market:
+
+- **🎓 Universities & Education**: Help students turn final-year projects into market-ready businesses before graduation
+- **🏆 Hackathon Events**: Equip teams with AI tools to rapidly prototype and validate ideas during time-constrained competitions
+- **🏢 Corporate Innovation Hubs**: Enable internal R&D teams to test, validate, and commercialize new product concepts
+- **🚀 Innovation Centers**: Provide incubators and accelerators with a complete toolkit for guiding early-stage ventures
+
+### B2C: Business Growth & Survival Tools
+Designed for entrepreneurs who need affordable, AI-powered alternatives to expensive agencies:
+
+- **💼 Hustlers & Side Businesses**: Replace costly social media managers, designers, and consultants with AI assistants
+- **🌍 Informal & Semi-Formal African Businesses**: Build visibility and credibility in competitive marketplaces
+- **👥 Youth Entrepreneurs**: Access professional tools typically reserved for established businesses
+- **📈 Small Businesses Scaling for Longevity**: Sustainable growth without breaking the bank
+
+---
+
+## 🚀 Core Value Propositions
+
+### From Idea to Income, Faster and Smarter
+
+**For Innovators (B2B):**
+- ✅ **Idea Validation**: AI-generated business cases with market analysis, financial projections, and go-to-market strategies
+- ✅ **Rapid Prototyping**: Generate marketing content, business documents, and creative assets in minutes
+- ✅ **Partner Discovery**: Connect with photographers, models, designers, and talent through the Creative Hub marketplace
+- ✅ **Market Testing**: Launch social media campaigns and gather real-time feedback before full commitment
+- ✅ **Collaboration**: Multi-business management with team-ready features
+
+**For Business Builders (B2C):**
+- 💰 **Cost Reduction**: Replace R5,000+/month social media managers with AI tools (pay-as-you-go from R10)
+- 🛍️ **Marketplace Visibility**: Get discovered on an integrated marketplace (think Takealot/Gumtree for services & products)
+- 📱 **Social Media Automation**: Schedule posts, generate content, and manage multiple platforms from one dashboard
+- 🎨 **Creative Production**: AI-generated images, videos, content calendars, and branding materials
+- 📊 **Business Intelligence**: Track wallet usage, analyze performance, and optimize spending
+
+---
+
+## ✨ Platform Features Overview
 
 ### Core Functionality
-- **Authentication:** Auth0 SPA integration with secure, iframe-compatible authentication flow
-- **Database:** MongoDB for persistent data storage
-- **Frontend:** HTML5, CSS3, and vanilla JavaScript with responsive design
-- **Backend:** Node.js/Express RESTful API
+- **🔐 Authentication**: Auth0 SPA integration with secure, iframe-compatible authentication flow
+- **💾 Database**: MongoDB for persistent data storage and multi-business management
+- **🎨 Frontend**: Modern, responsive HTML5/CSS3/JavaScript interface with intuitive navigation
+- **⚙️ Backend**: Node.js/Express RESTful API with modular architecture
+- **💳 Wallet System**: Pay-as-you-go credit system with transparent pricing (simple subscriptions, no hidden fees)
 
-### Audio Transcription System
-- **Azure OpenAI Whisper Integration:** High-accuracy audio transcription with configurable deployments
-- **Speaker Diarization:** Identify multiple speakers using Azure GPT-4o deployment
-- **Cloudinary Storage:** Secure CDN-based audio file storage with automatic scaling
-- **Cost Tracking:** N8N wallet integration for real-time billing (R15.00 per transcription)
-- **Email Delivery:** Webhook-based transcription result delivery to users
+---
 
-### Business Management
-- **Product Management:** Create and manage business products
-- **Service Management:** Track and organize business services
-- **Settings Management:** Granular control over business configurations
+## 📍 Platform Navigation: Main Tabs & Tools
 
-### Social Media Integration
-- **Multi-Platform Support:** Facebook, Instagram, LinkedIn, TikTok, YouTube
-- **OAuth Integration:** Secure OAuth 2.0 implementations for each platform
-- **Content Management:** Schedule and publish posts across platforms
-- **Analytics:** Track performance metrics per platform
+Zuke organizes all features into **three main hubs** accessible from the dashboard sidebar:
+
+### 1️⃣ **Business Tab** - Validate, Plan & Network
+
+The Business tab is your strategic command center for idea validation, business planning, and partner discovery.
+
+#### **Main Sim Cards** (Category Cards):
+
+##### 🟠 **Build a Plan for Your Business**
+Your idea validation and strategic planning hub.
+- **Business Case Generator (AI)**: Input your idea and get a comprehensive business plan with:
+  - Market analysis and competitive landscape
+  - Financial projections and revenue models
+  - Go-to-market strategy and milestone planning
+  - Perfect for pitch decks, funding applications, or internal approvals
+- **Regenerate Business Case**: Refine and update your plan as your idea evolves
+- **Generate Presentation (Coming Soon)**: Auto-create pitch decks from your business case
+
+##### 🟠 **Your Business Offers**
+Manage your product and service catalog - what you're bringing to market.
+- **Add Products**: Upload product images, descriptions, pricing, and inventory
+- **Add Services**: Define service offerings, packages, and rates
+- **View Products & Services**: Track and edit your complete catalog
+- **Integrated with Marketplace**: Automatically syncs to Zuke's discovery marketplace
+
+##### 🟠 **Business Networking**
+Find partners, customers, and collaborators to accelerate growth.
+- **Find Business Partners**: Connect with complementary businesses for partnerships
+- **Get Leads & Customers**: Access tools to identify and reach potential buyers
+- **Business Chat (Neo AI Agent)**: AI-powered business advisor for strategy and guidance
+
+---
+
+### 2️⃣ **Creative Tab** - Content, Design & Talent
+
+The Creative tab provides all tools for producing professional-grade content and connecting with creative talent.
+
+#### **Main Sim Cards**:
+
+##### 🟣 **Photography Models**
+Access and manage photography models for product shoots, campaigns, and content creation.
+- **Browse Models**: View portfolios of registered photography models
+- **Request Contact Details**: Pay R10 to unlock model contact info (65% goes to model, 35% to platform)
+- **Register as a Model**: Creatives can join the marketplace and earn from bookings
+- **Track Earnings**: Models see revenue from contact requests in real-time
+
+##### 🟠 **Improve Brand Appeal**
+Generate and refine visual content to elevate your brand identity.
+- **AI Image Generation**: Create product images, marketing visuals, and social media graphics from text prompts
+- **Text-to-Image Editor**: Edit existing images with AI-powered transformations
+- **Branding Assets**: Generate logos, color palettes, and brand guidelines (Beta)
+
+##### 🟠 **Audio Tools**
+Professional audio processing for meetings, pitches, and content creation.
+- **Audio Transcription (R15)**: Upload audio files and receive:
+  - Full text transcription (Azure OpenAI Whisper)
+  - Speaker diarization (identify multiple speakers in conversations)
+  - Email delivery of results
+  - Supports MP3, WAV, FLAC, OGG formats
+- **Podcast Editing (Coming Soon)**: AI-assisted podcast post-production
+
+##### 🔵 **Create Photo and Video Content**
+AI-powered video and image generation for marketing campaigns.
+- **Generate AI Videos (Veo)**: Text-to-video generation powered by Google's Veo model
+- **Create Images**: Bulk AI image generation for social media, ads, and content
+- **Video Editing (Coming Soon)**: AI-assisted video editing and enhancements
+
+##### 🟢 **Photoshoots**
+Book professional photography sessions and studios.
+- **Book a Studio**: Reserve photography studios for product shoots and content creation
+- **Find Photographers**: Connect with professional photographers in your area
+- **Session Management**: Track bookings, payments, and deliverables
+
+---
+
+### 3️⃣ **Marketing Tab** - Social Media & Growth
+
+The Marketing tab is your automation and distribution engine for reaching customers and building visibility.
+
+#### **Main Sim Cards**:
+
+##### 🔵 **Social Media Management**
+Schedule, publish, and manage content across all major platforms.
+- **AI Content Calendar**: Generate 30-day content strategies with AI-suggested post ideas and optimal timing
+- **Post Images to Socials**: Bulk upload and schedule image posts to Facebook, Instagram, LinkedIn, TikTok, YouTube
+- **Post Videos to Socials**: Publish video content with automatic format optimization per platform
+- **Draft Social Posts**: AI-assisted caption writing with hashtag suggestions
+- **Edit Images with AI**: Last-minute edits before publishing (filters, cropping, text overlays)
+- **Connected Platforms**: One-click OAuth integration with Facebook, Instagram, LinkedIn, TikTok, YouTube
+
+##### 🟠 **Marketing Tools**
+Email outreach, lead generation, and automation.
+- **Send Smart Outreach Emails**: AI-generated personalized email campaigns for customer acquisition
+- **Lead Generation Tools**: Capture and manage potential customer information
+- **Email Analytics (Coming Soon)**: Track open rates, click-throughs, and conversions
+
+---
+
+## 🔄 Understanding "Sim Cards"
+
+**Sim Cards** are the individual tool cards within each main category. Think of them as apps within an app store:
+
+- **Main Sim Cards** (Large category cards) = The folders that organize related tools
+- **Sim Cards** (Smaller tool cards) = Individual features you click to launch
+
+**Visual Hierarchy:**
+```
+Dashboard Sidebar
+ ├─ Business Tab
+ │   ├─ Main Sim Card: "Build a Plan for Your Business" (click to expand)
+ │   │   ├─ Sim Card: Business Case Generator
+ │   │   ├─ Sim Card: Regenerate Business Case
+ │   │   └─ Sim Card: Generate Presentation (Coming Soon)
+ │   ├─ Main Sim Card: "Your Business Offers"
+ │   │   ├─ Sim Card: Add Products
+ │   │   ├─ Sim Card: Add Services
+ │   │   └─ Sim Card: View Products & Services
+ │   └─ Main Sim Card: "Business Networking"
+ │       ├─ Sim Card: Find Business Partners
+ │       ├─ Sim Card: Get Leads & Customers
+ │       └─ Sim Card: Business Chat (Neo AI)
+```
+
+**How It Works:**
+1. Click a **Main Sim Card** (e.g., "Build a Plan for Your Business")
+2. The page expands to show all related **Sim Cards** (tools) in that category
+3. Click a **Sim Card** to launch the tool in a modal window or dedicated page
+4. Complete your task and return to the dashboard
+
+---
 
 ## 📋 Prerequisites
 
-- **Node.js & npm** - [Download](https://nodejs.org/)
-- **MongoDB** - Local or remote instance
+**Technical Requirements:**
+- **Node.js & npm** (v16 or higher) - [Download](https://nodejs.org/)
+- **MongoDB** - Local or remote instance (MongoDB Atlas recommended)
 - **Auth0 Account** - [Create Free Account](https://auth0.com/)
-- **Azure Account** - For OpenAI models (Whisper, GPT-4o)
-- **Cloudinary Account** - For audio file storage
-- **N8N Webhook URL** - For wallet/billing integration
+- **Azure Account** - For OpenAI models (Whisper for transcription, GPT-4o for diarization)
+- **Cloudinary Account** - For audio/image/video storage
+- **N8N Webhook URL** - For wallet/billing integration (optional for local dev)
+- **Google Cloud Account** - For Veo video generation API (optional)
+
+**Recommended for Production:**
+- **Mailgun Account** - For transactional emails (transcription results, contact requests)
+- **Domain Name** - For custom branding and email authentication
+
+---
 
 ## 🔧 Installation & Setup
 
@@ -183,6 +353,121 @@ Access the dashboard at: `http://localhost:3000/public/dashboard.html`
 ├── package.json               # Dependencies
 └── README.md                  # This file
 ```
+
+---
+
+## 💳 Pricing & Wallet System
+
+Zuke operates on a **transparent pay-as-you-go model** with no monthly subscriptions or hidden fees.
+
+### Pricing Structure
+
+| Service | Cost | Revenue Split |
+|---------|------|---------------|
+| **Audio Transcription** | R15.00 per file | 100% to Zuke (Azure API costs) |
+| **Model Contact Request** | R10.00 per contact | 65% to model (R6.50), 35% to Zuke (R3.50) |
+| **AI Image Generation** | R2.00 per image | 100% to Zuke (API costs) |
+| **AI Video Generation (Veo)** | R25.00 per video | 100% to Zuke (Google API costs) |
+| **Social Media Posting** | Free (with connected accounts) | - |
+| **Business Case Generation** | Free | - |
+
+### How the Wallet Works
+
+1. **Top-Up Credits**: Add funds to your wallet via the "TOPUP" button (minimum R50)
+2. **Pay Per Use**: Credits are deducted automatically when you use paid features
+3. **Real-Time Balance**: Your wallet balance is always visible in the dashboard header
+4. **Transaction History**: Track all spending in your wallet page
+5. **No Expiry**: Credits never expire - use them at your own pace
+
+**Why Pay-As-You-Go?**
+- **No Waste**: Only pay for what you actually use
+- **Predictable Costs**: Transparent pricing with no surprise bills
+- **Scalability**: Start small (R50 top-up) and scale as you grow
+- **Flexibility**: No lock-in contracts or cancellation fees
+
+**Example Cost Comparison:**
+
+| Traditional Approach | Monthly Cost | Zuke Approach | Monthly Cost |
+|---------------------|--------------|----------------|--------------|
+| Social Media Manager | R5,000 - R15,000 | AI Content Calendar + Scheduling | R0 (free) |
+| Graphic Designer | R3,000 - R8,000 | AI Image Generation (50 images) | R100 |
+| Photographer + Model | R2,500 - R10,000 | Model Contact + DIY Shoot | R10 + your time |
+| Transcription Service | R50 - R200 per hour | Audio Transcription (R15/file) | R15 - R60 |
+| **Total Traditional** | **R10,550 - R33,200** | **Zuke Total** | **R125 - R170** |
+
+**Savings: 95-98% reduction in creative/marketing costs**
+
+---
+
+## 🏢 Use Case Scenarios
+
+### Scenario 1: University Final-Year Project → Market-Ready Business
+**Student**: Thabo (UCT Computer Science, Cape Town)
+
+**Goal**: Launch his AI-powered inventory app for spaza shops before graduation.
+
+**Zuke Workflow:**
+1. **Business Tab** → Generate business case with market analysis and financial projections (free)
+2. **Business Tab** → Add app to product catalog with screenshots and pricing (free)
+3. **Creative Tab** → Generate marketing images for app store and social media (R2 each x 10 = R20)
+4. **Marketing Tab** → Create 30-day social media content calendar (free) and schedule posts to LinkedIn, Twitter, Facebook (free)
+5. **Business Tab** → Use Business Chat (Neo AI) to get advice on investor pitches (free)
+6. **Creative Tab** → Transcribe user interview audio for case study (R15/interview x 3 = R45)
+
+**Total Cost**: R65 | **Traditional Agency Cost**: R15,000+ | **Time Saved**: 40+ hours
+
+---
+
+### Scenario 2: Hackathon Team → Functional Prototype
+**Team**: 4 students at a 48-hour hackathon (Johannesburg)
+
+**Goal**: Build and pitch a food delivery app for township businesses.
+
+**Zuke Workflow (Hour-by-Hour):**
+- **Hour 2**: Business case generation → Validate idea with AI market analysis (10 mins, free)
+- **Hour 8**: Generate logo and branding assets with AI (15 mins, R10)
+- **Hour 18**: Create mockup screenshots with AI image generation (20 mins, R20)
+- **Hour 30**: Draft email outreach to potential pilot customers (15 mins, free)
+- **Hour 40**: Generate pitch deck presentation from business case (10 mins, free - coming soon)
+- **Hour 45**: Transcribe team brainstorming sessions for documentation (R15/file x 2 = R30)
+
+**Total Cost**: R60 | **Result**: Professional pitch deck, validated business model, visual prototype
+
+---
+
+### Scenario 3: Informal Business → Marketplace Visibility
+**Owner**: Nomsa (Spaza Shop Owner, Soweto)
+
+**Goal**: Increase sales by getting discovered online and competing with larger retailers.
+
+**Zuke Workflow:**
+1. **Business Tab** → Add 50 products to catalog with photos (taken on phone) and pricing (free)
+2. **Products Auto-Listed** → Business appears in Zuke's integrated marketplace (like Takealot for local services)
+3. **Marketing Tab** → Generate social media posts about weekly specials (free)
+4. **Marketing Tab** → Schedule posts to Facebook Business Page (free)
+5. **Creative Tab** → Find a local photographer to shoot professional product photos (R10 contact fee)
+6. **Marketing Tab** → Send email campaigns to previous customers announcing online ordering (free)
+
+**Total Cost**: R10 | **Monthly Agency Cost**: R5,000+ | **Result**: Online presence + new customer channel
+
+---
+
+### Scenario 4: Corporate Innovation Lab → Concept Testing
+**Company**: Telco R&D team testing new IoT product for smart homes
+
+**Goal**: Validate market demand before committing R2M to development.
+
+**Zuke Workflow:**
+1. **Business Tab** → Generate business case with competitive analysis and TAM/SAM/SOM (free)
+2. **Creative Tab** → Create explainer video with AI (R25)
+3. **Marketing Tab** → Generate 10 variations of ad images for A/B testing (R20)
+4. **Marketing Tab** → Launch social media campaign to gauge interest and collect leads (free posting)
+5. **Business Tab** → Track engagement and update business case with real feedback data (free)
+6. **Creative Tab** → Transcribe customer interview calls for qualitative insights (R15/call x 10 = R150)
+
+**Total Cost**: R195 | **Traditional Market Research**: R50,000+ | **Time to Insights**: 2 weeks vs. 3 months
+
+---
 
 ## 🔑 Recent Changes & Improvements
 
@@ -448,20 +733,181 @@ N8N_WALLET_WEBHOOK_URL
 - Test connection string in MongoDB Compass
 - Verify IP whitelist (if using MongoDB Atlas)
 
-## 📞 Support & Documentation
+---
 
-- **Auth0 Docs:** https://auth0.com/docs
-- **Azure OpenAI Docs:** https://learn.microsoft.com/en-us/azure/cognitive-services/openai/
-- **Cloudinary Docs:** https://cloudinary.com/documentation
-- **MongoDB Docs:** https://docs.mongodb.com/
-- **Express Docs:** https://expressjs.com/
+## 🌍 Impact & Vision
 
-## 📝 License
+### The Problem We're Solving
 
-Private project for Zuke Admin Dashboard - Vic3e Digital
+**For Innovators:**
+- 73% of university projects never reach market (lack of business skills, time, and resources)
+- Hackathon teams struggle to move beyond prototypes due to high costs of validation and marketing
+- Corporate innovation labs spend 80% of time on manual tasks instead of creative problem-solving
+
+**For Small Businesses:**
+- 90% of South African SMEs fail within the first 5 years (lack of visibility, high operating costs)
+- Informal businesses can't afford R5,000+/month for social media management
+- Youth unemployment is 63% - many have hustle ideas but no tools to scale them
+
+### Our Solution
+
+Zuke **democratizes access** to tools previously reserved for corporations and agencies:
+- **AI replaces expensive agencies** → 95% cost reduction
+- **One platform, all tools** → No more juggling 10+ subscriptions
+- **Pay-as-you-go** → Start with R50, scale to R50,000 at your pace
+- **African-first design** → Built for informal economy, township businesses, and emerging markets
+
+### Success Metrics (Vision)
+
+By 2027, Zuke aims to:
+- ✅ Help **10,000+ university students** commercialize their projects
+- ✅ Power **500+ hackathon events** across Africa
+- ✅ Support **50,000+ informal businesses** in achieving online visibility
+- ✅ Enable **1,000+ corporate innovation teams** to cut validation costs by 80%
+- ✅ Create **R100M+ in economic value** for African entrepreneurs
 
 ---
 
-**Last Updated:** November 20, 2025
-**Current Version:** 2.0.0 (Audio Transcription with Cloudinary & Azure OpenAI)
-**Session:** Audio transcription system complete - Auth0 auth flow fixed, API routes corrected, Cloudinary CDN integration, Azure models parameterized
+## 🤝 Contributing & Partnership Opportunities
+
+### For Universities & Innovation Hubs
+- **Institutional Licensing**: Volume pricing for student cohorts and incubators
+- **Custom Integrations**: White-label solutions for your innovation programs
+- **Training Workshops**: We can train your teams on rapid prototyping with AI
+
+**Contact**: partnerships@zuke.co.za
+
+### For Developers
+Zuke is built with a modular architecture designed for extensibility:
+- **Open API (Planned)**: Build third-party integrations
+- **Plugin System (Roadmap)**: Contribute new Sim Cards for specialized industries
+- **Community Modules**: Share templates, workflows, and best practices
+
+**Contribute**: Fork the repo and submit pull requests for new features
+
+### For Investors
+Zuke is positioned at the intersection of:
+- **AI/ML Adoption in Emerging Markets** (45% CAGR)
+- **Small Business Digitization** (R500B TAM in South Africa alone)
+- **Creator Economy Tools** (R120B global market)
+
+**Traction**: [Add your current metrics here - users, revenue, partnerships]
+
+**Contact**: invest@zuke.co.za
+
+---
+
+## 📞 Support & Documentation
+
+### Technical Documentation
+- **Auth0 Docs**: https://auth0.com/docs
+- **Azure OpenAI Docs**: https://learn.microsoft.com/en-us/azure/cognitive-services/openai/
+- **Cloudinary Docs**: https://cloudinary.com/documentation
+- **MongoDB Docs**: https://docs.mongodb.com/
+- **Express Docs**: https://expressjs.com/
+
+### Platform Guides
+- **[AI Chatbot RAG Guide](/docs/AI_CHATBOT_RAG.md)**: How the business chatbot works
+- **[Model Loader Guide](/docs/architecture/MODEL_LOADER_GUIDE.md)**: Understanding the creative model system
+- **[Email Tracking Implementation](/docs/EMAIL_TRACKING_IMPLEMENTATION.md)**: Email campaign tracking setup
+- **[Cloudinary Flow](/docs/cloudinary/CLOUDINARY_FLOW_DIAGRAM.md)**: Audio/image upload architecture
+
+### Support Channels
+- **Email**: support@zuke.co.za
+- **Documentation Portal**: https://docs.zuke.co.za (coming soon)
+- **Community Forum**: https://community.zuke.co.za (coming soon)
+- **Bug Reports**: [GitHub Issues](https://github.com/Vic3e-Digital/Zuke-Admin-Dashboard/issues)
+
+---
+
+## 🗺️ Roadmap
+
+### Q1 2026 (Jan - Mar)
+<!-- - [ ] **Mobile App (iOS/Android)**: Native mobile experience for on-the-go entrepreneurs -->
+- [ ] **Offline Mode**: Work without internet, sync when connected (critical for townships with intermittent connectivity)
+- [ ] **WhatsApp Integration**: Receive transcription results, model contacts, and alerts via WhatsApp Business API
+- [ ] **Advanced Analytics Dashboard**: Track ROI per tool, compare costs vs. traditional agencies
+
+### Q2 2026 (Apr - Jun)
+- [ ] **Zuke Marketplace 2.0**: Public-facing e-commerce platform for products/services listed by users
+- [ ] **Payment Integration**: Accept payments directly through Zuke (Paystack, Stripe, EFT)
+- [ ] **Team Collaboration**: Multi-user accounts for agencies, innovation labs, and teams
+- [ ] **Custom Branding**: White-label options for universities and corporate programs
+
+### Q3 2026 (Jul - Sep)
+- [ ] **AI Business Coach**: Personalized recommendations based on your business performance
+- [ ] **Financial Management**: Invoicing, expense tracking, and basic accounting
+- [ ] **Legal Templates**: Contracts, terms of service, privacy policies (South African law compliant)
+- [ ] **Investor Matching**: Connect validated businesses with angel investors and VCs
+
+### Q4 2026 (Oct - Dec)
+- [ ] **Regional Expansion**: Localized versions for Kenya, Nigeria, Ghana (currency, language, compliance)
+- [ ] **API Marketplace**: Third-party developers can build and sell plugins/Sim Cards
+- [ ] **Voice Interface**: Manage your business with voice commands (ideal for low-literacy users)
+- [ ] **Blockchain Payments**: Crypto wallet integration for cross-border transactions
+
+---
+
+## 📝 License
+
+**Proprietary Software** - Vic3e Digital © 2025
+
+This repository is private and contains proprietary code. Unauthorized copying, distribution, or use of this software is strictly prohibited without explicit written permission from Vic3e Digital.
+
+For licensing inquiries: legal@zuke.co.za
+
+---
+
+## 🙏 Acknowledgments
+
+Built with ❤️ in South Africa for African entrepreneurs, innovators, and dreamers.
+
+Special thanks to:
+- **Auth0** for authentication infrastructure
+- **Microsoft Azure** for AI/ML services (OpenAI, Cognitive Services)
+- **Cloudinary** for media storage and CDN
+- **MongoDB** for flexible, scalable data storage
+- **Google Cloud** for Veo video generation API
+- **Open-source community** for foundational libraries and inspiration
+
+---
+
+**Last Updated:** December 7, 2025  
+**Current Version:** 2.1.0 (Innovation-Focused Rebranding + Creative Hub Expansion)  
+**Repository**: [Vic3e-Digital/Zuke-Admin-Dashboard](https://github.com/Vic3e-Digital/Zuke-Admin-Dashboard)  
+**Website**: https://business.zuke.co.za  
+
+---
+
+## 🚀 Quick Start Summary
+
+```bash
+# 1. Clone and install
+git clone https://github.com/Vic3e-Digital/Zuke-Admin-Dashboard.git
+cd Zuke-Admin-Dashboard
+npm install
+
+# 2. Configure environment (copy .env.example to .env and fill in your credentials)
+cp .env.example .env
+
+# 3. Start MongoDB (if local)
+mongod
+
+# 4. Run the server
+npm start
+
+# 5. Open browser
+http://localhost:3000/public/dashboard.html
+```
+
+**First-Time Setup:**
+1. Create Auth0 account and configure `auth_config.json`
+2. Create Azure OpenAI resource for transcription features
+3. Create Cloudinary account for media storage
+4. (Optional) Set up N8N webhook for wallet billing
+
+**Need Help?** Email support@zuke.co.za or open a GitHub issue.
+
+---
+
+**Turn your idea into income. Start building today.** 🚀

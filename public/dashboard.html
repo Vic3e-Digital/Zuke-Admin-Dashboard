@@ -45,6 +45,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="css/simStyle.css">
     <link rel="stylesheet" href="css/MainSimStyle.css">
+    <link rel="stylesheet" href="css/chatbot.css">
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Structured Data -->
@@ -257,19 +258,16 @@
                         </svg>
                     </div>
                     
-                    <!-- Rotating switch dropdown -->
-                    <div class="switch-dropdown-container">
-                        <button class="switch-dropdown-btn" id="switchDropdownBtn" title="Switch Business">
-                            <!-- Rotating/Round Switch SVG Icon -->
-                            <!-- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M21 12C21 16.9706 16.9706 21 12 21M21 12C21 7.02944 16.9706 3 12 3M21 12H3M12 21C7.02944 21 3 16.9706 3 12M12 21C13.6569 21 15 16.9706 15 12C15 7.02944 13.6569 3 12 3M12 21C10.3431 21 9 16.9706 9 12C9 7.02944 10.3431 3 12 3M3 12C3 7.02944 7.02944 3 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                            </svg> -->
-                            <span class="nav-text">Switch </span>
-                                </svg>
-                            </svg>
-                    </button>
-                </div>
+                    <!-- Chatbot Toggle Switch -->
+                    <div class="chatbot-toggle-container">
+                        <label class="toggle-slider" title="Toggle chatbot on/off">
+                            <input type="checkbox" id="chatbotToggle" class="toggle-input" checked>
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </label>
+                        <span class="toggle-label">Chatbot</span>
+                    </div>
+            </div>
         </nav>
         
     <!-- ADD THIS OVERLAY -->
@@ -293,5 +291,6 @@
     <!-- Paystack Inline JS -->
     <script src="https://js.paystack.co/v2/inline.js"></script>
     <script src="js/dashboard.js" type="module"></script>
+    <script src="js/chatbot.js" type="module"></script>
 </body>
 </html>

@@ -144,6 +144,8 @@ app.use('/api/marketing', marketingApiRouter);
 app.use('/api/veo-vertex', veoVertexApiRouter);
 // app.use('/api/call-azure-openai', callAzureOpenAiRouter);
 app.use('/api/business-case', businessCaseApi);
+app.use('/api/business-chat', require('./api/business-chat-api'));
+app.use('/api/serpapi-trends', require('./api/serpapi-trends'));
 app.use('/api/creative-models', creativeModelsApi);
 app.use('/api/business-creatives', businessCreativesApi);
 app.use('/api/config', configApi);

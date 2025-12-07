@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Complete Your Business Case | Zuke</title>
   
-  <!-- ✅ Use new formStyle.css -->
+  <!-- ✅ Stylesheets -->
   <link rel="stylesheet" href="../../css/formStyle.css">
+  <link rel="stylesheet" href="../../css/simStyle.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
   
   <style>
@@ -316,6 +318,166 @@
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ✅ TAB STYLES */
+    .tabs-container {
+      margin: 20px 0;
+      border-bottom: 2px solid #e0e0e0;
+      background: white;
+      position: relative;
+      z-index: 10;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      align-items: center;
+    }
+
+    .tab {
+      padding: 14px 28px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.3s ease;
+      position: relative;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab:hover {
+      color: #ff6b35;
+      background: rgba(255, 107, 53, 0.05);
+    }
+
+    .tab.active {
+      color: #ff6b35;
+      border-bottom-color: #ff6b35;
+      font-weight: 600;
+      background: rgba(255, 107, 53, 0.05);
+    }
+
+    .tab i {
+      font-size: 16px;
+    }
+
+    .tab .coming-soon-badge-small {
+      font-size: 9px;
+      padding: 2px 6px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .calendar-container {
+      margin: 30px 0;
+      padding: 40px;
+      background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .calendar-container h3 {
+      color: #2d3436;
+      margin-bottom: 15px;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .calendar-container p {
+      color: #636e72;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .calendar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: #ff6b35;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+      border: none;
+      cursor: pointer;
+    }
+
+    .calendar-btn:hover {
+      background: #ff7b00;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+
+    .calendar-btn i {
+      font-size: 20px;
+    }
+
+    .coming-soon-container {
+      margin: 50px 0;
+      padding: 60px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      text-align: center;
+      color: white;
+    }
+
+    .coming-soon-container h3 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .coming-soon-container p {
+      font-size: 18px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .coming-soon-container .icon-large {
+      font-size: 64px;
+      margin: 20px 0;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      .tab {
+        font-size: 14px;
+        padding: 12px 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -324,8 +486,30 @@
     <!-- ✅ Header -->
     <div class="header">
       <h1>📝 Complete Your Business Case</h1>
-      <p>Take your time building a comprehensive business case. Progress through each phase at your own pace, and save your draft anytime.</p>
+      <p>Choose how you'd like to complete your business case: fill out the form yourself, submit via audio, or work with one of our agents.</p>
     </div>
+
+    <!-- ✅ TABS -->
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('form')">
+          <i class="fas fa-file-alt"></i>
+          Complete Form
+        </button>
+        <button class="tab" onclick="switchTab('audio')">
+          <i class="fas fa-microphone"></i>
+          Audio Submission
+          <span class="coming-soon-badge-small">Soon</span>
+        </button>
+        <button class="tab" onclick="switchTab('agent')">
+          <i class="fas fa-user-tie"></i>
+          Work with Agent
+        </button>
+      </div>
+    </div>
+
+    <!-- ✅ TAB CONTENT: FORM -->
+    <div class="tab-content active" id="tab-form">
     
     <!-- ✅ PHASE STEPPER -->
     <div class="phase-stepper">
@@ -662,6 +846,54 @@
       
     </form>
     
+    </div>
+    <!-- END TAB CONTENT: FORM -->
+
+    <!-- ✅ TAB CONTENT: AUDIO SUBMISSION -->
+    <div class="tab-content" id="tab-audio">
+      <div class="coming-soon-container">
+        <i class="fas fa-microphone icon-large"></i>
+        <h3>
+          <i class="fas fa-sparkles"></i>
+          Audio Submission
+        </h3>
+        <p>Submit your business case via audio recording</p>
+        <p style="font-size: 16px; margin-top: 20px;">
+          This feature is coming soon! You'll be able to simply record your answers and our AI will transcribe and structure your business case automatically.
+        </p>
+      </div>
+    </div>
+    <!-- END TAB CONTENT: AUDIO -->
+
+    <!-- ✅ TAB CONTENT: WORK WITH AGENT -->
+    <div class="tab-content" id="tab-agent">
+      <div class="calendar-container">
+        <h3>
+          <i class="fas fa-calendar-alt"></i>
+          Book a Session with Our Business Case Agent
+        </h3>
+        <p>
+          Work directly with one of our experienced business case agents who will guide you through the process step-by-step. 
+          They'll help you articulate your business vision, identify your unique value proposition, and create a comprehensive business case.
+        </p>
+        <p>
+          <strong>What to expect:</strong> A 45-60 minute personalized session where we'll discuss your business, goals, and growth strategy. 
+          Your agent will then complete your business case based on our conversation.
+        </p>
+        
+        <div style="margin-top: 30px;">
+          <a href="https://a.zuke.co.za/calendar/" target="_blank" rel="noopener noreferrer" class="calendar-btn">
+            <i class="fas fa-calendar-check"></i>
+            Open Booking Calendar
+          </a>
+          <p style="margin-top: 15px; color: #666; font-size: 14px;">
+            <i class="fas fa-external-link-alt"></i> Opens in a new tab
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- END TAB CONTENT: AGENT -->
+    
   </div>
 
   <script src="/js/dataManager.js"></script>
@@ -678,6 +910,31 @@
     let currentPhase = 1;
     
     const AI_SUGGESTION_COST = 10.00;
+    
+    // ========== TAB SWITCHING ==========
+    window.switchTab = function(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      const tabContent = document.getElementById(`tab-${tabName}`);
+      if (tabContent) {
+        tabContent.classList.add('active');
+      }
+      
+      // Add active class to clicked tab
+      event.target.classList.add('active');
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
     
     // ✅ PHASE CONFIGURATION
     const PHASES = {

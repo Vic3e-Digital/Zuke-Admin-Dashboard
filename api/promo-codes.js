@@ -28,6 +28,14 @@ const PROMO_CODES = {
     credits: 1797, // R1797 for 3 months
     active: true,
     yearlyAllowed: false // Only 3-month cycle allowed
+  },
+  'ZUKEXAISURVEY': {
+    plan: 'spark',
+    description: 'Spark Plan Promotional Access',
+    duration: 90,
+    credits: 1797, // R1797 for 3 months
+    active: true,
+    yearlyAllowed: false // Only 3-month cycle allowed
   }
 };
 
