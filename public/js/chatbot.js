@@ -291,6 +291,43 @@ class BusinessChatbot {
     document.getElementById('chatbotMenuDropdown')?.classList.remove('active');
   }
 
+  getAIModelPreferences() {
+    // Allow different model preferences based on conversation type
+    // For general business questions, use GPT-4.1 for better reasoning
+    // For quick responses, could use gpt-4o-mini for speed
+    return {
+      provider: 'azure',
+      model: 'gpt-4.1', // Premium model for business strategy discussions
+      // model: 'gpt-4o-mini', // Alternative for faster responses
+    };
+  }
+
+  buildBusinessContextPrompt(userMessage) {
+    // Build a comprehensive prompt with business context and conversation history
+    let prompt = `You are a Business Manager Assistant for ${this.businessName}. You have complete knowledge of the business case and can help with strategy, operations, marketing, growth planning, and decision-making.
+
+Business ID: ${this.businessId}
+Business Name: ${this.businessName}
+
+`;
+
+    // Add conversation history for context
+    if (this.conversationHistory.length > 0) {
+      prompt += "Previous conversation:\n";
+      this.conversationHistory.slice(-6).forEach(msg => {
+        const role = msg.role === 'user' ? 'User' : 'Assistant';
+        prompt += `${role}: ${msg.content}\n`;
+      });
+      prompt += "\n";
+    }
+
+    prompt += `Current question: ${userMessage}
+
+Please provide a helpful, informative response that addresses the user's question about their business. Keep responses conversational but professional.`;
+
+    return prompt;
+  }
+
   async sendMessage(messageText = null) {
     const input = document.getElementById('chatbotInput');
     const message = messageText || input?.value.trim();
@@ -335,16 +372,22 @@ class BusinessChatbot {
     this.showTyping();
 
     try {
-      // Call backend API
-      const response = await fetch('/api/business-chat/chat', {
+      // Call AI Generators API for text generation
+      const modelPrefs = this.getAIModelPreferences();
+      const response = await fetch('/api/ai-generators/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          businessId: this.businessId,
-          message: message,
-          conversationHistory: this.conversationHistory
+          capability: 'text-generation',
+          useCase: 'conversation',
+          prompt: this.buildBusinessContextPrompt(message),
+          parameters: {
+            temperature: 0.7,
+            max_tokens: 1000
+          },
+          preferences: modelPrefs
         })
       });
 
@@ -357,13 +400,32 @@ class BusinessChatbot {
       // Remove typing indicator
       this.hideTyping();
 
-      // Add assistant response
-      this.addMessage(data.response, 'assistant');
+      // Parse AI Generators response format
+      let assistantResponse = 'Sorry, I didn\'t get a response.';
+      
+      try {
+        if (data.success && data.output && data.output.data) {
+          // Parse the JSON string in data.output.data
+          const outputData = JSON.parse(data.output.data);
+          assistantResponse = outputData.text || assistantResponse;
+        } else if (data.result?.content) {
+          // Fallback for different response format
+          assistantResponse = data.result.content;
+        } else if (data.response) {
+          // Another fallback
+          assistantResponse = data.response;
+        }
+      } catch (parseError) {
+        console.error('Error parsing AI response:', parseError);
+        assistantResponse = 'Sorry, I had trouble understanding the response.';
+      }
+
+      this.addMessage(assistantResponse, 'assistant');
 
       // Add to conversation history
       this.conversationHistory.push({
         role: 'assistant',
-        content: data.response
+        content: assistantResponse
       });
 
       // Limit history to last 10 messages
@@ -377,7 +439,16 @@ class BusinessChatbot {
     } catch (error) {
       console.error('Chat error:', error);
       this.hideTyping();
-      this.showError('Sorry, I encountered an error. Please try again.');
+      
+      // Provide more specific error messages
+      if (error.message.includes('Failed to get response')) {
+        this.showError('Unable to connect to AI service. Please check your connection and try again.');
+      } else {
+        this.showError('Sorry, I encountered an error. Please try again in a moment.');
+      }
+      
+      // If AI Generators fails, could fall back to original business-chat API
+      // this.fallbackToOriginalAPI(message);
     }
   }
 

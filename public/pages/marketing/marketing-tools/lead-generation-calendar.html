@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Lead Generation Calendar | Zuke</title>
+  <link rel="stylesheet" href="../../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Two-Column Layout */
+    .calendar-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .calendar-settings-section {
+      flex: 1;
+      min-width: 350px;
+    }
+
+    .calendar-output-section {
+      flex: 1;
+      min-width: 400px;
+    }
+
+    /* Form Controls */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .form-group-inline {
+      margin-bottom: 0;
+    }
+
+    .frequency-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .frequency-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .frequency-btn:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .frequency-btn.selected {
+      border-color: var(--primary-orange);
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    /* Advanced Section */
+    .advanced-toggle {
+      width: 100%;
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+      color: var(--text-primary);
+    }
+
+    .advanced-toggle:hover {
+      background: #e9ecef;
+      border-color: var(--primary-orange);
+    }
+
+    .advanced-toggle.open {
+      background: #FFF8F0;
+      border-color: var(--primary-orange);
+      color: var(--primary-orange);
+    }
+
+    .advanced-toggle i {
+      transition: transform 0.2s ease;
+    }
+
+    .advanced-toggle.open i {
+      transform: rotate(180deg);
+    }
+
+    .advanced-section {
+      background: #fafbfc;
+      border: 1px solid #e9ecef;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 16px;
+      margin-top: -1px;
+    }
+
+    /* Compact Lead Goals */
+    .lead-goals-compact {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .goal-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      min-width: 140px;
+    }
+
+    .goal-item:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .goal-item.selected {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+      color: var(--primary-orange);
+    }
+
+    .goal-item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      accent-color: var(--primary-orange);
+    }
+
+    .goal-item svg {
+      width: 16px;
+      height: 16px;
+      color: inherit;
+    }
+
+    /* Output Preview */
+    .calendar-preview {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0;
+      max-height: 500px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+
+    .calendar-preview.empty {
+      padding: 40px;
+      text-align: center;
+      color: #999;
+    }
+
+    .lead-campaign-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .lead-campaign-item:hover {
+      background: #FFF8F0;
+    }
+
+    .lead-campaign-item:last-child {
+      border-bottom: none;
+    }
+
+    .campaign-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .campaign-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .campaign-date {
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: #F0F0F0;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .campaign-type {
+      display: inline-block;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .type-customers {
+      background: #E3F2FD;
+      color: #1976D2;
+    }
+
+    .type-partners {
+      background: #E8F5E8;
+      color: #2E7D32;
+    }
+
+    .type-investors {
+      background: #FFF3E0;
+      color: #F57C00;
+    }
+
+    .type-talent {
+      background: #FCE4EC;
+      color: #C2185B;
+    }
+
+    .type-awareness {
+      background: #F3E5F5;
+      color: #7B1FA2;
+    }
+
+    .campaign-description {
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .campaign-target {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 10px;
+      padding-left: 10px;
+      border-left: 2px solid var(--primary-orange);
+    }
+
+    .campaign-fields {
+      background: #F9F9F9;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .field-label {
+      font-weight: 600;
+      color: var(--primary-orange);
+    }
+
+    .field-value {
+      color: #555;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Action Buttons */
+    .generate-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--primary-orange), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 16px;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .export-btn {
+      flex: 1;
+      padding: 10px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: none;
+    }
+
+    .export-btn:hover {
+      background: #5a6268;
+    }
+
+    .export-btn.visible {
+      display: block;
+    }
+
+    .launch-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .launch-btn:hover {
+      background: #218838;
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status-message.success {
+      background: #D4EDDA;
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+
+    .status-message.error {
+      background: #F8D7DA;
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+
+    .status-message.info {
+      background: #D1ECF1;
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--primary-orange);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-orange), #FF9500);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: #856404;
+    }
+
+    .info-box strong {
+      color: var(--primary-orange);
+    }
+
+    @media (max-width: 768px) {
+      .calendar-container {
+        flex-direction: column;
+      }
+
+      .calendar-settings-section,
+      .calendar-output-section {
+        flex: none;
+        width: 100%;
+        min-width: auto;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .export-buttons {
+        flex-direction: column;
+      }
+
+      .lead-goals-compact {
+        flex-direction: column;
+      }
+
+      .goal-item {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <h1>AI Lead Generation Calendar</h1>
+      <p>Create a strategic lead generation campaign calendar with automated targeting and outreach sequences</p>
+    </div>
+
+    <!-- Info Alert -->
+    <div class="info-box">
+      <strong>🎯 Lead Generation Planning:</strong> Our AI analyzes your business case, target market, and industry trends to generate a strategic lead generation calendar with ready-to-launch campaigns that integrate with your CRM and outreach tools. <strong>Cost: R50 per calendar.</strong>
+    </div>
+
+    <div class="calendar-container">
+      
+      <!-- Left: Settings -->
+      <div class="calendar-settings-section">
+        <div class="section-title">Campaign Settings</div>
+
+        <!-- Duration & Frequency -->
+        <div class="form-row">
+          <div class="form-group form-group-inline">
+            <label for="duration">Campaign Duration</label>
+            <select id="duration">
+              <option value="1" selected>1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+            </select>
+          </div>
+
+          <div class="form-group form-group-inline">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate">
+          </div>
+        </div>
+
+        <!-- Campaign Frequency -->
+        <div class="form-group">
+          <label>Campaign Frequency</label>
+          <div class="frequency-options">
+            <button class="frequency-btn selected" data-frequency="1">1 per week</button>
+            <button class="frequency-btn" data-frequency="2">2 per week</button>
+            <button class="frequency-btn" data-frequency="3">3 per week</button>
+            <button class="frequency-btn" data-frequency="custom">Custom</button>
+          </div>
+          <input type="number" id="customFrequency" placeholder="Campaigns per week" style="display: none; margin-top: 8px;" min="1" max="10">
+        </div>
+
+
+
+
+
+        <!-- Target Settings -->
+        <div class="form-group">
+          <label for="defaultTargetRole">Default Target Role</label>
+          <input type="text" id="defaultTargetRole" placeholder="CEO, Marketing Manager, etc." />
+          <p style="font-size: 11px; color: #666; margin-top: 4px;">This will be used as default, but AI will suggest variations</p>
+        </div>
+
+        <div class="form-group">
+          <label for="defaultLocation">Default Target Location</label>
+          <input type="text" id="defaultLocation" placeholder="Houston, TX, USA or Cape Town, South Africa" />
+          <p style="font-size: 11px; color: #666; margin-top: 4px;">Primary geographic focus for lead generation</p>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="form-group">
+          <button type="button" class="advanced-toggle" id="advancedToggle">
+            <span>⚙️ Advanced Settings</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          
+          <div class="advanced-section" id="advancedSection" style="display: none;">
+            <!-- Lead Generation Goals -->
+            <div class="form-group" style="margin-top: 16px;">
+              <label>Lead Generation Goals</label>
+              <div class="lead-goals-compact">
+                <div class="goal-item selected" data-type="customers">
+                  <input type="checkbox" id="includeCustomers" checked>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                  <span>Find Customers</span>
+                </div>
+                <div class="goal-item selected" data-type="partners">
+                  <input type="checkbox" id="includePartners" checked>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A2.99 2.99 0 0 0 17.11 7H16c-.8 0-1.54.37-2.01.99L12 10l-1.99-2.01A2.99 2.99 0 0 0 8 7H6.89c-.89 0-1.67.52-2.04 1.37L2.5 16H5v6h2v-6h2.5l1.5-3 1.5 3H15v6h2z"/>
+                  </svg>
+                  <span>Find Partners</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Goals -->
+            <div class="form-group">
+              <label for="additionalGoals">Additional Goals (Optional)</label>
+              <textarea id="additionalGoals" placeholder="E.g., Find investors, recruit talent, build brand awareness..." rows="2"></textarea>
+              <p style="font-size: 11px; color: #666; margin-top: 4px;">Specify any other lead generation objectives</p>
+            </div>
+
+            <!-- Additional Context -->
+            <div class="form-group">
+              <label for="additionalContext">Campaign Context (Optional)</label>
+              <textarea id="additionalContext" placeholder="E.g., focusing on Series A startups, enterprise clients with 100+ employees, companies using Salesforce..." rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button class="generate-btn" id="generateBtn">🎯 Generate Lead Generation Calendar</button>
+
+        <!-- Progress -->
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-text" id="progressText">Analyzing target markets...</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div class="status-message" id="statusMessage"></div>
+      </div>
+
+      <!-- Right: Calendar Output -->
+      <div class="calendar-output-section">
+        <div class="section-title">Generated Lead Campaigns</div>
+
+        <div class="calendar-preview empty" id="calendarPreview">
+          <div>🎯</div>
+          <p style="margin-top: 12px;">Your AI-generated lead generation calendar will appear here</p>
+          <p style="font-size: 11px; color: #999; margin-top: 8px;">Configure your settings and click Generate</p>
+        </div>
+
+        <!-- Export Buttons -->
+        <div class="export-buttons">
+          <button class="export-btn" id="exportJsonBtn">📄 Export JSON</button>
+          <button class="export-btn" id="exportCsvBtn">📊 Export CSV</button>
+          <button class="export-btn" id="copyBtn">📋 Copy to Clipboard</button>
+        </div>
+        
+        <!-- Integration Features -->
+        <div class="export-buttons" style="margin-top: 8px;">
+          <button class="export-btn" id="launchCampaignsBtn" style="background: #28a745;">
+            🚀 Launch All Campaigns <span style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin-left: 4px;">AUTO EXECUTE</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // ========== CONFIGURATION & STATE ==========
+    const urlParams = new URLSearchParams(window.location.search);
+    let userEmail = urlParams.get('email');
+    let businessId = urlParams.get('businessId');
+    let businessName = urlParams.get('businessName') || 'My Business';
+    
+    let currentCalendar = null;
+    let selectedFrequency = 1;
+    let leadGenGoals = { 
+      'customers': true, 
+      'partners': true 
+    };
+
+    // ========== ELEMENT REFERENCES ==========
+    const generateBtn = document.getElementById('generateBtn');
+    const calendarPreview = document.getElementById('calendarPreview');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const statusMessage = document.getElementById('statusMessage');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const launchCampaignsBtn = document.getElementById('launchCampaignsBtn');
+
+    // ========== INITIALIZE START DATE ==========
+    document.getElementById('startDate').valueAsDate = new Date();
+
+    // ========== FREQUENCY SELECTION ==========
+    document.querySelectorAll('.frequency-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.frequency-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        
+        const freq = btn.dataset.frequency;
+        if (freq === 'custom') {
+          document.getElementById('customFrequency').style.display = 'block';
+          selectedFrequency = parseInt(document.getElementById('customFrequency').value) || 1;
+        } else {
+          document.getElementById('customFrequency').style.display = 'none';
+          selectedFrequency = parseInt(freq);
+        }
+      });
+    });
+
+    document.getElementById('customFrequency').addEventListener('input', (e) => {
+      selectedFrequency = parseInt(e.target.value) || 1;
+    });
+
+    // ========== ADVANCED SECTION TOGGLE ==========
+    const advancedToggle = document.getElementById('advancedToggle');
+    const advancedSection = document.getElementById('advancedSection');
+
+    advancedToggle.addEventListener('click', () => {
+      const isOpen = advancedSection.style.display === 'block';
+      
+      if (isOpen) {
+        advancedSection.style.display = 'none';
+        advancedToggle.classList.remove('open');
+      } else {
+        advancedSection.style.display = 'block';
+        advancedToggle.classList.add('open');
+      }
+    });
+
+    // ========== LEAD GENERATION GOAL SELECTION ==========
+    document.querySelectorAll('.goal-item').forEach(goalItem => {
+      goalItem.addEventListener('click', () => {
+        const type = goalItem.dataset.type;
+        const input = goalItem.querySelector('input[type="checkbox"]');
+        
+        input.checked = !input.checked;
+        leadGenGoals[type] = input.checked;
+        
+        if (input.checked) {
+          goalItem.classList.add('selected');
+        } else {
+          goalItem.classList.remove('selected');
+        }
+      });
+
+      // Also handle direct checkbox clicks
+      goalItem.querySelector('input[type="checkbox"]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const type = goalItem.dataset.type;
+        leadGenGoals[type] = e.target.checked;
+        
+        if (e.target.checked) {
+          goalItem.classList.add('selected');
+        } else {
+          goalItem.classList.remove('selected');
+        }
+      });
+    });
+
+    // ========== GENERATE CALENDAR ==========
+    generateBtn.addEventListener('click', async () => {
+      await generateLeadCalendar();
+    });
+
+    async function generateLeadCalendar() {
+      if (!userEmail || !businessId) {
+        showStatus('Missing user or business information', 'error');
+        return;
+      }
+
+      const hasSelectedGoals = Object.values(leadGenGoals).some(selected => selected);
+      if (!hasSelectedGoals) {
+        showStatus('Please select at least one lead generation goal', 'error');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      progressContainer.style.display = 'block';
+      hideStatus();
+
+      try {
+        const duration = parseInt(document.getElementById('duration').value);
+        const startDate = document.getElementById('startDate').value;
+        const defaultTargetRole = document.getElementById('defaultTargetRole').value;
+        const defaultLocation = document.getElementById('defaultLocation').value;
+        const additionalContext = document.getElementById('additionalContext').value;
+        const additionalGoals = document.getElementById('additionalGoals').value;
+
+        progressText.textContent = 'Analyzing your business and target market...';
+        progressFill.style.width = '20%';
+
+        const response = await fetch('/api/marketing/generate-lead-calendar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            businessId,
+            userEmail,
+            duration,
+            startDate,
+            campaignsPerWeek: selectedFrequency,
+            leadGenGoals,
+            additionalGoals,
+            defaultTargetRole,
+            defaultLocation,
+            additionalContext
+          })
+        });
+
+        progressFill.style.width = '60%';
+        progressText.textContent = 'AI is crafting your lead generation strategy...';
+
+        if (!response.ok) {
+          const error = await response.json();
+          if (response.status === 402) {
+            throw new Error(`Insufficient credits. Required: ${error.required}, Balance: ${error.balance}`);
+          }
+          throw new Error(error.error || 'Failed to generate lead calendar');
+        }
+
+        const result = await response.json();
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+
+        currentCalendar = result.calendar;
+        displayLeadCalendar(result.calendar);
+
+        showStatus(
+          `✅ Lead Generation Calendar created successfully!\n\n` +
+          `🎯 ${result.calendar.length} campaigns planned\n` +
+          `💰 Cost: R50.00\n` +
+          `📊 New Balance: ${result.formatted_balance}`,
+          'success'
+        );
+
+        // Show export buttons
+        exportJsonBtn.classList.add('visible');
+        exportCsvBtn.classList.add('visible');
+        copyBtn.classList.add('visible');
+        launchCampaignsBtn.classList.add('visible');
+
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+        }, 1500);
+
+      } catch (error) {
+        console.error('Error:', error);
+        progressContainer.style.display = 'none';
+        showStatus('❌ ' + error.message, 'error');
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    // ========== DISPLAY LEAD CALENDAR ==========
+    function displayLeadCalendar(calendar) {
+      if (!calendar || calendar.length === 0) {
+        calendarPreview.innerHTML = '<div class="empty">No lead campaigns generated</div>';
+        calendarPreview.classList.add('empty');
+        return;
+      }
+
+      calendarPreview.classList.remove('empty');
+      
+      let html = '';
+      calendar.forEach(campaign => {
+        const typeClass = `type-${campaign.type}`;
+        const typeIcon = getTypeIcon(campaign.type);
+        
+        html += `
+          <div class="lead-campaign-item">
+            <div class="campaign-header">
+              <div class="campaign-title">
+                ${typeIcon} ${campaign.campaignName}
+                <span class="campaign-type ${typeClass}">${campaign.type}</span>
+              </div>
+              <div class="campaign-date">${formatDate(campaign.date)}</div>
+            </div>
+            <div class="campaign-description">${campaign.description}</div>
+            <div class="campaign-target">🎯 Target: ${campaign.targetRole} in ${campaign.targetLocation}</div>
+            <div class="campaign-fields">
+              <div class="field-row">
+                <span class="field-label">Target Role:</span>
+                <span class="field-value">${campaign.targetRole}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Location:</span>
+                <span class="field-value">${campaign.targetLocation}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Variants:</span>
+                <span class="field-value">${campaign.variants}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Context:</span>
+                <span class="field-value">${campaign.context || 'Auto-generated'}</span>
+              </div>
+              <button class="launch-btn" onclick="launchSingleCampaign('${campaign.id}')">
+                🚀 Launch Campaign
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      calendarPreview.innerHTML = html;
+    }
+
+    function getTypeIcon(type) {
+      const icons = {
+        'customers': '👥',
+        'partners': '🤝',
+        'investors': '💰',
+        'talent': '🎯',
+        'awareness': '📢'
+      };
+      return icons[type] || '🎯';
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    // ========== LAUNCH CAMPAIGNS ==========
+    async function launchSingleCampaign(campaignId) {
+      const campaign = currentCalendar.find(c => c.id === campaignId);
+      if (!campaign) return;
+
+      try {
+        // Prepare data for find-leads webhook
+        const leadGenData = {
+          name: userEmail, // Will be populated from business data
+          email: userEmail,
+          business: businessName,
+          businessId: businessId,
+          businessCase: campaign.businessDescription || 'Auto-generated from calendar',
+          targetRole: campaign.targetRole,
+          country: campaign.targetLocation,
+          variants: campaign.variants,
+          context: campaign.context,
+          autoEnrich: true // Default to true for calendar campaigns
+        };
+
+        showStatus('🚀 Launching campaign: ' + campaign.campaignName, 'info');
+
+        const response = await fetch('/api/lead-generation/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(leadGenData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to launch campaign');
+        }
+
+        const result = await response.json();
+        showStatus(`✅ Campaign "${campaign.campaignName}" launched successfully!\nLeads will be generated and sent to ${userEmail}`, 'success');
+
+      } catch (error) {
+        showStatus(`❌ Failed to launch campaign: ${error.message}`, 'error');
+      }
+    }
+
+    launchCampaignsBtn.addEventListener('click', async () => {
+      if (!currentCalendar || currentCalendar.length === 0) return;
+
+      const confirmLaunch = confirm(`Are you sure you want to launch all ${currentCalendar.length} campaigns? This will cost R${50 * currentCalendar.length} total.`);
+      if (!confirmLaunch) return;
+
+      launchCampaignsBtn.disabled = true;
+      
+      let launched = 0;
+      for (const campaign of currentCalendar) {
+        try {
+          await launchSingleCampaign(campaign.id);
+          launched++;
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between launches
+        } catch (error) {
+          console.error(`Failed to launch campaign ${campaign.id}:`, error);
+        }
+      }
+
+      showStatus(`✅ Successfully launched ${launched} out of ${currentCalendar.length} campaigns!`, 'success');
+      launchCampaignsBtn.disabled = false;
+    });
+
+    // ========== EXPORT FUNCTIONS ==========
+    exportJsonBtn.addEventListener('click', () => {
+      if (!currentCalendar) return;
+      
+      const dataStr = JSON.stringify(currentCalendar, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `lead-generation-calendar-${Date.now()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      showStatus('✅ JSON file downloaded', 'success');
+      setTimeout(hideStatus, 2000);
+    });
+
+    exportCsvBtn.addEventListener('click', () => {
+      if (!currentCalendar) return;
+      
+      let csv = 'Date,Campaign Name,Type,Target Role,Target Location,Variants,Context,Description\n';
+      currentCalendar.forEach(campaign => {
+        const formattedDate = new Date(campaign.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        csv += `"${formattedDate}","${campaign.campaignName}","${campaign.type}","${campaign.targetRole}","${campaign.targetLocation}","${campaign.variants}","${campaign.context || ''}","${campaign.description.replace(/"/g, '""')}"\n`;
+      });
+      
+      const dataBlob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `lead-generation-calendar-${Date.now()}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      showStatus('✅ CSV file downloaded', 'success');
+      setTimeout(hideStatus, 2000);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      if (!currentCalendar) return;
+      
+      try {
+        const text = JSON.stringify(currentCalendar, null, 2);
+        await navigator.clipboard.writeText(text);
+        showStatus('✅ Calendar copied to clipboard!', 'success');
+        setTimeout(hideStatus, 2000);
+      } catch (error) {
+        showStatus('Failed to copy: ' + error.message, 'error');
+      }
+    });
+
+    // ========== SHOW/HIDE STATUS ==========
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type}`;
+      statusMessage.style.display = 'block';
+    }
+
+    function hideStatus() {
+      statusMessage.style.display = 'none';
+    }
+
+    // ========== INITIALIZE ON PAGE LOAD ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🎯 AI Lead Generation Calendar initialized');
+      
+      // Get user info from URL params or localStorage if available
+      if (!userEmail) {
+        userEmail = localStorage.getItem('userEmail');
+      }
+      if (!businessId) {
+        businessId = localStorage.getItem('businessId');
+      }
+      if (!businessName) {
+        businessName = localStorage.getItem('businessName');
+      }
+    });
+  </script>
+</body>
+</html>

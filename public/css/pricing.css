@@ -1,0 +1,872 @@
+/* Force Hanken Grotesk font - override formStyle.css Manrope and any other font imports */
+.page-container,
+.page-container *,
+.pricing-wrapper,
+.pricing-wrapper *,
+body,
+html {
+  font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.pricing-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Top Section - Wallet and Welcome */
+.pricing-top-section {
+  max-width: 800px;
+  margin: 0 auto 50px auto;
+  text-align: center;
+}
+
+/* Wallet Info - At Top */
+.wallet-info {
+  background: linear-gradient(135deg, var(--primary-orange), var(--alt-orange));
+  color: white;
+  padding: 24px 28px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 16px rgba(255, 139, 0, 0.2);
+}
+
+.wallet-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+.wallet-balance {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+/* Welcome Header - Below Wallet */
+.pricing-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.welcome-text {
+  color: var(--primary-orange);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 12px;
+}
+
+.pricing-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0;
+  color: var(--dark-neutral);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Step Container */
+.step-container {
+  display: none;
+}
+
+.step-container.active {
+  display: block;
+}
+
+/* Pricing Content - Centered Container */
+.pricing-content {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 60px;
+  padding: 0;
+}
+
+/* Plans Container - White Rectangle */
+.plans-container {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 900px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.faq-item {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.faq-question {
+  width: 100%;
+  padding: 18px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #E0E0E0;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--dark-neutral);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.faq-question:hover {
+  color: var(--primary-orange);
+}
+
+.faq-question::after {
+  content: '+';
+  font-size: 20px;
+  color: #999;
+  font-weight: 300;
+  transition: all 0.3s;
+  flex-shrink: 0;
+  margin-left: 12px;
+  line-height: 1;
+}
+
+.faq-question.active {
+  color: var(--primary-orange);
+}
+
+.faq-question.active::after {
+  content: '−';
+  color: var(--primary-orange);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: transparent;
+}
+
+.faq-answer.active {
+  max-height: 400px;
+}
+
+.faq-answer p {
+  margin: 0;
+  padding: 12px 0 18px 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* RIGHT: Plans Column - More Compact */
+.plans-column {
+  background: transparent;
+  /* border: 1px solid var(--border-color); */
+  /* border-radius: 8px; */
+  padding: 0 24px 24px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  max-width: 650px;
+}
+
+/* Billing Toggle - Compact */
+.billing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 0;
+  background: transparent;
+}
+
+.billing-toggle span {
+  font-weight: 500;
+  color: var(--dark-neutral);
+  font-size: 14px;
+}
+
+.billing-toggle .toggle-switch {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  background: #E0E0E0;
+  border-radius: 28px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.billing-toggle .toggle-switch.yearly {
+  background: var(--primary-orange);
+}
+
+.billing-toggle .toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.billing-toggle .toggle-switch.yearly::after {
+  transform: translateX(24px);
+}
+
+/* Plan Options - Compact Grid Layout */
+.plan-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+/* Plan Card - Square Compact Design */
+.plan-card {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  background: white;
+  position: relative;
+  aspect-ratio: 1;
+  justify-content: center;
+}
+
+.plan-card:hover:not(.current-plan) {
+  border-color: var(--primary-orange);
+  background: #FFF8F0;
+}
+
+.plan-card.selected {
+  border-color: var(--primary-orange);
+  background: #FFF8F0;
+  box-shadow: 0 4px 12px rgba(255, 139, 0, 0.15);
+}
+
+.plan-card.current-plan {
+  border-color: #ff8b00;
+  background: #F0F8FF;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* Radio Button */
+.plan-radio {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #D0D0D0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+}
+
+.plan-card.selected .plan-radio {
+  border-color: var(--primary-orange);
+  background: var(--primary-orange);
+}
+
+.plan-card.selected .plan-radio::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.plan-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.plan-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark-neutral);
+  margin-bottom: 4px;
+}
+
+.plan-description {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.plan-pricing {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.plan-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--primary-orange);
+  white-space: nowrap;
+}
+
+.plan-price small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.plan-price-strike {
+  font-size: 11px;
+  color: #999;
+  text-decoration: line-through;
+  display: block;
+  margin-top: 2px;
+}
+
+.current-plan-badge {
+  position: absolute;
+  top: -8px;
+  right: 16px;
+  background: #3498db;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* FAQ Section Main - Below Plans */
+.faq-section-main {
+  max-width: 900px;
+  margin: 40px auto 0;
+  padding: 0;
+}
+
+.faq-toggle-header {
+  background: #F5F5F5;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s;
+  border: 1px solid #E0E0E0;
+}
+
+.faq-toggle-header:hover {
+  background: #EEEEEE;
+  border-color: var(--primary-orange);
+}
+
+.faq-toggle-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-neutral);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.faq-toggle-icon {
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: transform 0.3s;
+}
+
+.faq-toggle-header.expanded .faq-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.faq-list-main {
+  display: none;
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+
+.faq-list-main.expanded {
+  display: block;
+  max-height: 2000px;
+}
+
+.faq-list-main .faq-item {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.faq-list-main .faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-list-main .faq-question {
+  width: 100%;
+  padding: 18px 20px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-neutral);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.faq-list-main .faq-question:hover {
+  color: var(--primary-orange);
+  background: #FAFAFA;
+}
+
+.faq-list-main .faq-question::after {
+  content: '+';
+  font-size: 20px;
+  color: #999;
+  font-weight: 300;
+  transition: all 0.3s;
+  flex-shrink: 0;
+  margin-left: 12px;
+  line-height: 1;
+}
+
+.faq-list-main .faq-question.active {
+  color: var(--primary-orange);
+}
+
+.faq-list-main .faq-question.active::after {
+  content: '−';
+  color: var(--primary-orange);
+}
+
+.faq-list-main .faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #FAFAFA;
+}
+
+.faq-list-main .faq-answer.active {
+  max-height: 400px;
+}
+
+.faq-list-main .faq-answer p {
+  margin: 0;
+  padding: 0 20px 16px 20px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  margin-top: 24px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-continue {
+  flex: 1;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, var(--primary-orange), var(--alt-orange));
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-continue:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+}
+
+.btn-continue:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.comparison-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.comparison-link a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.comparison-link a:hover {
+  color: var(--primary-orange);
+}
+
+/* STEP 2: Payment Method - Compact */
+.step-indicator {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.step-indicator strong {
+  color: var(--dark-neutral);
+}
+
+.payment-section {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.payment-section .pricing-header {
+  margin-bottom: 20px;
+}
+
+.payment-section .pricing-header h1 {
+  font-size: 1.6rem;
+}
+
+.selected-plan-summary {
+  background: #FFF8F0;
+  border: 2px solid var(--primary-orange);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.selected-plan-summary h3 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.selected-plan-summary .plan-detail {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--dark-neutral);
+}
+
+/* Auto-Renewal Section */
+.auto-renewal-section {
+  background: #F5F5F7;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auto-renewal-section input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-orange);
+  flex-shrink: 0;
+}
+
+.auto-renewal-info {
+  flex: 1;
+}
+
+.auto-renewal-info label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-neutral);
+  cursor: pointer;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.auto-renewal-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.payment-card {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-card:hover {
+  border-color: var(--primary-orange);
+  background: #FFF8F0;
+}
+
+.payment-card.selected {
+  border-color: var(--primary-orange);
+  background: #FFF8F0;
+  box-shadow: 0 4px 12px rgba(255, 139, 0, 0.15);
+}
+
+.payment-card .plan-radio {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #D0D0D0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  background: white;
+}
+
+.payment-card.selected .plan-radio {
+  border-color: var(--primary-orange);
+  background: var(--primary-orange);
+}
+
+.payment-card.selected .plan-radio::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.payment-icon {
+  width: 44px;
+  height: 44px;
+  background: #F5F5F7;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-info h3 {
+  margin: 0 0 2px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-neutral);
+}
+
+.payment-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Promotional Code Section */
+.promo-code-section {
+  background: #F5F5F7;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.promo-code-section label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-neutral);
+  margin-bottom: 10px;
+}
+
+.promo-code-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.promo-code-input-group input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.promo-code-input-group input:focus {
+  outline: none;
+  border-color: var(--primary-orange);
+  background: white;
+}
+
+.btn-apply-promo {
+  padding: 10px 20px;
+  background: white;
+  color: var(--dark-neutral);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-apply-promo:hover {
+  background: var(--primary-orange);
+  color: white;
+  border-color: var(--primary-orange);
+}
+
+.promo-message {
+  font-size: 12px;
+  padding: 6px 0;
+  min-height: 20px;
+}
+
+.promo-message.success {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.promo-message.error {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.btn-back {
+  flex: 1;
+  padding: 12px 24px;
+  background: white;
+  color: var(--dark-neutral);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: #F5F5F7;
+  border-color: var(--primary-orange);
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .plan-options {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .pricing-wrapper {
+    padding: 20px 12px;
+  }
+
+  .pricing-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .plans-container {
+    padding: 24px 16px;
+  }
+
+  .plan-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .plan-card {
+    aspect-ratio: auto;
+    min-height: 140px;
+  }
+
+  .plan-name {
+    font-size: 14px;
+  }
+
+  .plan-description {
+    font-size: 10px;
+  }
+
+  .plan-price {
+    font-size: 1.3rem;
+  }
+
+  .faq-section-main {
+    padding: 0 12px;
+    margin-top: 30px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-continue {
+    padding: 12px 16px;
+  }
+}

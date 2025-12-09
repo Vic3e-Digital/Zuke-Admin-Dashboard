@@ -1,0 +1,688 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Business-Case-Generator",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [32, -464],
+      "id": "1de94971-a25f-49bd-b387-a1903c007969",
+      "name": "Webhook - Receive Business Case",
+      "webhookId": "d4395840-2bff-4964-b77b-251651af3c17"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Business Case Coordinator AI. Analyze the following business information and create a structured JSON output with instructions for 4 specialist agents.\n\nBusiness Name: {{ $json.body.businessCase.business_name }}\nSubmitted By: {{ $json.body.submittedBy }}\n\nBUSINESS INFORMATION:\n- What they do: {{ $json.body.businessCase.what_you_do }}\n- Challenge: {{ $json.body.businessCase.the_challenge }}\n- Solution: {{ $json.body.businessCase.your_solution }}\n- Why choose them: {{ $json.body.businessCase.why_people_will_choose_you }}\n- Customers: {{ $json.body.businessCase.your_customers }}\n- Revenue: {{ $json.body.businessCase.how_you_make_money }}\n- Products: {{ $json.body.businessCase.products_services }}\n- Customer Profile: {{ $json.body.businessCase.customer_profile }}\n- Growth Goals: {{ $json.body.businessCase.growth_goals }}\n\nCreate specific instructions for:\n1. Executive Summary agent\n2. Market Analysis agent\n3. Business Model agent\n4. Growth Strategy agent",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [256, -464],
+      "id": "3a58f44d-ae3a-4b18-b05c-2ccaa4e3f8f0",
+      "name": "🎯 Agent 1: Coordinator"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [272, -240],
+      "id": "4ba224f9-b687-46ce-b7ff-3991be5c2156",
+      "name": "Azure OpenAI - Coordinator",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "ly5IVRAKYXsYNnBt",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"executive_summary_instructions\": \"Create a compelling 3-4 paragraph executive summary\",\n  \"market_analysis_instructions\": \"Analyze target market and competitive positioning\",\n  \"business_model_instructions\": \"Explain revenue model and value proposition\",\n  \"growth_strategy_instructions\": \"Create 6-12 month growth plan with milestones\",\n  \"business_name\": \"Business Name\",\n  \"submitted_by\": \"email@example.com\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [400, -240],
+      "id": "5d8e48ce-2515-4e68-8133-66d16a3eb5de",
+      "name": "Coordinator Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "exec_summary",
+              "name": "exec_summary_data",
+              "type": "object",
+              "value": "={{ { \n  instructions: $json.executive_summary_instructions,\n  business_name: $json.business_name,\n  original_data: $('Webhook - Receive Business Case').item.json.body.businessCase\n} }}"
+            },
+            {
+              "id": "market_analysis",
+              "name": "market_analysis_data",
+              "type": "object",
+              "value": "={{ { \n  instructions: $json.market_analysis_instructions,\n  business_name: $json.business_name,\n  original_data: $('Webhook - Receive Business Case').item.json.body.businessCase\n} }}"
+            },
+            {
+              "id": "business_model",
+              "name": "business_model_data",
+              "type": "object",
+              "value": "={{ { \n  instructions: $json.business_model_instructions,\n  business_name: $json.business_name,\n  original_data: $('Webhook - Receive Business Case').item.json.body.businessCase\n} }}"
+            },
+            {
+              "id": "growth_strategy",
+              "name": "growth_strategy_data",
+              "type": "object",
+              "value": "={{ { \n  instructions: $json.growth_strategy_instructions,\n  business_name: $json.business_name,\n  original_data: $('Webhook - Receive Business Case').item.json.body.businessCase\n} }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [608, -464],
+      "id": "356a1152-9ad7-4a3a-a81b-531c376df34e",
+      "name": "📋 Split Instructions"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an Executive Summary Specialist. Create a compelling, concise executive summary for this business case.\n\nBusiness: {{ $json.exec_summary_data.business_name }}\n\nInstructions: {{ $json.exec_summary_data.instructions }}\n\nBusiness Context:\n- What they do: {{ $json.exec_summary_data.original_data.what_you_do }}\n- Challenge: {{ $json.exec_summary_data.original_data.the_challenge }}\n- Solution: {{ $json.exec_summary_data.original_data.your_solution }}\n\nCreate a powerful 3-4 paragraph executive summary that captures the essence and makes stakeholders want to learn more.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [832, -1168],
+      "id": "055f7264-f298-40bc-b78c-86d8cb8781e4",
+      "name": "📊 Agent 2: Executive Summary"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [848, -944],
+      "id": "0953d45d-64c3-407c-aee4-46d4dc8c4d1f",
+      "name": "Azure OpenAI - Executive",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "ly5IVRAKYXsYNnBt",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"executive_summary\": \"Detailed executive summary text here...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [976, -944],
+      "id": "2fd9ebca-54a4-4e34-9a35-e7499df251d1",
+      "name": "Executive Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Market Analysis Specialist. Analyze the target market, customer segments, and competitive positioning.\n\nBusiness: {{ $json.market_analysis_data.original_data.business_name }}\n\nInstructions: {{ $json.market_analysis_data.instructions }}\n\nMarket Context:\n- Target customers: {{ $json.market_analysis_data.original_data.your_customers }}\n- Customer profile: {{ $json.market_analysis_data.original_data.customer_profile }}\n- Competitive advantage: {{ $json.market_analysis_data.original_data.why_people_will_choose_you }}\n\nCreate a detailed market analysis covering target market, customer segments, competitive advantages, and opportunities.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [832, -768],
+      "id": "34bc92d6-7a1c-4667-960b-8081c1cc81ac",
+      "name": "🎯 Agent 3: Market Analysis"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [848, -544],
+      "id": "2880e28a-5a25-4f3c-af53-6188a3297340",
+      "name": "Azure OpenAI - Market",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "ly5IVRAKYXsYNnBt",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"market_analysis\": \"Detailed market analysis text here...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [976, -544],
+      "id": "8239fc41-afff-4097-a665-c862ad3668fe",
+      "name": "Market Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Business Model Specialist. Explain revenue streams, value propositions, and operational approach.\n\nBusiness: {{ $json.business_model_data.business_name }}\n\nInstructions: {{ $json.business_model_data.instructions }}\n\nBusiness Model Context:\n- Revenue model: {{ $json.business_model_data.original_data.how_you_make_money }}\n- Products/Services: {{ $json.business_model_data.original_data.products_services }}\n- Value proposition: {{ $json.business_model_data.original_data.why_people_will_choose_you }}\n\nCreate a comprehensive business model section covering revenue model, products/services, value proposition, and operational approach.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [832, -368],
+      "id": "e3fdc301-479b-4f45-81ea-d840f97f96dd",
+      "name": "💰 Agent 4: Business Model"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [848, -144],
+      "id": "98f28e7d-7e55-4342-b958-059e2cfb4559",
+      "name": "Azure OpenAI - Business",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "ly5IVRAKYXsYNnBt",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"business_model\": \"Detailed business model text here...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [976, -144],
+      "id": "979ae6e3-1155-4339-9231-f98fdd4374ef",
+      "name": "Business Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Growth Strategy Specialist. Create actionable, realistic growth plans with specific milestones and KPIs.\n\nBusiness: {{ $json.growth_strategy_data.business_name }}\n\nInstructions: {{ $json.growth_strategy_data.instructions }}\n\nGrowth Context:\n- Growth goals: {{ $json.growth_strategy_data.original_data.growth_goals }}\n- Current offerings: {{ $json.growth_strategy_data.original_data.products_services }}\n- Target market: {{ $json.growth_strategy_data.original_data.your_customers }}\n\nCreate a detailed 6-12 month growth strategy with specific goals, milestones, and success metrics.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [832, 144],
+      "id": "0d04dcbf-0e20-4363-b320-8c679b34f42e",
+      "name": "🚀 Agent 5: Growth Strategy"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "maxTokens": 1500,
+          "temperature": 0.8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [848, 368],
+      "id": "391c099d-12a9-41bf-ba26-acb6f8d8437a",
+      "name": "Azure OpenAI - Growth",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "ly5IVRAKYXsYNnBt",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"growth_strategy\": \"Detailed growth strategy text here...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [976, 368],
+      "id": "b69d0c55-fdc6-48e4-88ea-aba8bca3752c",
+      "name": "Growth Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge all AI agent outputs into one structured document\nconst webhookData = $('Webhook - Receive Business Case').first().json.body;\nconst coordinatorData = $('🎯 Agent 1: Coordinator').first().json;\n\n// Get outputs from all agents\nconst items = $input.all();\nlet executiveSummary = '';\nlet marketAnalysis = '';\nlet businessModel = '';\nlet growthStrategy = '';\n\n// Extract content from each agent's output\nitems.forEach(item => {\n  if (item.json.executive_summary) {\n    executiveSummary = item.json.executive_summary;\n  }\n  if (item.json.market_analysis) {\n    marketAnalysis = item.json.market_analysis;\n  }\n  if (item.json.business_model) {\n    businessModel = item.json.business_model;\n  }\n  if (item.json.growth_strategy) {\n    growthStrategy = item.json.growth_strategy;\n  }\n});\n\nconst businessName = coordinatorData.business_name || webhookData.businessCase.business_name;\nconst submittedBy = coordinatorData.submitted_by || webhookData.submittedBy;\nconst generatedDate = new Date().toISOString();\n\nconst fullDocument = {\n  business_id: webhookData.businessId,\n  business_name: businessName,\n  submitted_by: submittedBy,\n  generated_date: generatedDate,\n  sections: {\n    executive_summary: executiveSummary,\n    market_analysis: marketAnalysis,\n    business_model: businessModel,\n    growth_strategy: growthStrategy\n  },\n  formatted_content: `BUSINESS CASE: ${businessName}\\n\\nGenerated: ${new Date(generatedDate).toLocaleDateString('en-ZA', { \\n  year: 'numeric', \\n  month: 'long', \\n  day: 'numeric' \\n})}\\n\\nSubmitted by: ${submittedBy}\\n\\n---\\n\\nEXECUTIVE SUMMARY\\n\\n${executiveSummary}\\n\\n---\\n\\nMARKET ANALYSIS\\n\\n${marketAnalysis}\\n\\n---\\n\\nBUSINESS MODEL\\n\\n${businessModel}\\n\\n---\\n\\nGROWTH STRATEGY\\n\\n${growthStrategy}\\n\\n---\\n\\nAPPENDIX: Source Information\\n\\nBusiness Information Submitted:\\n- What they do: ${webhookData.businessCase?.what_you_do || 'Not provided'}\\n- Challenge addressed: ${webhookData.businessCase?.the_challenge || 'Not provided'}\\n- Solution approach: ${webhookData.businessCase?.your_solution || 'Not provided'}\\n- Competitive advantage: ${webhookData.businessCase?.why_people_will_choose_you || 'Not provided'}\\n- Target customers: ${webhookData.businessCase?.your_customers || 'Not provided'}\\n- Revenue model: ${webhookData.businessCase?.how_you_make_money || 'Not provided'}\\n\\n---\\n\\nThis business case was generated using AI assistance and should be reviewed for accuracy. Generated on ${new Date(generatedDate).toLocaleDateString('en-ZA', { \\n  year: 'numeric', \\n  month: 'long', \\n  day: 'numeric',\\n  hour: '2-digit',\\n  minute: '2-digit'\\n})}.\\n`.trim()\n};\n\nreturn { json: fullDocument };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1648, -624],
+      "id": "f3da4487-b6ae-4dd4-b620-c30d47374231",
+      "name": "📝 Format Complete Document"
+    },
+    {
+      "parameters": {
+        "folderId": "1D8aJsdKmmUx7AqCtELltU6e0DMLZqPR6",
+        "title": "=Business Case - {{ $json.business_name }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [2016, -624],
+      "id": "b247f39c-bb2f-4a96-83ee-435a268d35d6",
+      "name": "📄 Create Google Doc",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "CNR13ZAImDgaoiOs",
+          "name": "Zuke GDocs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.documentId }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('📝 Format Complete Document').item.json.formatted_content }}",
+              "locationProperties": {
+                "index": 1
+              }
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [2224, -624],
+      "id": "ae58332e-1e9e-4caf-91b9-6c491491a2e8",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "CNR13ZAImDgaoiOs",
+          "name": "Zuke GDocs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://docs.google.com/document/d/{{ $json.documentId }}/export?format=pdf",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2448, -624],
+      "id": "167c0891-beb1-461b-b30f-b0e42a76addc",
+      "name": "📑 Export to PDF",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "CNR13ZAImDgaoiOs",
+          "name": "Zuke GDocs"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [1376, -656],
+      "id": "33fee7f9-8af4-463b-ae50-7dcfd9e9e59c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "docId",
+              "name": "documentId",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2120, -624],
+      "id": "extract-doc-id",
+      "name": "Extract Doc ID"
+    }
+  ],
+  "connections": {
+    "Webhook - Receive Business Case": {
+      "main": [
+        [
+          {
+            "node": "🎯 Agent 1: Coordinator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Agent 1: Coordinator": {
+      "main": [
+        [
+          {
+            "node": "📋 Split Instructions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI - Coordinator": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🎯 Agent 1: Coordinator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coordinator Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "🎯 Agent 1: Coordinator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Split Instructions": {
+      "main": [
+        [
+          {
+            "node": "📊 Agent 2: Executive Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🎯 Agent 3: Market Analysis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💰 Agent 4: Business Model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🚀 Agent 5: Growth Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Agent 2: Executive Summary": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI - Executive": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "📊 Agent 2: Executive Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executive Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "📊 Agent 2: Executive Summary",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Agent 3: Market Analysis": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI - Market": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🎯 Agent 3: Market Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Market Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "🎯 Agent 3: Market Analysis",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💰 Agent 4: Business Model": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI - Business": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "💰 Agent 4: Business Model",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "💰 Agent 4: Business Model",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🚀 Agent 5: Growth Strategy": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI - Growth": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🚀 Agent 5: Growth Strategy",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Growth Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "🚀 Agent 5: Growth Strategy",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "📝 Format Complete Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Format Complete Document": {
+      "main": [
+        [
+          {
+            "node": "📄 Create Google Doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Create Google Doc": {
+      "main": [
+        [
+          {
+            "node": "Extract Doc ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Doc ID": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "📑 Export to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Webhook - Receive Business Case": [
+      {
+        "headers": {
+          "host": "aigents.southafricanorth.azurecontainer.io",
+          "user-agent": "node",
+          "content-length": "7994",
+          "accept": "*/*",
+          "accept-encoding": "br, gzip, deflate",
+          "accept-language": "*",
+          "sec-fetch-mode": "cors",
+          "via": "1.1 Caddy",
+          "x-forwarded-for": "10.92.0.11",
+          "x-forwarded-host": "aigents.southafricanorth.azurecontainer.io",
+          "x-forwarded-proto": "https"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "event": "business_case_completed",
+          "businessId": "691dbc7eda6be37bfb836084",
+          "submittedBy": "opeolu.victory@gmail.com",
+          "businessCase": {
+            "business_name": "Ultra 2026",
+            "what_you_do": "Ultra 2026 runs an annual leadership and empowerment conference in Houston, focused on helping people take the next step in their careers, businesses, and personal lives. The event features keynote speakers, themed workshops, and dedicated tracks in business, social arts, and technology.",
+            "the_challenge": "Ultra 2026 addresses the need for practical guidance and inspiration for individuals looking to advance in their careers, businesses, or personal development. Many people struggle to find the right resources, mentorship, and networking opportunities to move forward. The conference connects participants with industry experts, relevant workshops, and a supportive community, helping them overcome barriers to growth and success.",
+            "your_solution": "Ultra 2026 solves this problem by organizing an annual conference that brings together industry experts, thought leaders, and ambitious individuals in one place. Through targeted workshops, mentorship sessions, and structured networking opportunities, participants gain practical skills, actionable advice, and valuable connections. The conference's curated content and supportive environment ensure attendees leave with clear steps and new relationships to advance their goals.",
+            "why_people_will_choose_you": "Ultra 2026 stands out by offering a unique blend of leadership, business, social arts, and technology tracks, all in one annual conference. Unlike other events, it provides targeted workshops and expert speakers that address both professional and personal growth, helping attendees take actionable steps forward in their lives. Customers choose Ultra 2026 for its diverse, holistic approach and strong networking opportunities in Houston's vibrant community.",
+            "your_customers": "The ideal customers for Ultra 2026 are ambitious professionals, entrepreneurs, and students aged 22-45 living in or near Houston who are seeking personal and career development. They value networking, practical skills, and expert guidance to advance in business, social arts, or technology. These individuals benefit from Ultra 2026's holistic approach, which offers both actionable workshops and opportunities to connect with like-minded peers and mentors.",
+            "how_you_make_money": "Ultra 2026 generates revenue primarily through ticket sales for its annual conference, offering different pricing tiers for general admission, VIP access, and specialized workshop participation. Additional income is earned from sponsorships, exhibitor fees, and partnerships with brands seeking exposure to the event's audience. The business may also monetize through merchandise sales and post-event digital content.",
+            "products_services": "Ultra 2026 offers the following products and services:\n\n1. **Annual Leadership and Empowerment Conference**\n   - A large-scale event held once a year in Houston, bringing together professionals, entrepreneurs, and community leaders.\n\n2. **Keynote Speaker Sessions**\n   - High-profile speakers share insights on leadership, business growth, personal development, and innovation.\n\n3. **Themed Workshops**\n   - Interactive workshops focused on practical skills in leadership, business strategy, communication, and personal branding.\n\n4. **Business Track**\n   - Sessions and panels dedicated to business development, entrepreneurship, finance, marketing, and scaling startups.\n\n5. **Social Arts Track**\n   - Workshops and discussions on creative industries, social influence, arts entrepreneurship, and community engagement.\n\n6. **Technology Track**\n   - Training and talks on the latest tech trends, digital transformation, coding, and technology-driven business solutions.\n\n7. **Networking Opportunities**\n   - Structured networking sessions and informal meetups to connect attendees with peers, mentors, and potential partners.\n\n8. **Exhibition Booths**\n   - Space for businesses and sponsors to showcase products, services, and innovations to attendees.\n\n9. **Personal Development Resources**\n   - Access to curated materials, toolkits, and follow-up resources for continued growth after the conference.\n\n10. **Exclusive VIP Packages**\n    - Premium tickets with added benefits such as meet-and-greet sessions, reserved seating, and special gifts.\n\n11. **Post-Conference Community Platform**\n    - An online community or alumni network for ongoing support, collaboration, and resource sharing throughout the year.\n\nEach offering is designed to empower individuals and businesses to achieve their next level of success.",
+            "customer_profile": "Customer Profile for Ultra 2026\n\n**Age Range:** 25–40 years\n\n**Gender:** Male and Female\n\n**Location:** Major urban centers in Africa such as Lagos, Nairobi, Accra, Johannesburg, and Cairo.\n\n**Income Level:** Middle to upper-middle class; earning between $500 – $2,000 per month.\n\n**Interests:**  \n- Technology and digital products  \n- Modern lifestyle and convenience  \n- Personal development and career growth  \n- Fashion, entertainment, and social trends  \n- Health and wellness  \n\n**Behaviors:**  \n- Regularly use smartphones and social media  \n- Shop online for products and services  \n- Seek recommendations and read reviews before buying  \n- Attend events, workshops, or networking forums  \n- Value brands with a strong online presence and good customer service  \n\n**Pain Points:**  \n- Limited access to high-quality, affordable products or services  \n- Lack of reliable customer support  \n- Difficulty finding trusted brands locally  \n- Time constraints and desire for convenience  \n- Desire to keep up with global trends but limited local options  \n\n**Buying Motivations:**  \n- Seek products/services that save time and offer convenience  \n- Value quality, reliability, and after-sales support  \n- Motivated by brands that align with their aspirations and lifestyle  \n- Attracted to innovative solutions and new experiences  \n- Respond to promotions, discounts, and loyalty programs  \n\nThis customer values efficiency, quality, and modern solutions that fit their fast-paced urban lifestyle. They are tech-savvy, socially connected, and open to trying new brands that address their needs and pain points.",
+            "growth_goals": "**Ultra 2026: 6–12 Month Growth Goals**\n\n1. **Revenue Targets**  \n   - Increase total revenue by 25% compared to the previous year.  \n   - Set a target of $150,000 in revenue from the next conference, combining ticket sales, sponsorships, and exhibitor fees.\n\n2. **Customer Acquisition**  \n   - Grow attendee numbers by 30%, aiming for 650 participants at the next event (up from 500 last year).  \n   - Secure at least 10 new corporate sponsors and 15 new exhibitors.\n\n3. **Product Launches**  \n   - Introduce a digital access pass, allowing remote participants to attend virtually. Target 100 digital ticket sales in the first year.  \n   - Launch two premium, small-group workshops with limited seats at a higher price point.\n\n4. **Market Expansion**  \n   - Expand marketing to attract attendees from at least two new African diaspora communities in the US.  \n   - Form partnerships with three organizations (universities, professional associations, or community groups) to boost awareness and participant diversity.\n\n5. **Branding and Engagement**  \n   - Launch an annual branded merchandise line (e.g., T-shirts, notebooks) and sell at least 200 items during the event and online.  \n   - Grow the email subscriber list by 40% and social media followers by 50% to build a year-round community.\n\nThese goals are achievable with focused marketing, improved attendee experience, and expanded digital offerings. Regularly review progress and adjust strategies as needed.",
+            "how_zuke_can_help": "",
+            "completed_at": "2025-12-08T21:14:18.149Z"
+          },
+          "timestamp": "2025-12-08T21:14:18.328Z"
+        },
+        "webhookUrl": "https://aigents.southafricanorth.azurecontainer.io/webhook/Business-Case-Generator",
+        "executionMode": "production"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7efc1962c71fc67cb489d19367515cef026ead8caeb6412688c5c81bb0b92950"
+  }
+}

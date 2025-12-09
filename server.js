@@ -34,6 +34,9 @@ const addCreditsRouter = require('./api/add-credits');
 const promoCodesRouter = require('./api/promo-codes');
 const emailTrackingRouter = require('./api/routes/email-tracking');
 
+const aiGenerators = require('./api/AI-generators/api');
+
+
 // -------------------------
 // ✅ MIDDLEWARE FIRST (BEFORE ROUTES!)
 // -------------------------
@@ -65,6 +68,7 @@ app.use('/api/products', getProductsServices);
 app.use('/api/webhook', productWebhook);
 app.use('/api/webhook', serviceWebhook);
 app.use('/api', wordpressConfig);
+
 
 // Auth0 Management Client
 const { ManagementClient } = require('auth0');
@@ -131,6 +135,8 @@ app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/lead-generation', require('./api/lead-generation'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
+
+app.use('/api/ai-generators', aiGenerators);
 
 // Image generation API
 const multiImageRouter = require('./api/image-generation/multi-image');

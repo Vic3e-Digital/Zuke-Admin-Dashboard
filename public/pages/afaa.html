@@ -12,7 +12,7 @@
   <div class="sim-cards-grid">
     
     <!-- Card 1: LinkedIn Partner Finder -->
-    <div class="sim-card" id="card1">
+    <!-- <div class="sim-card" id="card1">
       <div class="sim-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="8" cy="8" r="3" stroke="#323544" stroke-width="2"/>
@@ -34,10 +34,10 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Card X: Project Fishoek -->
-    <div class="sim-card" id="cardX">
+    <!-- <div class="sim-card" id="cardX">
       <div class="sim-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="8" cy="8" r="3" stroke="#323544" stroke-width="2"/>
@@ -59,10 +59,10 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
      <!-- Card XI: Project Fishoek -->
-     <div class="sim-card" id="cardX">
+     <!-- <div class="sim-card" id="cardX">
       <div class="sim-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="8" cy="8" r="3" stroke="#323544" stroke-width="2"/>
@@ -84,11 +84,11 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
 
     <!-- Card 2: Email Finder -->
-    <div class="sim-card" id="card2">
+    <!-- <div class="sim-card" id="card2">
       <div class="sim-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="3" y="5" width="18" height="14" rx="2" stroke="#323544" stroke-width="2"/>
@@ -110,10 +110,10 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Card 3: Email Outreach -->
-    <div class="sim-card" id="card3">
+    <!-- <div class="sim-card" id="card3">
       <div class="sim-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="3" y="5" width="18" height="14" rx="2" stroke="#323544" stroke-width="2"/>
@@ -135,7 +135,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Card 4: Post Videos -->
     <div class="sim-card" id="card4">
@@ -310,6 +310,30 @@
       </div>
     </div>
 
+    <!-- Card 11: AI Generator Test -->
+    <div class="sim-card" id="card11">
+      <div class="sim-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" stroke="#323544" stroke-width="2"/>
+          <path d="M9 12l2 2 4-4" stroke="#323544" stroke-width="2" opacity="0.4"/>
+          <circle cx="12" cy="12" r="2" fill="#323544" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sim-content">
+        <div class="sim-body">
+          <div class="sim-info">
+            <h3 class="sim-name">Test New AI System</h3>
+            <p class="sim-description">Test the new unified AI generation system with configurable models for text, image, and video generation.</p>
+          </div>
+          <button class="sim-action-btn" id="afaaAiTestBtn" aria-label="Open AI Test Tool">
+            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21.5127 5.77444C22.1665 3.97839 20.4248 2.23663 18.6287 2.89049L4.63167 7.98618C2.69138 8.69256 2.64771 11.4209 4.56441 12.189L9.72779 14.2582C9.91801 14.3344 10.0687 14.4851 10.145 14.6754L12.2142 19.8387C12.9823 21.7554 15.7106 21.7118 16.417 19.7715L21.5127 5.77444Z" fill="#323544"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Modal for popups -->
@@ -321,3 +345,37 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Handle AI Test button click
+  document.addEventListener('DOMContentLoaded', function() {
+    const aiTestBtn = document.getElementById('afaaAiTestBtn');
+    if (aiTestBtn) {
+      aiTestBtn.addEventListener('click', function() {
+        // Open the AI test page in a new tab
+        window.open('/pages/ai-generator-test.html', '_blank');
+      });
+    }
+
+    // Handle modal functionality
+    const modal = document.getElementById('afaaModal');
+    const closeBtn = document.querySelector('.close');
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        const iframe = document.getElementById('modalIframe');
+        iframe.src = '';
+      });
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      if (event.target == modal) {
+        modal.style.display = 'none';
+        const iframe = document.getElementById('modalIframe');
+        iframe.src = '';
+      }
+    });
+  });
+</script>
