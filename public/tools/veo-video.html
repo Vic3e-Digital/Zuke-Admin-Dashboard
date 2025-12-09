@@ -1702,14 +1702,20 @@ Make each suggestion cinematic, specific, and optimized for 8-second AI video ge
 
         const videoResult = await pollVideoGeneration(operationName, currentProvider); // ✅ Pass provider
 
-
-        // const videoResult = await pollVideoGeneration(operationName);
+        console.log('\n🎬 ========== RECEIVED VIDEO RESULT ==========');
+        console.log('VideoResult keys:', Object.keys(videoResult));
+        console.log('Has video property:', !!videoResult.video);
+        console.log('Has bytesBase64Encoded directly:', !!videoResult.bytesBase64Encoded);
+        console.log('VideoResult structure:', JSON.stringify(videoResult, null, 2));
 
         // Step 4: Download the video
         progressText.textContent = 'Downloading generated video...';
         progressFill.style.width = '90%';
 
-        const videoBlob = await downloadVideoFromGemini(videoResult.video);
+        // Handle both nested and direct video data formats
+        const videoData = videoResult.video || videoResult;
+        console.log('Using videoData:', !!videoData.bytesBase64Encoded ? 'Has base64 data' : 'No base64 data');
+        const videoBlob = await downloadVideoFromGemini(videoData);
         generatedVideoBlob = videoBlob;
 
         progressText.textContent = 'Generating caption...';
