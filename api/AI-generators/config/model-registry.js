@@ -270,6 +270,90 @@ const MODEL_REGISTRY = {
         ]
       }
     }
+  },
+
+  "image-generation": {
+    "text-to-image": {
+      "azure": {
+        "models": [
+          {
+            "id": "gpt-image-1",
+            "name": "GPT Image 1 (DALL-E 3 Azure)",
+            "tier": "premium",
+            "capabilities": {
+              "maxResolution": "1024x1024",
+              "supportedSizes": ["1024x1024", "1792x1024", "1024x1792"],
+              "maxPromptLength": 4000,
+              "styles": ["vivid", "natural"],
+              "quality": ["low", "standard", "high", "ultra"],
+              "format": "png"
+            },
+            "pricing": { 
+              "perImage": 0.04,
+              "currency": "USD"
+            },
+            "priority": 1,
+            "status": "active",
+            "description": "Latest DALL-E 3 model via Azure OpenAI for high-quality image generation"
+          }
+        ]
+      }
+    },
+
+    "image-to-image": {
+      "azure": {
+        "models": [
+          {
+            "id": "gpt-image-1",
+            "name": "GPT Image 1 Edit (DALL-E 3 Azure)",
+            "tier": "premium",
+            "capabilities": {
+              "maxResolution": "1024x1024",
+              "supportedSizes": ["1024x1024", "1792x1024", "1024x1792"],
+              "maxPromptLength": 4000,
+              "editModes": ["inpainting", "outpainting", "variation"],
+              "format": "png"
+            },
+            "pricing": { 
+              "perImage": 0.08,
+              "currency": "USD"
+            },
+            "priority": 1,
+            "status": "active",
+            "description": "DALL-E 3 image editing capabilities via Azure OpenAI"
+          }
+        ]
+      }
+    },
+
+    "multiple-images": {
+      "azure": {
+        "models": [
+          {
+            "id": "gpt-image-1",
+            "name": "GPT Image 1 Batch (DALL-E 3 Azure)",
+            "tier": "premium",
+            "capabilities": {
+              "maxCount": 10,
+              "maxResolution": "1024x1024",
+              "supportedSizes": ["1024x1024", "1792x1024", "1024x1792"],
+              "maxPromptLength": 4000,
+              "styles": ["vivid", "natural"],
+              "quality": ["standard", "hd"],
+              "format": "png",
+              "batchProcessing": true
+            },
+            "pricing": { 
+              "perImage": 0.04,
+              "currency": "USD"
+            },
+            "priority": 1,
+            "status": "active",
+            "description": "Generate multiple image variations using DALL-E 3 via Azure OpenAI"
+          }
+        ]
+      }
+    }
   }
 };
 

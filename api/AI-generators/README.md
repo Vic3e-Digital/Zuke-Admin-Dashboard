@@ -2,7 +2,7 @@
 
 ## 🎉 Implementation Complete!
 
-The AI Generators Architecture has been successfully implemented and **fully integrated**! The system now supports both **video generation** and **text generation** with Azure OpenAI GPT-4.1 integration. All endpoints are **operationally deployed** and responding correctly.
+The AI Generators Architecture has been successfully implemented and **fully integrated**! The system now supports **text generation**, **video generation**, and **image generation** with Azure OpenAI integration. All endpoints are **operationally deployed** and responding correctly.
 
 ## 📁 Project Structure
 
@@ -24,10 +24,16 @@ api/AI-generators/
 │   ├── video-generation/
 │   │   ├── text-to-video/        # Text-to-video generation
 │   │   └── providers/            # Video provider implementations
-│   └── text-generation/
-│       ├── conversation/         # Chat and Q&A interactions
-│       ├── content-creation/     # Structured content generation
-│       └── interfaces/           # Text generation interfaces
+│   ├── text-generation/
+│   │   ├── conversation/         # Chat and Q&A interactions
+│   │   ├── content-creation/     # Structured content generation
+│   │   └── interfaces/           # Text generation interfaces
+│   └── image-generation/
+│       ├── text-to-image/        # Text-to-image generation
+│       ├── image-to-image/       # Image transformation
+│       ├── multiple-images/      # Multiple image variations
+│       ├── providers/            # Image provider implementations
+│       └── interfaces/           # Image generation interfaces
 └── utils/
     ├── format-converters.js       # Media format handling
     ├── media-validators.js        # Media validation
@@ -55,7 +61,7 @@ GOOGLE_CLOUD_PROJECT_ID=your-project-id
 GOOGLE_CLOUD_REGION=us-central1
 GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
 
-# Azure OpenAI (required for text generation)
+# Azure OpenAI (required for text and image generation)
 AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
 AZURE_OPENAI_API_KEY=your-api-key
 
@@ -97,6 +103,17 @@ curl -X POST http://localhost:3000/api/ai-generators/generate \
     "parameters": { "temperature": 0.7, "max_tokens": 100 },
     "preferences": { "provider": "azure", "model": "gpt-4.1" }
   }'
+
+# ✅ Image generation with Azure OpenAI DALL-E 3 (VERIFIED WORKING)
+curl -X POST http://localhost:3000/api/ai-generators/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "capability": "image-generation",
+    "useCase": "text-to-image",
+    "prompt": "A red fox in an autumn forest",
+    "parameters": { "size": "1024x1024", "quality": "standard" },
+    "preferences": { "provider": "azure", "model": "gpt-image-1" }
+  }'
 ```
 
 ## 📊 Architecture Features
@@ -107,6 +124,7 @@ curl -X POST http://localhost:3000/api/ai-generators/generate \
 - **Core Architecture**: Request validation, model selection, response normalization  
 - **Video Generation**: Text-to-video and image-to-video capabilities
 - **Text Generation**: Azure OpenAI integration with GPT-4.1 and GPT-4o-mini
+- **Image Generation**: Azure OpenAI DALL-E 3 integration with three use cases
 - **Utility Functions**: Format conversion, media validation, async polling
 - **API Integration**: Complete Express router with all endpoints
 - **Test Suite**: Comprehensive validation framework
@@ -119,7 +137,14 @@ curl -X POST http://localhost:3000/api/ai-generators/generate \
    - Content creation for structured text (articles, emails, etc.)
    - Streaming and batch processing support
 
-2. **Text-to-Video Generation**
+2. **Image Generation**
+   - Azure OpenAI DALL-E 3 (gpt-image-1) integration
+   - Text-to-image generation with HD quality options
+   - Image-to-image transformation and editing
+   - Multiple image variations (up to 10 per request)
+   - Support for 1024x1024, 1792x1024, and 1024x1792 resolutions
+
+3. **Text-to-Video Generation**
    - Google Veo 3.1 integration
    - Customizable duration, quality, aspect ratio
    - Async job processing with status polling
@@ -218,6 +243,69 @@ const article = await fetch('/api/ai-generators/generate', {
 });
 ```
 
+### Image Generation with Azure OpenAI DALL-E 3
+
+```javascript
+// Text-to-Image Generation
+const textToImage = await fetch('/api/ai-generators/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    capability: 'image-generation',
+    useCase: 'text-to-image',
+    prompt: 'A majestic lion in the African savanna at sunset',
+    parameters: {
+      size: '1024x1024',
+      quality: 'standard',
+      style: 'natural'
+    },
+    preferences: {
+      provider: 'azure',
+      model: 'gpt-image-1'
+    }
+  })
+});
+
+// Image-to-Image Transformation
+const imageToImage = await fetch('/api/ai-generators/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    capability: 'image-generation',
+    useCase: 'image-to-image',
+    prompt: 'Convert this to a watercolor painting style',
+    image: 'https://example.com/input-image.jpg',
+    parameters: {
+      size: '1024x1024'
+    },
+    preferences: {
+      provider: 'azure',
+      model: 'gpt-image-1'
+    }
+  })
+});
+
+// Multiple Image Variations
+const multipleImages = await fetch('/api/ai-generators/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    capability: 'image-generation',
+    useCase: 'multiple-images',
+    prompt: 'A cute robot assistant in different poses',
+    count: 4,
+    parameters: {
+      size: '1024x1024',
+      quality: 'high'
+    },
+    preferences: {
+      provider: 'azure',
+      model: 'gpt-image-1'
+    }
+  })
+});
+```
+
 ### Video Generation
 
 ```javascript
@@ -301,6 +389,59 @@ let generatedText = '';
 if (data.success && data.output && data.output.data) {
   const outputData = JSON.parse(data.output.data);
   generatedText = outputData.text;
+}
+```
+
+### Image Generation Response
+
+```javascript
+{
+  "success": true,
+  "status": "completed",
+  "requestId": "req_1765319478082_0001",
+  "timestamp": "2025-12-09T22:31:41.883Z",
+  "processingTime": 23806,
+  "provider": "azure",
+  "model": "gpt-image-1",
+  "capability": "image-generation",
+  "useCase": "text-to-image",
+  "error": null,
+  "warnings": [],
+  "output": {
+    "type": "image",
+    "format": "png",
+    "data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+  },
+  "usage": {
+    "cost": null
+  }
+}
+```
+
+### Multiple Images Response
+
+```javascript
+{
+  "success": true,
+  "status": "completed",
+  "requestId": "req_xxx",
+  "provider": "azure",
+  "model": "gpt-image-1",
+  "capability": "image-generation",
+  "useCase": "multiple-images",
+  "output": {
+    "type": "image-array",
+    "format": "png",
+    "data": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    ],
+    "count": 3
+  },
+  "usage": {
+    "cost": null
+  }
 }
 ```
 
@@ -419,13 +560,32 @@ Set `NODE_ENV=development` to enable:
 
 **Text Generation**: ✅ **AZURE OPENAI INTEGRATED** - GPT-4.1 & GPT-4o-mini operational
 
+**Image Generation**: ✅ **AZURE OPENAI DALL-E 3 INTEGRATED** - Text-to-image, image-to-image, and multiple images operational
+
 **Video Generation**: ✅ **GOOGLE VEO INTEGRATED** - Text-to-video fully functional
 
 **Endpoints**: ✅ **ALL VERIFIED WORKING** - Health, capabilities, generation all responding
 
 **Architecture**: Fully modular, scalable, and extensible
 
-**Ready For**: Text generation, video generation, conversation AI, and content creation
+**Ready For**: Text generation, image generation, video generation, conversation AI, and complete content creation
+
+## 📚 Development Resources
+
+### **Creative Tools Development Guide**
+**🔗 [Complete Development Guide](../../docs/CREATIVE_TOOLS_DEVELOPMENT_GUIDE.md)**
+
+Learn how to create new creative tools following established patterns:
+- **Step-by-step implementation guide**
+- **Code templates and examples** 
+- **Integration with AI Generators**
+- **Wallet and authentication patterns**
+- **Styling and UX guidelines**
+
+### **Reference Implementations**
+- **[Image Enhancement Tool](../../public/pages/creative/improve-image.html)** - Complete image processing example
+- **[Audio Transcription Tool](../../public/pages/creative/transcribe-audio.html)** - File processing pattern
+- **Creative Hub Integration** - Navigation and routing examples
 
 The AI Generators Architecture is **live, operational, and powering your complete AI content generation suite**! 🚀✨
 
@@ -435,6 +595,9 @@ The AI Generators Architecture is **live, operational, and powering your complet
 - GPT-4.1 (Premium, 32K context)
 - GPT-4o-mini (Standard, 16K context)
 
+**Image Generation (Azure OpenAI):**
+- GPT Image 1 / DALL-E 3 (Premium, 1024x1024 HD, multiple formats)
+
 **Video Generation (Google Veo):**  
 - Veo 3.1 (Text-to-video, up to 60s)
 - Veo I2V (Image-to-video animation)
@@ -442,5 +605,8 @@ The AI Generators Architecture is **live, operational, and powering your complet
 **Use Cases:**
 - **Conversation**: Chat, Q&A, dialogue generation
 - **Content Creation**: Articles, emails, structured content
+- **Text-to-Image**: Generate images from text prompts
+- **Image-to-Image**: Transform and edit existing images
+- **Multiple Images**: Generate multiple variations from one prompt
 - **Text-to-Video**: Generate videos from text descriptions
 - **Image-to-Video**: Animate static images into videos

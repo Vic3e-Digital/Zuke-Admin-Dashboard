@@ -248,13 +248,14 @@ export async function initCreativePage() {
       },
       {
         btn: document.getElementById("improveImage"),
-        title: "Improve an Image",
-        url: `/tools/improve-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+        title: "Product Image Improvement",
+        url: `/pages/creative/improve-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
       },
       {
         btn: document.querySelector('#textAIImageCard .sim-action-btn'),
         title: "Text + AI Image",
-        url: `/tools/text-ai-image.html`
+        url: `/pages/creative/improve-image.html?email=${encodeURIComponent(userEmail)}&businessId=${businessId}&businessName=${encodeURIComponent(businessName)}`
+        // url: `/tools/text-ai-image.html`
       }
     ];
 

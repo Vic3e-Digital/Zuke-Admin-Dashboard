@@ -327,4 +327,86 @@ router.post('/credit', async (req, res) => {
   }
 });
 
+// Check wallet balance and sufficient funds
+router.post('/balance', async (req, res) => {
+  try {
+    const { email, businessId, userEmail, requiredAmount } = req.body;
+    
+    // Use email or userEmail, whichever is provided
+    const walletEmail = email || userEmail;
+    
+    if (!walletEmail) {
+      return res.status(400).json({
+        success: false,
+        error: 'email or userEmail is required'
+      });
+    }
+
+    const { db } = await connectToDatabase();
+    const collection = db.collection('user_wallets');
+
+    let wallet = await collection.findOne({ email: walletEmail });
+
+    // If wallet doesn't exist, create a new one
+    if (!wallet) {
+      const newWallet = {
+        email: walletEmail,
+        balance: 99,
+        currency: 'ZAR',
+        current_plan: 'free',
+        billing_period: null,
+        subscription_status: 'inactive',
+        subscription_start_date: null,
+        subscription_end_date: null,
+        transactions: [
+          {
+            transaction_id: `initial_${Date.now()}`,
+            type: 'credit',
+            amount: 99,
+            balance_after: 99,
+            description: 'Welcome bonus - Initial credits',
+            timestamp: new Date().toISOString(),
+            metadata: {
+              source: 'signup_bonus'
+            }
+          }
+        ],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      await collection.insertOne(newWallet);
+      wallet = newWallet;
+    }
+
+    // Check if sufficient funds if requiredAmount is provided
+    if (requiredAmount !== undefined) {
+      if (wallet.balance < requiredAmount) {
+        return res.status(402).json({
+          success: false,
+          error: 'Insufficient funds',
+          balance: wallet.balance,
+          required: requiredAmount,
+          shortfall: requiredAmount - wallet.balance
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      balance: wallet.balance,
+      formatted_balance: `R${wallet.balance.toFixed(2)}`,
+      currency: wallet.currency || 'ZAR',
+      sufficient: requiredAmount ? wallet.balance >= requiredAmount : true
+    });
+
+  } catch (error) {
+    console.error('Error checking wallet balance:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check wallet balance'
+    });
+  }
+});
+
 module.exports = router;

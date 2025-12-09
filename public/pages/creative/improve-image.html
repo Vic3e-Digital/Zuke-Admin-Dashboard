@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Image Improvement | Zuke</title>
+  <link rel="stylesheet" href="../../css/formStyle.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  <style>
+    /* Image Improvement Styles */
+    .image-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .image-upload-section, .settings-section {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .image-upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: var(--light-bg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .image-upload-box:hover {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .image-upload-box.has-image {
+      border-color: var(--primary-orange);
+      background: #FFF8F0;
+    }
+
+    .image-upload-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+
+    .uploaded-image-preview {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .settings-panel {
+      background: var(--light-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .setting-group {
+      margin-bottom: 20px;
+    }
+
+    .setting-label {
+      display: block;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .setting-select, .setting-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+      color: var(--text-primary);
+    }
+
+    .setting-select:focus, .setting-input:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 2px rgba(255, 149, 0, 0.1);
+    }
+
+    .setting-description {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .results-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: var(--light-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .results-header {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .image-carousel {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding: 10px 0;
+      scroll-behavior: smooth;
+    }
+
+    .result-image-container {
+      flex: 0 0 250px;
+      position: relative;
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .result-image-container:hover {
+      border-color: var(--primary-orange);
+      transform: translateY(-2px);
+    }
+
+    .result-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .result-btn {
+      flex: 1;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .download-btn {
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    .download-btn:hover {
+      background: #ff9500;
+    }
+
+    .copy-url-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .copy-url-btn:hover {
+      background: #5a6268;
+    }
+
+    .progress-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--light-bg);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .progress-bar-container {
+      background: #e0e0e0;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      background: var(--primary-orange);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+
+    .generate-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .generate-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--primary-orange);
+      color: white;
+    }
+
+    .generate-btn:hover:not(:disabled) {
+      background: #ff9500;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .generate-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .clear-btn {
+      padding: 12px 20px;
+      border: 1px solid #6c757d;
+      background: transparent;
+      color: #6c757d;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .clear-btn:hover {
+      background: #6c757d;
+      color: white;
+    }
+
+    .status {
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .cost-display {
+      font-size: 14px;
+      color: #666;
+      margin-top: 15px;
+      padding: 12px;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+    }
+
+    .cost-highlight {
+      font-weight: 600;
+      color: var(--primary-orange);
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .file-item .file-icon {
+      font-size: 20px;
+    }
+
+    .file-item .file-info {
+      flex: 1;
+    }
+
+    .file-item .file-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .file-item .file-size {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .file-item .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .file-item .remove-btn:hover {
+      background: #c82333;
+    }
+
+    @media (max-width: 768px) {
+      .image-container {
+        flex-direction: column;
+      }
+
+      .image-upload-section, .settings-section {
+        flex: none;
+        width: 100%;
+      }
+
+      .generate-group {
+        flex-direction: column;
+      }
+
+      .image-carousel {
+        flex-direction: column;
+      }
+
+      .result-image-container {
+        flex: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <div class="container">
+      
+      <!-- Header -->
+      <div class="header">
+        <h1>Product Image Improvement</h1>
+        <p>Transform cellphone-photographed images into studio-quality visuals with AI enhancement</p>
+      </div>
+
+      <!-- Info Alert -->
+      <div class="info-box" style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; color: #856404;">
+        <strong>🚀 Powered by AI Image Enhancement:</strong> Upload a product image and generate 3 professional variations. Perfect for e-commerce, social media, and marketing materials.
+      </div>
+
+      <!-- Main Content -->
+      <div class="image-container">
+        
+        <!-- Upload Section -->
+        <div class="image-upload-section">
+          <div class="section-title">Upload Product Image</div>
+
+          <div class="image-upload-box" id="imageUploadBox">
+            <div class="image-upload-icon">📸</div>
+            <div style="font-weight: 500; color: var(--text-primary);">Drag & drop your product image</div>
+            <div style="font-size: 12px; color: #666; margin-top: 8px;">or click to select</div>
+            <div style="font-size: 11px; color: #999; margin-top: 8px;">Supported: JPG, PNG, WebP (Max 10MB)</div>
+          </div>
+
+          <div id="fileDisplay" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings-section">
+          <div class="section-title">Advanced Settings</div>
+
+          <div class="settings-panel">
+            <div class="setting-group">
+              <label class="setting-label" for="styleSelect">Enhancement Style</label>
+              <select id="styleSelect" class="setting-select">
+                <option value="professional">Professional Product Shot</option>
+                <option value="minimalist">Minimalist Clean Background</option>
+                <option value="lifestyle">Lifestyle Scene</option>
+                <option value="studio">Studio Lighting</option>
+                <option value="ecommerce">E-commerce Ready</option>
+              </select>
+              <div class="setting-description">Choose the style for your enhanced images</div>
+            </div>
+
+            <div class="setting-group">
+              <label class="setting-label" for="backgroundSelect">Background Enhancement</label>
+              <select id="backgroundSelect" class="setting-select">
+                <option value="auto">Auto-Enhance Background</option>
+                <option value="white">Clean White Background</option>
+                <option value="transparent">Remove Background</option>
+                <option value="gradient">Gradient Background</option>
+                <option value="keep">Keep Original</option>
+              </select>
+              <div class="setting-description">Background processing options</div>
+            </div>
+
+            <div class="setting-group">
+              <label class="setting-label" for="qualitySelect">Output Quality</label>
+              <select id="qualitySelect" class="setting-select">
+                <option value="standard">Standard (1024x1024)</option>
+                <option value="high">High Quality (1792x1024)</option>
+                <option value="square">Square Format (1024x1024)</option>
+              </select>
+              <div class="setting-description">Resolution and format options</div>
+            </div>
+
+            <div class="setting-group">
+              <label class="setting-label" for="promptInput">Custom Enhancement Prompt (Optional)</label>
+              <input type="text" id="promptInput" class="setting-input" 
+                     placeholder="e.g., Add soft lighting, enhance product details...">
+              <div class="setting-description">Describe specific enhancements you want</div>
+            </div>
+          </div>
+
+          <div class="cost-display">
+            <strong>💰 Cost per generation:</strong><br>
+            <span class="cost-highlight">R10.00</span> for 3 enhanced variations<br>
+            <span style="font-size: 12px; color: #666;">Powered by AI Image Enhancement Technology</span>
+          </div>
+
+          <!-- Generate Buttons -->
+          <div class="generate-group">
+            <button id="generateBtn" class="generate-btn" disabled>
+              ✨ Generate 3 Variations (R10)
+            </button>
+            <button id="clearBtn" class="clear-btn" style="display: none;">
+              🗑️ Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="progress-section" id="progressSection">
+        <div class="progress-bar-container">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Preparing your image for AI enhancement...</div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="results-container" id="resultsContainer" style="display: none;">
+        <div class="results-header">✨ Enhanced Product Images</div>
+        <div class="image-carousel" id="imageCarousel">
+          <!-- Enhanced images will be populated here -->
+        </div>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="imageStatus" class="status"></div>
+
+      <input type="file" id="fileInput" class="file-input" accept="image/*">
+    </div>
+
+    <script>
+  // ========== CONFIGURATION & STATE ==========
+  const urlParams = new URLSearchParams(window.location.search);
+  let userEmail = urlParams.get('email');
+  let businessId = urlParams.get('businessId');
+  let businessName = urlParams.get('businessName') || 'My Business';
+  
+  let auth0Client = null;
+  let currentBusiness = null;
+  let businessCase = {};
+  
+  let uploadedImageFile = null;
+  let generatedImages = [];
+  let isGenerating = false;
+
+  // ========== ELEMENT REFERENCES ==========
+  const imageUploadBox = document.getElementById('imageUploadBox');
+  const fileInput = document.getElementById('fileInput');
+  const fileDisplay = document.getElementById('fileDisplay');
+  const generateBtn = document.getElementById('generateBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const progressSection = document.getElementById('progressSection');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const resultsContainer = document.getElementById('resultsContainer');
+  const imageCarousel = document.getElementById('imageCarousel');
+  const imageStatus = document.getElementById('imageStatus');
+  
+  // Settings
+  const styleSelect = document.getElementById('styleSelect');
+  const backgroundSelect = document.getElementById('backgroundSelect');
+  const qualitySelect = document.getElementById('qualitySelect');
+  const promptInput = document.getElementById('promptInput');
+
+  // ========== AUTH0 & BUSINESS INFO ==========
+  async function getAuth0Client() {
+    if (window.auth0Client) {
+      console.log('✅ Using global Auth0 client');
+      return window.auth0Client;
+    }
+    
+    if (window.parent && window.parent.auth0Client) {
+      console.log('✅ Using parent Auth0 client');
+      return window.parent.auth0Client;
+    }
+    
+    console.warn('⚠️ Global Auth0 client not available');
+    return null;
+  }
+
+  async function loadBusinessInfo() {
+    try {
+      if (!businessId && window.parent && window.parent.dataManager) {
+        try {
+          currentBusiness = window.parent.dataManager.getSelectedBusinessOrFirst();
+          if (currentBusiness) {
+            businessId = currentBusiness._id;
+            businessCase = currentBusiness.initial_business_case || {};
+            console.log('✅ Loaded business from parent');
+          }
+        } catch (e) {
+          console.warn('Could not access parent dataManager');
+        }
+      }
+
+      if (!userEmail) {
+        const auth0 = await getAuth0Client();
+        if (auth0) {
+          try {
+            const isAuthenticated = await auth0.isAuthenticated();
+            if (isAuthenticated) {
+              const user = await auth0.getUser();
+              if (user && user.email) {
+                userEmail = user.email;
+                console.log('✅ Got user email from Auth0');
+              }
+            }
+          } catch (error) {
+            console.error('Error getting user:', error);
+          }
+        }
+      }
+
+      if (!userEmail || !businessId) {
+        console.error('Missing required info');
+        showStatus('Missing user or business information. Please ensure you are logged in.', 'error');
+        return;
+      }
+
+      console.log('✅ Business info loaded');
+    } catch (error) {
+      console.error('Error loading business info:', error);
+      showStatus(`Error: ${error.message}`, 'error');
+    }
+  }
+
+  // ========== FILE UPLOAD HANDLERS ==========
+  imageUploadBox.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    handleImageUpload(e.target.files[0]);
+  });
+
+  imageUploadBox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    imageUploadBox.style.borderColor = 'var(--primary-orange)';
+    imageUploadBox.style.background = '#FFF8F0';
+  });
+
+  imageUploadBox.addEventListener('dragleave', () => {
+    if (!uploadedImageFile) {
+      imageUploadBox.style.borderColor = 'var(--border-color)';
+      imageUploadBox.style.background = 'var(--light-bg)';
+    }
+  });
+
+  imageUploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    imageUploadBox.style.borderColor = 'var(--border-color)';
+    imageUploadBox.style.background = 'var(--light-bg)';
+    handleImageUpload(e.dataTransfer.files[0]);
+  });
+
+  function handleImageUpload(file) {
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    if (!validTypes.includes(file.type)) {
+      showStatus(`Invalid format: ${file.type}. Use JPG, PNG, or WebP`, 'error');
+      return;
+    }
+
+    if (file.size > maxSize) {
+      showStatus(`File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum 10MB allowed`, 'error');
+      return;
+    }
+
+    uploadedImageFile = file;
+    updateFileDisplay();
+    generateBtn.disabled = false;
+    clearBtn.style.display = 'inline-block';
+    hideStatus();
+  }
+
+  function updateFileDisplay() {
+    if (!uploadedImageFile) {
+      imageUploadBox.classList.remove('has-image');
+      fileDisplay.innerHTML = '';
+      return;
+    }
+
+    imageUploadBox.classList.add('has-image');
+    const sizeMB = (uploadedImageFile.size / 1024 / 1024).toFixed(2);
+    
+    // Create image preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      fileDisplay.innerHTML = `
+        <div class="file-item">
+          <div class="file-icon">📸</div>
+          <div class="file-info">
+            <div class="file-name">${uploadedImageFile.name}</div>
+            <div class="file-size">${sizeMB} MB • Ready for enhancement</div>
+          </div>
+          <button class="remove-btn" onclick="removeFile()">✕</button>
+        </div>
+        <img src="${e.target.result}" alt="Preview" class="uploaded-image-preview">
+      `;
+    };
+    reader.readAsDataURL(uploadedImageFile);
+  }
+
+  window.removeFile = function() {
+    uploadedImageFile = null;
+    fileInput.value = '';
+    updateFileDisplay();
+    generateBtn.disabled = true;
+    clearBtn.style.display = 'none';
+    resultsContainer.style.display = 'none';
+    generatedImages = [];
+  };
+
+  function clearAll() {
+    uploadedImageFile = null;
+    generatedImages = [];
+    fileInput.value = '';
+    generateBtn.disabled = true;
+    clearBtn.style.display = 'none';
+    updateFileDisplay();
+    resultsContainer.style.display = 'none';
+    progressSection.style.display = 'none';
+    hideStatus();
+  }
+
+  clearBtn.addEventListener('click', clearAll);
+
+  // ========== GENERATE ENHANCED IMAGES ==========
+  generateBtn.addEventListener('click', async () => {
+    await generateEnhancedImages();
+  });
+
+  async function generateEnhancedImages() {
+    if (!uploadedImageFile || !userEmail || !businessId) {
+      showStatus('Missing required information', 'error');
+      return;
+    }
+
+    generateBtn.disabled = true;
+    isGenerating = true;
+    progressSection.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Preparing your image for AI enhancement...';
+    hideStatus();
+
+    try {
+      // First, check wallet balance using existing endpoint
+      const walletCheck = await fetch(`/api/wallet?email=${encodeURIComponent(userEmail)}`, {
+        method: 'GET'
+      });
+
+      const walletData = await walletCheck.json();
+      if (!walletCheck.ok) {
+        throw new Error(walletData.error || 'Unable to access wallet');
+      }
+
+      if (!walletData.wallet || walletData.wallet.balance < 10) {
+        const currentBalance = walletData.wallet ? walletData.wallet.balance : 0;
+        throw new Error(`Insufficient credits. Required: R10.00, Balance: R${currentBalance.toFixed(2)}`);
+      }
+
+      progressFill.style.width = '10%';
+      progressText.textContent = 'Uploading image to AI enhancement system...';
+
+      // Convert image to base64
+      const imageBase64 = await fileToBase64(uploadedImageFile);
+      
+      console.log('🖼️ Image converted to base64:', {
+        fileName: uploadedImageFile.name,
+        fileSize: uploadedImageFile.size,
+        imageBase64Length: imageBase64?.length,
+        imageBase64Preview: imageBase64?.substring(0, 100)
+      });
+      
+      if (!imageBase64) {
+        throw new Error('Failed to convert image to base64');
+      }
+      
+      progressFill.style.width = '25%';
+      progressText.textContent = 'Creating enhancement prompts...';
+
+      // Build enhancement prompt
+      const style = styleSelect.value;
+      const background = backgroundSelect.value;
+      const customPrompt = promptInput.value.trim();
+      
+      let enhancementPrompt = `Enhance this product image with ${style} styling`;
+      
+      if (background !== 'keep') {
+        enhancementPrompt += `, ${background} background processing`;
+      }
+      
+      if (customPrompt) {
+        enhancementPrompt += `, ${customPrompt}`;
+      }
+
+      enhancementPrompt += '. Make it look professional and suitable for e-commerce use.';
+
+      progressFill.style.width = '40%';
+      progressText.textContent = 'Generating 3 enhanced variations simultaneously...';
+
+      // Generate 3 images simultaneously using AI Generators API
+      const generatePromises = Array(3).fill(null).map(async (_, index) => {
+        const requestPayload = {
+          capability: 'image-generation',
+          useCase: 'image-to-image',
+          prompt: enhancementPrompt,
+          media: [{
+            type: 'image',
+            data: imageBase64,
+            format: imageBase64.includes('data:image/jpeg') ? 'jpeg' : 'png'
+          }],
+          parameters: {
+            size: qualitySelect.value === 'high' ? '1792x1024' : '1024x1024',
+            quality: qualitySelect.value === 'standard' ? 'standard' : 'hd'
+          },
+          preferences: {
+            provider: 'azure',
+            model: 'gpt-image-1'
+          }
+        };
+        
+        console.log(`🖼️ Sending request ${index + 1}:`, {
+          ...requestPayload,
+          media: requestPayload.media ? [{
+            ...requestPayload.media[0],
+            data: requestPayload.media[0].data?.substring(0, 50) + '...'
+          }] : 'undefined'
+        });
+        
+        const response = await fetch('/api/ai-generators/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestPayload)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(`Generation ${index + 1} failed: ${error.error || 'Unknown error'}`);
+        }
+
+        return await response.json();
+      });
+
+      // Update progress as images complete
+      let completedCount = 0;
+      const results = await Promise.all(generatePromises.map(async (promise) => {
+        const result = await promise;
+        completedCount++;
+        const progress = 40 + (completedCount * 20); // 40% to 100%
+        progressFill.style.width = `${progress}%`;
+        progressText.textContent = `Generated ${completedCount}/3 enhanced images...`;
+        return result;
+      }));
+
+      // Deduct cost from wallet
+      progressText.textContent = 'Processing payment...';
+      const walletResponse = await fetch('/api/wallet/deduct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          amount: 10,
+          description: `Image Enhancement - 3 variations for ${uploadedImageFile.name}`,
+          metadata: { 
+            category: 'ai-image-enhancement',
+            businessId: businessId
+          }
+        })
+      });
+
+      if (!walletResponse.ok) {
+        const error = await walletResponse.json();
+        throw new Error(`Payment failed: ${error.error || 'Unknown error'}`);
+      }
+
+      const walletResult = await walletResponse.json();
+      
+      progressFill.style.width = '100%';
+      progressText.textContent = 'Enhancement complete!';
+
+      // Store and display results
+      generatedImages = results;
+      displayEnhancedImages(results);
+
+      setTimeout(() => {
+        progressSection.style.display = 'none';
+      }, 1500);
+
+      let successMsg = '✨ Image enhancement complete!\n';
+      successMsg += `📸 Enhanced: ${uploadedImageFile.name}\n`;
+      successMsg += `🎨 Style: ${style}\n`;
+      successMsg += `🖼️ Generated: 3 variations\n`;
+      successMsg += `💰 Cost: R10.00\n`;
+      if (walletResult.new_balance) {
+        successMsg += `📊 New balance: ${walletResult.new_balance}`;
+      }
+
+      showStatus(successMsg, 'success');
+
+    } catch (error) {
+      console.error('Enhancement error:', error);
+      progressSection.style.display = 'none';
+      showStatus(error.message, 'error');
+    } finally {
+      generateBtn.disabled = false;
+      isGenerating = false;
+    }
+  }
+
+  function displayEnhancedImages(results) {
+    if (!results || results.length === 0) {
+      resultsContainer.style.display = 'none';
+      return;
+    }
+
+    let carouselHTML = '';
+    results.forEach((result, index) => {
+      if (result.success && result.output && result.output.data) {
+        carouselHTML += `
+          <div class="result-image-container" data-index="${index}">
+            <img src="${result.output.data}" alt="Enhanced ${index + 1}" class="result-image">
+            <div class="result-actions">
+              <button class="result-btn download-btn" onclick="downloadImage('${result.output.data}', '${uploadedImageFile.name}_enhanced_${index + 1}')">
+                📥 Download
+              </button>
+              <button class="result-btn copy-url-btn" onclick="copyImageData('${result.output.data}')">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    imageCarousel.innerHTML = carouselHTML;
+    resultsContainer.style.display = 'block';
+  }
+
+  // ========== UTILITY FUNCTIONS ==========
+  async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  window.downloadImage = function(dataUrl, filename) {
+    const link = document.createElement('a');
+    link.download = `${filename}.png`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showStatus('✅ Image downloaded successfully!', 'success');
+    setTimeout(hideStatus, 2000);
+  };
+
+  window.copyImageData = async function(dataUrl) {
+    try {
+      // Convert data URL to blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      
+      showStatus('✅ Image copied to clipboard!', 'success');
+      setTimeout(hideStatus, 2000);
+    } catch (error) {
+      // Fallback: copy the data URL as text
+      try {
+        await navigator.clipboard.writeText(dataUrl);
+        showStatus('✅ Image data copied as text!', 'success');
+        setTimeout(hideStatus, 2000);
+      } catch (fallbackError) {
+        showStatus('Failed to copy image: ' + fallbackError.message, 'error');
+      }
+    }
+  };
+
+  // ========== SHOW/HIDE STATUS ==========
+  function showStatus(message, type) {
+    imageStatus.textContent = message;
+    imageStatus.className = `status ${type}`;
+    imageStatus.style.display = 'block';
+  }
+
+  function hideStatus() {
+    imageStatus.style.display = 'none';
+  }
+
+  // ========== INITIALIZE ON PAGE LOAD ==========
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📸 Product Image Improvement tool initialized');
+    await loadBusinessInfo();
+  });
+</script>
+</body>
+</html>

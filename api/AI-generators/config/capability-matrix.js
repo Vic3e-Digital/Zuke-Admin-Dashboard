@@ -66,6 +66,13 @@ const CAPABILITY_MATRIX = {
       "text-to-image": {
         description: "Generate images from text prompts",
         providers: {
+          azure: {
+            status: "active",
+            models: ["gpt-image-1"],
+            strengths: ["High quality", "Enterprise security", "Creative interpretation", "1024x1024 HD"],
+            limitations: ["Content filters", "Rate limits"],
+            costTier: "premium"
+          },
           google: {
             status: "active",
             models: ["imagen-3.0"],
@@ -88,7 +95,7 @@ const CAPABILITY_MATRIX = {
             costTier: "budget"
           }
         },
-        fallbackOrder: ["google", "openai", "stability"],
+        fallbackOrder: ["azure", "google", "openai", "stability"],
         requirements: {
           essential: ["prompt"],
           optional: ["resolution", "style", "aspectRatio", "variations"]
@@ -98,6 +105,13 @@ const CAPABILITY_MATRIX = {
       "image-to-image": {
         description: "Transform or edit existing images",
         providers: {
+          azure: {
+            status: "active",
+            models: ["gpt-image-1"],
+            strengths: ["High quality editing", "Style transfer", "Enterprise security"],
+            limitations: ["Content filters", "Limited inpainting"],
+            costTier: "premium"
+          },
           stability: {
             status: "planned",
             models: ["stable-diffusion-3-img2img"],
@@ -106,10 +120,28 @@ const CAPABILITY_MATRIX = {
             costTier: "standard"
           }
         },
-        fallbackOrder: ["stability"],
+        fallbackOrder: ["azure", "stability"],
         requirements: {
           essential: ["prompt", "image"],
           optional: ["strength", "guidance", "mask"]
+        }
+      },
+
+      "multiple-images": {
+        description: "Generate multiple image variations from a single prompt",
+        providers: {
+          azure: {
+            status: "active",
+            models: ["gpt-image-1"],
+            strengths: ["Consistent quality", "Creative variations", "HD resolution"],
+            limitations: ["Max 10 images per request", "Higher cost for multiple"],
+            costTier: "premium"
+          }
+        },
+        fallbackOrder: ["azure"],
+        requirements: {
+          essential: ["prompt", "count"],
+          optional: ["resolution", "style", "aspectRatio"]
         }
       }
     }
@@ -321,7 +353,24 @@ function validateRequirements(capability, useCase, request) {
 
   // Check essential requirements
   for (const field of requirements.essential) {
-    if (!request[field] && !request.parameters?.[field]) {
+    let fieldExists = false;
+    
+    // Check direct field or in parameters
+    if (request[field] || request.parameters?.[field]) {
+      fieldExists = true;
+    }
+    
+    // Special handling for image-to-image: check media array for image field
+    if (!fieldExists && field === 'image' && capability === 'image-generation' && useCase === 'image-to-image') {
+      if (request.media && Array.isArray(request.media)) {
+        const imageMedia = request.media.filter(m => m.type === 'image');
+        if (imageMedia.length > 0 && imageMedia[0].data) {
+          fieldExists = true;
+        }
+      }
+    }
+    
+    if (!fieldExists) {
       errors.push(`Missing required field: ${field}`);
     }
   }

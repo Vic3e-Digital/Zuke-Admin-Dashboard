@@ -70,10 +70,12 @@ const PROVIDER_CONFIGS = {
         apiKey: process.env.AZURE_OPENAI_API_KEY,
         deployment: process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4.1"
       }
-    },
+    }, 
     endpoints: {
       "gpt-4.1": "/openai/deployments/{deployment}/chat/completions?api-version=2024-08-01-preview",
-      "gpt-4o-mini": "/openai/deployments/{deployment}/chat/completions?api-version=2024-08-01-preview"
+      "gpt-4o-mini": "/openai/deployments/{deployment}/chat/completions?api-version=2024-08-01-preview",
+      "gpt-image-1": "/openai/deployments/gpt-image-1/images/generations?api-version=2025-04-01-preview",
+      "gpt-image-1-edit": "/openai/deployments/gpt-image-1/images/edits?api-version=2025-04-01-preview"
     },
     rateLimits: {
       requestsPerMinute: 120,
@@ -213,6 +215,14 @@ async function getAuthHeaders(provider) {
 
   switch (authentication.type) {
     case 'api_key':
+      // Special handling for Azure OpenAI
+      if (provider === 'azure') {
+        return {
+          'api-key': authentication.credentials.apiKey,
+          'Content-Type': 'application/json'
+        };
+      }
+      // Default for other providers
       return {
         'Authorization': `Bearer ${authentication.credentials.apiKey}`,
         'Content-Type': 'application/json'
