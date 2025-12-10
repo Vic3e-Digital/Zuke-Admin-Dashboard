@@ -76,7 +76,7 @@ window.copyApiKey = function() {
 };
 
 // When you're ready to activate the settings page, uncomment this section:
-/*
+
 function loadUserData() {
   if (!currentUser) return;
   
@@ -276,4 +276,3 @@ function showNotification(message, type = 'info') {
     notification.remove();
   }, 5000);
 }
-*/
