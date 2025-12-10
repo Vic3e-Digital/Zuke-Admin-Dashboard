@@ -46,6 +46,10 @@ public/css/*.css.map
 *.bak
 *.tmp
 
+# Google Cloud Service Account Keys
+*.json
+the-zuke-project-*.json
+
 # auth_config.json
 
 deploy_setup.ps1
