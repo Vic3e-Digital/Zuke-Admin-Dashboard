@@ -35,14 +35,14 @@
   }
   
   /* ========== HEADER ========== */
-  .header {
+  /* .header {
     background: white;
     border-radius: 8px;
     padding: 20px 24px;
     margin-bottom: 16px;
     border-left: 4px solid var(--primary-orange);
   }
-  
+   */
   .header h1 {
     font-size: 20px;
     font-weight: 600;
