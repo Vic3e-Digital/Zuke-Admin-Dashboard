@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Trends | Zuke</title>
+  <link rel="stylesheet" href="/css/formStyle.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .page-header h1 {
+      font-size: 32px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .page-header p {
+      color: #666;
+      font-size: 16px;
+    }
+    
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .required {
+      color: #ff6b6b;
+      margin-left: 4px;
+    }
+    
+    textarea, input[type="text"], select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+    }
+    
+    textarea {
+      min-height: 100px;
+    }
+    
+    input:read-only {
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    .field-note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    
+    .cost {
+      background: #FFF8F0;
+      border: 1px solid var(--primary-orange, #ff6b35);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary-orange, #ff6b35);
+      font-size: 14px;
+    }
+    
+    .search-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary-orange, #ff6b35), #FF7B00);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .search-btn:hover:not(:disabled) { 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 139, 0, 0.3);
+    }
+    
+    .search-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .status {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 6px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .status.success { 
+      background: #D4EDDA; 
+      color: #155724;
+      border: 1px solid #28A745;
+    }
+    .status.error { 
+      background: #F8D7DA; 
+      color: #721C24;
+      border: 1px solid #DC3545;
+    }
+    .status.info { 
+      background: #D1ECF1; 
+      color: #0C5460;
+      border: 1px solid #17A2B8;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .results-section {
+      display: none;
+      margin-top: 24px;
+    }
+    
+    .trend-card {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 149, 0, 0.05) 100%);
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .trend-card:hover {
+      border-color: var(--primary-orange, #ff6b35);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
+    }
+    
+    .trend-title {
+      font-weight: 700;
+      font-size: 18px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+    
+    .trend-description {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    
+    .trend-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .keyword-tag {
+      background: var(--primary-orange, #ff6b35);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .example-box {
+      background: #f8f9fa;
+      border-left: 4px solid var(--primary-orange, #ff6b35);
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .example-box strong {
+      display: block;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .example-box p {
+      margin: 6px 0;
+      line-height: 1.5;
+    }
+
+    .ai-suggest-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .ai-suggest-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .ai-suggest-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .ai-suggestion-box {
+      display: none;
+      background: #f8f5ff;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+      animation: slideDown 0.3s ease;
+    }
+
+    .ai-suggestion-box.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ai-suggestion-text {
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .ai-suggestion-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .use-suggestion-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .use-suggestion-btn:hover {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+
+    .dismiss-suggestion-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dismiss-suggestion-btn:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>🔍 Find Trends</h1>
+      <p>Discover trending topics and opportunities relevant to your business niche</p>
+    </div>
+    
+    <form id="trendsForm">
+      <div class="section">
+        <h2 class="section-title">Trend Search</h2>
+        
+        <div class="form-group">
+          <label for="searchQuery">
+            What trends are you looking for? <span class="required">*</span>
+          </label>
+          <textarea 
+            id="searchQuery" 
+            placeholder="E.g., 'Latest marketing trends for small businesses' or 'Emerging technologies in my industry'"
+            required
+          ></textarea>
+          <p class="field-note">Describe what kind of trends or insights you're interested in finding</p>
+          <button type="button" class="ai-suggest-btn" id="searchQueryAiBtn">
+            <span>✨</span> AI Suggest Search Query (R10.00)
+          </button>
+          <div class="ai-suggestion-box" id="searchQuerySuggestion"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="region">Region/Market</label>
+          <select id="region">
+            <option value="ZA">South Africa</option>
+            <option value="NG">Nigeria</option>
+            <option value="US">United States</option>
+            <option value="GB">United Kingdom</option>
+            <option value="GLOBAL">Global</option>
+          </select>
+          <p class="field-note">Select the geographic market for trend analysis</p>
+        </div>
+        
+        <div class="example-box">
+          <strong>💡 Examples of trend searches:</strong>
+          <p>• "Content marketing trends for 2024"</p>
+          <p>• "Popular social media strategies for retail businesses"</p>
+          <p>• "Emerging AI tools for small business automation"</p>
+          <p>• "Consumer behavior trends in e-commerce"</p>
+        </div>
+        
+        <div class="cost" id="costDisplay">
+          Trend Search Cost: R5.00
+        </div>
+        
+        <button type="submit" class="search-btn" id="searchBtn">
+          🔍 Find Trends
+        </button>
+        
+        <div id="status" class="status"></div>
+      </div>
+    </form>
+    
+    <div class="results-section" id="resultsSection">
+      <div class="section">
+        <h2 class="section-title">📊 Trending Insights</h2>
+        <div id="trendsResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dataManager.js"></script>
+
+  <script>
+    // ========== GLOBAL VARIABLES ==========
+    let currentBusiness = null;
+    let userEmail = null;
+
+    const TRENDS_COST = 5; // R5 per search
+    const form = document.getElementById('trendsForm');
+    const searchBtn = document.getElementById('searchBtn');
+    const status = document.getElementById('status');
+    const resultsSection = document.getElementById('resultsSection');
+    const trendsResults = document.getElementById('trendsResults');
+
+    // ========== CALL BACKEND API ==========
+    async function callBackendAPI(endpoint, options = {}) {
+      const response = await fetch(endpoint, options);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+      }
+      
+      return response.json();
+    }
+
+    // ========== LOAD BUSINESS INFO FROM CACHE ==========
+    function loadBusinessInfoFromCache() {
+      try {
+        searchBtn.disabled = true;
+        searchBtn.textContent = '⏳ Loading...';
+
+        // Get business from cache ONLY
+        const business = window.dataManager?.getSelectedBusiness();
+        
+        if (!business) {
+          showStatus('❌ No business found. Please select a business first.', 'error');
+          searchBtn.disabled = true;
+          return false;
+        }
+
+        currentBusiness = business;
+
+        // Get user email from cache
+        userEmail = window.dataManager?.getUserEmail();
+        
+        if (!userEmail) {
+          showStatus('❌ User not authenticated. Please log in.', 'error');
+          searchBtn.disabled = true;
+          return false;
+        }
+
+        searchBtn.disabled = false;
+        searchBtn.textContent = '🔍 Find Trends';
+        
+        return true;
+
+      } catch (error) {
+        console.error('Error loading business info from cache:', error);
+        showStatus(`❌ Failed to load business information: ${error.message}`, 'error');
+        searchBtn.disabled = true;
+        return false;
+      }
+    }
+
+    // ========== FORM SUBMISSION ==========
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const searchQuery = document.getElementById('searchQuery').value.trim();
+      const region = document.getElementById('region').value;
+
+      if (!searchQuery) {
+        showStatus('❌ Please enter a search query', 'error');
+        return;
+      }
+
+      if (!currentBusiness || !userEmail) {
+        showStatus('❌ Business information not loaded. Please refresh the page.', 'error');
+        return;
+      }
+
+      searchBtn.disabled = true;
+      searchBtn.innerHTML = '🔍 Searching... <span class="spinner"></span>';
+      status.style.display = 'none';
+      resultsSection.style.display = 'none';
+
+      try {
+        // Deduct credits (this also checks balance internally)
+        const deductResponse = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: userEmail,
+            amount: TRENDS_COST,
+            description: `Trend search: ${searchQuery.substring(0, 50)}...`,
+            metadata: {
+              feature: 'find_trends',
+              query: searchQuery,
+              region: region
+            }
+          })
+        });
+
+        if (!deductResponse.ok) {
+          const walletError = await deductResponse.json();
+          if (walletError.error === 'Insufficient funds') {
+            showStatus(`❌ Insufficient balance!\n\nRequired: R${TRENDS_COST.toFixed(2)}\nBalance: R${(walletError.current_balance || 0).toFixed(2)}\n\nPlease add credits to continue.`, 'error');
+          } else {
+            showStatus(`❌ ${walletError.error || 'Failed to process payment'}`, 'error');
+          }
+          return;
+        }
+
+        const walletResult = await deductResponse.json();
+
+        // Call backend API to generate trends
+        const businessInfo = {
+          region: region
+        };
+
+        console.log('🤖 Calling backend API for trends...');
+        const trendsResponse = await fetch('/api/business-chat/generate-trends', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            businessInfo: businessInfo,
+            searchQuery: searchQuery
+          })
+        });
+
+        if (!trendsResponse.ok) {
+          throw new Error('Failed to generate trends');
+        }
+
+        const trendsData = await trendsResponse.json();
+        const trends = trendsData.trends || [];
+        
+        if (trends.length === 0) {
+          throw new Error('No trends generated');
+        }
+
+        // Display results
+        trendsResults.innerHTML = '';
+        
+        trends.forEach((trend, index) => {
+          const card = document.createElement('div');
+          card.className = 'trend-card';
+          
+          const keywordsHTML = trend.keywords.map(kw => 
+            `<span class="keyword-tag">${kw}</span>`
+          ).join('');
+          
+          card.innerHTML = `
+            <div class="trend-title">${index + 1}. ${trend.title}</div>
+            <div class="trend-description">${trend.description}</div>
+            <div class="trend-keywords">${keywordsHTML}</div>
+          `;
+          
+          trendsResults.appendChild(card);
+        });
+
+        resultsSection.style.display = 'block';
+        
+        const newBalance = walletResult.wallet?.balance || walletResult.new_balance || 0;
+        showStatus(`✅ Found ${trends.length} trending insights!\n\n💳 Cost: R${TRENDS_COST.toFixed(2)}\n💰 New Balance: R${newBalance.toFixed(2)}`, 'success');
+
+      } catch (error) {
+        console.error('Error searching trends:', error);
+        showStatus(`❌ ${error.message}`, 'error');
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = '🔍 Find Trends';
+      }
+    });
+
+    // ========== SHOW STATUS ==========
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type}`;
+      status.style.display = 'block';
+      
+      if (type === 'error') {
+        setTimeout(() => {
+          status.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    // ========== AI SUGGESTION HANDLERS ==========
+    async function callAzureOpenAI(prompt) {
+      try {
+        const response = await fetch('/api/get-openai-config');
+        if (!response.ok) throw new Error('Failed to get OpenAI config');
+        const config = await response.json();
+
+        const url = `${config.endpoint}openai/deployments/${config.deployment}/chat/completions?api-version=2024-08-01-preview`;
+        
+        const aiResponse = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': config.apiKey
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a business trends analyst. Help businesses discover relevant trend searches based on their business case.'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            max_tokens: 300,
+            temperature: 0.7
+          })
+        });
+
+        if (!aiResponse.ok) throw new Error('AI request failed');
+        
+        const data = await aiResponse.json();
+        return data.choices[0].message.content.trim();
+      } catch (error) {
+        throw new Error('Failed to get AI suggestion: ' + error.message);
+      }
+    }
+
+    async function handleSearchQueryAI() {
+      const button = document.getElementById('searchQueryAiBtn');
+      const suggestionBox = document.getElementById('searchQuerySuggestion');
+      
+      button.disabled = true;
+      button.innerHTML = '<span class="spinner"></span> Generating...';
+      
+      try {
+        // Deduct R10
+        const deductResponse = await fetch('/api/wallet/deduct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail,
+            amount: 10,
+            description: 'AI Trend Search Query Suggestion',
+            metadata: { feature: 'find_trends_ai_query' }
+          })
+        });
+
+        if (!deductResponse.ok) {
+          const error = await deductResponse.json();
+          throw new Error(error.error || 'Payment failed');
+        }
+
+        // Get business case from dataManager
+        const business = window.dataManager?.getSelectedBusiness();
+        const businessCase = business?.initial_business_case || {};
+        
+        // Build context from business case
+        const businessContext = `
+Business: ${business?.store_info?.name || 'Unknown'}
+What they do: ${businessCase.what_you_do || 'N/A'}
+Challenge they solve: ${businessCase.the_challenge || 'N/A'}
+Target customers: ${businessCase.your_customers || 'N/A'}
+Growth goals: ${businessCase.growth_goals || 'N/A'}
+        `.trim();
+        
+        const prompt = `Based on this business information:
+
+${businessContext}
+
+Suggest 3 specific trend search queries this business should explore. Each query should:
+- Be actionable and specific
+- Help them discover opportunities in their market
+- Be relevant to their challenges and goals
+- Be good Google Trends search terms
+
+Format: Just list 3 search queries, one per line, without numbering.`;
+        
+        const suggestion = await callAzureOpenAI(prompt);
+        
+        suggestionBox.innerHTML = `
+          <p class="ai-suggestion-text">${suggestion.replace(/\n/g, '<br>')}</p>
+          <div class="ai-suggestion-actions">
+            <button class="use-suggestion-btn" onclick="useSuggestion('searchQuery', \`${suggestion.split('\n')[0]}\`)">✓ Use First</button>
+            <button class="dismiss-suggestion-btn" onclick="dismissSuggestion('searchQuery')">✕ Dismiss</button>
+          </div>
+        `;
+        
+        suggestionBox.classList.add('show');
+        suggestionBox.dataset.suggestions = suggestion;
+        showStatus('✅ AI suggestions generated! R10.00 deducted', 'success');
+        
+      } catch (error) {
+        showStatus('❌ ' + error.message, 'error');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = '<span>✨</span> AI Suggest Search Query (R10.00)';
+      }
+    }
+
+    window.useSuggestion = function(fieldId, text) {
+      const field = document.getElementById(fieldId);
+      if (field && text) {
+        field.value = text;
+        dismissSuggestion(fieldId);
+        showStatus('✅ Suggestion applied!', 'success');
+        setTimeout(() => status.style.display = 'none', 2000);
+      }
+    };
+
+    window.dismissSuggestion = function(fieldId) {
+      const suggestionBox = document.getElementById(`${fieldId}Suggestion`);
+      suggestionBox.classList.remove('show');
+    };
+
+    // ========== INITIALIZE ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Initializing Find Trends...');
+      loadBusinessInfoFromCache();
+      
+      // Attach AI suggestion handler
+      document.getElementById('searchQueryAiBtn')?.addEventListener('click', handleSearchQueryAI);
+    });
+
+    // ========== LISTEN FOR BUSINESS CHANGES ==========
+    if (window.dataManager) {
+      window.dataManager.onBusinessChange((business) => {
+        currentBusiness = business;
+        loadBusinessInfoFromCache();
+      });
+    }
+    
+  </script>
+</body>
+</html>

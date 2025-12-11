@@ -244,6 +244,26 @@ function setupBillingToggle() {
 }
 
 function setupFAQs() {
+  // FAQ Toggle Button
+  const faqToggleBtn = document.getElementById('faqToggleBtn');
+  const faqSection = document.getElementById('faqSection');
+  const faqArrow = document.querySelector('.faq-arrow');
+  
+  if (faqToggleBtn) {
+    faqToggleBtn.addEventListener('click', () => {
+      const isVisible = faqSection.style.display === 'block';
+      
+      if (isVisible) {
+        faqSection.style.display = 'none';
+        faqToggleBtn.innerHTML = 'Click here to see FAQs <span class="faq-arrow">▼</span>';
+      } else {
+        faqSection.style.display = 'block';
+        faqToggleBtn.innerHTML = 'Hide FAQs <span class="faq-arrow">▲</span>';
+      }
+    });
+  }
+  
+  // FAQ Accordion Items
   const faqQuestions = document.querySelectorAll('.faq-question');
   
   faqQuestions.forEach(question => {

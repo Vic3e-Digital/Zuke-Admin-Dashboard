@@ -93,7 +93,7 @@ const updateUI = async () => {
         loginBtn.style.opacity = '1';
         loginBtn.style.transform = 'scale(1)';
         loginBtn.disabled = false;
-        loginBtn.innerHTML = '<span>Get Started</span>';
+        loginBtn.innerHTML = '<span>Click Here to Gain Access</span>';
       }
     }
     

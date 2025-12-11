@@ -135,6 +135,7 @@ app.use('/api/social-post', require('./api/social-post'));
 app.use('/api/lead-generation', require('./api/lead-generation'));
 app.use('/api/send-email', sendEmailRoutes);
 app.use('/api/audio-transcribe', audioTranscribeRoutes);
+app.use('/api/analytics', require('./api/analytics'));
 
 app.use('/api/ai-generators', aiGenerators);
 

@@ -323,54 +323,7 @@
   <h2>Automation Hub</h2>
   <p class="panel-description">Connect your business tools and automate workflows</p>
 
-  <!-- Social Media Category (Always Available) -->
-  <div class="automation-category">
-    <div class="category-header">
-      <div class="category-icon social">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="18" cy="5" r="3"></circle>
-          <circle cx="6" cy="12" r="3"></circle>
-          <circle cx="18" cy="19" r="3"></circle>
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-        </svg>
-      </div>
-      <div class="category-info">
-        <h3>Social Media</h3>
-        <p>Automate your social media posting and engagement</p>
-      </div>
-      <span class="availability-badge active">Active</span>
-    </div>
-    
-    <div class="automation-links">
-      <div class="settings-section">
-        <div class="form-group">
-          <label>n8n Webhook URL</label>
-          <input type="url" id="n8nWebhookUrl" class="form-input" 
-                 placeholder="https://aigents.southafricanorth.azurecontainer.io/webhook/social-media-automator" />
-          <span class="field-note">Main webhook for social media posting</span>
-        </div>
 
-        <div class="form-group">
-          <label>Webhook API Key (Optional)</label>
-          <input type="password" id="n8nApiKey" class="form-input" 
-                 placeholder="Leave empty if not using authentication" />
-          <span class="field-note">Add extra security to your webhook calls</span>
-        </div>
-
-        <div class="toggle-setting">
-          <div class="toggle-info">
-            <h4>Enable Social Automation</h4>
-            <p>Allow this business to post via n8n workflows</p>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="automationEnabled" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ✅ Apollo.io Lead Generation Category (NEW) -->
   <div class="automation-category">
@@ -713,6 +666,37 @@
       <p>Automatic AI assistants are launching soon!</p>
       <p class="small-text">Get notified when this feature becomes available</p>
       <button class="btn-notify" data-feature="ai-assistants">Notify Me</button>
+    </div>
+  </div>
+</div>
+
+<!-- Social Media Category (Growth & Blaze Plans) -->
+<div class="automation-category">
+  <div class="category-header">
+    <div class="category-icon social">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+      </svg>
+    </div>
+    <div class="category-info">
+      <h3>Social Media</h3>
+      <p>Automate your social media posting and engagement</p>
+    </div>
+    <span class="availability-badge growth">Growth & Blaze Plans</span>
+  </div>
+  
+  <div class="automation-links locked">
+    <div class="locked-message">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <p>Available on Growth and Blaze plans</p>
+      <button class="btn-upgrade" data-page="pricing">Upgrade Plan</button>
     </div>
   </div>
 </div>

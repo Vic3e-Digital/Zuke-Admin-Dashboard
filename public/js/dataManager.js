@@ -293,6 +293,48 @@ class DataManager {
       this.cache.creativeModelsTimestamp = null;
       sessionStorage.removeItem('cachedCreativeModels');
     }
+
+    // Cache analytics data
+    setAnalytics(analyticsData) {
+      this.cache.analytics = analyticsData;
+      this.cache.analyticsTimestamp = Date.now();
+      sessionStorage.setItem('cachedAnalytics', JSON.stringify({
+        data: analyticsData,
+        timestamp: this.cache.analyticsTimestamp
+      }));
+    }
+
+    // Get cached analytics data
+    getAnalytics() {
+      // Check memory cache first
+      if (this.cache.analytics && this.isCacheValid(this.cache.analyticsTimestamp)) {
+        return this.cache.analytics;
+      }
+
+      // Check sessionStorage
+      const stored = sessionStorage.getItem('cachedAnalytics');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Date.now() - parsed.timestamp < this.cache.cacheExpiry) {
+            this.cache.analytics = parsed.data;
+            this.cache.analyticsTimestamp = parsed.timestamp;
+            return parsed.data;
+          }
+        } catch (error) {
+          console.error('Error parsing cached analytics:', error);
+        }
+      }
+
+      return null;
+    }
+
+    // Clear analytics cache (for refresh)
+    clearAnalyticsCache() {
+      this.cache.analytics = null;
+      this.cache.analyticsTimestamp = null;
+      sessionStorage.removeItem('cachedAnalytics');
+    }
   }
 
   

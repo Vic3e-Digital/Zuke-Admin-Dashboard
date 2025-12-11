@@ -291,6 +291,77 @@ body.loaded {
 }
 
 /* ============================================
+   VALUE PROPOSITIONS
+   ============================================ */
+
+.value-props {
+    margin: 1.5rem 0 2rem 0;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(255, 139, 0, 0.08), rgba(255, 159, 26, 0.05));
+    border-radius: 16px;
+    border: 1px solid rgba(255, 139, 0, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.value-props::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    opacity: 0.8;
+}
+
+.prop-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    animation: fadeInUp 0.6s ease-out both;
+}
+
+.prop-item:nth-child(1) { animation-delay: 0.1s; }
+.prop-item:nth-child(2) { animation-delay: 0.2s; }
+.prop-item:nth-child(3) { animation-delay: 0.3s; }
+.prop-item:nth-child(4) { animation-delay: 0.4s; }
+
+.prop-item:last-child {
+    margin-bottom: 0;
+}
+
+.prop-item:hover {
+    transform: translateX(4px);
+}
+
+.prop-icon {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 16px;
+    text-align: center;
+    filter: drop-shadow(0 0 4px rgba(255, 139, 0, 0.3));
+    animation: checkPulse 2s ease-in-out infinite;
+}
+
+.prop-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.prop-text strong {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* ============================================
    BUTTONS
    ============================================ */
 
@@ -570,6 +641,28 @@ body.loaded {
     }
 }
 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes checkPulse {
+    0%, 100% { 
+        transform: scale(1);
+        filter: drop-shadow(0 0 4px rgba(255, 139, 0, 0.3));
+    }
+    50% { 
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 139, 0, 0.5));
+    }
+}
+
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
@@ -630,6 +723,15 @@ body.loaded {
         height: 50px;
     }
     
+    .value-props {
+        margin: 1rem 0 1.5rem 0;
+        padding: 1rem;
+    }
+    
+    .prop-text {
+        font-size: 0.85rem;
+    }
+    
     /* Reduce orb sizes on mobile */
     .orb-1 {
         width: 250px;
@@ -668,6 +770,21 @@ body.loaded {
         width: 36px;
         height: 36px;
         font-size: 1rem;
+    }
+    
+    .value-props {
+        padding: 0.875rem;
+        margin: 0.875rem 0 1.25rem 0;
+    }
+    
+    .prop-item {
+        gap: 0.5rem;
+        margin-bottom: 0.625rem;
+    }
+    
+    .prop-text {
+        font-size: 0.8rem;
+        line-height: 1.3;
     }
 }
 

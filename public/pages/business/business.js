@@ -99,6 +99,18 @@ export async function initBusinessPage() {
       }
     }
 
+    const findTrendsBtn = document.getElementById("findTrendsBtn");
+    if (findTrendsBtn) {
+      findTrendsBtn.onclick = function(e) {
+        e.stopPropagation();
+        if (!modal || !modalTitle || !iframe) return;
+        // modalTitle.textContent = "Find Trends";
+        iframe.src = `/pages/business/find-trends.html`;
+        modal.style.display = "block";
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
     // Generate Presentation with AI
     const presentonBtn = document.getElementById("presentonBtn");
     if (presentonBtn) {

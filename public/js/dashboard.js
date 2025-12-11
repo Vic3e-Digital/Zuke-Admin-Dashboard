@@ -346,7 +346,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       top: 80px;
       right: 20px;
       padding: 15px 20px;
-      background: ${balance <= 0 ? '#ff6b35' : '#f39c12'};
+      background: ${balance <= 0 ? '#ff7b00' : '#f39c12'};
       color: white;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -743,6 +743,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Initialize page-specific functionality
       initializePageFunctionality(page);
       
+      // Load analytics data if we're on dashboard page
+      if (page === 'dashboard') {
+        setTimeout(() => loadAnalyticsOverview(), 100);
+      }
+      
       // Hide overlay using requestAnimationFrame to ensure content is painted and styles are applied
       requestAnimationFrame(() => {
         // Give the browser a moment to apply CSS and render
@@ -830,47 +835,200 @@ document.addEventListener("DOMContentLoaded", async () => {
   
         <!-- Active Plan Banner -->
         ${planStatus.hasPlan && planStatus.planDetails ? `
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin: 20px 0; color: white;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-              <div style="font-size: 32px;">✨</div>
-              <div style="flex: 1;">
-                <h3 style="margin: 0 0 5px 0;">Active Subscription: ${planStatus.planDetails.planDisplayName || planStatus.planDetails.plan}</h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">
-                  ${planStatus.planDetails.monthlyPrice || ''} ${planStatus.planDetails.billingPeriod || ''} • 
-                  ${planStatus.planDetails.daysRemaining} days remaining
-                  ${planStatus.planDetails.endDate ? ` • Renews ${new Date(planStatus.planDetails.endDate).toLocaleDateString()}` : ''}
-                </p>
-              </div>
-              <button onclick="document.querySelector('[data-page=\\'pricing\\']').click();" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+          <div style="
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-bottom: 4px solid #ff8b00;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            min-height: 180px;
+          ">
+            <div style="position: relative; z-index: 2; max-width: 60%;">
+              <div style="font-size: 32px; margin-bottom: 8px;">✨</div>
+              <h3 style="margin: 0 0 8px 0; color: #2f2f2d; font-size: 20px; font-weight: 600;">
+                Active Subscription: ${planStatus.planDetails.planDisplayName || planStatus.planDetails.plan}
+              </h3>
+              <p style="margin: 0 0 16px 0; color: #6B7280; font-size: 14px; line-height: 1.6;">
+                ${planStatus.planDetails.monthlyPrice || ''} ${planStatus.planDetails.billingPeriod || ''} • 
+                ${planStatus.planDetails.daysRemaining} days remaining
+                ${planStatus.planDetails.endDate ? ` • Renews ${new Date(planStatus.planDetails.endDate).toLocaleDateString()}` : ''}
+              </p>
+              <button onclick="document.querySelector('[data-page=\\'pricing\\']').click();" style="
+                background: #ff8b00;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+              " onmouseover="this.style.background='#ff8b00'" onmouseout="this.style.background='#ff8b00'">
                 Manage Plan
               </button>
             </div>
+            <div style="
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              width: 200px;
+              height: 200px;
+              overflow: hidden;
+              border-top-left-radius: 60%;
+            ">
+              <img src="https://res.cloudinary.com/dekgwsl3c/image/upload/v1765491920/zuke_dashboard_cvfyh9.webp" 
+                   alt="Active Plan" 
+                   loading="lazy"
+                   style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+            </div>
           </div>
         ` : `
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin: 20px 0; color: white;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-              <div style="font-size: 32px;">🚀</div>
-              <div style="flex: 1;">
-                <h3 style="margin: 0 0 5px 0;">Unlock Your Business Potential</h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Subscribe to a plan to add businesses and access premium features</p>
-              </div>
-              <button onclick="document.querySelector('[data-page=\\'pricing\\']').click();" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap;">
+          <div style="
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-bottom: 4px solid #ff7b00;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            min-height: 180px;
+          ">
+            <div style="position: relative; z-index: 2; max-width: 60%;">
+              <div style="font-size: 32px; margin-bottom: 8px;">🚀</div>
+              <h3 style="margin: 0 0 8px 0; color: #2f2f2d; font-size: 20px; font-weight: 600;">
+                Unlock Your Business Potential
+              </h3>
+              <p style="margin: 0 0 16px 0; color: #6B7280; font-size: 14px; line-height: 1.6;">
+                Subscribe to a plan to add businesses and access premium features
+              </p>
+              <button onclick="document.querySelector('[data-page=\\'pricing\\']').click();" style="
+                background: #ff7b00;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+              " onmouseover="this.style.background='#e66d00'" onmouseout="this.style.background='#ff7b00'">
                 View Plans
               </button>
+            </div>
+            <div style="
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              width: 200px;
+              height: 200px;
+              overflow: hidden;
+              border-top-left-radius: 60%;
+            ">
+              <img src="https://res.cloudinary.com/dekgwsl3c/image/upload/v1765491920/zuke_dashboard_cvfyh9.webp" 
+                   alt="Get Started" 
+                   loading="lazy"
+                   style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
             </div>
           </div>
         `}
   
-        <!-- Status overview -->
+        <!-- Analytics Overview Cards -->
+        <div class="analytics-overview-grid" style="margin: 30px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div class="analytics-overview-card" id="businessesCard">
+            <div class="top-section">
+              <div class="card-icon" style="color: #ff7b00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                </svg>
+              </div>
+              <div class="metric-value">${businesses.length}</div>
+            </div>
+            <div class="metric-label">Businesses Created</div>
+          </div>
+          
+          <div class="analytics-overview-card" id="videosCard">
+            <div class="top-section">
+              <div class="card-icon" style="color: #ff7b00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+              </div>
+              <div class="metric-value" id="videosCount">-</div>
+            </div>
+            <div class="metric-label">Videos & Images Generated</div>
+          </div>
+          
+          <div class="analytics-overview-card" id="emailsCard">
+            <div class="top-section">
+              <div class="card-icon" style="color: #ff7b00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </div>
+              <div class="metric-value" id="emailsCount">-</div>
+            </div>
+            <div class="metric-label">Emails Sent</div>
+          </div>
+          
+          <div class="analytics-overview-card" id="socialCard">
+            <div class="top-section">
+              <div class="card-icon" style="color: #ff7b00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                </svg>
+              </div>
+              <div class="metric-value" id="socialCount">-</div>
+            </div>
+            <div class="metric-label">Social Posts Created</div>
+          </div>
+          
+          <div class="analytics-overview-card" id="audioCard">
+            <div class="top-section">
+              <div class="card-icon" style="color: #ff7b00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </div>
+              <div class="metric-value" id="audioCount">-</div>
+            </div>
+            <div class="metric-label">Audio Files Transcribed</div>
+          </div>
+          
+          <div class="analytics-overview-card" id="modelsCard">
+            <div class="top-section">
+              <div class="card-icon" style="color: #ff7b00;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div class="metric-value" id="modelsCount">-</div>
+            </div>
+            <div class="metric-label">Creative Models Registered</div>
+          </div>
+        </div>
+  
+        <!-- Business Status Overview -->
         <div class="business-overview" style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
           <h3>Business Overview</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-top: 20px;">
             <div style="text-align: center;">
-              <div style="font-size: 2rem; font-weight: bold; color: #ff6b35;">${businesses.length}</div>
+              <div style="font-size: 2rem; font-weight: bold; color: #ff7b00;">${businesses.length}</div>
               <div style="color: #666; font-size: 14px;">Total Businesses</div>
             </div>
             <div style="text-align: center;">
-              <div style="font-size: 2rem; font-weight: bold; color: #2ecc71;">${businesses.filter(b => b.processing_status?.status === 'active').length}</div>
+              <div style="font-size: 2rem; font-weight: bold; color: #ff8b00;">${businesses.filter(b => b.processing_status?.status === 'active').length}</div>
               <div style="color: #666; font-size: 14px;">Active</div>
             </div>
             <div style="text-align: center;">
@@ -878,7 +1036,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               <div style="color: #666; font-size: 14px;">Processing</div>
             </div>
             <div style="text-align: center;">
-              <div style="font-size: 2rem; font-weight: bold; color: #667eea;">${planStatus.hasPlan ? planStatus.planDetails.planDisplayName || planStatus.planDetails.plan : 'Free'}</div>
+              <div style="font-size: 2rem; font-weight: bold; color: #ff7b00;">${planStatus.hasPlan ? planStatus.planDetails.planDisplayName || planStatus.planDetails.plan : 'Free'}</div>
               <div style="color: #666; font-size: 14px;">Current Plan</div>
             </div>
           </div>
@@ -892,7 +1050,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   ${business.media_files?.store_logo ? `
                     <img src="${business.media_files.store_logo}" alt="${business.store_info?.name}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
                   ` : `
-                    <div style="width: 40px; height: 40px; background: #ff6b35; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
+                    <div style="width: 40px; height: 40px; background: #ff7b00; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
                       ${(business.store_info?.name || 'B').substring(0, 1).toUpperCase()}
                     </div>
                   `}
@@ -946,7 +1104,105 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  async function loadMarketplacePage() {
+  // Function to animate counter
+  function animateCounter(element, finalValue, duration = 800) {
+    if (!element) return;
+    
+    const startValue = 0;
+    const startTime = Date.now();
+    
+    function update() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuad = progress < 0.5 
+        ? 2 * progress * progress 
+        : -1 + (4 - 2 * progress) * progress;
+      
+      const currentValue = Math.floor(startValue + (finalValue - startValue) * easeOutQuad);
+      element.textContent = currentValue.toLocaleString();
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.textContent = finalValue.toLocaleString();
+      }
+    }
+    
+    update();
+  }
+
+  // Function to load analytics overview data with caching
+  async function loadAnalyticsOverview() {
+    try {
+      // Check if we have cached analytics data
+      const cachedAnalytics = dataManager.getAnalytics ? dataManager.getAnalytics() : null;
+      
+      if (cachedAnalytics) {
+        // Use cached data
+        const videosElement = document.getElementById('videosCount');
+        const emailsElement = document.getElementById('emailsCount');
+        const socialElement = document.getElementById('socialCount');
+        const audioElement = document.getElementById('audioCount');
+        const modelsElement = document.getElementById('modelsCount');
+
+        if (videosElement) animateCounter(videosElement, cachedAnalytics.videos);
+        if (emailsElement) animateCounter(emailsElement, cachedAnalytics.emails);
+        if (socialElement) animateCounter(socialElement, cachedAnalytics.social);
+        if (audioElement) animateCounter(audioElement, cachedAnalytics.audio);
+        if (modelsElement) animateCounter(modelsElement, cachedAnalytics.models);
+        
+        return;
+      }
+
+      // Load all analytics data in parallel from server
+      const [videosData, imagesData, emailsData, socialData, audioData, modelsData] = await Promise.all([
+        fetch('/api/analytics/overview/videos').then(r => r.json()).catch(() => ({success: false, count: 0})),
+        fetch('/api/analytics/overview/images').then(r => r.json()).catch(() => ({success: false, count: 0})),
+        fetch('/api/analytics/overview/emails').then(r => r.json()).catch(() => ({success: false, count: 0})),
+        fetch('/api/analytics/overview/social').then(r => r.json()).catch(() => ({success: false, count: 0})),
+        fetch('/api/analytics/overview/audio').then(r => r.json()).catch(() => ({success: false, count: 0})),
+        fetch('/api/analytics/overview/models').then(r => r.json()).catch(() => ({success: false, count: 0}))
+      ]);
+
+      // Combine videos and images count
+      const videosCount = videosData.success ? videosData.count : 0;
+      const imagesCount = imagesData.success ? imagesData.count : 0;
+      const totalMediaCount = videosCount + imagesCount;
+      const emailsCount = emailsData.success ? emailsData.count : 0;
+      const socialCount = socialData.success ? socialData.count : 0;
+      const audioCount = audioData.success ? audioData.count : 0;
+      const modelsCount = modelsData.success ? modelsData.count : 0;
+
+      // Cache the analytics data using dataManager if available
+      if (dataManager && typeof dataManager.setAnalytics === 'function') {
+        dataManager.setAnalytics({
+          videos: totalMediaCount,
+          emails: emailsCount,
+          social: socialCount,
+          audio: audioCount,
+          models: modelsCount
+        });
+      }
+
+      // Update the cards with animated counters
+      const videosElement = document.getElementById('videosCount');
+      const emailsElement = document.getElementById('emailsCount');
+      const socialElement = document.getElementById('socialCount');
+      const audioElement = document.getElementById('audioCount');
+      const modelsElement = document.getElementById('modelsCount');
+
+      if (videosElement) animateCounter(videosElement, totalMediaCount);
+      if (emailsElement) animateCounter(emailsElement, emailsCount);
+      if (socialElement) animateCounter(socialElement, socialCount);
+      if (audioElement) animateCounter(audioElement, audioCount);
+      if (modelsElement) animateCounter(modelsElement, modelsCount);
+
+    } catch (error) {
+      console.error('Error loading analytics overview:', error);
+    }
+  }  async function loadMarketplacePage() {
     if (!loadMarketplacePage.cache) {
       loadMarketplacePage.cache = await fetch('pages/marketplace.html').then(r => r.text());
     }
@@ -1140,7 +1396,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       top: 80px;
       right: 20px;
       padding: 15px 20px;
-      background: ${type === 'error' ? '#ff6b35' : '#f39c12'};
+      background: ${type === 'error' ? '#ff7b00' : '#f39c12'};
       color: white;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);

@@ -258,4 +258,224 @@ Response Guidelines:
   };
 }
 
+// ========== GENERATE TRENDS ENDPOINT ==========
+router.post('/generate-trends', async (req, res) => {
+  try {
+    const { businessInfo, searchQuery } = req.body;
+
+    if (!businessInfo || !searchQuery) {
+      return res.status(400).json({ 
+        error: 'Missing required parameters: businessInfo, searchQuery' 
+      });
+    }
+
+    const db = req.app.locals.db;
+    
+    if (!db) {
+      return res.status(500).json({ error: 'Database connection error' });
+    }
+
+    console.log('🔍 Step 1: Fetching real trends from SERP API...');
+    
+    // Use SERP API to get real trending data
+    const https = require('https');
+    const SERPAPI_KEY = process.env.SERPAPI_KEY;
+    
+    if (!SERPAPI_KEY) {
+      return res.status(500).json({ error: 'SERP API key not configured' });
+    }
+
+    // Extract keywords for SERP query (only use search query, not business name)
+    const keywords = [searchQuery].filter(Boolean);
+
+    const serpTrends = [];
+    
+    // Fetch trends from Google Trends via SERP API
+    for (const keyword of keywords) {
+      try {
+        const params = new URLSearchParams({
+          engine: 'google_trends',
+          q: keyword,
+          data_type: 'RELATED_QUERIES',
+          api_key: SERPAPI_KEY,
+          geo: businessInfo.region || 'ZA'
+        });
+
+        const url = `https://serpapi.com/search?${params.toString()}`;
+        console.log(`📡 Fetching SERP trends for: "${keyword}"`);
+
+        const serpData = await new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => reject(new Error('SERP API timeout')), 8000);
+          
+          https.get(url, (response) => {
+            let data = '';
+            response.on('data', chunk => data += chunk);
+            response.on('end', () => {
+              clearTimeout(timeoutId);
+              try {
+                resolve(JSON.parse(data));
+              } catch (err) {
+                reject(err);
+              }
+            });
+          }).on('error', (err) => {
+            clearTimeout(timeoutId);
+            reject(err);
+          });
+        });
+
+        // Extract related queries
+        const relatedQueries = serpData.related_queries || {};
+        
+        if (Array.isArray(relatedQueries.top)) {
+          relatedQueries.top.slice(0, 3).forEach(item => {
+            if (item?.query) serpTrends.push({ query: item.query, value: item.value || 0, type: 'top' });
+          });
+        }
+
+        if (Array.isArray(relatedQueries.rising)) {
+          relatedQueries.rising.slice(0, 2).forEach(item => {
+            if (item?.query) serpTrends.push({ query: item.query, value: item.value || 0, type: 'rising' });
+          });
+        }
+
+        console.log(`✅ Found ${serpTrends.length} trends from SERP API`);
+
+      } catch (error) {
+        console.warn(`⚠️ SERP API error for "${keyword}":`, error.message);
+      }
+    }
+
+    console.log('🤖 Step 2: Generating insights with AI...');
+
+    // Build context - use real SERP trends if available, otherwise use AI-only mode
+    let trendsContext = '';
+    let dataSource = 'ai_generated';
+    
+    if (serpTrends.length > 0) {
+      trendsContext = `\n\nHere are REAL trending searches from Google Trends:\n${serpTrends.map((t, i) => 
+        `${i + 1}. "${t.query}" (${t.type}, search interest: ${t.value})`
+      ).join('\n')}\n\nAnalyze these real trending searches and provide actionable insights.`;
+      dataSource = 'serp_api + ai_analysis';
+      console.log(`✅ Using ${serpTrends.length} real trends from SERP API`);
+    } else {
+      trendsContext = '\n\nSERP API data unavailable. Generate relevant trend insights based on current market knowledge.';
+      console.log('ℹ️ No SERP data available, using AI-only mode');
+    }
+
+    const contextInfo = `
+Business: ${businessInfo.name}
+Description: ${businessInfo.description}
+Region: ${businessInfo.region}
+`.trim();
+
+    const prompt = `Based on this business information:
+
+${contextInfo}
+
+User's trend search query: "${searchQuery}"
+${trendsContext}
+
+Provide 5 actionable business insights. Each insight should:
+- Have a clear, compelling title
+- Explain the trend and its business relevance (2-3 sentences)
+- Include 3-5 related keywords
+
+Focus on practical, actionable insights.
+
+Return ONLY valid JSON in this exact format:
+{
+  "trends": [
+    {
+      "title": "Trend title here",
+      "description": "Detailed description of the trend and why it matters",
+      "keywords": ["keyword1", "keyword2", "keyword3"]
+    }
+  ]
+}`;
+
+    console.log('🤖 Calling Azure OpenAI for trend analysis...');
+    
+    // Call Azure OpenAI directly with proper parameters
+    const aiConfig = await db.collection('config').findOne({ type: 'azure_openai' });
+    
+    if (!aiConfig) {
+      throw new Error('Azure OpenAI configuration not found');
+    }
+
+    const { endpoint, apiKey, deployment } = aiConfig;
+    
+    const url = `${endpoint}openai/deployments/${deployment}/chat/completions?api-version=2024-08-01-preview`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a business trends analyst. Provide insightful, actionable trend analysis based on the user\'s query. Return structured JSON with trend insights.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Azure OpenAI API error: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const aiResult = {
+      message: data.choices[0].message.content,
+      usage: data.usage
+    };
+
+    // Parse the response
+    let trendsData;
+    try {
+      trendsData = JSON.parse(aiResult.message);
+    } catch (e) {
+      const jsonMatch = aiResult.message.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        trendsData = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Failed to parse AI response');
+      }
+    }
+
+    const trends = trendsData.trends || [];
+    
+    if (trends.length === 0) {
+      return res.status(500).json({ 
+        error: 'No trends generated' 
+      });
+    }
+
+    res.json({
+      success: true,
+      trends: trends,
+      source: dataSource,
+      raw_trends_count: serpTrends.length,
+      usage: aiResult.usage
+    });
+
+  } catch (error) {
+    console.error('❌ Error generating trends:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate trends',
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;

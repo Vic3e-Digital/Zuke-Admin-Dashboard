@@ -32,7 +32,7 @@
 
 /* Accent Colors - Bottom Border */
 .main-sim-card.accent-orange {
-  border-bottom: 4px solid #FF6B35;
+  border-bottom: 4px solid #ff7b00;
 }
 
 .main-sim-card.accent-orange:hover {
@@ -40,7 +40,7 @@
 }
 
 .main-sim-card.accent-orange .main-sim-arrow svg {
-  stroke: #FF6B35;
+  stroke: #ff7b00;
 }
 
 .main-sim-card.accent-blue {
@@ -134,11 +134,11 @@
 }
 
 .main-sim-card:hover .main-sim-info-icon {
-  color: #FF6B35;
+  color: #ff7b00;
 }
 
 .main-sim-card.accent-orange:hover .main-sim-info-icon {
-  color: #FF6B35;
+  color: #ff7b00;
 }
 
 .main-sim-card.accent-blue:hover .main-sim-info-icon {
@@ -150,7 +150,7 @@
 }
 
 .main-sim-card.accent-purple:hover .main-sim-info-icon {
-  color: #8B5CF6;
+  color: #ff7b00;
 }
 
 /* Tooltip for description */
@@ -224,7 +224,7 @@
   padding: 30px;
   background: #F9FAFB;
   border-radius: 12px;
-  border-left: 4px solid #FF6B35;
+  border-left: 4px solid #ff7b00;
   animation: slideDown 0.3s ease;
 }
 
@@ -298,6 +298,121 @@
   
   .page-header {
     padding: 0 16px;
+  }
+}
+
+/* Analytics Overview Cards - Industry Standard Design */
+.analytics-overview-card {
+  background: #FFFFFF;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFC 100%);
+}
+
+.analytics-overview-card:hover {
+  border-color: #ff7b00;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.1);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F3 100%);
+  transition: all 0.2s ease;
+}
+
+.analytics-overview-card .card-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 107, 53, 0.12);
+  border-radius: 10px;
+  color: #2d2d2d;
+  font-size: 20px;
+}
+
+.analytics-overview-card > .card-icon {
+  display: none;
+}
+
+.analytics-overview-card .top-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.analytics-overview-card .top-section .card-icon {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.analytics-overview-card .card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2px;
+  width: 100%;
+}
+
+.analytics-overview-card .metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  margin: 0;
+  padding: 0;
+}
+
+.analytics-overview-card .metric-label {
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  margin: 0;
+  width: 100%;
+}
+
+/* Responsive for analytics cards */
+@media (max-width: 768px) {
+  .analytics-overview-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 16px !important;
+  }
+  
+  .analytics-overview-card {
+    padding: 16px;
+    gap: 10px;
+    min-height: 120px;
+  }
+  
+  .analytics-overview-card .card-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .analytics-overview-card .card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .analytics-overview-card .metric-value {
+    font-size: 20px;
+  }
+  
+  .analytics-overview-card .metric-label {
+    font-size: 12px;
   }
 }
 

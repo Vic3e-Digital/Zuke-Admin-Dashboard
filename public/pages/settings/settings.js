@@ -11,6 +11,84 @@ import { BusinessManagementComponent } from './components/business-management.js
 import { CreativePanelComponent } from './components/creative-panel.js';
 import { SettingsState } from './state/settings-state.js';
 
+// ===== AUTOMATION CATEGORY MANAGER =====
+class AutomationCategoryManager {
+  constructor() {
+    this.expandedCategories = this.getExpandedCategories();
+    this.initializeCategories();
+  }
+
+  getExpandedCategories() {
+    const stored = localStorage.getItem('automation-expanded-categories');
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  saveExpandedCategories() {
+    localStorage.setItem('automation-expanded-categories', JSON.stringify(this.expandedCategories));
+  }
+
+  toggleCategory(categoryName) {
+    const index = this.expandedCategories.indexOf(categoryName);
+    if (index > -1) {
+      this.expandedCategories.splice(index, 1);
+    } else {
+      this.expandedCategories.push(categoryName);
+    }
+    this.saveExpandedCategories();
+    this.updateCategoryDisplay(categoryName);
+  }
+
+  updateCategoryDisplay(categoryName) {
+    const categories = document.querySelectorAll('.automation-category');
+    categories.forEach(category => {
+      const header = category.querySelector('.category-header h3');
+      if (header && header.textContent.includes(categoryName)) {
+        const isExpanded = this.expandedCategories.includes(categoryName);
+        const links = category.querySelector('.automation-links');
+        const toggleIcon = category.querySelector('.category-toggle');
+        
+        if (links) {
+          links.style.display = isExpanded ? 'block' : 'none';
+        }
+        if (toggleIcon) {
+          toggleIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+        
+        category.classList.toggle('expanded', isExpanded);
+      }
+    });
+  }
+
+  initializeCategories() {
+    const categories = document.querySelectorAll('.automation-category');
+    categories.forEach(category => {
+      const header = category.querySelector('.category-header');
+      const titleElement = header.querySelector('h3');
+      const categoryName = titleElement.textContent.trim();
+      
+      // Add toggle icon if it doesn't exist
+      if (!header.querySelector('.category-toggle')) {
+        const toggleIcon = document.createElement('div');
+        toggleIcon.className = 'category-toggle';
+        toggleIcon.innerHTML = '▼';
+        header.appendChild(toggleIcon);
+      }
+      
+      // Make header clickable
+      header.style.cursor = 'pointer';
+      header.onclick = () => {
+        // Don't toggle locked categories
+        if (!category.querySelector('.automation-links.locked')) {
+          this.toggleCategory(categoryName);
+        }
+      };
+      
+      // Set initial state (all collapsed by default)
+      this.updateCategoryDisplay(categoryName);
+    });
+  }
+}
+
 // ===== MAIN SETTINGS CONTROLLER =====
 class SettingsController {
   constructor() {
@@ -70,6 +148,9 @@ class SettingsController {
 
       // Setup navigation
       this.setupTabNavigation();
+
+      // Initialize automation category manager
+      this.automationCategoryManager = new AutomationCategoryManager();
 
       // Setup global event listeners
       this.setupGlobalListeners();
@@ -370,6 +451,11 @@ class SettingsController {
 
     window.testWebhook = () => {
       this.automationPanel.testWebhook(currentBusiness);
+    };
+
+    // Automation category management
+    window.toggleCategory = (categoryName) => {
+      this.automationCategoryManager.toggleCategory(categoryName);
     };
 
     // Preferences
