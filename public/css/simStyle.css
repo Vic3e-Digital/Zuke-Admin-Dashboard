@@ -3,13 +3,15 @@
 /* SIM Card Container with cut corner */
 .sim-card {
     position: relative;
-    width: 300px;
+    width: 100%;
+    max-width: 320px;
     height: fit-content;
     background: linear-gradient(135deg, #fff 0%, #fff 100%);
     padding: 25px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    box-sizing: border-box;
     
     /* Create the cut corner shape */
     clip-path: polygon(
@@ -97,8 +99,8 @@
   /* Grid layout for multiple SIM cards */
   .sim-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
     padding: 20px;
   }
   
@@ -145,16 +147,43 @@
   }
   
   /* Responsive */
+  @media (max-width: 1200px) {
+    .sim-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    
+    .sim-card {
+      max-width: 300px;
+      padding: 20px;
+    }
+  }
+  
+  @media (max-width: 968px) {
+    .sim-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px;
+      padding: 16px;
+    }
+    
+    .sim-card {
+      max-width: 280px;
+      padding: 18px;
+    }
+  }
+  
   @media (max-width: 768px) {
     .sim-card {
       width: 100%;
-      max-width: 350px;
+      max-width: 100%;
       margin: 0 auto;
+      padding: 20px;
     }
     
     .sim-cards-grid {
       grid-template-columns: 1fr;
-      padding: 10px;
+      padding: 12px;
+      gap: 16px;
     }
   }
   /* Update the sim-body to use better alignment */

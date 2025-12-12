@@ -111,6 +111,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   const pageContent = document.getElementById("pageContent");
   const userAvatar = document.getElementById("userAvatar");
   const settingsButton = document.getElementById("settingsButton");
+  
+  // Three-dot menu functionality
+  const headerMenuButton = document.getElementById("headerMenuButton");
+  const headerMenuDropdown = document.getElementById("headerMenuDropdown");
+  
+  if (headerMenuButton && headerMenuDropdown) {
+    headerMenuButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      headerMenuDropdown.classList.toggle("active");
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!headerMenuButton.contains(e.target) && !headerMenuDropdown.contains(e.target)) {
+        headerMenuDropdown.classList.remove("active");
+      }
+    });
+  }
 
   // Page navigation functionality
   const navLinks = document.querySelectorAll(".nav-link");
@@ -726,7 +744,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           break;
         case "topup":
           content = await loadTopupPage();
-          break;  
+          break;
+        case "unlock-credits":
+          content = await loadUnlockCreditsPage();
+          break;
         default:
           content = '<div style="padding: 30px;"><h1>Page not found</h1></div>';
       }
@@ -772,6 +793,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       loadTopupPage.cache = await fetch('pages/topup.html').then(r => r.text());
     }
     return loadTopupPage.cache;
+  }
+
+  async function loadUnlockCreditsPage() {
+    if (!loadUnlockCreditsPage.cache) {
+      loadUnlockCreditsPage.cache = await fetch('pages/unlock-credits.html').then(r => r.text());
+    }
+    return loadUnlockCreditsPage.cache;
   }
 
   async function loadBusinessesPage(loadId) {
@@ -1384,6 +1412,24 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         } else {
           import("../pages/topup.js").then(mod => mod.initTopupPage());
+        }
+        break;
+      case "unlock-credits":
+        if (!window.__unlockCreditsLoaded) {
+          try {
+            const mod = await import("./unlock-credits.js");
+            if (mod.init) {
+              mod.init();
+            }
+            window.__unlockCreditsLoaded = true;
+          } catch (error) {
+            console.error("Error loading unlock-credits page:", error);
+          }
+        } else {
+          // Re-initialize if already loaded
+          if (window.unlockCredits && window.unlockCredits.init) {
+            window.unlockCredits.init();
+          }
         }
         break;
     }

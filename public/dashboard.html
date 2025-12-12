@@ -115,15 +115,29 @@
 </button>
 
                 </div>
-                <button class="logout-button" id="logoutButton">
-                    <!-- Modern logout icon -->
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>Logout</span>
-                </button>
+                
+                <!-- Three-dot menu button -->
+                <div style="position: relative;">
+                    <button class="header-menu-button" id="headerMenuButton">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="6" r="1.5" fill="currentColor"/>
+                            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                            <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown menu -->
+                    <div class="header-menu-dropdown" id="headerMenuDropdown">
+                        <button class="header-menu-item logout" id="logoutButton">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M10 17L15 12L10 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -242,6 +256,15 @@
                             <path opacity="0.4" d="M11.9993 8.77344C9.8813 8.77344 8.16431 10.4904 8.16431 12.6084C8.16431 14.7264 9.8813 16.4434 11.9993 16.4434C14.1173 16.4434 15.8343 14.7264 15.8343 12.6084C15.8343 10.4904 14.1173 8.77344 11.9993 8.77344ZM9.66431 12.6084C9.66431 11.3189 10.7097 10.2734 11.9993 10.2734C13.2889 10.2734 14.3343 11.3189 14.3343 12.6084C14.3343 13.898 13.2889 14.9434 11.9993 14.9434C10.7097 14.9434 9.66431 13.898 9.66431 12.6084Z" fill="#323544"/>
                         </svg>
                         <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+
+                <li class="nav-item unlock-credits-nav">
+                    <a href="#" class="nav-link" data-page="unlock-credits">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                        <span class="nav-text">Unlock Credits</span>
                     </a>
                 </li>
 

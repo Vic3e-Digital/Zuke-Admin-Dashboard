@@ -643,17 +643,18 @@
 
 .chatbot-toggle-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 0;
-  margin-top: 1rem;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
 }
 
 .toggle-slider {
   position: relative;
   display: inline-block;
-  width: 48px;
-  height: 28px;
+  width: 32px;
+  height: 18px;
   cursor: pointer;
 }
 
@@ -668,7 +669,7 @@
   right: 0;
   bottom: 0;
   background-color: #E0E0E0;
-  border-radius: 14px;
+  border-radius: 9px;
   transition: background-color 0.3s ease;
   z-index: 1;
 }
@@ -677,13 +678,13 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 24px;
-  height: 24px;
+  width: 14px;
+  height: 14px;
   background-color: white;
   border-radius: 50%;
   transition: all 0.3s ease;
   z-index: 2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 /* Checked state */
@@ -692,17 +693,18 @@
 }
 
 .toggle-input:checked ~ .toggle-thumb {
-  left: 22px;
+  left: 16px;
 }
 
 /* Hover state */
 .toggle-slider:hover .toggle-track {
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
 .toggle-label {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 500;
   color: var(--chatbot-text-primary);
   user-select: none;
+  text-align: center;
 }

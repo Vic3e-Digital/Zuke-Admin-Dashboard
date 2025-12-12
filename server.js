@@ -126,6 +126,7 @@ app.use("/api", (req, res, next) => {
 app.use('/api/businesses', require('./api/businesses'));
 app.use('/api/business-settings', require('./api/routes/business-settings'));
 app.use('/api/wallet', require('./api/wallet'));
+app.use('/api/unlock-credits', require('./api/unlock-credits'));
 app.use('/api/activate-subscription', subscriptionActivationRouter);
 app.use('/api/cancel-subscription', cancelSubscriptionRouter);
 app.use('/api/add-credits', addCreditsRouter);

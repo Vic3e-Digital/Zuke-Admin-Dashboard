@@ -98,8 +98,15 @@ async function loadWalletBalance() {
     
     if (data.success && data.wallet) {
       const balance = data.wallet.balance || 0;
-      document.getElementById('currentBalance').textContent = `R${balance.toLocaleString()}`;
-      document.getElementById('walletInfo').style.display = 'block';
+      const currentBalanceEl = document.getElementById('currentBalance');
+      const walletInfoEl = document.getElementById('walletInfo');
+      
+      if (currentBalanceEl) {
+        currentBalanceEl.textContent = `R${balance.toLocaleString()}`;
+      }
+      if (walletInfoEl) {
+        walletInfoEl.style.display = 'block';
+      }
     }
   } catch (error) {
     console.error("Error loading wallet balance:", error);
